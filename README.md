@@ -1,2 +1,919 @@
 # AstroToolkit
-AstroToolkit Package
+Collection of tools for data fetching, plotting and analysis.
+
+## Installation
+
+1. With pip, the package can be installed using:
+
+```
+pip install AstroToolkit
+```
+
+2. Once this has finished, you should navigate to the package location. This should be in a '.../Lib/site-packages/AstroToolkit' folder where ... is your python install location. If you wish to find this, you can can run the following commands:
+
+```
+python
+
+from AstroToolkit.Tools import getztfanalysis
+getztfanalysis(source=6050296829033196032)
+```
+
+As long as there are no issues with ZTF, this **should return an error** which will include the file path.
+
+3. Navigate to this file in any terminal that can access your python environment, and run either buildwin.bat (windows) or build.sh (linux).
+
+4. Re-run the above python commands and the error should no longer appear. The package is now fully installed.
+
+## Usage
+
+### 1. Bokeh
+
+***NOTE***: In this version, AstroToolkit has been rewritten to use Bokeh as its plotting library. The official documentation can be found at https://bokeh.org/. All plots will be saved as a static .html file, which can be opened in the browser (or from a python script using:
+
+```
+show(plot)
+```
+
+where 'plot' is the name of the parameter that the plot is assigned to.
+
+### 2. Importing Tools
+
+**All Tools in the package are located in AstroTools.Tools**
+
+### 3. Input
+
+***All AstroToolkit functions require atleast one input from:***
+1. source = ...
+   
+where source is a Gaia source_id (string)
+
+2. pos = ...
+
+where pos is a 1D list with two elements: [ra,dec] in units of degrees
+
+<br>
+
+**For example:**
+
+when trying to obtain a panstarrs image, there are therefore two options:
+
+```
+getpanstarrsimage(source=...)
+````
+
+and
+
+```
+getpanstarrsimage(pos=...)
+```
+
+The key difference between these input formats is the way that proper motion is handled. Given coordinates (pos), the results retrieved by any AstroToolkit function are simply the raw data obtained from that location
+in Gaia's epoch of Jan 2016, with no proper motion correction. The one exception for this is detection overlays in imaging functions, as these are still possible without an initial reference proper motion (i.e. a 
+specific object in Gaia).
+
+In contrast to this, any AstroToolkit functions called using a Gaia source_id as input will correct for any proper motion of that object between the time at which the data was taken and Gaia's epoch of Jan 2016, *pre-execution*. An
+example of this difference is seen in imaging functions for objects with a large proper motion. Here, using a source as input will result in an image that is centred on the object, regardless of the magnitude of its
+proper motion.
+
+Using a position as input may still produce an image which contains the object, but it is unlikely to be centred as the focus of the image has not accounted for the proper motion of the object.
+
+
+<br>
+
+*Note*: As the functions need to sort between the different input formats, explicit declaration is required, i.e.:
+
+```
+getpanstarrsimage(6050296829033196032)
+```
+
+will fail.
+
+Instead, use:
+
+```
+getpanstarrsimage(source=6050296829033196032)
+```
+
+# AstroToolkit Functions
+
+## Imaging functions
+
+These functions produce images of objects from supported surveys.
+
+*Note*: When not using source mode, some detections can be missing for high proper motion objects. When using a source_id as input, this is no longer an issue as 'adaptive' proper motion correction is used. Here, the search radius for detections is increased to include the maximum distance that the object could have travelled in the gap between the epoch of the image and the epoch of the detection coordinates so that it is still picked up.
+
+### 1. getpanstarrsimage
+Retrieves Pan-STARRS image 
+
+```
+getpanstarrsimage(source=None,pos=None,image_size=60,band='g',overlay=['gaia'])
+```
+
+where:
+```
+source        = integer/string
+              = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos           = 1D tuple of two integers
+              = [ra,dec], object coordinates in degrees.
+```
+```
+image_size    = integer
+              = size of image in arcseconds (maximum = 1500).
+```
+```
+band          = string
+              = list of all filters to include (e.g. for all filters, use band='grizy').
+```
+```
+overlay       = 1D tuple of strings
+              = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+### 2. getskymapperimage
+
+```
+getskymapperimage(source=None,pos=None,image_size=60,band='g',output_format='fits',contrast=50,overlay=['gaia'],ax=None)
+```
+
+where:
+```
+source        = integer/string
+              = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos           = 1D tuple of two integers
+              = [ra,dec], object coordinates in degrees.
+```
+```
+image_size    = integer
+              = size of image in arcseconds (maximum = 600).
+```
+```
+band          = string
+              = string of filter to use (supported filters are: 'g','r','i','z','u','v'
+```
+```
+overlay       = 1D tuple of strings
+              = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+### 3. getdssimage
+
+```
+getdssimage(source=None,pos=None,image_size=60,contrast=50,overlay=['gaia'],ax=None)
+```
+
+where:
+```
+source        = integer/string
+              = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos           = 1D tuple of two integers
+              = [ra,dec], object coordinates in degrees.
+```
+```
+image_size    = integer
+              = size of image in arcseconds (maximum = 600).
+```
+```
+overlay       = 1D tuple of strings
+              = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+## Data queries
+
+These functions return all raw data retrieved from various surveys.
+
+### 1. panstarrsquery
+
+```
+panstarrsquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source = integer/string
+       = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos    = 1D tuple of two integers
+       = [ra,dec], object coordinates in degrees.
+```
+```
+radius = integer
+       = search radius of query in arcseconds.   
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 2. skymapperquery
+
+```
+skymapperquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source = integer/string
+       = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos    = 1D tuple of two integers
+       = [ra,dec], object coordinates in degrees.
+```
+```
+radius = integer
+       = search radius of query in arcseconds.   
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 3. gaiaquery
+
+```
+gaiaquery(source=None,pos=None,radius=3,catalogue='dr3')
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.   
+```
+```
+catalogue = string
+          = 'dr2' or 'dr3'. Determines the data release from which the data is retrieved.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 4. galexquery
+
+```
+galexquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.   
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 5. rosatquery
+
+```
+rosatquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 6. ztfquery
+
+```
+ztfquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 7. sdssquery
+
+```
+sdssquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 8. wisequery
+
+```
+wisequery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 9. twomassquery
+
+```
+twomassquery(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+
+## Photometry queries
+
+These functions return only the photometry retrieved from various surveys.
+
+### 1. getpanstarrsphot
+
+```
+getpanstarrsphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 2. getskymapperphot
+
+```
+getskymapperphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 3. getgaiaphot
+
+```
+getgaiaphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 4. getgalexphot
+
+```
+getgalexphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 5. getsdssphot
+
+```
+getsdssphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 6. getwisephot
+
+```
+getwisephot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+### 4. gettwomassphot
+
+```
+gettwomassphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: pandas dataframe or None (if no data retrieved).
+
+## Photometry bulk search
+
+This function returns all retrieved photometry for all supported surveys for a given object.
+
+### 1. getbulkphot
+
+```
+getbulkphot(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: dictionary in format: 'survey':pandas dataframe or None (if no data retrieved).
+
+## Timeseries queries
+
+These functions create light curves from supported surveys.
+
+### 1. getztflc
+
+```
+getztflc(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+## SED queries
+
+This function creates a spectral energy distribution from all supported surveys.
+
+### 1. getsed
+
+```
+getsed(source=None,pos=None)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+
+returns: matplotlib axis or None (if no data retrieved).
+
+## Spectra queries
+
+These functions retrieve spectra from supported surveys.
+
+### 1. getsdssspectrum
+
+```
+getsdssspectrum(source=None,pos=None,radius=3)
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+## HR diagram function
+
+### 1. gethrd
+
+```
+gethrd(source=None)
+```
+
+where:
+```
+source      = integer/string
+            = Gaia source_id (e.g. 6050296829033196032).
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+## Timeseries analysis tools
+
+### 1. getztfanalysis
+
+Allows for timeseries analysis of ZTF data for a given object.
+
+```
+getztfanalysis(source=None,pos=None)
+```
+
+where:
+```
+source      = integer/string
+            = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+
+### 2. getps
+
+Produces a power spectrum using ZTF data for a given object.
+
+```
+getps(source=None,pos=None)
+```
+
+where:
+```
+source      = integer/string
+            = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+## Miscellaneous tools
+
+### 1. correctPM
+
+```
+correctPM(input,target,ra,dec,pmra,pmdec)
+```
+
+where:
+```
+input = 1D tuple of integers in form [year, month]
+      = current epoch of coordinates
+```
+```
+output = 1D tuple of integers in form [year, month]
+       = target epoch of coordinates
+```
+```
+ra     = float
+       = right ascension of object in degrees
+```
+```
+dec    = float
+       = declination of object in degrees
+```
+```
+pmra   = float
+       = right ascension component of proper motion in milli-arcseconds/year
+```
+```
+pmdec  = float
+       = declination component of proper motion in milli-arcseconds/year
+```
+
+returns: ra (float), dec (float). 
+
+### 2. getgaiacoords
+
+```
+getgaiacoords(source,catalogue='dr3')
+
+```
+
+where:
+```
+source    = integer/string
+          = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+catalogue = string
+          = 'dr2' or 'dr3'. Determines the data release from which the data is retrieved.
+```
+
+returns: 1D tuple of floats in format [ra,dec] or None (if no data retrieved).
+
+### 3. getgaiasource
+
+```
+getgaiasource(pos,radius=3,catalogue='dr3')
+```
+
+where:
+```
+pos       = 1D tuple of two integers
+          = [ra,dec], object coordinates in degrees.
+```
+```
+radius    = integer
+          = search radius of query in arcseconds.
+```
+```
+catalogue = string
+          = 'dr2' or 'dr3'. Determines the data release from which the data is retrieved.
+```
+
+returns: string or None (if no data retrieved)
+
+### 4. getsources
+
+```
+getsources(file_name)
+```
+
+where:
+```
+file_name = string
+          = .fits file containing a column 'source_id' of Gaia source IDs
+```
+
+returns: list of source_id's.
+
+### 5. getpositions
+
+```
+getpositions(file_name)
+```
+
+where:
+```
+file_name = string
+          = .fits file containing two columns 'ra' and 'dec'
+```
+
+returns: list of 'pos' objects, i.e. a list of lists with each 'pos' = [ra,dec].
+
+## Datapage functions
+
+This function produces a datapage using all available data for an object, given its position or Gaia source_id.
+
+### 1. getdatapage
+
+```
+getdatapage(source=None,pos=None,prefs=None)
+```
+
+where:
+```
+source = integer/string
+            = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos    = 1D tuple of two integers
+       = [ra,dec], object coordinates in degrees.
+```
+```
+prefs  = dictionary
+       = preferences for datapage functionality (see below)
+```
+
+## Datapage elements
+
+1 - 1 | 2 - 2 | 3 - 3 
+
+1 - 1 | 2 - 2 | 4 - 4
+
+5 | 6 - 6 - 6 | 7 - 7 
+
+where:
+```
+1: Image with survey preference according to: PanSTARRS > SkyMapper > DSS
+2: HR Diagram
+3: SED plot with any photometry obtained from all supported surveys
+4: Spectrum
+5: SIMBAD/Vizier Buttons
+6: ZTF Lightcurves
+7: Power Spectrum
+```
+   
+## Datapage preferences
+
+The argument 'prefs' in the above allows for the user to modify various aspects of datapages. It takes the form of a dictionary, i.e.:
+
+```
+prefs={}
+```
+
+with the below accepted parameters:
+
+```
+band : string
+       = string containing bands to use for image datapage element (see format and accepted filters in imaging functions above). Default = 'g'.
+```
+```
+overlay : list
+          = list of overlays to use in image datapage element (see below for suppported overlays). Default = ['gaia'].
+```
+```
+image_size : integer
+             = size of image datapage element in arcseconds. Default = 20".
+```
+```
+lc_radius : integer
+            = radius in arcseconds to use when looking for avaialble lightcurve data. Default = 3".
+```
+```
+sed_radius : integer
+             = radius in arcseconds to use when looking for available photometry for use in SED datapage element. Default = 3".
+```
+```
+spec_radius : integer
+              = radius in arcseconds to use when looking for available specta. Default = 3".
+```
+```
+simbad_radius : integer
+                = radius to use in a SIMBAD query when 'SIMBAD' button is clicked. Default = 3".
+```
+```
+vizier_radius : integer
+                = provides an override to the radius used in a Vizier query when the 'Vizier' button is clicked. Default = See below.
+```
+
+***NOTE***: by default, the Vizier radius scales with proper motion (i.e. adpative pm correction, see above) to include all images in the image datapage element. I.e. if the image_size is set to 30, then the Vizier radius will likely be approximately 30", but will be scaled to include possible proper motion of the object.
+
+```
+grid_size : integer
+            = size of overall datapage (i.e. every datapage element scales with this parameter). Default = 300.
+```
+
+# Currently supported overlays
+
+1. gaia (default)
+2. galex_nuv
+3. galex_fuv
+4. ztf
+5. rosat
+
+*Note*: all overlays are proper motion corrected except rosat in all imaging functions. ZTF detections are particularly expensive, but can be useful in 'tracking' high proper motion objects through time.
