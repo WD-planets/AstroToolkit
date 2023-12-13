@@ -1,4 +1,4 @@
-from WDPlanetsToolkit.Tools import *
+from ..Tools import *
 
 import time
 from bokeh.plotting import show

@@ -1147,8 +1147,11 @@ def getdatapage(source=None,pos=None,prefs=None):
 		vizier_radius=vizier_radius_override
 
 	vizier_button = Button(label="Vizier",button_type='primary',height=button_height,width=button_width)	
-
-	vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}%2b{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	
+	if vizier_dec>=0:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}+{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	else:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	
 	vizier_button_js = CustomJS(args=dict(url=vizier_url),code='''
 		window.open(url)

@@ -10,7 +10,7 @@ from importlib_resources import files
 
 from ..Surveys.Gaia import GaiaQueryDesignation
 
-fits_file = files('WDPlanetsToolkit.Figures').joinpath('backdrop_hrd_allmags.fits')
+fits_file = files('AstroToolkit.Figures').joinpath('backdrop_hrd_allmags.fits')
 
 def get_plot(source=None,sources=None):
 	background=Table.read(fits_file).to_pandas()

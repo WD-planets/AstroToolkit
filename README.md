@@ -1,5 +1,5 @@
-# AstroToolkit
-Collection of tools for data fetching, plotting and analysis.
+# Toolkit
+Collection of tools for data fetching, plotting and analysis
 
 ## Installation
 
@@ -24,11 +24,15 @@ As long as there are no issues with ZTF, this **should return an error** which w
 
 4. Re-run the above python commands and the error should no longer appear. The package is now fully installed.
 
+***NOTE***: See README.txt (Linux) or README - Windows.txt (Windows) in the above directory for any additional dependencies.
+
 ## Usage
 
 ### 1. Bokeh
 
-***NOTE***: In this version, AstroToolkit has been rewritten to use Bokeh as its plotting library. The official documentation can be found at https://bokeh.org/. All plots will be saved as a static .html file, which can be opened in the browser (or from a python script using:
+The central module within which all functions are found is toolkit.py.
+
+***NOTE***: In this version, Toolkit has been rewritten to use Bokeh as its plotting library. The official documentation can be found at https://bokeh.org/. All plots will be saved as a static .html file, which can be opened in the browser (or from a python script using:
 
 ```
 show(plot)
@@ -42,7 +46,7 @@ where 'plot' is the name of the parameter that the plot is assigned to.
 
 ### 3. Input
 
-***All AstroToolkit functions require atleast one input from:***
+***All Toolkit functions require atleast one input from:***
 1. source = ...
    
 where source is a Gaia source_id (string)
@@ -67,11 +71,11 @@ and
 getpanstarrsimage(pos=...)
 ```
 
-The key difference between these input formats is the way that proper motion is handled. Given coordinates (pos), the results retrieved by any AstroToolkit function are simply the raw data obtained from that location
+The key difference between these input formats is the way that proper motion is handled. Given coordinates (pos), the results retrieved by any Toolkit function are simply the raw data obtained from that location
 in Gaia's epoch of Jan 2016, with no proper motion correction. The one exception for this is detection overlays in imaging functions, as these are still possible without an initial reference proper motion (i.e. a 
 specific object in Gaia).
 
-In contrast to this, any AstroToolkit functions called using a Gaia source_id as input will correct for any proper motion of that object between the time at which the data was taken and Gaia's epoch of Jan 2016, *pre-execution*. An
+In contrast to this, any Toolkit functions called using a Gaia source_id as input will correct for any proper motion of that object between the time at which the data was taken and Gaia's epoch of Jan 2016, *pre-execution*. An
 example of this difference is seen in imaging functions for objects with a large proper motion. Here, using a source as input will result in an image that is centred on the object, regardless of the magnitude of its
 proper motion.
 
@@ -94,7 +98,7 @@ Instead, use:
 getpanstarrsimage(source=6050296829033196032)
 ```
 
-# AstroToolkit Functions
+# Toolkit Functions
 
 ## Imaging functions
 
@@ -917,3 +921,11 @@ grid_size : integer
 5. rosat
 
 *Note*: all overlays are proper motion corrected except rosat in all imaging functions. ZTF detections are particularly expensive, but can be useful in 'tracking' high proper motion objects through time.
+
+# TestFile
+
+To run a file that tests all functions, use:
+
+```
+from AstroToolkit.Miscellaneous import TestFile
+```

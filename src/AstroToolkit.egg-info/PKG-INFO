@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: AstroToolkit
-Version: 1.0.1
+Version: 1.0.3
 Summary: A package for the gathering and plotting of astronomical data.
 Author-email: Ethan Moorfield <ethan.moorfield@hotmail.co.uk>
 Project-URL: Homepage, https://github.com/WD-planets/Toolkit
@@ -36,6 +36,8 @@ As long as there are no issues with ZTF, this **should return an error** which w
 3. Navigate to this file in any terminal that can access your python environment, and run either buildwin.bat (windows) or build.sh (linux).
 
 4. Re-run the above python commands and the error should no longer appear. The package is now fully installed.
+
+***NOTE***: See README.txt (Linux) or README - Windows.txt (Windows) in the above directory for any additional dependencies.
 
 ## Usage
 
@@ -932,3 +934,11 @@ grid_size : integer
 5. rosat
 
 *Note*: all overlays are proper motion corrected except rosat in all imaging functions. ZTF detections are particularly expensive, but can be useful in 'tracking' high proper motion objects through time.
+
+# TestFile
+
+To run a file that tests all functions, use:
+
+```
+from AstroToolkit.Miscellaneous import TestFile
+```
