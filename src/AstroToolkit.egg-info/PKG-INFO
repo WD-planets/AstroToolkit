@@ -1,3 +1,16 @@
+Metadata-Version: 2.1
+Name: AstroToolkit
+Version: 1.0.1
+Summary: A package for the gathering and plotting of astronomical data.
+Author-email: Ethan Moorfield <ethan.moorfield@hotmail.co.uk>
+Project-URL: Homepage, https://github.com/WD-planets/Toolkit
+Project-URL: Issues, https://github.com/WD-planets/Toolkit/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Toolkit
 Collection of tools for data fetching, plotting and analysis
 

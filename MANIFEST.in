@@ -1,0 +1,5 @@
+include src/AstroToolkit/Timeseries/*.f90
+include src/AstroToolkit/Timeseries/*.bat
+include src/AstroToolkit/Timeseries/*.sh
+include src/AstroToolkit/Timeseries/*.pyd
+include src/AstroToolkit/HRD/*.fits
