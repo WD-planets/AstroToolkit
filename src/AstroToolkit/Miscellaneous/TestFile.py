@@ -1,4 +1,4 @@
-from WDPlanetsToolkit.Tools import *
+from ..Tools import *
 
 import time
 from bokeh.plotting import show
@@ -135,4 +135,5 @@ newline='\n'
 print(f'{newline}all tests passed in: {delta_time}s')
 
 for figure in figs:
-    show(figure)
+    if figure!=None:
+        show(figure)
