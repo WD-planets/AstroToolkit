@@ -6,7 +6,7 @@ import numpy as np
 from bokeh.plotting import figure,show
 from bokeh.models import Whisker, ColumnDataSource
 
-from ..Surveys.Gaia import GaiaQueryDesignation
+from ..Surveys.Gaia import GaiaQuerySource
 from ..Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 from ..Surveys.SDSS import get_photometry as get_phot_sdss
 from ..Surveys.WISE import get_photometry as get_phot_wise
@@ -28,7 +28,7 @@ def get_plot(source=None,pos=None,radius=3):
 		raise Exception('simulatenous source and pos input detected')
 	
 	if source!=None:
-		gaia_data=GaiaQueryDesignation(Designation=source)
+		gaia_data=GaiaQuerySource(source=source)
 		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
 		
 		pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)

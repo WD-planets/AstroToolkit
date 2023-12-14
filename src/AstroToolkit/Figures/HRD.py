@@ -8,9 +8,9 @@ from bokeh.plotting import figure,show
 import os
 from importlib_resources import files
 
-from ..Surveys.Gaia import GaiaQueryDesignation
+from ..Surveys.Gaia import GaiaQuerySource
 
-fits_file = files('WDPlanetsToolkit.Figures').joinpath('backdrop_hrd_allmags.fits')
+fits_file = files('AstroToolkit.Figures').joinpath('backdrop_hrd_allmags.fits')
 
 def get_plot(source=None,sources=None):
 	background=Table.read(fits_file).to_pandas()
@@ -55,7 +55,7 @@ def get_plot(source=None,sources=None):
 		plot.scatter(x_arr[i],y_arr[i],size=3,color=colour_arr[i],legend_label=labels[i])
 
 	if source!=None:
-		data=GaiaQueryDesignation(Designation=source)
+		data=GaiaQuerySource(source=source)
 		gmag,bpmag,rpmag,parallax=data['phot_g_mean_mag'].values,data['phot_bp_mean_mag'].values,data['phot_rp_mean_mag'].values,data['parallax'].values
 		x=bpmag-rpmag
 		y=gmag+5*np.log10(parallax/1000)+5
@@ -67,7 +67,7 @@ def get_plot(source=None,sources=None):
 
 	elif sources!=None:
 		for i in range(0,len(sources)):
-			data=GaiaQueryDesignation(Designation=sources[i])
+			data=GaiaQuerySource(source=sources[i])
 			gmag,bpmag,rpmag,parallax=data['phot_g_mean_mag'].values,data['phot_bp_mean_mag'].values,data['phot_rp_mean_mag'].values,data['parallax'].values
 			x=bpmag-rpmag
 			y=gmag+5*np.log10(parallax/1000)+5
