@@ -15,9 +15,11 @@ IF %ERRORLEVEL% NEQ 0 (
 	Echo
 	Echo ********************************
 	)
+ELSE (
 	Echo ********************************
 	Echo
 	Echo f2py was successful
 	Echo
 	Echo ********************************
+	)
 setx KMP_DUPLICATE_LIB_OK TRUE

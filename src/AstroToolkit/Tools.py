@@ -7,15 +7,14 @@ import pandas as pd
 
 '''
 Changelog:
-- Re-wrote everything in Bokeh
-- Cleaned up imports
+- Fixed bug where SEDs would fail if no 2MASS photometry returned
 
 Known Issues:
-- Detections at large distance from focus are slightly innacurate due to lack of projection support in Bokeh
+- Detections at large distance from focus are slightly innacurate due to lack of projection support in Bokeh 
 
 To Do:
 - Clean up errors
-- Sort structure https://docs.python.org/3/reference/import.html#package-relative-imports
+- ADD UPPER LIMITS TO SED TOOL + Check issues with plotting
 '''
 
 # Data Queries ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,15 +28,16 @@ def panstarrsquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
-		pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
 		raise Exception('either source or pos input required')
-		return None
 
 	data=PanSTARRSQueryCoords(ra,dec,radius)
 	return data
@@ -51,10 +51,13 @@ def skymapperquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
-		pos_corrected=CorrectPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -65,14 +68,14 @@ def skymapperquery(source=None,pos=None,radius=3):
 	return data
 
 def gaiaquery(source=None,pos=None,radius=3,catalogue='dr3'):
-	from .Surveys.Gaia import GaiaQueryDesignation
+	from .Surveys.Gaia import GaiaQuerySource
 	from .Surveys.Gaia import GaiaQueryCoords
 
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
 	
 	if source!=None:
-		data=GaiaQueryDesignation(Designation=source)
+		data=GaiaQuerySource(source=source)
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 		data=GaiaQueryCoords(ra,dec)
@@ -90,10 +93,13 @@ def galexquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
-		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -112,10 +118,12 @@ def rosatquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
-		pos_corrected=CorrectPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -134,10 +142,13 @@ def sdssquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
-		pos_corrected=CorrectPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -156,10 +167,13 @@ def wisequery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
-		pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -178,10 +192,13 @@ def twomassquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
-		pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -207,7 +224,13 @@ def getpanstarrsimage(source=None,pos=None,image_size=30,band='g',overlay=['gaia
 	if source!=None:
 		# Fetch coordinates and proper motion for object
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			if get_time==False:
+				return None
+			else:
+				return None, None
 		
 		# Get an image and get the time it was taken
 		mjd=get_info(ra=ra,dec=dec,size=image_size,band=band)[1]
@@ -298,8 +321,14 @@ def getskymapperimage(source=None,pos=None,image_size=30,band='g',overlay=['gaia
 	if source!=None:
 		# Fetch coordinates and proper motion for object
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			if get_time==False:
+				return None
+			else:
+				return None, None
+
 		# Get an image and get the time it was taken
 		mjd=get_info(ra=ra,dec=dec,size=image_size,band=band)[1]
 		if mjd==None:
@@ -389,7 +418,13 @@ def getdssimage(source=None,pos=None,image_size=30,overlay=['gaia'],get_time=Fal
 	if source!=None:
 		# Fetch coordinates and proper motion for object
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			if get_time==False:
+				return None
+			else:
+				return None, None
 		
 		# Get an image and get the time it was taken
 		mjd=get_info(ra=ra,dec=dec,size=image_size)[1]
@@ -478,8 +513,11 @@ def getpanstarrsphot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
+
 		pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
@@ -500,7 +538,10 @@ def getskymapperphot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -515,14 +556,14 @@ def getskymapperphot(radius=3,source=None,pos=None):
 
 def getgaiaphot(radius=3,source=None,pos=None):
 	from .Surveys.Gaia import GaiaGetPhotometryCoords
-	from .Surveys.Gaia import GaiaGetPhotometryDesignation
+	from .Surveys.Gaia import GaiaGetPhotometrySource
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
 	
 	if source!=None:
-		data=GaiaGetPhotometryDesignation(Designation=source)
+		data=GaiaGetPhotometrySource(source=source)
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 		data=GaiaGetPhotometryCoords(ra,dec,radius)
@@ -541,8 +582,11 @@ def getgalexphot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
+
 		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
 	elif pos!=None:
@@ -564,7 +608,10 @@ def getsdssphot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -586,7 +633,10 @@ def getwisephot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -608,7 +658,10 @@ def gettwomassphot(radius=3,source=None,pos=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -639,30 +692,33 @@ def getbulkphot(radius=3,source=None,pos=None):
 	
 	if source!=None:		
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
 		
-		pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
-		ra_panstarrs,dec_panstarrs=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
+			ra_panstarrs,dec_panstarrs=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=CorrectPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
-		ra_skymapper,dec_skymapper=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
+			ra_skymapper,dec_skymapper=pos_corrected[0],pos_corrected[1]
 		
-		ra_gaia,dec_gaia=ra,dec
+			ra_gaia,dec_gaia=ra,dec
 		
-		pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
-		ra_galex,dec_galex=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
+			ra_galex,dec_galex=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=CorrectPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
-		ra_rosat,dec_rosat=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
+			ra_rosat,dec_rosat=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=CorrectPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
-		ra_sdss,dec_sdss=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
+			ra_sdss,dec_sdss=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
-		ra_wise,dec_wise=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[2010,5],ra,dec,pmra,pmdec)
+			ra_wise,dec_wise=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=CorrectPM([2016,0],[1999,0],ra,dec,pmra,pmdec)
-		ra_twomass,dec_twomass=pos_corrected[0],pos_corrected[1]
+			pos_corrected=CorrectPM([2016,0],[1999,0],ra,dec,pmra,pmdec)
+			ra_twomass,dec_twomass=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
 	elif pos!=None:
 		ra_panstarrs,dec_panstarrs=pos[0],pos[1]
@@ -676,7 +732,6 @@ def getbulkphot(radius=3,source=None,pos=None):
 		
 	else:
 		raise Exception('either source or pos input required')
-		return None
 
 	photometry={'gaia':None,'galex':None,'rosat':None,'panstarrs':None,'skymapper':None,'sdss':None,'wise':None,'twomass':None}
 	
@@ -734,7 +789,10 @@ def ztfquery(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2019,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -758,10 +816,13 @@ def getztflc(source=None,pos=None,radius=3,return_raw=False):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
-		
-		pos_corrected=CorrectPM([2016,0],[2019,0],ra,dec,pmra,pmdec)
-		ra,dec=pos_corrected[0],pos_corrected[1]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+			pos_corrected=CorrectPM([2016,0],[2019,0],ra,dec,pmra,pmdec)
+			ra,dec=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
+
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
 	else:
@@ -835,7 +896,10 @@ def getsdssspectrum(source=None,pos=None,radius=3):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		else:
+			return None
 		
 		pos_corrected=CorrectPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
 		ra,dec=pos_corrected[0],pos_corrected[1]
@@ -965,17 +1029,17 @@ def correctPM(input,target,ra,dec,pmra,pmdec):
 	data=CorrectPM(input,target,ra,dec,pmra,pmdec)
 	return data
 
-def getgaiacoords(source,catalogue='dr3'):
+def getgaiacoords(source):
 	from .Surveys.Gaia import GaiaGetCoords
 	
-	data=GaiaGetCoords(source,catalogue)
+	data=GaiaGetCoords(source)
 	return data
 
-def getgaiasource(pos,radius=3,catalogue='dr3'):
-	from .Surveys.Gaia import GaiaGetDesignation
+def getgaiasource(pos,radius=3):
+	from .Surveys.Gaia import GaiaGetSource
 	
 	ra,dec=pos[0],pos[1]
-	data=GaiaGetDesignation(ra,dec,radius,catalogue)
+	data=GaiaGetSource(ra,dec,radius)
 	return data
 
 def getsources(file_name):
@@ -988,6 +1052,25 @@ def getpositions(file_name):
 	from .Miscellaneous.ReadFits import get_pos_list
 	pos_list=get_pos_list(file_name)
 	return pos_list
+
+def getsd(file_name):
+	from .Figures.SD import get_plot
+	plot=get_plot(file_name)
+	
+	if plot!=None:
+		# Double click to hide legend
+		toggle_legend_js = CustomJS(args=dict(leg=plot.legend[0]), code='''
+			 if (leg.visible) {
+				 leg.visible = false
+				 }
+			 else {
+				 leg.visible = true
+			 }
+		''')
+	
+		plot.js_on_event(events.DoubleTap, toggle_legend_js) 
+
+	return plot
 
 # Datapage generation -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1049,27 +1132,30 @@ def getdatapage(source=None,pos=None,prefs=None):
 	
 	if source!=None:
 		gaia_data=gaiaquery(source=source)
-		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		if isinstance(gaia_data,pd.DataFrame):
+			ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
 		
-		pos_corrected=correctPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
-		ra_panstarrs,dec_panstarrs=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[2012,0],ra,dec,pmra,pmdec)
+			ra_panstarrs,dec_panstarrs=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=correctPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
-		ra_skymapper,dec_skymapper=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[2016,0],ra,dec,pmra,pmdec)
+			ra_skymapper,dec_skymapper=pos_corrected[0],pos_corrected[1]
 		
-		ra_gaia,dec_gaia=ra,dec
+			ra_gaia,dec_gaia=ra,dec
 		
-		pos_corrected=correctPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
-		ra_galex,dec_galex=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[2007,0],ra,dec,pmra,pmdec)
+			ra_galex,dec_galex=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=correctPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
-		ra_rosat,dec_rosat=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[1991,0],ra,dec,pmra,pmdec)
+			ra_rosat,dec_rosat=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=correctPM([2016,0],[2019,0],ra,dec,pmra,pmdec)
-		ra_ztf,dec_ztf=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[2019,0],ra,dec,pmra,pmdec)
+			ra_ztf,dec_ztf=pos_corrected[0],pos_corrected[1]
 		
-		pos_corrected=correctPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
-		ra_sdss,dec_sdss=pos_corrected[0],pos_corrected[1]
+			pos_corrected=correctPM([2016,0],[2017,0],ra,dec,pmra,pmdec)
+			ra_sdss,dec_sdss=pos_corrected[0],pos_corrected[1]
+		else:
+			return None
 		
 	elif pos!=None:
 		ra,dec=pos[0],pos[1]
@@ -1147,8 +1233,11 @@ def getdatapage(source=None,pos=None,prefs=None):
 		vizier_radius=vizier_radius_override
 
 	vizier_button = Button(label="Vizier",button_type='primary',height=button_height,width=button_width)	
-
-	vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}%2b{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	
+	if vizier_dec>=0:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}+{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	else:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	
 	vizier_button_js = CustomJS(args=dict(url=vizier_url),code='''
 		window.open(url)
@@ -1205,18 +1294,5 @@ def getdatapage(source=None,pos=None,prefs=None):
 		column([hrd_axis,row(lightcurve_axis_r,lightcurve_axis_i)]),
 		column([sed_axis,spectrum_axis,ps_axis])
 	))
-	
-	'''
-	def exec_timeseries(event):
-		sys_path=os.getcwd()
-		timeseries_path=os.path.join(sys_path,'timeseries.py')
-		print(timeseries_path)
-		if source!=None:
-			subprocess.run(['python',timeseries_path,'source',str(source)])
-		elif pos!=None:
-			subprocess.run(['python',timeseries_path,'pos',str(pos[0]),str(pos[1])])
-	
-	timeseries_button.on_event('button_click',exec_timeseries)
-	'''
 
 	return grid

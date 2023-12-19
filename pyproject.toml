@@ -7,7 +7,7 @@ include-package-data = true
 
 [project]
 name = "AstroToolkit"
-version = "1.0.1"
+version = "1.0.7"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
