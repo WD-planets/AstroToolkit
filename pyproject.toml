@@ -7,16 +7,33 @@ include-package-data = true
 
 [project]
 name = "AstroToolkit"
-version = "1.0.1"
+version = "1.0.9"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
 description = "A package for the gathering and plotting of astronomical data."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+]
+dependencies = [
+    "astropy",
+    "astroquery",
+    "bokeh>=3.1.1",
+    "cmasher",
+    "importlib_resources",
+    "matplotlib",
+    "numba",
+    "numpy",
+    "pandas",
+    "Pillow",
+    "PyQt5",
+    "PyQt5_sip",
+    "Requests",
+    "scikit_learn",
+    "scipy",
 ]
 
 [project.urls]

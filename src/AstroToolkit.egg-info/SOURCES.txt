@@ -7,10 +7,14 @@ src/AstroToolkit/__init__.py
 src/AstroToolkit.egg-info/PKG-INFO
 src/AstroToolkit.egg-info/SOURCES.txt
 src/AstroToolkit.egg-info/dependency_links.txt
+src/AstroToolkit.egg-info/requires.txt
 src/AstroToolkit.egg-info/top_level.txt
+src/AstroToolkit/Examples/datapage_creation.py
 src/AstroToolkit/Figures/HRD.py
+src/AstroToolkit/Figures/SD.py
 src/AstroToolkit/Figures/SED.py
 src/AstroToolkit/Figures/__init__.py
+src/AstroToolkit/Figures/backdrop_hrd_allmags.fits
 src/AstroToolkit/Miscellaneous/ProperMotionCorrection.py
 src/AstroToolkit/Miscellaneous/ReadFits.py
 src/AstroToolkit/Miscellaneous/TestFile.py
@@ -32,11 +36,14 @@ src/AstroToolkit/Surveys/TWOMASS.py
 src/AstroToolkit/Surveys/WISE.py
 src/AstroToolkit/Surveys/ZTF.py
 src/AstroToolkit/Surveys/__init__.py
+src/AstroToolkit/Timeseries/README - Windows.txt
+src/AstroToolkit/Timeseries/README.txt
 src/AstroToolkit/Timeseries/__init__.py
 src/AstroToolkit/Timeseries/aov.f90
 src/AstroToolkit/Timeseries/aovconst.f90
 src/AstroToolkit/Timeseries/aovsub.f90
 src/AstroToolkit/Timeseries/build.sh
 src/AstroToolkit/Timeseries/buildwin.bat
+src/AstroToolkit/Timeseries/pyaov.pdf
 src/AstroToolkit/Timeseries/pyaov.py
 src/AstroToolkit/Timeseries/ztfanalysis.py

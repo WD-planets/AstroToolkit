@@ -36,7 +36,7 @@ def getData(ra,dec,radius=3):
 	url=f'{service}?POS=CIRCLE {ra} {dec} {radius}&BANDNAME=g,r,i&FORMAT=CSV'
 	
 	s=requests.Session()
-	retries=Retry(total=5,backoff_factor=0.1,status_forcelist=[500,502,503,504])
+	retries=Retry(total=5,backoff_factor=1,status_forcelist=[500,502,503,504])
 	s.mount('http://',HTTPAdapter(max_retries=retries))
 	try:
 		r=s.get(url,timeout=15)
