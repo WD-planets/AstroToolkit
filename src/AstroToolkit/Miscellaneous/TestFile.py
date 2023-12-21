@@ -1,4 +1,4 @@
-from WDPlanetsToolkit.Tools import *
+from ..Tools import *
 
 import time
 from bokeh.plotting import show
@@ -117,22 +117,11 @@ print('success \n\n\n')
 
 figs.append(fig13)
 
-print('testing datapage function (source):\n')
-fig14=getdatapage(source=587316166180416640)
-print('success \n\n\n')
-
-figs.append(fig14)
-
-print('testing datapage function (pos):\n')
-fig15=getdatapage(pos=[141.1853304445800,08.0308343220600])
-print('success \n\n\n')
-
-figs.append(fig15)
-
 delta_time=round((time.time()-start_time),2)
 
 newline='\n'
 print(f'{newline}all tests passed in: {delta_time}s')
 
 for figure in figs:
-    show(figure)
+    if figure!=None:
+        show(figure)

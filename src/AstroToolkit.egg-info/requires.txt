@@ -1,0 +1,15 @@
+astropy
+astroquery
+bokeh>=3.1.1
+cmasher
+importlib_resources
+matplotlib
+numba
+numpy
+pandas
+Pillow
+PyQt5
+PyQt5_sip
+Requests
+scikit_learn
+scipy

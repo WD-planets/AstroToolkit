@@ -1,15 +1,30 @@
 Metadata-Version: 2.1
 Name: AstroToolkit
-Version: 1.0.1
+Version: 1.1.0
 Summary: A package for the gathering and plotting of astronomical data.
 Author-email: Ethan Moorfield <ethan.moorfield@hotmail.co.uk>
 Project-URL: Homepage, https://github.com/WD-planets/Toolkit
 Project-URL: Issues, https://github.com/WD-planets/Toolkit/issues
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.8
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: astropy
+Requires-Dist: astroquery
+Requires-Dist: bokeh>=3.1.1
+Requires-Dist: cmasher
+Requires-Dist: importlib_resources
+Requires-Dist: matplotlib
+Requires-Dist: numba
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: Pillow
+Requires-Dist: PyQt5
+Requires-Dist: PyQt5_sip
+Requires-Dist: Requests
+Requires-Dist: scikit_learn
+Requires-Dist: scipy
 
 # Toolkit
 Collection of tools for data fetching, plotting and analysis
@@ -37,19 +52,23 @@ As long as there are no issues with ZTF, this **should return an error** which w
 
 4. Re-run the above python commands and the error should no longer appear. The package is now fully installed.
 
+***NOTE***: See README.txt (Linux) or README - Windows.txt (Windows) in the above directory for any additional dependencies.
+
 ## Usage
 
 ### 1. Bokeh
 
 The central module within which all functions are found is toolkit.py.
 
-***NOTE***: In this version, Toolkit has been rewritten to use Bokeh as its plotting library. The official documentation can be found at https://bokeh.org/. All plots will be saved as a static .html file, which can be opened in the browser (or from a python script using:
+***NOTE:*** AstroToolkit uses Bokeh as its plotting library. The official documentation can be found at https://bokeh.org/. All plots will be saved as a static .html file, which can be opened in the browser (or from a python script using:
 
 ```
 show(plot)
 ```
 
 where 'plot' is the name of the parameter that the plot is assigned to.
+
+***NOTE:*** All legends can be hidden/shown in plots by double clicking the figure. Individual legend elements can be hidden/shown by single clicking them in the legend.
 
 ### 2. Importing Tools
 
@@ -83,7 +102,7 @@ getpanstarrsimage(pos=...)
 ```
 
 The key difference between these input formats is the way that proper motion is handled. Given coordinates (pos), the results retrieved by any Toolkit function are simply the raw data obtained from that location
-in Gaia's epoch of Jan 2016, with no proper motion correction. The one exception for this is detection overlays in imaging functions, as these are still possible without an initial reference proper motion (i.e. a 
+in the epoch of the survey in question, with no proper motion correction. The one exception for this is detection overlays in imaging functions, as these are still possible without an initial reference proper motion (i.e. a 
 specific object in Gaia).
 
 In contrast to this, any Toolkit functions called using a Gaia source_id as input will correct for any proper motion of that object between the time at which the data was taken and Gaia's epoch of Jan 2016, *pre-execution*. An
@@ -95,7 +114,7 @@ Using a position as input may still produce an image which contains the object, 
 
 <br>
 
-*Note*: As the functions need to sort between the different input formats, explicit declaration is required, i.e.:
+***Note:*** As the functions need to sort between the different input formats, explicit declaration is required, i.e.:
 
 ```
 getpanstarrsimage(6050296829033196032)
@@ -115,13 +134,13 @@ getpanstarrsimage(source=6050296829033196032)
 
 These functions produce images of objects from supported surveys.
 
-*Note*: When not using source mode, some detections can be missing for high proper motion objects. When using a source_id as input, this is no longer an issue as 'adaptive' proper motion correction is used. Here, the search radius for detections is increased to include the maximum distance that the object could have travelled in the gap between the epoch of the image and the epoch of the detection coordinates so that it is still picked up.
+***Note:*** When not using source mode, some detections can be missing for high proper motion objects. When using a source_id as input, this is no longer an issue as 'adaptive' proper motion correction is used. Here, the search radius for detections is increased to include the maximum distance that the object could have travelled in the gap between the epoch of the image and the epoch of the detection coordinates so that it is still picked up.
 
 ### 1. getpanstarrsimage
 Retrieves Pan-STARRS image 
 
 ```
-getpanstarrsimage(source=None,pos=None,image_size=60,band='g',overlay=['gaia'])
+getpanstarrsimage(source=None,pos=None,image_size=30,band='g',overlay=['gaia'],get_time=False)
 ```
 
 where:
@@ -145,13 +164,17 @@ band          = string
 overlay       = 1D tuple of strings
               = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
 ```
+```
+get_time      = Bool
+              = Returns Bokeh figure, image time in format [year,month]
+```
 
 returns: Bokeh figure or None (if no data retrieved).
 
 ### 2. getskymapperimage
 
 ```
-getskymapperimage(source=None,pos=None,image_size=60,band='g',output_format='fits',contrast=50,overlay=['gaia'],ax=None)
+getskymapperimage(source=None,pos=None,image_size=30,band='g',overlay=['gaia'],get_time=False)
 ```
 
 where:
@@ -165,15 +188,19 @@ pos           = 1D tuple of two integers
 ```
 ```
 image_size    = integer
-              = size of image in arcseconds (maximum = 600).
+              = size of image in arcseconds (maximum = 1500).
 ```
 ```
 band          = string
-              = string of filter to use (supported filters are: 'g','r','i','z','u','v'
+              = list of all filters to include (e.g. for all filters, use band='grizy').
 ```
 ```
 overlay       = 1D tuple of strings
               = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
+```
+```
+get_time      = Bool
+              = Returns Bokeh figure, image time in format [year,month]
 ```
 
 returns: Bokeh figure or None (if no data retrieved).
@@ -181,7 +208,7 @@ returns: Bokeh figure or None (if no data retrieved).
 ### 3. getdssimage
 
 ```
-getdssimage(source=None,pos=None,image_size=60,contrast=50,overlay=['gaia'],ax=None)
+getdssimage(source=None,pos=None,image_size=30,overlay=['gaia'],get_time=False)
 ```
 
 where:
@@ -195,12 +222,54 @@ pos           = 1D tuple of two integers
 ```
 ```
 image_size    = integer
-              = size of image in arcseconds (maximum = 600).
+              = size of image in arcseconds (maximum = 1500).
 ```
 ```
 overlay       = 1D tuple of strings
               = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
 ```
+```
+get_time      = Bool
+              = Returns Bokeh figure, image time in format [year,month]
+```
+
+returns: Bokeh figure or None (if no data retrieved).
+
+### 4. getimage
+
+Returns result of an exhaustitive image search (i.e. first searches PanSTARRS, if unsuccessful > searches SkyMapper, if unsuccessful > searches DSS)
+
+```
+getimage(source=None,pos=None,image_size=30,overlay=['gaia'],get_time=False,band='g')
+```
+
+where:
+```
+source        = integer/string
+              = Gaia source_id (e.g. 6050296829033196032).
+```
+```
+pos           = 1D tuple of two integers
+              = [ra,dec], object coordinates in degrees.
+```
+```
+image_size    = integer
+              = size of image in arcseconds (maximum = 1500).
+```
+```
+band          = string
+              = list of all filters to include (e.g. for all filters, use band='grizy').
+```
+```
+overlay       = 1D tuple of strings
+              = for example, for Gaia and ZTF overlays, use overlay=['gaia','ztf']. Note, only supported for fits output_format.
+```
+```
+get_time      = Bool
+              = Returns Bokeh figure, image time in format [year,month]
+```
+
+***NOTE:*** 'band' parameter has no effect on DSS as this only supports g band imaging.
 
 returns: Bokeh figure or None (if no data retrieved).
 
@@ -830,100 +899,93 @@ file_name = string
 
 returns: list of 'pos' objects, i.e. a list of lists with each 'pos' = [ra,dec].
 
+### 6. getsd
+
+```
+getsd(file_name)
+```
+
+Gets a spatial distribution plot of all objects in a .fits file.
+
+where:
+```
+file_name = string
+          = .fits file containing two columns 'ra' and 'dec'
+```
+
+returns: bokeh plot or None (if no data retrieved).
+
+
+
 ## Datapage functions
 
-This function produces a datapage using all available data for an object, given its position or Gaia source_id.
+These functions are used to create custom datapages from any plots/data supported by AstroToolkit.
 
-### 1. getdatapage
+***NOTE:*** An example of datapage creation can be found within the packages 'Examples' folder, named 'datapage_creation.py' (within the …/Lib/site-packages/AstroToolkit from earlier). This can be imported from a python terminal using from AstroToolkit.Examples import datapage_creation.
+
+### 1. getgrid
+
+Helps with datapage creation.
 
 ```
-getdatapage(source=None,pos=None,prefs=None)
+getgrid(dimensions,plots,grid_size=250)
+```
+where:
+```
+dimensions = 1D Tuple
+           = grid dimensions in format [width,height]. E.g. for a grid that is 6 units wide and 3 units tall, use dimensions = [6,3]
+```
+```
+plots      = 2D Tuple
+			  = Tuple of plots, with their desired dimensions included. E.g. for a 2x2 plot and two 2x1 plots, use plots = [[plot1,2,2],[plot2,2,1],[plot3,2,1]].
+```
+```
+grid_size  = int
+           = size of each square of the grid to which all plots are scaled.
+```
+
+returns: list of plots stripped of their dimensions. E.g. for the plots = ... input above, the following will be returned:
+
+```
+[plot1,plot2,plot3]
+```
+
+where all plots have been scaled to the desired grid size.
+
+***NOTE:*** Again, see the datapage_creation example as noted above for an example.
+
+### 2. getinfobuttons
+
+Returns a Bokeh figure containing SIMBAD and Vizier buttons for use in datapages.
+
+```
+getinfobuttons(grid_size,source=None,pos=None,simbad_radius=3,vizier_radius=3)
 ```
 
 where:
 ```
-source = integer/string
-            = Gaia source_id (e.g. 6050296829033196032).
+grid_size = size of the grid to which the buttons are scaled.
 ```
 ```
-pos    = 1D tuple of two integers
-       = [ra,dec], object coordinates in degrees.
+source        = integer/string
+              = Gaia source_id (e.g. 6050296829033196032).
 ```
 ```
-prefs  = dictionary
-       = preferences for datapage functionality (see below)
+pos           = 1D tuple of two integers
+              = [ra,dec], object coordinates in degrees.
 ```
-
-## Datapage elements
-
-1 - 1 | 2 - 2 | 3 - 3 
-
-1 - 1 | 2 - 2 | 4 - 4
-
-5 | 6 - 6 - 6 | 7 - 7 
-
-where:
 ```
-1: Image with survey preference according to: PanSTARRS > SkyMapper > DSS
-2: HR Diagram
-3: SED plot with any photometry obtained from all supported surveys
-4: Spectrum
-5: SIMBAD/Vizier Buttons
-6: ZTF Lightcurves
-7: Power Spectrum
+simbad_radius = int
+              = radius to use in SIMBAD queries
 ```
-   
-## Datapage preferences
-
-The argument 'prefs' in the above allows for the user to modify various aspects of datapages. It takes the form of a dictionary, i.e.:
-
 ```
-prefs={}
+vizier_radius = int
+              = radius to use in Vizier queries
 ```
 
-with the below accepted parameters:
+returns: Bokeh figure
 
-```
-band : string
-       = string containing bands to use for image datapage element (see format and accepted filters in imaging functions above). Default = 'g'.
-```
-```
-overlay : list
-          = list of overlays to use in image datapage element (see below for suppported overlays). Default = ['gaia'].
-```
-```
-image_size : integer
-             = size of image datapage element in arcseconds. Default = 20".
-```
-```
-lc_radius : integer
-            = radius in arcseconds to use when looking for avaialble lightcurve data. Default = 3".
-```
-```
-sed_radius : integer
-             = radius in arcseconds to use when looking for available photometry for use in SED datapage element. Default = 3".
-```
-```
-spec_radius : integer
-              = radius in arcseconds to use when looking for available specta. Default = 3".
-```
-```
-simbad_radius : integer
-                = radius to use in a SIMBAD query when 'SIMBAD' button is clicked. Default = 3".
-```
-```
-vizier_radius : integer
-                = provides an override to the radius used in a Vizier query when the 'Vizier' button is clicked. Default = See below.
-```
-
-***NOTE***: by default, the Vizier radius scales with proper motion (i.e. adpative pm correction, see above) to include all images in the image datapage element. I.e. if the image_size is set to 30, then the Vizier radius will likely be approximately 30", but will be scaled to include possible proper motion of the object.
-
-```
-grid_size : integer
-            = size of overall datapage (i.e. every datapage element scales with this parameter). Default = 300.
-```
-
-# Currently supported overlays
+# Currently supported imaging overlays
 
 1. gaia (default)
 2. galex_nuv
@@ -932,3 +994,11 @@ grid_size : integer
 5. rosat
 
 *Note*: all overlays are proper motion corrected except rosat in all imaging functions. ZTF detections are particularly expensive, but can be useful in 'tracking' high proper motion objects through time.
+
+# TestFile
+
+To run a file that tests all functions, use:
+
+```
+from AstroToolkit.Miscellaneous import TestFile
+```

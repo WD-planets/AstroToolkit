@@ -17,7 +17,7 @@ def getGaiaOverlay(plot,ra,dec,sizeAS,mjd,border,pmra=None,pmdec=None):
 		sizeAS=PMCorrection(gaiaTime,imageTime,ra,dec,pmra,pmdec,radius=sizeAS)[2]
 
 	detections_made=False
-	nearby=GaiaQueryCoords(ra,dec,sizeAS,'dr3')
+	nearby=GaiaQueryCoords(ra,dec,sizeAS)
 	#Check if any data was returned by Gaia search
 	if isinstance(nearby,pd.DataFrame):
 		dataAvailability=True
