@@ -11,6 +11,7 @@ Changelog:
 
 Known Issues:
 - Detections at large distance from focus are slightly innacurate due to lack of projection support in Bokeh 
+- Crashes (usually upon multiple consecutive executions) in timseries analysis tool
 
 To Do:
 - Clean up errors
@@ -1067,10 +1068,10 @@ def getps(source=None,pos=None):
 
 # Miscellaneous Tools -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def correctPM(input,target,ra,dec,pmra,pmdec):
+def correctPM(input_time,target_time,ra,dec,pmra,pmdec,radius=None):
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 
-	data=CorrectPM(input,target,ra,dec,pmra,pmdec)
+	data=CorrectPM(input_time,target_time,ra,dec,pmra,pmdec,radius)
 	return data
 
 def getgaiacoords(source):
@@ -1127,12 +1128,16 @@ def getinfobuttons(grid_size,source=None,pos=None,simbad_radius=3,vizier_radius=
 		ra,dec=pos[0],pos[1]
 	elif source!=None:
 		gaia_data=gaiaquery(source=source)
-		vizier_ra,vizier_dec,_,_=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		
+		# Scale search radius to include ~26 years of potential proper motion (don't actually correct coordinates, just give a buffer)
+		_,_,simbad_radius=correctPM([2016,0],[1990,0],ra,dec,pmra,pmdec,simbad_radius)
+		_,_,vizier_radius=correctPM([2016,0],[1990,0],ra,dec,pmra,pmdec,vizier_radius)
 
 	if pos!=None:
 		simbad_url=f'https://simbad.cds.unistra.fr/simbad/sim-coo?Coord={ra}+{dec}&CooFrame=FK5&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+query&CoordList='
 	elif source!=None:
-		simbad_url=f'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Gaia DR3 {source}&NbIdent=1&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+id'
+		simbad_url=f'https://simbad.cds.unistra.fr/simbad/sim-coo?Coord={ra}+{dec}&CooFrame=FK5&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+query&CoordList='
 	
 	simbad_button_js = CustomJS(args=dict(url=simbad_url),code='''
 		window.open(url)
@@ -1141,10 +1146,10 @@ def getinfobuttons(grid_size,source=None,pos=None,simbad_radius=3,vizier_radius=
 
 	vizier_button = Button(label="Vizier",button_type='primary',height=button_height,width=button_width)	
 	
-	if vizier_dec>=0:
-		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}+{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	if dec>=0:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={ra}+{dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	else:
-		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={ra}{dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	
 	vizier_button_js = CustomJS(args=dict(url=vizier_url),code='''
 		window.open(url)
