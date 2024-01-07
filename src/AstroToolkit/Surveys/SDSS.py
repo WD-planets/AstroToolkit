@@ -6,6 +6,7 @@ import astropy.coordinates as coord
 import pandas as pd
 from bokeh.plotting import figure
 import astropy
+import math
 
 catalogue_name='V/154/sdss16'
 
@@ -29,15 +30,38 @@ def get_spectrum_data(ra,dec,radius):
 
 	return wavelength,flux
 
-def get_plot(ra,dec,radius=3):
+def get_plot(ra,dec,radius=3,save_data=False):
 	x,y=get_spectrum_data(ra,dec,radius)
-	
+
+	# strip units
+	raw_x=[]
+	raw_y=[]
+	if save_data==True:
+		for i in range(0,len(x)):
+			try:
+				raw_x.append(x[i].value)
+			except:
+				raw_x.append(math.nan)
+		for i in range(0,len(y)):
+			try:
+				raw_y.append(y[i].value)
+			except:
+				raw_y.append(math.nan)
+
+		data=pd.DataFrame.from_dict({'wavelength [AA]':raw_x,'flux [ergcm-2s-1AA-1]':raw_y},orient='index').T
+
 	if not isinstance(x,astropy.units.quantity.Quantity) or not isinstance(y,astropy.units.quantity.Quantity):
-		return None
+		if save_data==True:
+			return None, None
+		else:
+			return None
 
 	plot=figure(width=400,height=400,title="SDSS Spectrum",x_axis_label=r'\[\lambda\text{ }[\text{AA}]\]',y_axis_label=r"\[\text{flux [erg}\text{ cm }^{-2}\text{ s }^{-1}\text{AA}^{-1}]\]")
 	plot.line(x,y,color='black',line_width=1)
-	
+
+	if save_data==True:
+		return plot, data
+
 	return plot
 
 def get_data(ra,dec,radius=3):

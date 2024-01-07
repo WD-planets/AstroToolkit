@@ -7,21 +7,132 @@ import pandas as pd
 
 '''
 Changelog:
-- Fixed bug where SEDs would fail if no 2MASS photometry returned
+- Implemented a new naming convention for objects, with its own function for positions or gaia sources
 
 Known Issues:
 - Detections at large distance from focus are slightly innacurate due to lack of projection support in Bokeh 
+- Crashes (usually upon multiple consecutive executions) in timseries analysis tool
 
 To Do:
 - Clean up errors
 - ADD UPPER LIMITS TO SED TOOL + Check issues with plotting
 '''
 
+# File handling -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def savefile(data,identifier,extension='csv',pos=None,source=None):
+	if pos!=None:
+		file_name=getfilename(identifier=identifier,extension=extension,pos=pos)
+	elif source!=None:
+		file_name=getfilename(identifier=identifier,extension=extension,source=source)
+	
+	if extension=='csv':
+		data.to_csv(file_name,index=False)
+
+def getfilename(identifier,extension,pos=None,source=None):
+	import os
+	
+	if pos!=None:
+		middle_str=f'{pos[0]}_{pos[1]}'
+		
+		file_name=f'{middle_str}_{identifier}.{extension}'
+	
+	elif source!=None:
+		prefix_str=convertsource(source=source)
+		middle_str=str(source)
+		
+		file_name=f'{prefix_str}_{middle_str}_{identifier}.{extension}'
+
+	file_name=os.path.join(os.getcwd(),file_name)
+
+	return file_name
+
+def convertsource(source):
+	from .Surveys.Gaia import GaiaGetCoords
+	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
+	
+	gaia_data=gaiaquery(source=source)
+
+	ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+	pos=[ra,dec]
+	
+	pos=correctPM([2016,0],[2000,0],ra,dec,pmra,pmdec)
+
+	ObjRef=convertpos(pos=pos)
+	
+	return ObjRef
+
+def convertpos(pos):
+	from astropy.coordinates import Angle
+	from astropy import units as u
+	import numpy as np
+
+	ra,dec=pos[0],pos[1]
+	if dec<0:
+		negativeDec=True
+	else:
+		negativeDec=False
+
+	ra=Angle(ra,u.degree)
+	dec=Angle(dec,u.degree)
+	
+	ra=ra.hms
+	dec=dec.dms
+	
+	ra_arr=np.array([0,0,0],dtype=float)
+	dec_arr=np.array([0,0,0],dtype=float)		
+
+	ra_arr[0]=ra[0]
+	ra_arr[1]=ra[1]
+	ra_arr[2]=ra[2]
+
+	dec_arr[0]=dec[0]
+	dec_arr[1]=dec[1]
+	dec_arr[2]=dec[2]
+
+	ra_str_arr=[]
+	for element in ra_arr:
+		if element<0:
+			element=element*-1
+
+		# Will only retain the SS part from final iteration
+		ra_remainder=element-int(element)		
+
+		element=int(element)
+		element=str(element).zfill(2)
+		ra_str_arr.append(element)
+
+	dec_str_arr=[]
+	for element in dec_arr:
+		if element<0:
+			element=element*-1
+		
+		dec_remainder=element-int(element)
+		
+		element=int(element)
+		element=str(element).zfill(2)
+		dec_str_arr.append(element)
+
+	# Format remainder: force 2 decimal places, round to 2 decimal places and remove '0.'
+	ra_str_arr[2]+=str('{:.2f}'.format(round(ra_remainder,2))[1:])
+	dec_str_arr[2]+=str('{:.2f}'.format(round(dec_remainder,2))[1:])
+	
+	if negativeDec==True:
+		objRef=f'J{ra_str_arr[0]}{ra_str_arr[1]}{ra_str_arr[2]}-{dec_str_arr[0]}{dec_str_arr[1]}{dec_str_arr[2]}'
+	elif negativeDec==False:
+		objRef=f'J{ra_str_arr[0]}{ra_str_arr[1]}{ra_str_arr[2]}+{dec_str_arr[0]}{dec_str_arr[1]}{dec_str_arr[2]}'
+	else:
+		print('objRef Error')
+		return None
+	
+	return objRef
+
 # Data Queries ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def panstarrsquery(source=None,pos=None,radius=3):
+def panstarrsquery(source=None,pos=None,radius=3,save_data=False): # maybe have a keep_cols parameter?
 	from .Surveys.PanSTARRS import PanSTARRSQueryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
+	import os
 
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
@@ -40,9 +151,13 @@ def panstarrsquery(source=None,pos=None,radius=3):
 		raise Exception('either source or pos input required')
 
 	data=PanSTARRSQueryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='PanSTARRS-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def skymapperquery(source=None,pos=None,radius=3):
+def skymapperquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.SkyMapper import SkyMapperQueryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 	
@@ -65,9 +180,13 @@ def skymapperquery(source=None,pos=None,radius=3):
 		return None
 	
 	data=SkyMapperQueryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='SkyMapper-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def gaiaquery(source=None,pos=None,radius=3,catalogue='dr3'):
+def gaiaquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.Gaia import GaiaQuerySource
 	from .Surveys.Gaia import GaiaQueryCoords
 
@@ -82,9 +201,12 @@ def gaiaquery(source=None,pos=None,radius=3,catalogue='dr3'):
 	else:
 		raise Exception('either source or pos input required')
 	
+	if save_data==True:
+		savefile(data=data,identifier='Gaia-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def galexquery(source=None,pos=None,radius=3):
+def galexquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.GALEX import GALEXQueryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 	
@@ -107,9 +229,13 @@ def galexquery(source=None,pos=None,radius=3):
 		return None
 
 	data=GALEXQueryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='GALEX-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def rosatquery(source=None,pos=None,radius=3):
+def rosatquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.ROSAT import ROSATQueryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 
@@ -131,9 +257,13 @@ def rosatquery(source=None,pos=None,radius=3):
 		return None
 	
 	data=ROSATQueryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='ROSAT-Data',extension='csv',pos=pos,source=source)
+		
 	return data
 
-def sdssquery(source=None,pos=None,radius=3):
+def sdssquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.SDSS import get_data
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 
@@ -156,9 +286,13 @@ def sdssquery(source=None,pos=None,radius=3):
 		return None
 		
 	data=get_data(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='SDSS-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def wisequery(source=None,pos=None,radius=3):
+def wisequery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.WISE import get_data
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM		
 
@@ -181,9 +315,13 @@ def wisequery(source=None,pos=None,radius=3):
 		return None
 		
 	data=get_data(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='WISE-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
-def twomassquery(source=None,pos=None,radius=3):
+def twomassquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.TWOMASS import get_data
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 	
@@ -204,8 +342,12 @@ def twomassquery(source=None,pos=None,radius=3):
 	else:
 		raise Exception('either source or pos input required')
 		return None
-		
+	
 	data=get_data(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='2MASS-Data',extension='csv',pos=pos,source=source)
+
 	return data
 
 # Imaging Queries ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -548,7 +690,7 @@ def getimage(source=None,pos=None,image_size=30,overlay=['gaia'],get_time=False,
 				
 # Photometry Queries  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def getpanstarrsphot(radius=3,source=None,pos=None):
+def getpanstarrsphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.PanSTARRS import PanSTARRSGetPhotometryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 
@@ -568,12 +710,15 @@ def getpanstarrsphot(radius=3,source=None,pos=None):
 		ra,dec=pos[0],pos[1]
 	else:
 		raise Exception('either source or pos input required')
-		return None
 		
 	data=PanSTARRSGetPhotometryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='PanSTARRS-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
-def getskymapperphot(radius=3,source=None,pos=None):
+def getskymapperphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.SkyMapper import SkyMapperGetPhotometryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 	
@@ -593,12 +738,15 @@ def getskymapperphot(radius=3,source=None,pos=None):
 		ra,dec=pos[0],pos[1]
 	else:
 		raise Exception('either source or pos input required')
-		return None
 
 	data=SkyMapperGetPhotometryCoords(ra,dec,radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='SkyMapper-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
-def getgaiaphot(radius=3,source=None,pos=None):
+def getgaiaphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.Gaia import GaiaGetPhotometryCoords
 	from .Surveys.Gaia import GaiaGetPhotometrySource
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
@@ -613,11 +761,13 @@ def getgaiaphot(radius=3,source=None,pos=None):
 		data=GaiaGetPhotometryCoords(ra,dec,radius)
 	else:
 		raise Exception('either source or pos input required')
-		return None
+
+	if save_data==True:
+		savefile(data=data,identifier='Gaia-Phot',extension='csv',pos=pos,source=source)
 
 	return data
 
-def getgalexphot(radius=3,source=None,pos=None):
+def getgalexphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.GALEX import GALEXGetPhotometryCoords
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 
@@ -641,9 +791,12 @@ def getgalexphot(radius=3,source=None,pos=None):
 
 	data=GALEXGetPhotometryCoords(ra,dec,radius)
 	
+	if save_data==True:
+		savefile(data=data,identifier='GALEX-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
-def getsdssphot(radius=3,source=None,pos=None):
+def getsdssphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.SDSS import get_photometry
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 
@@ -666,9 +819,13 @@ def getsdssphot(radius=3,source=None,pos=None):
 		return None
 	
 	data=get_photometry(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='SDSS-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
-def getwisephot(radius=3,source=None,pos=None):
+def getwisephot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.WISE import get_photometry
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 	
@@ -691,9 +848,13 @@ def getwisephot(radius=3,source=None,pos=None):
 		return None
 	
 	data=get_photometry(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='WISE-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
-def gettwomassphot(radius=3,source=None,pos=None):
+def gettwomassphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.TWOMASS import get_photometry
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM	
 	
@@ -716,11 +877,15 @@ def gettwomassphot(radius=3,source=None,pos=None):
 		return None
 	
 	data=get_photometry(ra=ra,dec=dec,radius=radius)
+	
+	if save_data==True:
+		savefile(data=data,identifier='2MASS-Phot',extension='csv',pos=pos,source=source)
+
 	return data
 
 # Bulk Photometry Query
 
-def getbulkphot(radius=3,source=None,pos=None):
+def getbulkphot(radius=3,source=None,pos=None,save_data=False):
 	from .Surveys.Gaia import GaiaGetPhotometryCoords
 	from .Surveys.GALEX import GALEXGetPhotometryCoords
 	from .Surveys.ROSAT import ROSATGetPhotometryCoords
@@ -820,11 +985,25 @@ def getbulkphot(radius=3,source=None,pos=None):
 	except:
 		print('[Photometry: GetPhotometryCoords] Note: No 2MASS photometry found using given coordinates and search radius')
 	
+	if save_data==True:
+		file_name=getfilename(identifier='BulkPhot',extension='csv',pos=pos,source=source)
+
+		with open(file_name,'w') as f:
+			for key in photometry:
+				try:
+					# add a column denoting the survey
+					photometry[key].insert(0,'survey',key)
+					photometry[key].to_csv(f,index=False,lineterminator='\n',)
+					
+					f.write('\n')
+				except:
+					pass
+
 	return photometry
 
 # Timeseries Queries -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def ztfquery(source=None,pos=None,radius=3):
+def ztfquery(source=None,pos=None,radius=3,save_data=False):
 	from .Surveys.ZTF import getData as getZTFData	
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 
@@ -844,16 +1023,20 @@ def ztfquery(source=None,pos=None,radius=3):
 		ra,dec=pos[0],pos[1]
 	else:
 		raise Exception('either source or pos input required')
-		return None
 	
 	data=getZTFData(ra,dec,radius)
+
+	if save_data==True:
+		savefile(data=data,identifier='ZTF-Data',extension='csv',pos=pos,source=source)	
+
 	return data
 
 # Timeseries Plotting ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def getztflc(source=None,pos=None,radius=3,return_raw=False):
+def getztflc(source=None,pos=None,radius=3,return_raw=False,save_data=False):
 	from .Surveys.ZTF import getLightCurve as getZTFLightCurve
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
+	from .Surveys.ZTF import getData
 
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
@@ -884,20 +1067,30 @@ def getztflc(source=None,pos=None,radius=3,return_raw=False):
 		else:
 			output_file(f"{pos[0]}{pos[1]}_lightcurve.html")
 
+	if save_data==True:
+		data=getData(ra,dec,radius)
+		savefile(data=data,identifier='ZTF-Data',extension='csv',pos=pos,source=source)	
+
 	return plot
 
 # SED Plotting -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def getsed(source=None,pos=None,radius=3):
+def getsed(source=None,pos=None,radius=3,save_data=False):
 	from .Figures.SED import get_plot
 	
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
 
 	if source!=None:
-		plot=get_plot(source=source,radius=radius)
+		if save_data==False:
+			plot=get_plot(source=source,radius=radius)
+		else:
+			plot,data=get_plot(source=source,radius=radius,save_data=True)
 	elif pos!=None:
-		plot=get_plot(pos=pos,radius=radius)
+		if save_data==False:
+			plot=get_plot(pos=pos,radius=radius)
+		else:
+			plot,data=get_plot(pos=pos,radius=radius,save_data=True)
 	else:
 		raise Exception('either source or pos input required')
 
@@ -926,12 +1119,15 @@ def getsed(source=None,pos=None,radius=3):
 			output_file(f"{pos[0]}+{pos[1]}_sed.html")	
 		else:
 			output_file(f"{pos[0]}{pos[1]}_sed.html")
-		
+	
+	if save_data==True:
+		savefile(data=data,identifier='SED-Data',extension='csv',pos=pos,source=source)
+
 	return plot
 
 # Spectra Queries --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def getsdssspectrum(source=None,pos=None,radius=3):
+def getsdssspectrum(source=None,pos=None,radius=3,save_data=False):
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 	from .Surveys.SDSS import get_plot
 
@@ -951,9 +1147,11 @@ def getsdssspectrum(source=None,pos=None,radius=3):
 		ra,dec=pos[0],pos[1]
 	else:
 		raise Exception('either source or pos input required')
-		return None
 	
-	plot=get_plot(ra=ra,dec=dec,radius=radius)
+	if save_data==False:
+		plot=get_plot(ra=ra,dec=dec,radius=radius)
+	else:
+		plot,data=get_plot(ra=ra,dec=dec,radius=radius,save_data=True)
 
 	if source!=None:
 		output_file(f'{source}_spectrum.html')
@@ -963,7 +1161,10 @@ def getsdssspectrum(source=None,pos=None,radius=3):
 			output_file(f"{pos[0]}+{pos[1]}_spectrum.html")	
 		else:
 			output_file(f"{pos[0]}{pos[1]}_spectrum.html")
-		
+	
+	if save_data==True:
+		savefile(data=data,identifier='SDSS-Data',extension='csv',pos=pos,source=source)
+
 	return plot
 
 # HR diagram --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1016,7 +1217,6 @@ def getztfanalysis(source=None,pos=None):
 		data=ztfquery(source=source)
 	else:
 		raise Exception('either source or pos input required')
-		return None
 
 	empty_count=0
 	for item in data:
@@ -1031,7 +1231,7 @@ def getztfanalysis(source=None,pos=None):
 
 	getanalysis(data)
 
-def getps(source=None,pos=None):
+def getps(source=None,pos=None,save_data=False):
 	from .Timeseries.ztfanalysis import getpowerspectrum
 	
 	if pos!=None:
@@ -1052,7 +1252,10 @@ def getps(source=None,pos=None):
 		print('no ZTF data available for given fields')
 		return None	
 
-	plot=getpowerspectrum(data)
+	if save_data==True:
+		plot,ps_data=getpowerspectrum(data,save_data=True)
+	else:
+		plot=getpowerspectrum(data)
 
 	if source!=None:
 		output_file(f'{source}_powspec.html')
@@ -1063,14 +1266,17 @@ def getps(source=None,pos=None):
 		else:
 			output_file(f"{pos[0]}{pos[1]}_powspec.html")
 
+	if save_data==True:
+		savefile(data=ps_data,identifier='PS-Data',extension='csv',pos=pos,source=source)
+
 	return plot
 
 # Miscellaneous Tools -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def correctPM(input,target,ra,dec,pmra,pmdec):
+def correctPM(input_time,target_time,ra,dec,pmra,pmdec,radius=None):
 	from .Miscellaneous.ProperMotionCorrection import PMCorrection as CorrectPM
 
-	data=CorrectPM(input,target,ra,dec,pmra,pmdec)
+	data=CorrectPM(input_time,target_time,ra,dec,pmra,pmdec,radius)
 	return data
 
 def getgaiacoords(source):
@@ -1127,12 +1333,16 @@ def getinfobuttons(grid_size,source=None,pos=None,simbad_radius=3,vizier_radius=
 		ra,dec=pos[0],pos[1]
 	elif source!=None:
 		gaia_data=gaiaquery(source=source)
-		vizier_ra,vizier_dec,_,_=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		ra,dec,pmra,pmdec=gaia_data['ra'].values[0],gaia_data['dec'].values[0],gaia_data['pmra'].values[0],gaia_data['pmdec'].values[0]
+		
+		# Scale search radius to include ~26 years of potential proper motion (don't actually correct coordinates, just give a buffer)
+		_,_,simbad_radius=correctPM([2016,0],[1990,0],ra,dec,pmra,pmdec,simbad_radius)
+		_,_,vizier_radius=correctPM([2016,0],[1990,0],ra,dec,pmra,pmdec,vizier_radius)
 
 	if pos!=None:
 		simbad_url=f'https://simbad.cds.unistra.fr/simbad/sim-coo?Coord={ra}+{dec}&CooFrame=FK5&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+query&CoordList='
 	elif source!=None:
-		simbad_url=f'http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Gaia DR3 {source}&NbIdent=1&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+id'
+		simbad_url=f'https://simbad.cds.unistra.fr/simbad/sim-coo?Coord={ra}+{dec}&CooFrame=FK5&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius={simbad_radius}&Radius.unit=arcsec&submit=submit+query&CoordList='
 	
 	simbad_button_js = CustomJS(args=dict(url=simbad_url),code='''
 		window.open(url)
@@ -1141,10 +1351,10 @@ def getinfobuttons(grid_size,source=None,pos=None,simbad_radius=3,vizier_radius=
 
 	vizier_button = Button(label="Vizier",button_type='primary',height=button_height,width=button_width)	
 	
-	if vizier_dec>=0:
-		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}+{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+	if dec>=0:
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={ra}+{dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	else:
-		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={vizier_ra}{vizier_dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
+		vizier_url=f'https://vizier.cds.unistra.fr/viz-bin/VizieR-4?-c={ra}{dec}&-c.rs={vizier_radius}&-out.add=_r&-sort=_r&-out.max=$4'
 	
 	vizier_button_js = CustomJS(args=dict(url=vizier_url),code='''
 		window.open(url)
