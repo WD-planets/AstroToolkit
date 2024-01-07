@@ -993,7 +993,7 @@ def getbulkphot(radius=3,source=None,pos=None,save_data=False):
 				try:
 					# add a column denoting the survey
 					photometry[key].insert(0,'survey',key)
-					photometry[key].to_csv(f,index=False,lineterminator='\n',)
+					photometry[key].to_csv(f,index=False,lineterminator='\n')
 					
 					f.write('\n')
 				except:
@@ -1027,8 +1027,20 @@ def ztfquery(source=None,pos=None,radius=3,save_data=False):
 	data=getZTFData(ra,dec,radius)
 
 	if save_data==True:
-		savefile(data=data,identifier='ZTF-Data',extension='csv',pos=pos,source=source)	
+		data_dict={'g':data[0],'r':data[1],'i':data[2]}
 
+		file_name=getfilename(identifier='ZTF-Data',extension='csv',pos=pos,source=source)
+		
+		with open(file_name,'w') as f:
+			for key in data_dict:
+				try:
+					data_dict[key].insert(0,'band',key)
+					data_dict[key].to_csv(f,index=False,lineterminator='\n')
+					
+					f.write('\n')
+				except:
+					pass
+					
 	return data
 
 # Timeseries Plotting ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1069,7 +1081,20 @@ def getztflc(source=None,pos=None,radius=3,return_raw=False,save_data=False):
 
 	if save_data==True:
 		data=getData(ra,dec,radius)
-		savefile(data=data,identifier='ZTF-Data',extension='csv',pos=pos,source=source)	
+		
+		data_dict={'g':data[0],'r':data[1],'i':data[2]}
+
+		file_name=getfilename(identifier='ZTF-Data',extension='csv',pos=pos,source=source)
+		
+		with open(file_name,'w') as f:
+			for key in data_dict:
+				try:
+					data_dict[key].insert(0,'band',key)
+					data_dict[key].to_csv(f,index=False,lineterminator='\n')
+
+					f.write('\n')
+				except:
+					pass
 
 	return plot
 

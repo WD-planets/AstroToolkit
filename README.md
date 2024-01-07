@@ -974,7 +974,7 @@ file_name = string
 
 returns: bokeh plot or None (if no data retrieved).
 
-###7. convertsource
+### 7. convertsource
 
 ```
 convertsource(source)
