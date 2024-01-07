@@ -808,23 +808,19 @@ def getanalysis(data):
     f.close()
     '''
     
-def getpowerspectrum(data):
+def getpowerspectrum(data,save_data=False):
     from astropy.time import Time
     from astropy.timeseries import TimeSeries
     from astropy.units import cds
     from astropy import units as u
+    import pandas as pd
     
     file_name='lightcurve_data.csv'
-    data.to_csv(file_name,index=False)
-    
-    file_path=os.path.join(os.getcwd(),file_name)
     
     data.sort_values('hjd',inplace=True)
     xd=data['hjd']-2400000.5
     yd=data['mag']
     ed=data['magerr']
-    
-    y_unit=u.mag
     
     filters = list(set(data['filtercode']))
     first_filter = filters[0]
@@ -844,4 +840,8 @@ def getpowerspectrum(data):
     plot=figure(width=400,height=400,title='ZTF Power Spectrum',x_axis_label=r'\[\text{Frequency [days}^{-1}]\]',y_axis_label=r'\[\text{Power}\]')
     plot.line(x=freqs,y=th,color='black',line_width=0.5)
     
+    if save_data==True:
+        data=pd.DataFrame.from_dict({'Frequency [1/D]':freqs,'Power':th},orient='index').T
+        return plot, data
+
     return plot

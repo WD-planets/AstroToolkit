@@ -23,7 +23,7 @@ def zeropoint(mag,zp,wl):
 	flux=flux/((fnl*c)/wl**2)*1000
 	return flux
 
-def get_plot(source=None,pos=None,radius=3):
+def get_plot(source=None,pos=None,radius=3,save_data=False):
 	if source!=None and pos!=None:
 		raise Exception('simulatenous source and pos input detected')
 	
@@ -66,7 +66,6 @@ def get_plot(source=None,pos=None,radius=3):
 		
 	else:
 		raise Exception('either source or pos input required')
-		return None
 	
 	filter_arr=[]
 	
@@ -325,7 +324,10 @@ def get_plot(source=None,pos=None,radius=3):
 		rel_error_arr.append(flux_arr[i]*error_arr[i]/mag_arr[i])
 
 	if len(wavelength_arr)==0 and len(flux_arr)==0:
-		return None
+		if save_data==True:
+			return None, None
+		else:
+			return None
 	
 	#Order on plot: GALEX, SDSS, SkyMapper, PanSTARRS, Gaia, 2MASS, WISE
 	#Order in script: Gaia, GALEX, PanSTARRS, SkyMapper, SDSS, WISE, 2MASS
@@ -356,9 +358,21 @@ def get_plot(source=None,pos=None,radius=3):
 			errors.upper_head.line_width,errors.lower_head.line_width=0.5,0.5
 			errors.upper_head.size,errors.lower_head.size=3,3
 			errors.upper_head.line_color,errors.lower_head.line_color=colour_arr[i],colour_arr[i]
+	
+	if save_data==True:
+		flat_flux=[]
+		flat_wavelength=[]
+		flat_error=[]
+		for element in flux_arr:
+			flat_flux.extend(element)
+		for element in wavelength_arr:
+			flat_wavelength.extend(element)
+		for element in rel_error_arr:
+			flat_error.extend(element)
+		
+		data={'flux [mJy]':flat_flux,'flux_err [mJy]':flat_error,'wavelength [AA]':flat_wavelength}
+		df=pd.DataFrame.from_dict(data,orient='index').T
+	
+		return plot, df
 
 	return plot
-
-if __name__=='__main__':
-	img=get_plot(source=6050296829033196032)
-	show(img)
