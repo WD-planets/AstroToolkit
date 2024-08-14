@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit.Data.spectrumquery &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../datastructures.html">Data Structures</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AstroToolkit.Data.spectrumquery</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AstroToolkit.Data.spectrumquery</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="SpectrumStruct">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct">[docs]</a>
+<span></span><span class="k">class</span> <span class="nc">SpectrumStruct</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SpectrumStruct()</span>
+<span class="sd">    This structure is returned from spectrum queries, when read from a data file that was originally created by an spectrum query, or through the Models module (in which case all attributes are set to None).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    kind : str</span>
+<span class="sd">        &quot;spectrum&quot;</span>
+
+<span class="sd">    survey: str</span>
+<span class="sd">        survey to which the data pertains, see spectrum query description for details</span>
+
+<span class="sd">    source: int</span>
+<span class="sd">        Gaia source ID (if one was used to target the system, else None)</span>
+
+<span class="sd">    pos: list&lt;int&gt;</span>
+<span class="sd">        Target position [right ascension, declination] in degrees</span>
+
+<span class="sd">    identifier: str</span>
+<span class="sd">        Target position in JHHMMSS.SS±DDMMSS.SS format</span>
+
+<span class="sd">    dataname: str</span>
+<span class="sd">        Default file name that data will be saved to when using the savedata() method</span>
+
+<span class="sd">    plotname: str</span>
+<span class="sd">        Default file name that plot will be saved to when using the showplot() and saveplot() methods</span>
+
+<span class="sd">    figure: None</span>
+<span class="sd">        Stores any figure resulting from the plot() method</span>
+
+<span class="sd">    data: dict&lt;list&gt;</span>
+<span class="sd">        Returned data in the format:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            &quot;wavelength&quot;: wavelength</span>
+<span class="sd">            &quot;flux&quot;: flux</span>
+
+<span class="sd">        where:</span>
+
+<span class="sd">        :**wavelength**: list&lt;float&gt;, wavelength of each detection</span>
+<span class="sd">        :**flux**: flux values of each detection</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;spectrum&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;ATK Spectrum Structure&gt;&quot;</span>
+
+<div class="viewcode-block" id="SpectrumStruct.plot">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots spectrum data and assigns the resulting figure to the **figure** attribute.</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">map_to_plot</span>
+
+        <span class="k">return</span> <span class="n">map_to_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SpectrumStruct.savedata">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.savedata">[docs]</a>
+    <span class="k">def</span> <span class="nf">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves data to local files. Default file name = dataname attribute.</span>
+
+<span class="sd">        :param str fname: overrides file name</span>
+<span class="sd">        :return: name of file to which data was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">.data_saving</span> <span class="kn">import</span> <span class="n">savedata</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+
+
+<div class="viewcode-block" id="SpectrumStruct.showdata">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.showdata">[docs]</a>
+    <span class="k">def</span> <span class="nf">showdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints data structure to stdout in a readable format.</span>
+
+<span class="sd">        :param bool raw: if True, doesn&#39;t collapse arrays to improve readability, default = False</span>
+<span class="sd">        :return: self</span>
+<span class="sd">        :rtype: class</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">.data_printing</span> <span class="kn">import</span> <span class="n">print_data</span>
+
+        <span class="n">print_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="SpectrumStruct.showplot">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.showplot">[docs]</a>
+    <span class="k">def</span> <span class="nf">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens the figure stored in the **figure** attribute in the default web browser, and saves it to local files.</span>
+
+<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
+<span class="sd">        :return: file name to which the figure was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">showplot</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+
+
+<div class="viewcode-block" id="SpectrumStruct.saveplot">
+<a class="viewcode-back" href="../../../SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.saveplot">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens the figure stored in the **figure** attribute in the default web browser, and saves it to local files.</span>
+
+<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
+<span class="sd">        :return: file name to which the figure was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">saveplot</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+</div>
+
+
+
+<span class="k">class</span> <span class="nc">SurveyMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for spectrum queries&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+
+    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2">_query&quot;</span><span class="p">](</span><span class="n">pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">sdss_query</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">coordinates</span> <span class="k">as</span> <span class="n">coords</span>
+    <span class="kn">from</span> <span class="nn">astropy</span> <span class="kn">import</span> <span class="n">units</span> <span class="k">as</span> <span class="n">u</span>
+    <span class="kn">from</span> <span class="nn">astroquery.sdss</span> <span class="kn">import</span> <span class="n">SDSS</span>
+
+    <span class="n">position</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">SkyCoord</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;deg&quot;</span><span class="p">)</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">/</span> <span class="mi">3600</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">deg</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">SDSS</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">wavelength</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;loglam&quot;</span><span class="p">]</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">17</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;wavelength&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">wavelength</span><span class="p">),</span> <span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">flux</span><span class="p">)}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Note: SDSS spectrum query returned no data.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">..Tools</span> <span class="kn">import</span> <span class="n">correctpm</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">correctpm</span><span class="p">(</span><span class="n">target_survey</span><span class="o">=</span><span class="s2">&quot;sdss&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pos</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SpectrumStruct</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">SurveyMap</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">SpectrumStruct</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

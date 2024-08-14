@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit.Gui &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configkeys.html">Config Keys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commandline.html">Command-Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AstroToolkit.Gui</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AstroToolkit.Gui</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the ATK GUI, which allows for much of the package to be used through an interface.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="kn">import</span> <span class="n">QFont</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QApplication</span><span class="p">,</span> <span class="n">QComboBox</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
+                             <span class="n">QLineEdit</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.Configuration.baseconfig</span> <span class="kn">import</span> <span class="n">ConfigStruct</span>
+<span class="kn">from</span> <span class="nn">.Data.dataquery</span> <span class="kn">import</span> <span class="n">SurveyInfo</span>
+<span class="kn">from</span> <span class="nn">.Tools</span> <span class="kn">import</span> <span class="n">query</span><span class="p">,</span> <span class="n">readdata</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigStruct</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+
+<span class="n">supported_surveys</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">list</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;other&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;phot&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">bulkphot_surveys</span><span class="p">,</span>
+    <span class="s2">&quot;reddening&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">reddening_surveys</span><span class="p">,</span>
+    <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">image_surveys</span><span class="p">,</span>
+    <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">lightcurve_surveys</span><span class="p">,</span>
+    <span class="s2">&quot;spectrum&quot;</span><span class="p">:</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">spectrum_surveys</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">grid_width</span> <span class="o">=</span> <span class="mi">150</span>
+<span class="n">grid_height</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">margin</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="n">newline</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">Window</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Initialise initial values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="s2">&quot;gaia&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span> <span class="o">=</span> <span class="s2">&quot;.csv&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_ready</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;ATK GUI&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">11</span> <span class="o">*</span> <span class="n">grid_width</span><span class="p">,</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">grid_height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MainUiComponents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">QuerySettingsUiComponents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DataManipulationUiComponents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PlottingUiComponents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PlotOptionsUiComponents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_additional_settings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_plotoptions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_button_positions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_plotting_button_positions</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Sets position in grid space, and scales widgets to grid size</span>
+    <span class="k">def</span> <span class="nf">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">position</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span>
+            <span class="n">margin</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">grid_width</span><span class="p">,</span> <span class="n">margin</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">grid_height</span><span class="p">,</span> <span class="n">grid_width</span><span class="p">,</span> <span class="n">grid_height</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="nb">int</span><span class="p">((</span><span class="n">widget</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">margin</span><span class="p">)</span> <span class="o">/</span> <span class="n">grid_width</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">((</span><span class="n">widget</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="n">margin</span><span class="p">)</span> <span class="o">/</span> <span class="n">grid_height</span><span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">centerList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">line_edit</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">lineEdit</span><span class="p">()</span>
+        <span class="n">line_edit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">line_edit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">customLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">header_font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+        <span class="n">header_font</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">header_font</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;padding :3px&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">label</span>
+
+    <span class="k">def</span> <span class="nf">customLabel2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span> <span class="o">|</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;padding :3px&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">label</span>
+
+    <span class="k">def</span> <span class="nf">parseTextBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">textbox</span><span class="p">):</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\s|\,)&quot;</span><span class="p">,</span> <span class="n">textbox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">if</span> <span class="n">a</span><span class="p">]</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arr</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;,&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="k">def</span> <span class="nf">MainUiComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main Query UI</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="s2">&quot;Query Kind:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind_header</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="s2">&quot;Survey:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survey_header</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Query kind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">supported_query_kinds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_change_linked</span><span class="p">)</span>
+
+        <span class="c1"># Target Box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="s2">&quot;Target Source / Position&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Survey Box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">surveys</span> <span class="o">=</span> <span class="n">supported_surveys</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span><span class="p">]</span>
+        <span class="n">surveys</span> <span class="o">=</span> <span class="p">[</span><span class="n">survey</span> <span class="k">for</span> <span class="n">survey</span> <span class="ow">in</span> <span class="n">surveys</span> <span class="k">if</span> <span class="n">survey</span> <span class="o">!=</span> <span class="s2">&quot;gaia_lc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">surveys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Execute Query</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Execute Query&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Vizier Catalogue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="s2">&quot;Vizier Catalogue ID&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="c1"># ATLAS username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="s2">&quot;ATLAS Username&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="c1"># ATLAS password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="s2">&quot;ATLAS Password&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="c1"># HRD sources</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholderText</span><span class="o">=</span><span class="s2">&quot;Source(s)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="c1"># Read data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readdata_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Open File Browser&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readdata_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">readdata_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Local ATK File:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">readdata_header</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># Signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_change_linked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_change_linked</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_query_kind_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_vizier_catalogue_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_target_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">execute_query</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_atlas_login_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_atlas_login_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_hrd_sources_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">readdata_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_file</span><span class="p">)</span>
+
+    <span class="c1"># Read local files</span>
+    <span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">fname</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open File&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">&quot;ATK Data Files (*.csv *.fits)&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">readdata</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;subkind&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">subkind</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kind</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;survey&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">survey</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_data_found</span><span class="p">()</span>
+
+    <span class="c1"># Triggers on both query kind and survey changes</span>
+    <span class="k">def</span> <span class="nf">on_change_linked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+
+        <span class="c1"># Hide by default, shown if needed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">==</span> <span class="s2">&quot;other&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">==</span> <span class="s2">&quot;atlas&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">!=</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span> <span class="o">=</span> <span class="s2">&quot;.csv&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span> <span class="o">=</span> <span class="s2">&quot;.fits&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color : white&quot;</span><span class="p">)</span>
+
+    <span class="c1"># handles hiding of survey button if not needed, and updates survey list</span>
+    <span class="k">def</span> <span class="nf">on_query_kind_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;sed&quot;</span><span class="p">,</span> <span class="s2">&quot;hrd&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_header</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">surveys</span> <span class="o">=</span> <span class="n">supported_surveys</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+                <span class="n">surveys</span> <span class="o">=</span> <span class="p">[</span><span class="n">survey</span> <span class="k">for</span> <span class="n">survey</span> <span class="ow">in</span> <span class="n">surveys</span> <span class="k">if</span> <span class="n">survey</span> <span class="o">!=</span> <span class="s2">&quot;gaia_lc&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">surveys</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey_header</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">on_vizier_catalogue_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">isHidden</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vizier_catalogue</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">on_target_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+
+        <span class="c1"># if target is a source</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^[0-9]+$&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseTextBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_box</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">on_hrd_sources_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseTextBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hrd_sources</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_atlas_login_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atlas_username</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atlas_password</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">execute_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;sed&quot;</span><span class="p">,</span> <span class="s2">&quot;hrd&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hrd&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span><span class="p">,</span>
+            <span class="n">survey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="n">raw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">return_raw</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">image_size</span><span class="p">,</span>
+            <span class="n">band</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="p">,</span>
+            <span class="n">overlays</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">,</span>
+            <span class="n">sources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_data_found</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">on_data_found</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lightcurve&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">band</span><span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">]:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bulkphot&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">survey</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_ready</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color : rgba(0,255,0,0.75)&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;reddening&quot;</span><span class="p">,</span> <span class="s2">&quot;phot&quot;</span><span class="p">,</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plotname</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_plotoptions</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="p">:</span>
+                <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;phot&quot;</span><span class="p">,</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;reddening&quot;</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="p">:</span>
+                    <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgba(255,0,0,0.75)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ADDITIONAL QUERY SETTINGS ----------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">QuerySettingsUiComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_settings_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Additional</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Query Settings:&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_settings_header</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># radius</span>
+        <span class="n">query_radius</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">query_radius_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Query radius in</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">arcseconds&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query_radius_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">config</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;query_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span><span class="si">}</span><span class="s2">_radius&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_query_radius_change</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+        <span class="c1"># lightcurve raw</span>
+        <span class="n">return_raw</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">return_raw</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="s2">&quot;True&quot;</span><span class="p">])</span>
+        <span class="n">return_raw_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Return raw data</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">with no filtering&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">return_raw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">return_raw_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_return_raw_changed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_raw</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># image size</span>
+        <span class="n">image_size</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">image_size_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image size in</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">arcseconds&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_size_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_image_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_image_size_changed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_size</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+        <span class="c1"># image band</span>
+        <span class="n">image_band</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">image_band_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image band as a</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">single string&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_band</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_band_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_image_band</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_image_band_changed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+        <span class="c1"># image overlays</span>
+        <span class="n">image_overlays</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">image_overlays_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Sets which overlay</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">surveys to use.&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_overlays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_overlays_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_image_overlays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_image_overlays_changed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_additional_settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_additional_settings</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_query_radius_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+    <span class="k">def</span> <span class="nf">on_return_raw_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_raw</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_Raw</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">on_image_size_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+    <span class="k">def</span> <span class="nf">on_image_band_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_band&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+    <span class="k">def</span> <span class="nf">on_image_overlays_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseTextBox</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+    <span class="c1"># triggers on query kind change and survey change</span>
+    <span class="k">def</span> <span class="nf">set_additional_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]:</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;phot&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;reddening&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">==</span> <span class="s2">&quot;stilism&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;panstarrs&quot;</span><span class="p">,</span> <span class="s2">&quot;skymapper&quot;</span><span class="p">]:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">,</span> <span class="s2">&quot;image_band&quot;</span><span class="p">,</span> <span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;image_size&quot;</span><span class="p">,</span> <span class="s2">&quot;image_overlays&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">,</span> <span class="s2">&quot;return_raw&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;sed&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;query_radius&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_settings_header</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_settings_header</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;query_radius&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                    <span class="n">config</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;query_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span><span class="si">}</span><span class="s2">_radius&quot;</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_values</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">additional_settings_headers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># DATA MANIPULATION ------------------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">DataManipulationUiComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showdata_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show Data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showdata_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_showdata_button_pressed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">showdata_button</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Save Data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_savedata_button_pressed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw_box</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw_box</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw_box</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_showraw_box_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">showraw_box</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Additional</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Settings:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">showraw_header</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showraw_header2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;Readable output&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">showraw_header2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Additional</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Settings:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_header</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_header2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;File name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_header2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_button_positions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_button_positions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_savedata_fname_changed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_button_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="c1"># self.savedata_button.setText(&quot;Save Data&quot;)</span>
+        <span class="c1"># self.savedata_button.setStyleSheet(&quot;background-color: white&quot;)</span>
+
+        <span class="n">query_button_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_button</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_manipulation_widgets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span>
+                <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span>
+                    <span class="n">query_button_position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widget</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">query_button_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">widget</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_showdata_button_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">showdata</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showraw</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_savedata_button_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">savedata</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">savedata</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+            <span class="n">keep_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Data Saved&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_savedata_fname_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Save Data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: white&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span>
+            <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Data Saved&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedata_fname_box</span><span class="o">.</span><span class="n">placeholderText</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_extension</span>
+            <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Data Saved&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedata_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_showraw_box_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">showraw_box</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showraw</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showraw</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># PLOTTING ---------------------------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">PlottingUiComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showplot_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Plot Data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showplot_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_showplot_button_pressed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">showplot_button</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Save Plot&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">pressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_saveplot_button_pressed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_saveplot_fname_changed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Additional</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Settings:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_header</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_header2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;File name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_header2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_plotting_button_positions</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_plotting_button_positions</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">do_plotting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+            <span class="n">plot_kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+            <span class="n">timeformat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">plot_kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+                <span class="n">colours</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseTextBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_colours&quot;</span><span class="p">])</span>
+                <span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseTextBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_bands&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">sigmaclip</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sigmaclip</span><span class="p">(</span><span class="n">sigmaclip</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">bin_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">bin_text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">bin_text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="n">bin_text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="n">bin_text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">binsize</span><span class="o">=</span><span class="n">bin_text</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_text</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="n">plot_kind</span><span class="p">,</span>
+                    <span class="n">colours</span><span class="o">=</span><span class="n">colours</span><span class="p">,</span>
+                    <span class="n">timeformat</span><span class="o">=</span><span class="n">timeformat</span><span class="p">,</span>
+                    <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">plot_kind</span> <span class="o">==</span> <span class="s2">&quot;powspec&quot;</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;powspec&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">plot_kind</span> <span class="o">==</span> <span class="s2">&quot;phasefold&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_freq&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">freq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_freq&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">freq</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_bins&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_bins&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bins</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">foverlay</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">foverlay</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">repeat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;phasefold&quot;</span><span class="p">,</span>
+                    <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                    <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
+                    <span class="n">foverlay</span><span class="o">=</span><span class="n">foverlay</span><span class="p">,</span>
+                    <span class="n">repeat</span><span class="o">=</span><span class="n">repeat</span><span class="p">,</span>
+                    <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;sed&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;---&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">spectrum_overlay</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">survey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">on_showplot_button_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_plotting</span><span class="p">()</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">showplot</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_saveplot_button_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_plotting</span><span class="p">()</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">saveplot</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+            <span class="n">keep_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Plot Saved&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_saveplot_fname_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Save Plot&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: white&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.html&quot;</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">+=</span> <span class="s2">&quot;.html&quot;</span>
+            <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Data Saved&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_fname_box</span><span class="o">.</span><span class="n">placeholderText</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.html&quot;</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">+=</span> <span class="s2">&quot;.html&quot;</span>
+            <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Data Saved&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span>
+                    <span class="s2">&quot;background-color: rgba(0,255,0,0.75)&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_plotting_button_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="n">query_kind_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotting_widgets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span>
+                <span class="n">widget</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span>
+                    <span class="n">query_kind_position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">widget</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">query_kind_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">widget</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+    <span class="c1"># PLOTTING OPTIONS -------------------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">PlotOptionsUiComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Additional</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">Plotting Options:&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Lightcurve - kind</span>
+        <span class="n">plot_kind</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">plot_kind</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;lightcurve&quot;</span><span class="p">,</span> <span class="s2">&quot;powspec&quot;</span><span class="p">,</span> <span class="s2">&quot;phasefold&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_kind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;Plot type&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;lightcurve&quot;</span>
+
+        <span class="c1"># Lightcurve - bands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;lightcurve_bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Light curve bands&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Lightcurve - colours</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_colours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;lightcurve_colours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Light curve colours&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Lightcurve - timeformat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;reduced&quot;</span><span class="p">,</span> <span class="s2">&quot;original&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Time format&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;reduced&quot;</span>
+
+        <span class="c1"># Lightcurve - sigmaclip()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Sigma clip&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;---&quot;</span>
+
+        <span class="c1"># Lightcurve - bin()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Bins or binsize</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">e.g. 30 or 1h&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;---&quot;</span>
+
+        <span class="c1"># Powspec - method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;ls&quot;</span><span class="p">,</span> <span class="s2">&quot;amhw&quot;</span><span class="p">,</span> <span class="s2">&quot;pspw&quot;</span><span class="p">,</span> <span class="s2">&quot;atrw&quot;</span><span class="p">,</span> <span class="s2">&quot;aovw&quot;</span><span class="p">,</span> <span class="s2">&quot;f_mw&quot;</span><span class="p">,</span> <span class="s2">&quot;lomw&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Analysis Method&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ls&quot;</span>
+
+        <span class="c1"># Phasefold - freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;phasefold_freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;Fold frequency&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_freq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Calculate&quot;</span>
+
+        <span class="c1"># Phasefold - bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_bins&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;phasefold_bins&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span><span class="s2">&quot;Number of bins&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_bins&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;---&quot;</span>
+
+        <span class="c1"># Phasefold - foverlay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Sine wave overlay&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Phasefold - repeat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Number of repetitions&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1"># Phasefold - shift587316166180416640</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Shift in phase&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;phasefold_shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># SED - spectrum_overlay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">addItems</span><span class="p">([</span><span class="s2">&quot;---&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">spectrum_surveys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customLabel2</span><span class="p">(</span>
+            <span class="s2">&quot;Spectrum overlay survey&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;---&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disable_widgets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_kind_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_plotoptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey_list</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_plotoptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentTextChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_plotoptions</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_plotoptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: white&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveplot_button</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Save Plot&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># put names of QComboBoxes here so that they don&#39;t get cleared</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;kind&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;powspec_method&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sed_spec&quot;</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># this also gets called on change of plot kind, so need to not reset this to default in this case</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_reset</span><span class="p">:</span>
+                    <span class="n">val</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_ready</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+                <span class="c1"># place defaults here that need to update per-query</span>
+                <span class="n">lightcurve_bands</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">lightcurve_bands</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="p">]:</span>
+                    <span class="n">lightcurve_bands</span> <span class="o">+=</span> <span class="n">band</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="n">lightcurve_bands</span> <span class="o">=</span> <span class="n">lightcurve_bands</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;lightcurve_bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lightcurve_bands</span>
+
+                <span class="n">lightcurve_colours</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;black, &quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">lightcurve_bands</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="p">])</span>
+                <span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="s2">&quot;lightcurve_colours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lightcurve_colours</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s2">&quot;kind&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lightcurve_bands&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lightcurve_colours&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lightcurve_timeformat&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lightcurve_sigmaclip&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;lightcurve_bin&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;powspec&quot;</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">,</span> <span class="s2">&quot;powspec_method&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;phasefold&quot;</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s2">&quot;kind&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;phasefold_freq&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;phasefold_bins&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;phasefold_foverlay&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;phasefold_repeat&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;phasefold_shift&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;sed&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sed_spec&quot;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Don&#39;t have plotting, but included here so that it doesn&#39;t break if these kinds are selected</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;phot&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_kind</span> <span class="o">==</span> <span class="s2">&quot;reddening&quot;</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_defaults</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">11</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">11</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_headers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plotoptions_header</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">disable_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_ready</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">keep_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">appExec</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">([])</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">Window</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_files</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="openGUI">
+<a class="viewcode-back" href="../../Gui.html#AstroToolkit.Gui.openGUI">[docs]</a>
+<span class="k">def</span> <span class="nf">openGUI</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens the ATK GUI. This function can also be called directly from the :ref:`Command-Line`.</span>
+
+<span class="sd">    :return: None</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">appExec</span><span class="p">())</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

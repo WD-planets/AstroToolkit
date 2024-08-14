@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[project]
+name = "AstroToolkit"
+version = "1.6.0"
+authors = [
+  { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
+]
+description = "A package for the gathering, plotting and analysis of astronomical data."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "astropy==6.0.1",
+    "astroquery==0.4.7",
+    "bokeh==3.4.1",
+    "cmasher==1.8.0",
+    "matplotlib==3.8.4",
+    "importlib_resources==6.4.0",
+    "numpy==1.26.4",
+    "pandas==2.2.2",
+    "Requests==2.31.0",
+    "beautifulsoup4==4.12.3",
+    "scipy==1.13.0",
+    "selenium==4.21.0",
+    "lightkurve==2.4.2",
+    "PyQt5==5.15.10",
+    "numba==0.60.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/WD-planets/AstroToolkit"
+Issues = "https://github.com/WD-planets/AstroToolkit/issues"
+
+[project.scripts]
+ATKgui = "bin.opengui_command:main"
+ATKtsbuild = "bin.tsbuild_command:main"
+ATKtsguide =  "bin.tsguide_command:main"
+ATKquery = "bin.atkquery_command:main"
+ATKread = "bin.atkread_command:main"

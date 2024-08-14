@@ -1,0 +1,6 @@
+[console_scripts]
+ATKgui = bin.opengui_command:main
+ATKquery = bin.atkquery_command:main
+ATKread = bin.atkread_command:main
+ATKtsbuild = bin.tsbuild_command:main
+ATKtsguide = bin.tsguide_command:main

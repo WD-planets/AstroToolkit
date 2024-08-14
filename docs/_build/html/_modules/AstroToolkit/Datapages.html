@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit.Datapages &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../datastructures.html">Data Structures</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AstroToolkit.Datapages</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AstroToolkit.Datapages</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module assists in creating datapages, and provides additional panels for this purpose. It is greatly recommended to see the datapage examples alongside this section.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.Configuration.baseconfig</span> <span class="kn">import</span> <span class="n">ConfigStruct</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigStruct</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="buttons">
+<a class="viewcode-back" href="../../Datapages.html#AstroToolkit.Datapages.buttons">[docs]</a>
+<span class="k">def</span> <span class="nf">buttons</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">grid_size</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;buttons(source/pos, *)</span>
+
+<span class="sd">    Generates Vizier and SIMBAD search buttons for a given target.</span>
+
+<span class="sd">    :param int source: Target GAIA DR3 Source ID</span>
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+<span class="sd">    :param int, optional radius: search radius in arcseconds, default = config</span>
+<span class="sd">    :param int, optional grid_size: datapage grid size used for scaling, default = config</span>
+
+<span class="sd">    :return: Vizier and SIMBAD search buttons</span>
+<span class="sd">    :rtype: bokeh figure</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">.DatapageElements.datapage_buttons</span> <span class="kn">import</span> <span class="n">get_search_buttons</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">radius</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span> <span class="s2">&quot;grid_size&quot;</span><span class="p">:</span> <span class="n">grid_size</span><span class="p">},</span>
+        <span class="s2">&quot;buttons&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;grid_size&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datapage_search_button_radius</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grid_size</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datapage_grid_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">get_search_buttons</span><span class="p">(</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">grid_size</span><span class="o">=</span><span class="n">grid_size</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="datatable">
+<a class="viewcode-back" href="../../Datapages.html#AstroToolkit.Datapages.datatable">[docs]</a>
+<span class="k">def</span> <span class="nf">datatable</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;datatable(selection,source/pos, *)</span>
+<span class="sd">    Generates a datatable for a given target.</span>
+
+<span class="sd">    :param int source: Target GAIA DR3 Source ID</span>
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+<span class="sd">    :param int, optional radius: search radius to use when fetching data from supported surveys in arcseconds, default = config</span>
+<span class="sd">    :param dict&lt;str&gt; or dict&lt;dict&gt; selection: dict of datatable entries, with each entry taking a different format depending on the use case:</span>
+
+<span class="sd">    To generate entires for supported surveys quickly and easily:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        survey: &quot;default&quot;</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    :param str survey: supported survey, from:</span>
+
+<span class="sd">        - gaia</span>
+<span class="sd">        - panstarrs</span>
+<span class="sd">        - skymapper</span>
+<span class="sd">        - galex</span>
+<span class="sd">        - sdss</span>
+<span class="sd">        - wise</span>
+<span class="sd">        - twomass (2MASS)</span>
+<span class="sd">        - rosat</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    For customised entries within supported surveys:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        survey: {</span>
+<span class="sd">                &quot;parameters&quot;: parameters</span>
+<span class="sd">                &quot;errors&quot;: errors</span>
+<span class="sd">                &quot;notes&quot;: notes</span>
+<span class="sd">                }</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    :param str survey: supported survey, from:</span>
+
+<span class="sd">        - gaia</span>
+<span class="sd">        - panstarrs</span>
+<span class="sd">        - skymapper</span>
+<span class="sd">        - galex</span>
+<span class="sd">        - rosat</span>
+<span class="sd">        - sdss</span>
+<span class="sd">        - wise</span>
+<span class="sd">        - twomass (2MASS)</span>
+<span class="sd">        - erosita</span>
+
+<span class="sd">    :param list&lt;str&gt; parameters: names of parameters (i.e. column headers) that exist in chosen survey</span>
+<span class="sd">    :param list&lt;str&gt; errors: names of errors on these parameters (i.e. column headers) that exist in chosen survey</span>
+<span class="sd">    :param list&lt;str&gt; notes: any notes to include on each of the chosen parameters/errors</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    For customised entries outside of supported surveys:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        survey: {</span>
+<span class="sd">                &quot;parameters&quot;: parameters</span>
+<span class="sd">                &quot;values&quot;: values</span>
+<span class="sd">                &quot;errors&quot;: errors</span>
+<span class="sd">                &quot;notes&quot;: notes</span>
+<span class="sd">                }</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    :param str survey: name of survey to which the data belongs</span>
+<span class="sd">    :param list&lt;str&gt; parameters: names of parameters</span>
+<span class="sd">    :param list&lt;float&gt; values: values of these parameters</span>
+<span class="sd">    :param list&lt;float&gt; errors: error values on these parameters</span>
+<span class="sd">    :param list&lt;str&gt; notes: any notes to include on each of the chosen parameters/errors</span>
+
+<span class="sd">    :return: populated datatable</span>
+<span class="sd">    :rtype: bokeh figure</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">.DatapageElements.metadata_table</span> <span class="kn">import</span> <span class="n">gettable</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="n">selection</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">radius</span><span class="p">},</span>
+        <span class="s2">&quot;datatable&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">selection</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;selection&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datapage_datatable_radius</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gettable</span><span class="p">(</span><span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="gridsetup">
+<a class="viewcode-back" href="../../Datapages.html#AstroToolkit.Datapages.gridsetup">[docs]</a>
+<span class="k">def</span> <span class="nf">gridsetup</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">grid_size</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;gridsetup(dimensions, plots, *)</span>
+
+<span class="sd">    Assists in setting up panels for use in datapages.</span>
+
+<span class="sd">    :param dict&lt;int&gt; dimensions: dimensions of plot in grid units, in format:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        &#39;width&#39;: width</span>
+<span class="sd">        &#39;height&#39;: height</span>
+
+<span class="sd">    :param list&lt;dict&gt; plots: plots for use in datapage, with each entry in format:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        &#39;name&#39;: name</span>
+<span class="sd">        &#39;figure&#39;: figure</span>
+<span class="sd">        &#39;width&#39;: width</span>
+<span class="sd">        &#39;height&#39;: height</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    :param str name: name to assign to the figure</span>
+<span class="sd">    :param class or bokeh figure or None figure: The figure to give this panel, this can either be an ATK structure that supports plotting (lightcurve, image, etc.) or a Bokeh figure. If filling empty space, None can instead be passed to create a blank panel.</span>
+<span class="sd">    :param int width: width of panel in grid units</span>
+<span class="sd">    :param int height: height of panel in grid units</span>
+
+<span class="sd">    :return: dictionary of plots with keys = names assigned to each panel</span>
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+    <span class="kn">from</span> <span class="nn">.Misc.gridsetup</span> <span class="kn">import</span> <span class="n">format_grid_plots</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;dimensions&quot;</span><span class="p">:</span> <span class="n">dimensions</span><span class="p">,</span> <span class="s2">&quot;plots&quot;</span><span class="p">:</span> <span class="n">plots</span><span class="p">,</span> <span class="s2">&quot;grid_size&quot;</span><span class="p">:</span> <span class="n">grid_size</span><span class="p">},</span> <span class="s2">&quot;gridsetup&quot;</span>
+    <span class="p">)</span>
+    <span class="n">dimensions</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">grid_size</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;plots&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;grid_size&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">grid_size</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">datapage_grid_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">format_grid_plots</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">plots</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

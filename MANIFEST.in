@@ -1,0 +1,7 @@
+include src/AstroToolkit/Timeseries/pyaov/*.f90
+include src/AstroToolkit/Timeseries/pyaov/*.bat
+include src/AstroToolkit/Timeseries/pyaov/*.sh
+include src/AstroToolkit/Timeseries/pyaov/aovwrapper
+include src/AstroToolkit/Timeseries/pyaov/README/*.pdf
+include src/AstroToolkit/Timeseries/pyaov/README/*.txt
+include src/AstroToolkit/Plotting/*.fits

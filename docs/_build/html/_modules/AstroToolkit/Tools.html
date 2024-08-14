@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit.Tools &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configkeys.html">Config Keys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commandline.html">Command-Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AstroToolkit.Tools</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AstroToolkit.Tools</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the main tools for data fetching, plotting and analysis in ATK.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.Configuration.baseconfig</span> <span class="kn">import</span> <span class="n">ConfigStruct</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigStruct</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+<span class="n">newline</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+
+<span class="c1"># &#39;pos&#39; has epoch of 2000 if given as input, 2016 if found as a result of source query. &#39;identifier&#39; is therefore always J2000</span>
+
+
+<div class="viewcode-block" id="query">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.query">[docs]</a>
+<span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
+    <span class="n">kind</span><span class="p">,</span>
+    <span class="n">survey</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">band</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">overlays</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s2">&quot;external&quot;</span><span class="p">,</span>
+    <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;query(kind,source/pos, *)</span>
+
+<span class="sd">    Returns data of a given type from a given survey.</span>
+
+<span class="sd">    :param str kind: Type of query to perform, from:</span>
+
+<span class="sd">        - data: return survey data as listed in Vizier</span>
+<span class="sd">        - phot: return only photometry from supported surveys</span>
+<span class="sd">        - bulkphot: return photometry from all supported surveys</span>
+<span class="sd">        - reddening: return reddening from a supported survey</span>
+<span class="sd">        - lightcurve: return light curve data from a supported survey</span>
+<span class="sd">        - image: return image data from a supported survey</span>
+<span class="sd">        - hrd: return Gaia Hertzsprung-Russell diagram data</span>
+<span class="sd">        - sed: return spectral energy distribution data from all supported surveys</span>
+<span class="sd">        - spectrum: return spectrum data from a supported survey</span>
+
+<span class="sd">    :param int source: Target GAIA DR3 Source ID</span>
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+
+<span class="sd">    Requires additional parameters depending on query type, and returns different data structures in each case.</span>
+
+<span class="sd">    - kind = data</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - any Vizier survey ID</span>
+<span class="sd">        - gaia</span>
+<span class="sd">        - panstarrs</span>
+<span class="sd">        - skymapper</span>
+<span class="sd">        - galex</span>
+<span class="sd">        - rosat</span>
+<span class="sd">        - sdss</span>
+<span class="sd">        - wise</span>
+<span class="sd">        - twomass (2MASS)</span>
+<span class="sd">        - erosita</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`DataStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = phot</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - gaia</span>
+<span class="sd">        - panstarrs</span>
+<span class="sd">        - skymapper</span>
+<span class="sd">        - galex</span>
+<span class="sd">        - sdss</span>
+<span class="sd">        - wise</span>
+<span class="sd">        - twomass (2MASS)</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`DataStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = bulkphot</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`DataStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = reddening</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - stilism, requires source input, doesn&#39;t accept a radius</span>
+<span class="sd">        - gdre, accepts source or pos input</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`DataStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = lightcurve</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - atlas, requires username and password</span>
+<span class="sd">        - ztf</span>
+<span class="sd">        - crts</span>
+<span class="sd">        - asassn</span>
+<span class="sd">        - gaia</span>
+<span class="sd">        - tess</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+<span class="sd">    :param bool, optional raw: Return raw data with no filtering, default: False</span>
+<span class="sd">    :param str, optional username: ATLAS username, only required in ATLAS queries</span>
+<span class="sd">    :param str, optional password: ATLAS password, only required in ATLAS queries</span>
+
+<span class="sd">    :return: :ref:`LightcurveStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = image</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - panstarrs, accepted bands = grizy</span>
+<span class="sd">        - skymapper, accepted bands = grizuv</span>
+<span class="sd">        - dss, accepted bands = g</span>
+
+<span class="sd">    :param float, optional size: Size of image in arcseconds, default: config</span>
+<span class="sd">    :param str, optional, band: All required image bands (as listed above) as a single string. E.g. &#39;grizy&#39; for all panstarrs bands. Default = g</span>
+<span class="sd">    :param list&lt;str&gt;, optional overlays: Required detection overlays from:</span>
+
+<span class="sd">        - gaia</span>
+<span class="sd">        - galex</span>
+<span class="sd">        - wise</span>
+<span class="sd">        - sdss</span>
+<span class="sd">        - twomass  (2MASS)</span>
+<span class="sd">        - skymapper</span>
+<span class="sd">        - panstarrs</span>
+<span class="sd">        - rosat</span>
+<span class="sd">        - erosita</span>
+<span class="sd">        - atlas</span>
+<span class="sd">        - gaia_lc (Gaia light curve)</span>
+<span class="sd">        - asassn</span>
+<span class="sd">        - crts</span>
+<span class="sd">        - ztf</span>
+
+<span class="sd">    The bands used in these detection overlays are taken from the config. If you wish to use multiple bands from a single survey, detections can instead be requested using a dict. E.g. to use all Gaia magnitudes:</span>
+
+<span class="sd">    .. code-block::  python</span>
+
+<span class="sd">        overlays={&#39;gaia&#39;:[&#39;phot_g_mean_mag&#39;,&#39;phot_bp_mean_mag&#39;,&#39;phot_rp_mean_mag&#39;]}</span>
+
+<span class="sd">    :return: :ref:`ImageStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = hrd</span>
+
+<span class="sd">    :param list&lt;int&gt; sources: Target Gaia DR3 source(s)</span>
+
+<span class="sd">    :return: :ref:`HrdStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = sed</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`SedStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    - kind = spectrum</span>
+
+<span class="sd">    :param str survey: Target survey, from:</span>
+
+<span class="sd">        - sdss</span>
+
+<span class="sd">    :param float, optional radius: Search radius in arcseconds, default: config</span>
+
+<span class="sd">    :return: :ref:`SpectrumStruct`</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">.Data.dataquery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">data_query</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">overlays</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">))</span> <span class="ow">and</span> <span class="n">overlays</span> <span class="o">!=</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">overlays</span> <span class="o">=</span> <span class="p">[</span><span class="n">overlays</span><span class="p">]</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;survey&quot;</span><span class="p">:</span> <span class="n">survey</span><span class="p">,</span>
+            <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">radius</span><span class="p">,</span>
+            <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span>
+            <span class="s2">&quot;band&quot;</span><span class="p">:</span> <span class="n">band</span><span class="p">,</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">password</span><span class="p">,</span>
+            <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="n">overlays</span><span class="p">,</span>
+            <span class="s2">&quot;sources&quot;</span><span class="p">:</span> <span class="n">sources</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">kind</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">overlays</span><span class="p">,</span> <span class="n">sources</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;survey&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;overlays&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span> <span class="ow">and</span> <span class="n">kind</span> <span class="o">!=</span> <span class="s2">&quot;image&quot;</span> <span class="ow">and</span> <span class="n">kind</span> <span class="o">!=</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;query_</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">_radius&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">query_image_size</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">band</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">band</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_image_band</span>
+    <span class="k">if</span> <span class="n">overlays</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">overlays</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">query_image_overlays</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_lightcurve_atlas_username</span>
+    <span class="k">if</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">query_lightcurve_atlas_password</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+        <span class="n">survey</span> <span class="o">=</span> <span class="s2">&quot;Gaia&quot;</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span>
+        <span class="ow">and</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">&quot;internal&quot;</span>
+        <span class="ow">and</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;sed&quot;</span><span class="p">,</span> <span class="s2">&quot;hrd&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">survey</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> query</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">source = </span><span class="si">{</span><span class="n">source</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">pos = </span><span class="si">{</span><span class="n">pos</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">radius = </span><span class="si">{</span><span class="n">radius</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span>
+        <span class="ow">and</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">&quot;internal&quot;</span>
+        <span class="ow">and</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">survey</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> query</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">source = </span><span class="si">{</span><span class="n">source</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">pos = </span><span class="si">{</span><span class="n">pos</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">size = </span><span class="si">{</span><span class="n">size</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span>
+        <span class="ow">and</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">&quot;internal&quot;</span>
+        <span class="ow">and</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;sed&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> query</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">source = </span><span class="si">{</span><span class="n">source</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">pos = </span><span class="si">{</span><span class="n">pos</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">radius = </span><span class="si">{</span><span class="n">radius</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span>
+        <span class="ow">and</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">&quot;internal&quot;</span>
+        <span class="ow">and</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hrd&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> query</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">sources = </span><span class="si">{</span><span class="n">sources</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">survey</span> <span class="o">==</span> <span class="s2">&quot;gaia&quot;</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ra&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dec&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">survey</span> <span class="o">!=</span> <span class="s2">&quot;gaia&quot;</span><span class="p">:</span>
+            <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ra&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dec&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.spectrumquery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">spectrum_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">spectrum_query</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.imagequery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">image_query</span>
+
+        <span class="k">if</span> <span class="n">survey</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">survey</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;panstarrs&quot;</span><span class="p">,</span> <span class="s2">&quot;skymapper&quot;</span><span class="p">,</span> <span class="s2">&quot;dss&quot;</span><span class="p">]:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">image_query</span><span class="p">(</span>
+                    <span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                    <span class="n">band</span><span class="o">=</span><span class="n">band</span><span class="p">,</span>
+                    <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                    <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                    <span class="n">overlays</span><span class="o">=</span><span class="n">overlays</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">image_query</span><span class="p">(</span>
+                <span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">band</span><span class="o">=</span><span class="n">band</span><span class="p">,</span>
+                <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                <span class="n">overlays</span><span class="o">=</span><span class="n">overlays</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;lightcurve&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.lightcurvequery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">lightcurve_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">lightcurve_query</span><span class="p">(</span>
+            <span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+            <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;phot&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.photquery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">phot_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">phot_query</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.photquery</span> <span class="kn">import</span> <span class="n">bulkphot_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">bulkphot_query</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;sed&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.sedquery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">sed_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sed_query</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;reddening&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.reddeningquery</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">reddening_query</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">reddening_query</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;hrd&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Data.hrdquery</span> <span class="kn">import</span> <span class="n">gather_data</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">gather_data</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid kind passed to query.&quot;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">.Misc.identifier_generation</span> <span class="kn">import</span> <span class="n">identifier_from_pos</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">source</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ra2000&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gaia_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dec2000&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier_from_pos</span><span class="p">([</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier_from_pos</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;sources&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="n">identifiers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span>
+                <span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span> <span class="o">=</span> <span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;ra2000&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;dec2000&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">identifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identifier_from_pos</span><span class="p">([</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">]))</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="n">identifiers</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier_from_pos</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">.FileHandling.file_naming</span> <span class="kn">import</span> <span class="n">name_file</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">name_file</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="n">fname</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;phot&quot;</span><span class="p">,</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;reddening&quot;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">.FileHandling.file_naming</span> <span class="kn">import</span> <span class="n">generate_plotname</span>
+
+        <span class="n">generate_plotname</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="correctpm">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.correctpm">[docs]</a>
+<span class="k">def</span> <span class="nf">correctpm</span><span class="p">(</span>
+    <span class="n">input_survey</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_survey</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">input_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">target_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pmra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pmdec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;correctpm(source/pos, *)</span>
+<span class="sd">    Corrects a system&#39;s coordinates for proper motion between times or supported surveys.</span>
+
+<span class="sd">    :param int source: Target GAIA DR3 Source ID</span>
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+
+<span class="sd">    Also additional parameters depending on whether a source or pos is used:</span>
+
+<span class="sd">    - for source input, requires one of:</span>
+
+<span class="sd">    :param str target_survey: any supported survey in any supported query type</span>
+<span class="sd">    :param list&lt;int&gt; target_time: time to correct coordinates to in format [year,month]</span>
+
+<span class="sd">    - for pos input, requires:</span>
+
+<span class="sd">    :param list&lt;int&gt; input_time: epoch of supplied coordinates in format [year,month]</span>
+<span class="sd">    :param list&lt;int&gt; target_time: time to correct coordinates to in format [year,month]</span>
+<span class="sd">    :param float pmra: proper motion in right ascension in mas/yr</span>
+<span class="sd">    :param float pmdec: proper motion in declination in mas/yr</span>
+
+<span class="sd">    or</span>
+
+<span class="sd">    :param str input_survey: any supported survey in any supported query type</span>
+<span class="sd">    :param str target_survey: any supported survey in any supported query type</span>
+
+
+<span class="sd">    :return: [right ascension, declination] in degrees</span>
+<span class="sd">    :rtype: list&lt;int&gt;</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;input_survey&quot;</span><span class="p">:</span> <span class="n">input_survey</span><span class="p">,</span>
+            <span class="s2">&quot;target_survey&quot;</span><span class="p">:</span> <span class="n">target_survey</span><span class="p">,</span>
+            <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;input_time&quot;</span><span class="p">:</span> <span class="n">input_time</span><span class="p">,</span>
+            <span class="s2">&quot;target_time&quot;</span><span class="p">:</span> <span class="n">target_time</span><span class="p">,</span>
+            <span class="s2">&quot;pmra&quot;</span><span class="p">:</span> <span class="n">pmra</span><span class="p">,</span>
+            <span class="s2">&quot;pmdec&quot;</span><span class="p">:</span> <span class="n">pmdec</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;correctpm&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">input_survey</span><span class="p">,</span> <span class="n">target_survey</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">input_time</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">pmra</span><span class="p">,</span> <span class="n">pmdec</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;input_survey&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;target_survey&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;input_time&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;target_time&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pmra&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pmdec&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">target_time</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Misc.pmcorrection</span> <span class="kn">import</span> <span class="n">autocorrect_source</span>
+
+        <span class="n">corrected_pos</span> <span class="o">=</span> <span class="n">autocorrect_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target_time</span><span class="o">=</span><span class="n">target_time</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">target_survey</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Misc.pmcorrection</span> <span class="kn">import</span> <span class="n">autocorrect_source</span>
+
+        <span class="n">corrected_pos</span> <span class="o">=</span> <span class="n">autocorrect_source</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target_survey</span><span class="o">=</span><span class="n">target_survey</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pos</span> <span class="ow">and</span> <span class="n">input_time</span> <span class="ow">and</span> <span class="n">target_time</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Misc.pmcorrection</span> <span class="kn">import</span> <span class="n">correctpm</span>
+
+        <span class="n">corrected_pos</span> <span class="o">=</span> <span class="n">correctpm</span><span class="p">(</span><span class="n">input_time</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pmra</span><span class="p">,</span> <span class="n">pmdec</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pos</span> <span class="ow">and</span> <span class="n">input_survey</span> <span class="ow">and</span> <span class="n">target_survey</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.Misc.pmcorrection</span> <span class="kn">import</span> <span class="n">autocorrect_survey</span>
+
+        <span class="n">corrected_pos</span> <span class="o">=</span> <span class="n">autocorrect_survey</span><span class="p">(</span>
+            <span class="n">input_survey</span><span class="p">,</span> <span class="n">target_survey</span><span class="p">,</span> <span class="n">ra</span><span class="o">=</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dec</span><span class="o">=</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pmra</span><span class="o">=</span><span class="n">pmra</span><span class="p">,</span> <span class="n">pmdec</span><span class="o">=</span><span class="n">pmdec</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid input combination passed to correctpm.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">corrected_pos</span></div>
+
+
+
+<div class="viewcode-block" id="readdata">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.readdata">[docs]</a>
+<span class="k">def</span> <span class="nf">readdata</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads data from a local file created by ATK, recreating the inital data structure.</span>
+
+<span class="sd">    :param str fname: name of file from which to read</span>
+
+<span class="sd">    :return: ATK Data Structure of same type as original data</span>
+<span class="sd">    :rtype: class</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.FileHandling.file_reading</span> <span class="kn">import</span> <span class="n">read_local_file</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">({</span><span class="s2">&quot;fname&quot;</span><span class="p">:</span> <span class="n">fname</span><span class="p">},</span> <span class="s2">&quot;readdata&quot;</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;fname&quot;</span><span class="p">]</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recreating data from local storage: </span><span class="si">{</span><span class="n">fname</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">.FileHandling.file_naming</span> <span class="kn">import</span> <span class="n">name_file</span>
+
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">read_local_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">struct</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="n">name_file</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;phot&quot;</span><span class="p">,</span> <span class="s2">&quot;bulkphot&quot;</span><span class="p">,</span> <span class="s2">&quot;reddening&quot;</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">.FileHandling.file_naming</span> <span class="kn">import</span> <span class="n">generate_plotname</span>
+
+        <span class="n">generate_plotname</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                    <span class="n">fname</span> <span class="o">+=</span> <span class="s2">&quot;.csv&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.fits&quot;</span><span class="p">):</span>
+                    <span class="n">fname</span> <span class="o">+=</span> <span class="s2">&quot;.fits&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span>
+
+        <span class="kn">from</span> <span class="nn">.FileHandling.file_writing</span> <span class="kn">import</span> <span class="n">generate_local_file</span>
+
+        <span class="n">success</span> <span class="o">=</span> <span class="n">generate_local_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving data to local storage: </span><span class="si">{</span><span class="n">fname</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="kn">import</span> <span class="nn">types</span>
+
+    <span class="n">struct</span><span class="o">.</span><span class="n">savedata</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">savedata</span><span class="p">,</span> <span class="n">struct</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">.Data.data_printing</span> <span class="kn">import</span> <span class="n">print_data</span>
+
+    <span class="n">struct</span><span class="o">.</span><span class="n">showdata</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">print_data</span><span class="p">,</span> <span class="n">struct</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">struct</span></div>
+
+
+
+<div class="viewcode-block" id="search">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.search">[docs]</a>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;search(kind,source/pos, *)</span>
+
+<span class="sd">    Searches for a given target in Vizier or SIMBAD.</span>
+
+<span class="sd">    :param str kind: where to search for target, from:</span>
+
+<span class="sd">        - vizier</span>
+<span class="sd">        - simbad</span>
+
+<span class="sd">    :param int source: Target GAIA DR3 Source ID</span>
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+<span class="sd">    :param float, optional radius: radius of search in arcseconds, default = config</span>
+
+<span class="sd">    :return: None</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+    <span class="kn">from</span> <span class="nn">.Misc.search</span> <span class="kn">import</span> <span class="n">do_search</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">radius</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">},</span> <span class="s2">&quot;search&quot;</span>
+    <span class="p">)</span>
+    <span class="n">kind</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">radius</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">search_radius</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> query</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">source = </span><span class="si">{</span><span class="n">source</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">pos = </span><span class="si">{</span><span class="n">pos</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">radius = </span><span class="si">{</span><span class="n">radius</span><span class="si">}{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">do_search</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="readfits">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.readfits">[docs]</a>
+<span class="k">def</span> <span class="nf">readfits</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads columns from a .fits file.</span>
+
+<span class="sd">    :param str fname: name of file from which to read</span>
+<span class="sd">    :param list&lt;str&gt;/str columns: name(s) of column(s) to read</span>
+
+<span class="sd">    :return: Returned column data. E.g. if [ra, dec] requested, returns [[ra], [dec]]</span>
+<span class="sd">    :rtype: list&lt;list&gt;</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+    <span class="kn">from</span> <span class="nn">.Misc.fitsfiles</span> <span class="kn">import</span> <span class="n">get_columns</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">({</span><span class="s2">&quot;fname&quot;</span><span class="p">:</span> <span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="n">columns</span><span class="p">},</span> <span class="s2">&quot;readfits&quot;</span><span class="p">)</span>
+    <span class="n">fname</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;fname&quot;</span><span class="p">],</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">read_config</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_notifications</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading local .fits file: </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">get_columns</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="deg2hms">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.deg2hms">[docs]</a>
+<span class="k">def</span> <span class="nf">deg2hms</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts coordinates in degrees to HMS±DMS format.</span>
+
+<span class="sd">    :param list&lt;float&gt; pos: Position [right ascension, declination] in degrees</span>
+
+<span class="sd">    :return: coordinates in HMS±DMS format</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+    <span class="kn">from</span> <span class="nn">.Misc.identifier_generation</span> <span class="kn">import</span> <span class="n">identifier_from_pos</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">({</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">},</span> <span class="s2">&quot;deg2hms&quot;</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">identifier_from_pos</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;conversion&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="hms2deg">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.hms2deg">[docs]</a>
+<span class="k">def</span> <span class="nf">hms2deg</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts coordinates in HMS±DMS format to degrees.</span>
+
+<span class="sd">    :param str pos: position of target in HMS±DMS format, i.e. HHMMSS.SS... ± DDMMSS.SS...</span>
+
+<span class="sd">    :return: [right ascension, declination] in degrees</span>
+<span class="sd">    :rtype: list&lt;float&gt;</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.Input.input_validation</span> <span class="kn">import</span> <span class="n">check_inputs</span>
+    <span class="kn">from</span> <span class="nn">.Misc.coordinate_conversions</span> <span class="kn">import</span> <span class="n">conv_hms_to_deg</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">check_inputs</span><span class="p">({</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">},</span> <span class="s2">&quot;hms2deg&quot;</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">conv_hms_to_deg</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tsanalysis">
+<a class="viewcode-back" href="../../Tools.html#AstroToolkit.Tools.tsanalysis">[docs]</a>
+<span class="k">def</span> <span class="nf">tsanalysis</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens GUI for PyAOV time series analysis.</span>
+
+<span class="sd">    :param class LightcurveStruct: Light curve data in format of ATK LightcurveStruct</span>
+
+<span class="sd">    :return: None</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="kn">from</span> <span class="nn">.Timeseries.pyaov</span> <span class="kn">import</span> <span class="n">pyaov</span>
+    <span class="kn">from</span> <span class="nn">.Timeseries.pyaov.pyaov_interface</span> <span class="kn">import</span> <span class="n">get_analysis</span>
+
+    <span class="c1"># path = Path(pyaov.__file__).parent.absolute()</span>
+    <span class="c1"># if str(path) not in os.environ[&quot;PATH&quot;]:</span>
+    <span class="c1">#    os.environ[&quot;PATH&quot;] += str(path)</span>
+
+    <span class="n">get_analysis</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">gui</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

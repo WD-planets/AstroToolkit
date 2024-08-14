@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit Documentation &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configkeys.html">Config Keys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commandline.html">Command-Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AstroToolkit Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="astrotoolkit-documentation">
+<h1>AstroToolkit Documentation<a class="headerlink" href="#astrotoolkit-documentation" title="Link to this heading"></a></h1>
+<p>AstroToolkit (ATK) is a set of tools for fetching, plotting, and analysing astronomical data. The package is in active development, so please report any issues/suggestions/contributions to its <a class="reference external" href="https://github.com/WD-planets/AstroToolkit">GitHub repository</a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<ul>
+<li><p>A GUI through which most of the package can be utilised</p></li>
+<li><p>Command-line integration</p></li>
+<li><p>Scripting integration for greater control</p></li>
+<li><p>Proper motion correction through Gaia, utilised across the entire package</p></li>
+<li><p>Light curve, spectral energy distribution, spectrum and image queries from a wide range of surveys</p></li>
+<li><p>Gaia HRD queries for any Gaia sources</p></li>
+<li><p>In-built interactive plotting support for all of the above as shareable .html pages that retain all interactivity</p></li>
+<li><p>Data queries from any <a class="reference external" href="https://vizier.cds.unistra.fr/">Vizier</a> survey, with many commonly used surveys built-in</p></li>
+<li><p>Reddening queries from <a class="reference external" href="https://stilism.obspm.fr/">Stilism</a> and <a class="reference external" href="https://irsa.ipac.caltech.edu/applications/DUST/">GDRE</a></p></li>
+<li><p>Data analysis tools:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Timeseries analysis using a variety of methods (Lomb-Scargle, AOVMHW, …)</p></li>
+<li><p>Light curve binning, clipping, phase folding and sigma-clipping</p></li>
+<li><p>Image detection and tracer overlays</p></li>
+<li><p>Spectral band highlighting</p></li>
+<li><p>SED-spectrum overlays</p></li>
+<li><p>Data quality filtering (optional)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Lossless saving and reading of any ATK data structures to / from local files</p></li>
+<li><p>Datapage creation, allowing the combination of any of the above into a single page with additional elements specifically designed for this purpose</p></li>
+<li><p>No hard coded parameters - built-in configuration support allows the user to personalise the package to their specific needs.</p></li>
+<li><p>All data structures are available to the user, allowing them to use all ATK routines on non-ATK data</p></li>
+<li><p>Other quality-of-life tools, such as coordinate conversions, .fits file reading and <a class="reference external" href="https://vizier.cds.unistra.fr/">Vizier</a> / <a class="reference external" href="https://simbad.u-strasbg.fr/simbad/">SIMBAD</a> searches</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package’s development, and particularly for his help in integrating the PyAOV time series analysis routines.</p>
+<p>I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package’s development.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>The package can be installed like any other package, e.g. using pip:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">AstroToolkit</span>
+</pre></div>
+</div>
+<p>This package also includes the PyAOV time series analysis routines by <a class="reference external" href="https://users.camk.edu.pl/alex/#software">A. Schwarzenberg-Czerny</a>, which may require additional dependencies. See <a class="reference internal" href="Setup.html#module-AstroToolkit.Setup"><span class="std std-ref">Setup</span></a> for details.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>ATK uses <a class="reference external" href="https://bokeh.org/">Bokeh</a> as its primary plotting library. A key property of Bokeh plots is that they can be saved as static .html files, which can then be shared/accessed while retaining all interactivity.</p>
+<p>Across ATK, there are two possible ways to target your system of interest:
+1. pos = [right ascension,declination] in degrees
+2. source = Gaia Source ID</p>
+<p>Where possible, it is usually best to use a Gaia source as input, as this enables a key feature of ATK: <strong>Proper Motion Correction</strong>.</p>
+<p>A good example of this is in imaging queries. If a ‘pos’ is used as input, the result will simply be the image data returned by the chosen imaging survey at those exact coordinates. However, this may not be ideal in the case of an object with a large proper motion. If a source is used instead, the data returned will have accounted for this, resulting in the image being centered on the target system. This concept is used throughout ATK when matching data from different surveys to a given system.</p>
+<img alt="_images/source_vs_pos.png" src="_images/source_vs_pos.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Setup.html">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Gui.html">Gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Config.html">Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Datapages.html">Datapages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datastructures.html">Data Structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="DataStruct.html">DataStruct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LightcurveStruct.html">LightcurveStruct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ImageStruct.html">ImageStruct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HrdStruct.html">HrdStruct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SedStruct.html">SedStruct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SpectrumStruct.html">SpectrumStruct</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configkeys.html">Config Keys</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configkeys.html#global-settings">Global Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configkeys.html#query-settings">Query Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configkeys.html#image-overlay-settings">Image Overlay Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configkeys.html#search-settings">Search Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configkeys.html#datapage-settings">Datapage Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commandline.html">Command-Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#data-queries">Data Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#lightcurve-fetching-and-plotting">Lightcurve Fetching and Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#timeseries-plotting">Timeseries Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#image-fetching-and-plotting">Image Fetching and Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#spectrum-fetching-and-plotting">Spectrum Fetching and Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sed-fetching-and-plotting">SED Fetching and Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#hrd-fetching-and-plotting">HRD Fetching and Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#local-files-saving-and-reading">Local Files Saving and Reading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#datapage-creation">Datapage Creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#pyaov-time-series-analysis">PyAOV Time Series Analysis</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

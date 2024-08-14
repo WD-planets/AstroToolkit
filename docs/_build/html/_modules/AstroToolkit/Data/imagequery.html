@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroToolkit.Data.imagequery &mdash; AstroToolkit 1.16.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AstroToolkit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../datastructures.html">Data Structures</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AstroToolkit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">AstroToolkit.Data.imagequery</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for AstroToolkit.Data.imagequery</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="ImageStruct">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct">[docs]</a>
+<span></span><span class="k">class</span> <span class="nc">ImageStruct</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ImageStruct()</span>
+<span class="sd">    This structure is returned from image queries, when read from a data file that was originally created by an image query, or through the Models module (in which case all attributes are set to None).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    kind : str</span>
+<span class="sd">        &quot;image&quot;</span>
+
+<span class="sd">    survey: str</span>
+<span class="sd">        survey to which the data pertains, see image query description for details.</span>
+
+<span class="sd">    source: int</span>
+<span class="sd">        Gaia source ID (if one was used to target the system, else None)</span>
+
+<span class="sd">    pos: list&lt;int&gt;</span>
+<span class="sd">        Target position [right ascension, declination] in degrees</span>
+
+<span class="sd">    identifier: str</span>
+<span class="sd">        Target position in JHHMMSS.SS±DDMMSS.SS format</span>
+
+<span class="sd">    dataname: str</span>
+<span class="sd">        Default file name that data will be saved to when using the savedata() method</span>
+
+<span class="sd">    plotname: str</span>
+<span class="sd">        Default file name that plot will be saved to when using the showplot() and saveplot() methods</span>
+
+<span class="sd">    figure: None</span>
+<span class="sd">        Stores any figure resulting from the plot() method</span>
+
+<span class="sd">    data: dict&lt;list&gt;</span>
+<span class="sd">        Returned data in format:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            &quot;image_data&quot;: image_data</span>
+<span class="sd">            &quot;image_header&quot;: image_header</span>
+<span class="sd">            &quot;size&quot;: size</span>
+<span class="sd">            &quot;image_time&quot;: image_time</span>
+<span class="sd">            &quot;wcs&quot;: wcs</span>
+<span class="sd">            &quot;image_focus&quot;: image_focus</span>
+<span class="sd">            &quot;overlay&quot;: overlay</span>
+
+<span class="sd">        where:</span>
+
+<span class="sd">        :**image_data**: list&lt;float&gt;, raw image data</span>
+
+<span class="sd">        :**image_header**: astropy image header</span>
+
+<span class="sd">        :**size**: int, image size in arcseconds</span>
+
+<span class="sd">        :**image_time**: list&lt;int&gt;, [year,month] time at which the image was taken</span>
+
+<span class="sd">        :**wcs**: astropy wcs object</span>
+
+<span class="sd">        :**image_focus**: list&lt;float&gt;, [right ascension, declination] of image focus in degrees</span>
+
+<span class="sd">        :**overlay**: list&lt;dict&gt;, detection information to overlay when plotting images with the plot() method</span>
+
+<span class="sd">    |</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;image&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;ATK Image Structure&gt;&quot;</span>
+
+<div class="viewcode-block" id="ImageStruct.plot">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots image data and assigns the resulting figure to the **figure** attribute.</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">map_to_plot</span>
+
+        <span class="k">return</span> <span class="n">map_to_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImageStruct.savedata">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.savedata">[docs]</a>
+    <span class="k">def</span> <span class="nf">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves data to local files. Default file name = dataname attribute.</span>
+
+<span class="sd">        :param str fname: overrides file name</span>
+<span class="sd">        :return: name of file to which data was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">.data_saving</span> <span class="kn">import</span> <span class="n">savedata</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+
+
+<div class="viewcode-block" id="ImageStruct.showdata">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showdata">[docs]</a>
+    <span class="k">def</span> <span class="nf">showdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints data structure to stdout in a readable format.</span>
+
+<span class="sd">        :param bool raw: if True, doesn&#39;t collapse arrays to improve readability, default = False</span>
+<span class="sd">        :return: self</span>
+<span class="sd">        :rtype: class</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">.data_printing</span> <span class="kn">import</span> <span class="n">print_data</span>
+
+        <span class="n">print_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="ImageStruct.showplot">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showplot">[docs]</a>
+    <span class="k">def</span> <span class="nf">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens the figure stored in the **figure** attribute in the default web browser, and saves it to local files.</span>
+
+<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
+<span class="sd">        :return: file name to which the figure was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">showplot</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+
+
+<div class="viewcode-block" id="ImageStruct.saveplot">
+<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.saveplot">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the figure stored in the **figure** attribute to local files without opening it in the web browser.</span>
+
+<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
+<span class="sd">        :return: file name to which the figure was saved</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        |</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">saveplot</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span></div>
+</div>
+
+
+
+<span class="k">class</span> <span class="nc">GeneralQuery</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for image queries&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="n">band</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_image_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="kn">import</span> <span class="nn">requests</span>
+        <span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+        <span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">AsinhStretch</span><span class="p">,</span> <span class="n">PercentileInterval</span>
+
+        <span class="c1"># send request using the URL returned for the selected survey</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: experiencing issues with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: experiencing issues with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fh</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2"> image query returned no data.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># read image fits file, apply a contrast filter</span>
+        <span class="p">(</span><span class="n">fh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">AsinhStretch</span><span class="p">()</span> <span class="o">+</span> <span class="n">PercentileInterval</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span> <span class="o">=</span> <span class="n">fh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_data</span> <span class="o">=</span> <span class="n">transform</span><span class="p">(</span><span class="n">fh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+        <span class="n">mjd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">[</span><span class="s2">&quot;MJD-OBS&quot;</span><span class="p">]</span>
+
+        <span class="n">imageTime</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">mjd</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+
+        <span class="n">imageTime</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageTime</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">imageTime</span><span class="o">.</span><span class="n">month</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">imageTime</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_wcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
+
+        <span class="k">return</span> <span class="n">WCS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">PanstarrsQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+
+        <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mi">4</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://ps1images.stsci.edu/cgi-bin/ps1filenames.py?ra=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;dec=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;band=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2"> image query returned no data.&quot;</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="n">sub_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;dec=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;size=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&amp;format=fits&quot;</span>
+
+            <span class="n">filter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;yzirg&quot;</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">table</span><span class="p">[</span><span class="s2">&quot;filter&quot;</span><span class="p">]]</span>
+
+            <span class="n">sub_table</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">filter_list</span><span class="p">)]</span>
+
+            <span class="n">url_base</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_url</span><span class="si">}</span><span class="s2">&amp;red=&quot;</span>
+
+            <span class="n">url_main</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">sub_table</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]:</span>
+                <span class="n">url_main</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url_base</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+
+            <span class="n">url_main</span> <span class="o">=</span> <span class="n">url_main</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url_main</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: experiencing issues with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">class</span> <span class="nc">SkymapperQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+        <span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+
+        <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3600</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://api.skymapper.nci.org.au/public/siap/dr2/query?POS=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;SIZE=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&amp;BAND=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="si">}</span><span class="s2">&amp;FORMAT=image/fits&amp;VERB=3&amp;INTERSECT=covers&amp;RESPONSEFORMAT=CSV&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+            <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: experiencing issues with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">url_main</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="s2">&quot;get_image&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url_main</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">survey</span><span class="si">}</span><span class="s2"> image query returned no data.&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">class</span> <span class="nc">DssQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">60</span>
+
+        <span class="n">url_main</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://archive.stsci.edu/cgi-bin/dss_search?ra=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;v=3&amp;e=J2000&amp;f=fits&amp;h=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&amp;w=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url_main</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">[</span><span class="s2">&quot;DATE-OBS&quot;</span><span class="p">]</span>
+
+        <span class="n">mins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">14</span><span class="p">:</span><span class="mi">16</span><span class="p">])</span>
+
+        <span class="n">hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">mins</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
+            <span class="n">mins</span> <span class="o">=</span> <span class="n">mins</span> <span class="o">-</span> <span class="mi">60</span>
+
+            <span class="n">hours</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">mins</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">hours</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;T&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">time</span><span class="p">[</span><span class="mi">17</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
+
+        <span class="n">imageTime</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fits&quot;</span><span class="p">)</span>
+
+        <span class="n">mjd</span> <span class="o">=</span> <span class="n">imageTime</span><span class="o">.</span><span class="n">mjd</span>
+
+        <span class="n">imageTime</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">mjd</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+
+        <span class="n">imageTime</span> <span class="o">=</span> <span class="p">[</span><span class="n">imageTime</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">imageTime</span><span class="o">.</span><span class="n">month</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">imageTime</span>
+
+
+<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overlays</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">f_return</span> <span class="o">=</span> <span class="n">ImageStruct</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getimage</span><span class="p">():</span>
+        <span class="n">query_object</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">survey</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">Query&quot;</span><span class="p">](</span>
+            <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="n">band</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="n">survey</span>
+        <span class="p">)</span>
+
+        <span class="n">query_object</span><span class="o">.</span><span class="n">set_url</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">query_object</span><span class="o">.</span><span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f_return</span>
+
+        <span class="n">image_data</span><span class="p">,</span> <span class="n">image_header</span> <span class="o">=</span> <span class="n">query_object</span><span class="o">.</span><span class="n">get_image_data</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">image_header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f_return</span>
+
+        <span class="n">image_time</span> <span class="o">=</span> <span class="n">query_object</span><span class="o">.</span><span class="n">image_time</span>
+
+        <span class="n">wcs</span> <span class="o">=</span> <span class="n">query_object</span><span class="o">.</span><span class="n">get_wcs</span>
+
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;image_data&quot;</span><span class="p">:</span> <span class="n">image_data</span><span class="p">,</span>
+            <span class="s2">&quot;image_header&quot;</span><span class="p">:</span> <span class="n">image_header</span><span class="p">,</span>
+            <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span>
+            <span class="s2">&quot;image_time&quot;</span><span class="p">:</span> <span class="n">image_time</span><span class="p">,</span>
+            <span class="s2">&quot;wcs&quot;</span><span class="p">:</span> <span class="n">wcs</span><span class="p">,</span>
+            <span class="s2">&quot;image_focus&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ImageStruct</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data_dict</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">..Data.dataquery</span> <span class="kn">import</span> <span class="n">SurveyInfo</span>
+        <span class="kn">from</span> <span class="nn">..Tools</span> <span class="kn">import</span> <span class="n">correctpm</span>
+        <span class="kn">from</span> <span class="nn">..Tools</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">data_query</span>
+
+        <span class="n">survey_times</span> <span class="o">=</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">times</span>
+
+        <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">gaia_data</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;ra&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;dec&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Note: No gaia object found with given Source.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">f_return</span>
+
+        <span class="c1"># get an initial image to get image_time</span>
+
+        <span class="n">image</span> <span class="o">=</span> <span class="n">getimage</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">image_time</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;image_time&quot;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f_return</span>
+
+        <span class="c1"># correct coords of source to image_time</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">correctpm</span><span class="p">(</span>
+            <span class="n">input_time</span><span class="o">=</span><span class="n">survey_times</span><span class="p">[</span><span class="s2">&quot;gaia&quot;</span><span class="p">],</span> <span class="n">target_time</span><span class="o">=</span><span class="n">image_time</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span>
+        <span class="p">)</span>
+
+    <span class="n">image</span> <span class="o">=</span> <span class="n">getimage</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">overlays</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">..Data.imageoverlay</span> <span class="kn">import</span> <span class="n">overlay_query</span>
+
+        <span class="n">overlay_data</span> <span class="o">=</span> <span class="n">overlay_query</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">overlays</span><span class="p">)</span>
+        <span class="n">image</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;overlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlay_data</span>
+
+    <span class="k">return</span> <span class="n">image</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ethan Moorfield.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
