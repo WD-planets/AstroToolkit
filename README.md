@@ -32,7 +32,30 @@ Features
 
 <br>
 
+Acknowledgements
+----------------
+This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement No. 101020057).
+
+<p align="center">
+    <picture>
+        <img src="./images/erc_logo_dark.png" width="200"/>
+    </picture>
+</p>
+
+<br>
+
+I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development, and particularly for his help in integrating the PyAOV time series analysis routines.
+
+I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package's development.
+
+<br>
+
 Documentation
 -------------
 
-Full documentation for the package can be found [here](https://astrotoolkit.readthedocs.io/en/latest/). 
+Full documentation for the package can be found [here](https://astrotoolkit.readthedocs.io/en/latest/).
+
+<p align="center">
+    <img src="./images/erc_logo_dark.png" width="200"/>
+</p>
+

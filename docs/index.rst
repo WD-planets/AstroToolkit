@@ -40,6 +40,14 @@ Features
 
 Acknowledgements
 ----------------
+This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement No. 101020057).
+
+.. image:: ../images/erc_logo_light.png
+   :scale: 15%
+   :align: center
+
+|
+
 I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development, and particularly for his help in integrating the PyAOV time series analysis routines.
 
 I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package's development.
