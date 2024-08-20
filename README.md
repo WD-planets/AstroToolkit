@@ -38,6 +38,8 @@ This project has received funding from the European Research Council (ERC) under
 
 <p align="center">
     <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./images/erc_logo_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="./images/erc_logo_light.png">
         <img src="./images/erc_logo_dark.png" width="200"/>
     </picture>
 </p>
@@ -54,8 +56,3 @@ Documentation
 -------------
 
 Full documentation for the package can be found [here](https://astrotoolkit.readthedocs.io/en/latest/).
-
-<p align="center">
-    <img src="./images/erc_logo_dark.png" width="200"/>
-</p>
-
