@@ -9,5 +9,8 @@ docs/_build/
 *.pyc
 *.egg-info
 *.html
+!docs/_static/
 
+src/AstroToolkit/CRTS_TIMER.txt
+src/AstroToolkit/*.egg-info
 src/AstroToolkit/Timeseries/pyaov/path.dat
