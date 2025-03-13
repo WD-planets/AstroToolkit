@@ -1,6 +1,12 @@
 from bokeh.layouts import column
 from bokeh.models import Button, CustomJS, InlineStyleSheet
 
+from ..Configuration.baseconfig import ConfigStruct
+
+config = ConfigStruct()
+config.read_config()
+
+
 def get_search_buttons(radius, grid_size, source=None, pos=None):
     from ..Misc.search import DatapageButtons
 
@@ -8,13 +14,10 @@ def get_search_buttons(radius, grid_size, source=None, pos=None):
     query_object.get_params()
     simbad_url, vizier_url = query_object.get_urls()
 
-    button_width, button_height = (
-        int(int(grid_size) / 2),
-        int(int(grid_size) / 4),
-    )
+    button_width, button_height = (int(int(grid_size) / 2), int(int(grid_size) / 4))
 
     button_style = InlineStyleSheet(
-        css=".bk-btn {--base-font:var(--bokeh-base-font, Helvetica, Arial, sans-serif);--mono-font:var(--bokeh-mono-font, monospace);--font-size:var(--bokeh-font-size, 25px);--line-height:calc(20 / 14);--line-height-computed:calc(var(--font-size) * var(--line-height));--border-radius:4px;--padding-vertical:6px;--padding-horizontal:12px;--bokeh-top-level:1000;}:host{box-sizing:border-box;font-family:var(--base-font);font-size:var(--font-size);line-height:var(--line-height);}*,*:before,*:after{box-sizing:inherit;font-family:inherit;}pre,code{font-family:var(--mono-font);margin:0;}"
+        css=f".bk-btn {{--base-font:var(--bokeh-base-font, Helvetica, Arial, sans-serif);--mono-font:var(--bokeh-mono-font, monospace);--font-size:var(--bokeh-font-size, 25px);--line-height:calc(20 / 14);--line-height-computed:calc(var(--font-size) * var(--line-height));--border-radius:4px;--padding-vertical:6px;--padding-horizontal:12px;--bokeh-top-level:1000;}}:host{{box-sizing:border-box;font-family:var(--base-font);font-size:var(--font-size);line-height:var(--line-height);}}*,*:before,*:after{{box-sizing:inherit;font-family:inherit;}}pre,code{{font-family:var(--mono-font);margin:0;}}"
     )
 
     simbad_button = Button(
@@ -24,7 +27,7 @@ def get_search_buttons(radius, grid_size, source=None, pos=None):
         width=button_width,
         sizing_mode="stretch_width",
         align="end",
-        stylesheets=[button_style]
+        stylesheets=[button_style],
     )
     vizier_button = Button(
         label="Vizier Search",
@@ -33,7 +36,7 @@ def get_search_buttons(radius, grid_size, source=None, pos=None):
         width=button_width,
         sizing_mode="stretch_width",
         align="end",
-        stylesheets=[button_style]
+        stylesheets=[button_style],
     )
 
     simbad_button_js = CustomJS(
@@ -52,19 +55,10 @@ def get_search_buttons(radius, grid_size, source=None, pos=None):
     )
     vizier_button.js_on_event("button_click", vizier_button_js)
 
-    simbad_button.margin = [
-        round(button_height),
-        round(button_height),
-        round(button_height / 4),
-        round(button_height),
-    ]
-    vizier_button.margin = [
-        0,
-        round(button_height),
-        round(button_height / 4),
-        round(button_height),
-    ]
-
+    simbad_button.margin = [round(button_height), 0, 0, 0]
+    vizier_button.margin = [round(button_height / 2), 0, 0, 0]
     buttons = column(simbad_button, vizier_button, align="center")
+
+    buttons.background = "white"
 
     return buttons

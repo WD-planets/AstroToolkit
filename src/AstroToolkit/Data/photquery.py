@@ -1,4 +1,4 @@
-from ..Data.dataquery import SurveyInfo
+from ..PackageInfo import SurveyInfo
 
 bulkphot_surveys = SurveyInfo().bulkphot_surveys
 
@@ -6,14 +6,7 @@ bulkphot_surveys = SurveyInfo().bulkphot_surveys
 def query(survey, radius, pos=None, source=None):
     from ..Tools import query
 
-    dataStruct = query(
-        kind="data",
-        survey=survey,
-        pos=pos,
-        source=source,
-        radius=radius,
-        level="internal",
-    )
+    dataStruct = query(kind="data", survey=survey, pos=pos, source=source, radius=radius, level="internal")
 
     dataStruct.subkind = "phot"
 
@@ -36,15 +29,7 @@ def query(survey, radius, pos=None, source=None):
         elif survey == "galex":
             photometry = {
                 key: dataStruct.data[key]
-                for key in [
-                    "RAJ2000",
-                    "DEJ2000",
-                    "objid",
-                    "NUVmag",
-                    "e_NUVmag",
-                    "FUVmag",
-                    "e_FUVmag",
-                ]
+                for key in ["RAJ2000", "DEJ2000", "objid", "NUVmag", "e_NUVmag", "FUVmag", "e_FUVmag"]
             }
         elif survey == "sdss":
             photometry = {
@@ -68,17 +53,7 @@ def query(survey, radius, pos=None, source=None):
         elif survey == "twomass":
             photometry = {
                 key: dataStruct.data[key]
-                for key in [
-                    "RAJ2000",
-                    "DEJ2000",
-                    "_2MASS",
-                    "Jmag",
-                    "e_Jmag",
-                    "Hmag",
-                    "e_Hmag",
-                    "Kmag",
-                    "e_Kmag",
-                ]
+                for key in ["RAJ2000", "DEJ2000", "_2MASS", "Jmag", "e_Jmag", "Hmag", "e_Hmag", "Kmag", "e_Kmag"]
             }
         elif survey == "wise":
             photometry = {
@@ -150,32 +125,16 @@ def bulkphot_query(radius, pos=None, source=None):
 
     bulk_phot = {}
     for survey in bulkphot_surveys:
-        data = query(
-            kind="phot",
-            pos=pos,
-            source=source,
-            radius=radius,
-            survey=survey,
-            level="internal",
-        ).data
+        data = query(kind="phot", pos=pos, source=source, radius=radius, survey=survey, level="internal").data
         bulk_phot[survey] = data
 
     if source:
-        gaia_data = query(
-            kind="data", source=source, survey="gaia", level="internal"
-        ).data
+        gaia_data = query(kind="data", source=source, survey="gaia", level="internal").data
         if gaia_data:
             pos = [gaia_data["ra"][0], gaia_data["dec"][0]]
 
     from ..Data.dataquery import DataStruct
 
-    dataStruct = DataStruct(
-        survey="all",
-        catalogue=None,
-        pos=pos,
-        source=source,
-        data=bulk_phot,
-        sub_kind="bulkphot",
-    )
+    dataStruct = DataStruct(survey="all", catalogue=None, pos=pos, source=source, data=bulk_phot, sub_kind="bulkphot")
 
     return dataStruct

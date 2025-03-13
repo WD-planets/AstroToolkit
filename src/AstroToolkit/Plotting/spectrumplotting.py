@@ -14,10 +14,10 @@ def get_overlay():
                 None,
                 None,
                 None,
-                r"\[H\alpha\]",
-                r"\[H\beta\]",
-                r"\[H\gamma\]",
-                r"\[H\delta\]",
+                r"\[\text{H}\alpha\]",
+                r"\[\text{H}\beta\]",
+                r"\[\text{H}\gamma\]",
+                r"\[\text{H}\delta\]",
             ],
         }
     )
@@ -55,6 +55,17 @@ def get_overlay():
 
 
 def plot_spectrum(struct):
+    from ..Configuration.baseconfig import ConfigStruct
+
+    config = ConfigStruct()
+    config.read_config()
+
+    text_size = str(config.font_size)
+    if not text_size.endswith("pt"):
+        text_size += "pt"
+
+    text_font = str(config.font)
+
     x, y = struct.data["wavelength"], struct.data["flux"]
 
     y = [i * pow(10, 16) for i in y]
@@ -63,17 +74,20 @@ def plot_spectrum(struct):
         width=400,
         height=400,
         title=f"{struct.survey} Spectrum",
-        x_axis_label=r"\[\lambda\text{ }[\text{AA}]\]",
-        y_axis_label=r"\[\text{flux [}10^{-16}\text{ erg}\text{ cm }^{-2}\text{ s }^{-1}\text{AA}^{-1}]\]",
+        x_axis_label="Wavelength / \u212b",
+        y_axis_label=r"\[\text{flux / }10^{-16}\text{ erg}\text{cm}^{-2}\text{s}^{-1}\]"
+        + "\u212b"
+        + r"\[\:\:^{-1}\]",
     )
+
+    # r"\[\lambda\text{ }[\unicode{x212B}\:\:]\]"
 
     plot.line(x, y, color="black", line_width=1)
 
     wavelengths, colours = get_overlay()
 
-    bottom_margin = 0.05
     top_margin = 0.4
-    y_min = min(y) - bottom_margin * (max(y) - min(y))
+    y_min = 0
     y_max = max(y) + top_margin * (max(y) - min(y))
     plot.y_range = Range1d(y_min, y_max)
     plot.y_range.max_interval = y_max
@@ -89,7 +103,7 @@ def plot_spectrum(struct):
         ):
             line_renderer = plot.line(
                 x=[wavelength, wavelength],
-                y=[y_min, y_max],
+                y=[1.5 * y_min, 1.5 * y_max],
                 color=colours[index],
                 legend_label=element["label"],
                 level="underlay",
@@ -103,7 +117,8 @@ def plot_spectrum(struct):
                     y=annotation_height,
                     x_offset=2,
                     text=annotation,
-                    text_font_size="12pt",
+                    text_font_size=text_size,
+                    text_font=text_font,
                 )
 
                 plot.add_layout(label)

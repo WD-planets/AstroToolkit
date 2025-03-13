@@ -5,9 +5,13 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 include-package-data = true
 
+[tool.black]
+line-length=120
+skip-magic-trailing-comma = true
+
 [project]
 name = "AstroToolkit"
-version = "1.6.3"
+version = "1.7.0"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
@@ -42,7 +46,11 @@ Issues = "https://github.com/WD-planets/AstroToolkit/issues"
 
 [project.scripts]
 ATKgui = "bin.opengui_command:main"
-ATKtsbuild = "bin.tsbuild_command:main"
-ATKtsguide =  "bin.tsguide_command:main"
 ATKquery = "bin.atkquery_command:main"
 ATKread = "bin.atkread_command:main"
+ATKopenconfig = "bin.atkopenconfig_command:main"
+ATKsearch = "bin.atksearch_command:main"
+ATKconv = "bin.atkconv_command:main"
+ATKresetconfig = "bin.atkresetconfig_command:main"
+ATKshowconfig = "bin.atkshowconfig_command:main"
+ATKeditconfig = "bin.atkeditconfig_command:main"

@@ -1,2 +1,13 @@
+src/AstroToolkit/Configuration/ATKConfig.ini
+
+notes/
+test_scripts/
+
+dist/
+__pycache__/
+docs/_build/
 *.pyc
-dist
+*.egg-info
+*.html
+
+src/AstroToolkit/Timeseries/pyaov/path.dat

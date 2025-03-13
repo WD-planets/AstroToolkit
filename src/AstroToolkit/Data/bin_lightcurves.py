@@ -6,65 +6,52 @@ def binning(data, bins=None, bin_size=None):
 
     mag = data["mag"]
     mag_err = data["mag_err"]
-    if "mjd_ori" in data:
-        time = data["mjd_ori"]
-        time_unit = "mjd_ori"
+    if "mjd" in data:
+        time = data["mjd"]
+        time_unit = "mjd"
     else:
-        time = data["hjd_ori"]
-        time_unit = "hjd_ori"
+        time = data["hjd"]
+        time_unit = "hjd"
+
+    sync_time = min(time)
 
     bin_edges_arr = []
 
+    # if a number of equally spaced bins in time are requested
     if bins:
-        # fixes a bug that made the script get stuck when this condition wasn't met
-        if bins > len(mag):
-            return data
-
         bin_edge_lower = 0
-        bin_size = int(len(time) / bins)
+        bin_size = (max(time) - min(time)) / bins
         bin_edge_higher = bin_size
+        bins = np.linspace(0, bins, bins + 1)
+        bin_edges = (bins * bin_size) + min(time)
 
-        while True:
-            reached_end = False
-            if bin_edge_higher + bin_size >= len(time):
-                bin_edge_higher = len(time) - 1
-                reached_end = True
-
-            bin_edges_arr.append([bin_edge_lower, bin_edge_higher])
-            bin_edge_lower = bin_edge_higher
-            bin_edge_higher += bin_size
-
-            if reached_end:
+        for i, val in enumerate(bin_edges):
+            if i == len(bin_edges) - 1:
                 break
+            else:
+                bin_edges_arr.append([bin_edges[i], bin_edges[i + 1]])
 
-        for i, val in enumerate(bin_edges_arr):
-            bin_edges_arr[i][0] = time[val[0]]
-            bin_edges_arr[i][1] = time[val[1]]
-
+    # if a specific bin size is requested (e.g. '10h')
     elif bin_size:
         bin_edge_lower = min(time)
 
-        try:
-            bin_unit = bin_size[-1]
-            bin_size = float(bin_size[:-1])
-        except:
-            raise Exception("No binsize unit given.")
+        bin_unit = bin_size[-1]
+        bin_size = float(bin_size[:-1])
 
+        # convert bin size to days based on unit provided
         if bin_unit == "d":
             bin_size = bin_size
         elif bin_unit == "h":
             bin_size = bin_size / 24
         elif bin_unit == "m":
             bin_size = bin_size / (24 * 60)
-        else:
-            raise Exception("Invalid binsize unit.")
 
         bin_edge_higher = bin_edge_lower + bin_size
 
+        # sets lower and higher bin edges using bin size in days, final one may be smaller than requested size if it exceeds upper time limit of data
         while True:
             reached_end = False
             if bin_edge_higher + bin_size >= max(time):
-                bin_edge_higher = max(time)
                 reached_end = True
 
             bin_edges_arr.append([bin_edge_lower, bin_edge_higher])
@@ -74,6 +61,7 @@ def binning(data, bins=None, bin_size=None):
             if reached_end:
                 break
 
+    # combine binned data
     final_mags, final_times, final_errors, final_ra, final_dec = [], [], [], [], []
     for bin_edges in bin_edges_arr:
         mask = [i for i, val in enumerate(time) if bin_edges[0] <= val < bin_edges[1]]
@@ -85,8 +73,8 @@ def binning(data, bins=None, bin_size=None):
         binned_ra = [val for i, val in enumerate(ra) if i in mask]
         binned_dec = [val for i, val in enumerate(dec) if i in mask]
 
+        # calculates weighted mean based on errors (i.e. those with larger errors have less impact)
         weights = [1 / pow(err, 2) for i, err in enumerate(mag_err) if i in mask]
-
         weighted_mean, norm = np.average(binned_mags, weights=weights, returned=True)
 
         mean_ra = sum(binned_ra) / len(binned_ra)
@@ -95,15 +83,19 @@ def binning(data, bins=None, bin_size=None):
         final_mags.append(weighted_mean)
         final_ra.append(mean_ra)
         final_dec.append(mean_dec)
+
+        # sets time values to the middle of each bin
         final_times.append((bin_edges[1] + bin_edges[0]) / 2)
+        # error on the weighted mean
         final_errors.append(1 / np.sqrt(norm))
 
-    base_time_unit = time_unit[:-4]
+    reduced_time_unit = time_unit[:-4]
 
+    # set up final data dict
     data["mag"] = final_mags
     data[time_unit] = final_times
     data["mag_err"] = final_errors
-    data[base_time_unit] = [t - min(final_times) for t in final_times]
+    data[reduced_time_unit] = [t - sync_time for t in data[time_unit]]
     data["ra"] = final_ra
     data["dec"] = final_dec
 

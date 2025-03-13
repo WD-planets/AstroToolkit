@@ -1,6 +1,13 @@
 import configparser
 import os
 
+from ..PackageInfo import SurveyInfo
+
+overlay_marker_surveys = SurveyInfo().marker_overlays
+keys_to_not_lower = ["query_lightcurve_atlas_username", "query_lightcurve_atlas_password", "font"]
+for survey in overlay_marker_surveys:
+    keys_to_not_lower.append(f"{survey}_overlay_mag")
+
 
 class ConfigStruct(object):
     def __init__(self):
@@ -21,7 +28,7 @@ class ConfigStruct(object):
         return keys
 
     def set_default_config(self):
-        from ..Data.dataquery import SurveyInfo
+        from ..PackageInfo import SurveyInfo
 
         overlay_info = SurveyInfo().overlay_param_names
 
@@ -32,13 +39,13 @@ class ConfigStruct(object):
         self.query_lightcurve_radius = "3"
         self.query_spectrum_radius = "3"
         self.query_sed_radius = "3"
-        self.query_reddening_radius = "5"
+        self.query_reddening_radius = "3"
         self.query_image_size = "30"
         self.query_image_overlays = "gaia"
         self.query_image_band = "g"
         self.query_lightcurve_atlas_username = "None"
         self.query_lightcurve_atlas_password = "None"
-        self.unit_size = "400"
+        self.unit_size = "500"
         self.search_radius = "3"
         self.datapage_search_button_radius = "3"
         self.gaia_overlay_mag = overlay_info["gaia"]["default_overlay_mag"]
@@ -48,11 +55,16 @@ class ConfigStruct(object):
         self.twomass_overlay_mag = overlay_info["twomass"]["default_overlay_mag"]
         self.skymapper_overlay_mag = overlay_info["skymapper"]["default_overlay_mag"]
         self.panstarrs_overlay_mag = overlay_info["panstarrs"]["default_overlay_mag"]
+        self.overlay_simbad_search_radius = "3"
         self.datapage_datatable_radius = "3"
         self.datapage_grid_size = "250"
+        self.datapage_font_size = "12"
         self.output_backend = "canvas"
-        self.font_size = "12"
-        self.font = "Times New Roman"
+        self.show_toolbars = "True"
+        self.show_grids = "True"
+        self.show_titles = "True"
+        self.font_size = "14"
+        self.font = "Helvetica"
         self.overlay_piggyback_radius = "5"
 
     def read_config(self):
@@ -66,90 +78,75 @@ class ConfigStruct(object):
         sections.append(Config["search_settings"])
         sections.append(Config["datapage_settings"])
 
+        # read config values, apply some transformations from str -> None/bool
         for section in sections:
             for key, val in section.items():
+                if key not in keys_to_not_lower:
+                    val = val.lower()
+                if val == "none":
+                    val = None
+                elif val == "true":
+                    val = True
+                elif val == "false":
+                    val = False
+                if key == "font":
+                    val = val.title()
+
                 setattr(self, key, val)
 
     def write_config(self):
         config = configparser.ConfigParser()
 
+        # take current config values and cast all to lowercase strings
+        for key, val in vars(self).items():
+            if key != "config_file":
+                val = str(val)
+                if key not in keys_to_not_lower:
+                    val = val.lower()
+                setattr(self, key, val)
+
         config.add_section("global_settings")
         config.set("global_settings", "enable_notifications", self.enable_notifications)
         config.set("global_settings", "unit_size", self.unit_size)
         config.set("global_settings", "output_backend", self.output_backend)
+        config.set("global_settings", "show_toolbars", self.show_toolbars)
+        config.set("global_settings", "show_grids", self.show_grids)
+        config.set("global_settings", "show_titles", self.show_titles)
         config.set("global_settings", "font_size", self.font_size)
         config.set("global_settings", "font", self.font)
 
         config.add_section("query_settings")
         config.set("query_settings", "query_data_radius", self.query_data_radius)
         config.set("query_settings", "query_phot_radius", self.query_phot_radius)
-        config.set(
-            "query_settings", "query_bulkphot_radius", self.query_bulkphot_radius
-        )
-        config.set(
-            "query_settings", "query_lightcurve_radius", self.query_lightcurve_radius
-        )
-        config.set(
-            "query_settings", "query_spectrum_radius", self.query_spectrum_radius
-        )
+        config.set("query_settings", "query_bulkphot_radius", self.query_bulkphot_radius)
+        config.set("query_settings", "query_lightcurve_radius", self.query_lightcurve_radius)
+        config.set("query_settings", "query_spectrum_radius", self.query_spectrum_radius)
         config.set("query_settings", "query_sed_radius", self.query_sed_radius)
-        config.set(
-            "query_settings", "query_reddening_radius", self.query_reddening_radius
-        )
+        config.set("query_settings", "query_reddening_radius", self.query_reddening_radius)
         config.set("query_settings", "query_image_size", self.query_image_size)
         config.set("query_settings", "query_image_overlays", self.query_image_overlays)
         config.set("query_settings", "query_image_band", self.query_image_band)
-        config.set(
-            "query_settings",
-            "query_lightcurve_atlas_username",
-            self.query_lightcurve_atlas_username,
-        )
-        config.set(
-            "query_settings",
-            "query_lightcurve_atlas_password",
-            self.query_lightcurve_atlas_password,
-        )
+        config.set("query_settings", "query_lightcurve_atlas_username", self.query_lightcurve_atlas_username)
+        config.set("query_settings", "query_lightcurve_atlas_password", self.query_lightcurve_atlas_password)
 
         config.add_section("image_overlay_settings")
         config.set("image_overlay_settings", "gaia_overlay_mag", self.gaia_overlay_mag)
-        config.set(
-            "image_overlay_settings", "galex_overlay_mag", self.galex_overlay_mag
-        )
+        config.set("image_overlay_settings", "galex_overlay_mag", self.galex_overlay_mag)
         config.set("image_overlay_settings", "wise_overlay_mag", self.wise_overlay_mag)
         config.set("image_overlay_settings", "sdss_overlay_mag", self.sdss_overlay_mag)
-        config.set(
-            "image_overlay_settings", "twomass_overlay_mag", self.twomass_overlay_mag
-        )
-        config.set(
-            "image_overlay_settings",
-            "skymapper_overlay_mag",
-            self.skymapper_overlay_mag,
-        )
-        config.set(
-            "image_overlay_settings",
-            "panstarrs_overlay_mag",
-            self.panstarrs_overlay_mag,
-        )
-        config.set(
-            "image_overlay_settings",
-            "overlay_piggyback_radius",
-            self.overlay_piggyback_radius,
-        )
+        config.set("image_overlay_settings", "twomass_overlay_mag", self.twomass_overlay_mag)
+        config.set("image_overlay_settings", "skymapper_overlay_mag", self.skymapper_overlay_mag)
+        config.set("image_overlay_settings", "panstarrs_overlay_mag", self.panstarrs_overlay_mag)
+        config.set("image_overlay_settings", "overlay_piggyback_radius", self.overlay_piggyback_radius)
+        config.set("image_overlay_settings", "overlay_simbad_search_radius", self.overlay_simbad_search_radius)
 
         config.add_section("search_settings")
         config.set("search_settings", "search_radius", self.search_radius)
 
         config.add_section("datapage_settings")
-        config.set(
-            "datapage_settings",
-            "datapage_search_button_radius",
-            self.datapage_search_button_radius,
-        )
-        config.set(
-            "datapage_settings",
-            "datapage_datatable_radius",
-            self.datapage_datatable_radius,
-        )
+        config.set("datapage_settings", "datapage_search_button_radius", self.datapage_search_button_radius)
+        config.set("datapage_settings", "datapage_datatable_radius", self.datapage_datatable_radius)
+        config.set("datapage_settings", "datapage_font_size", self.datapage_font_size)
         config.set("datapage_settings", "datapage_grid_size", self.datapage_grid_size)
 
         with open(self.config_file, "w") as file:

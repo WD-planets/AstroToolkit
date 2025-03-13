@@ -3,35 +3,39 @@ Most defaults in ATK can be changed via a config file. This module allows for th
 """
 
 from .Configuration.baseconfig import ConfigStruct
+from .Input.input_validation import check_inputs
 
 config = ConfigStruct()
 config.read_config()
 
 
-def editconfig(key, value):
-    """
-    Allows for config values to be edited. See :ref:`Config Keys` for a description of available keys.
+def editconfig(key: str, value: str) -> None:
+    """editconfig(key, value)
+    Edits config values. See :ref:`Config Keys` for a list and description of available keys.
 
-    :param str key: config key
-    :param str value: value to assign to this config key
+    :param key: config key
+    :type key: str
+    :param value: value to assign to this config key
+    :type value: str
 
     :return: None
 
     |
 
     """
-    from .Input.input_validation import check_inputs
 
-    inputs = check_inputs({"key": key, "value": value}, "edit")
-    key, value = inputs["key"], inputs["value"]
+    corrected_inputs = check_inputs({"key": [key, str], "value": [value, str]}, "editconfig")
+    key, value = corrected_inputs
 
     print("Written change to ATKConfig.ini. New Values:\n")
     config.edit_config(key, value)
 
+    return None
 
-def openconfig():
+
+def openconfig() -> None:
     """
-    Opens the config in the default text editor. See :ref:`Config Keys` for a description of available keys.
+    Opens the config in the default text editor. See :ref:`Config Keys` for a list and description of available keys.
 
     :return: None
 
@@ -41,12 +45,21 @@ def openconfig():
     config = ConfigStruct()
     path = config.config_file
 
-    import webbrowser
+    import platform
+    import subprocess
 
-    webbrowser.open(path)
+    if platform.system().lower() in ["posix", "linux"]:
+        subprocess.run(["chmod", "+x", str(path)])
+        subprocess.run(["xdg-open", str(path)])
+    else:
+        import webbrowser
+
+        webbrowser.open(path)
+
+    return None
 
 
-def outputconfig():
+def showconfig() -> None:
     """
     Prints the current config file to stdout.
 
@@ -59,10 +72,12 @@ def outputconfig():
     config.read_config()
     config.output_config()
 
+    return None
 
-def resetconfig():
+
+def resetconfig() -> None:
     """
-    Resets the config to default values.
+    Resets the config to default values. A list of available keys and their default values can be found in :ref:`Config Keys`.
 
     :return: None
 
@@ -72,3 +87,5 @@ def resetconfig():
     print("Resetting ATKConfig.ini to default values...\n")
     config.set_default_config()
     config.write_config()
+
+    return None

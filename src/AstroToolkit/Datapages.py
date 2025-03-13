@@ -2,21 +2,35 @@
 This module assists in creating datapages, and provides additional panels for this purpose. It is greatly recommended to see the datapage examples alongside this section.
 """
 
+from bokeh.models import Button, DataTable
+
 from .Configuration.baseconfig import ConfigStruct
+from .Input.input_validation import check_inputs
 
 config = ConfigStruct()
 config.read_config()
 
+newline = "\n"
 
-def buttons(radius="config", grid_size="config", pos=None, source=None):
-    """buttons(source/pos, *)
+
+def buttons(
+    radius: float = "config",
+    grid_size: int = "config",
+    pos: list[float] = None,
+    source: int = None,
+) -> Button:
+    """buttons(source/pos, **kwargs)
 
     Generates Vizier and SIMBAD search buttons for a given target.
 
-    :param int source: Target GAIA DR3 Source ID
-    :param list<float> pos: Position [right ascension, declination] in degrees
-    :param int, optional radius: search radius in arcseconds, default = config
-    :param int, optional grid_size: datapage grid size used for scaling, default = config
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`datapage_search_button_radius <cfg_datapage_search_button_radius>` config key
+    :type radius: float, optional
+    :param grid_size: datapage grid size used for scaling, default given by :ref:`datapage_grid_size <cfg_datapage_grid_size>` config kkey
+    :type grid_size: int, optional
 
     :return: Vizier and SIMBAD search buttons
     :rtype: bokeh figure
@@ -26,18 +40,20 @@ def buttons(radius="config", grid_size="config", pos=None, source=None):
     """
 
     from .DatapageElements.datapage_buttons import get_search_buttons
-    from .Input.input_validation import check_inputs
 
-    inputs = check_inputs(
-        {"radius": radius, "pos": pos, "source": source, "grid_size": grid_size},
+    if config.enable_notifications:
+        print(f"Generating datapage SIMBAD/Vizier buttons{newline}")
+
+    corrected_inputs = check_inputs(
+        {
+            "radius": [radius, float],
+            "pos": [pos, list],
+            "source": [source, int],
+            "grid_size": [grid_size, int],
+        },
         "buttons",
     )
-    radius, pos, source, grid_size = (
-        inputs["radius"],
-        inputs["pos"],
-        inputs["source"],
-        inputs["grid_size"],
-    )
+    radius, pos, source, grid_size = corrected_inputs
 
     config.read_config()
     if radius == "config":
@@ -45,167 +61,199 @@ def buttons(radius="config", grid_size="config", pos=None, source=None):
     if grid_size == "config":
         grid_size = int(config.datapage_grid_size)
 
-    return get_search_buttons(
+    buttons = get_search_buttons(
         radius=radius, source=source, pos=pos, grid_size=grid_size
     )
+    return buttons
 
 
-def datatable(selection, source=None, pos=None, radius="config"):
-    """datatable(selection,source/pos, *)
+def datatable(
+    entries: dict, source: int = None, pos: list[float] = None, radius: float = "config"
+) -> DataTable:
+    """datatable(entries, source/pos, **kwargs)
     Generates a datatable for a given target.
 
-    :param int source: Target GAIA DR3 Source ID
-    :param list<float> pos: Position [right ascension, declination] in degrees
-    :param int, optional radius: search radius to use when fetching data from supported surveys in arcseconds, default = config
-    :param dict<str> or dict<dict> selection: dict of datatable entries, with each entry taking a different format depending on the use case:
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: search radius to use when fetching data from supported surveys in arcseconds, default given by `datapage_datatable_radius <cfg_datapage_datatable_radius>` config key
+    :type radius: float, optional
+    :param entries: datatable entry or list of datatable entries
+    :type entries: dict/list<dict>
 
-    To generate entires for supported surveys quickly and easily:
+    Each datatable entry in **entries** can take three different forms.
 
-    .. code-block:: python
-
-        survey: "default"
-
-    where:
-
-    :param str survey: supported survey, from:
-
-        - gaia
-        - panstarrs
-        - skymapper
-        - galex
-        - sdss
-        - wise
-        - twomass (2MASS)
-        - rosat
+    :return: ATK Datatable
+    :rtype: Bokeh figure
 
     |
 
-    For customised entries within supported surveys:
+    .. rubric:: Default Entries
+        :heading-level: 3
+
+    For data surveys that are supported by ATK, default entries are available. These contain key astrometry and photometry. To use these default entries:
 
     .. code-block:: python
 
-        survey: {
-                "parameters": parameters
-                "errors": errors
-                "notes": notes
+        entry = {
+                "kind": "atk_defaults",
+                "surveys": <surveys>,
                 }
 
     where:
 
-    :param str survey: supported survey, from:
-
-        - gaia
-        - panstarrs
-        - skymapper
-        - galex
-        - rosat
-        - sdss
-        - wise
-        - twomass (2MASS)
-        - erosita
-
-    :param list<str> parameters: names of parameters (i.e. column headers) that exist in chosen survey
-    :param list<str> errors: names of errors on these parameters (i.e. column headers) that exist in chosen survey
-    :param list<str> notes: any notes to include on each of the chosen parameters/errors
+    :param surveys: list of :ref:`supported ATK data surveys <Data Surveys>` to include in the datatable
+    :type surveys: list<str>
 
     |
 
-    For customised entries outside of supported surveys:
+    .. rubric:: Vizier Entries
+        :heading-level: 3
+
+    To generate a table entry using any catalogue available in Vizier:
 
     .. code-block:: python
 
-        survey: {
-                "parameters": parameters
-                "values": values
-                "errors": errors
-                "notes": notes
+        entry = {
+                "kind": "vizier",
+                "survey": <survey>,
+                "parameters": <parameters>,
+                "errors": <errors>,
+                "notes": <notes",
                 }
 
     where:
 
-    :param str survey: name of survey to which the data belongs
-    :param list<str> parameters: names of parameters
-    :param list<float> values: values of these parameters
-    :param list<float> errors: error values on these parameters
-    :param list<str> notes: any notes to include on each of the chosen parameters/errors
+    :param survey: any Vizier catalogue ID
+    :type survey: str
+    :param parameters: names of parameters (i.e. Vizier column headers) that exist in chosen catalogue
+    :type parameters: list<str>
+    :param errors: names of errors on these parameters (i.e. Vizier column headers) that exist in chosen catalogue
+    :type errors: list<str>
+    :param notes: any notes to include on each of the chosen parameters/errors
+    :type notes: list<str>
 
-    :return: populated datatable
-    :rtype: bokeh figure
+    |
+
+    .. rubric:: Custom Entries
+        :heading-level: 3
+
+    To include entries using external data:
+
+    .. code-block:: python
+
+        entry = {
+                "kind": "external"
+                "survey": <survey>,
+                "parameters": <parameters>,
+                "values": <values>,
+                "errors": <errors>,
+                "notes": <notes>,
+                }
+
+    where:
+
+    :param survey: name of source from which data originates
+    :type survey: str
+    :param parameters: names of parameters
+    :type parameters: list<str>
+    :param values: values of these parameters
+    :type values: list<float>
+    :param errors: errors on these parameters
+    :type errors: list<float>
+    :param notes: any notes to include on each of the chosen parameters/errors
+    :type notes: list<str>
 
     |
 
     """
 
-    from .DatapageElements.metadata_table import gettable
-    from .Input.input_validation import check_inputs
+    if config.enable_notifications:
+        print(f"Generating datapage datatable{newline}")
 
-    inputs = check_inputs(
-        {"selection": selection, "source": source, "pos": pos, "radius": radius},
+    from .DatapageElements.metadata_table import gettable
+
+    corrected_inputs = check_inputs(
+        {
+            "selection": [entries, list],
+            "source": [source, int],
+            "pos": [pos, list],
+            "radius": [radius, float],
+        },
         "datatable",
     )
-    selection, source, pos, radius = (
-        inputs["selection"],
-        inputs["source"],
-        inputs["pos"],
-        inputs["radius"],
-    )
+    entries, source, pos, radius = corrected_inputs
 
     config.read_config()
 
     if radius == "config":
         radius = float(config.datapage_datatable_radius)
 
-    return gettable(selection=selection, source=source, pos=pos, radius=radius)
+    return gettable(selection=entries, source=source, pos=pos, radius=radius)
 
 
-def gridsetup(dimensions, plots, grid_size="config"):
-    """gridsetup(dimensions, plots, *)
+def datapage(
+    dimensions: dict, panels: list[dict], grid_size: int = "config", layout: list = None
+) -> dict:
+    """datapage(dimensions, panels, layout, **kwargs)
 
-    Assists in setting up panels for use in datapages.
+    Assists in setting up figures for use in datapages by adjusting scaling, sizing and style.
 
-    :param dict<int> dimensions: dimensions of plot in grid units, in format:
-
-    .. code-block:: python
-
-        'width': width
-        'height': height
-
-    :param list<dict> plots: plots for use in datapage, with each entry in format:
+    :param dimensions: dimensions of datapage, in the form:
+    :type dimensions: dict
 
     .. code-block:: python
 
-        'name': name
-        'figure': figure
-        'width': width
-        'height': height
+        dimensions = {
+                     'width': width (grid units)
+                     'height': height (grid units)
+                     }
+
+    :param plots: list of plot entries with each entry in format:
+    :type plots: list<dict>
+
+    .. code-block:: python
+
+        entry = {
+                'name': name
+                'figure': figure
+                'width': width
+                'height': height
+                }
 
     where:
 
-    :param str name: name to assign to the figure
-    :param class or bokeh figure or None figure: The figure to give this panel, this can either be an ATK structure that supports plotting (lightcurve, image, etc.) or a Bokeh figure. If filling empty space, None can instead be passed to create a blank panel.
-    :param int width: width of panel in grid units
-    :param int height: height of panel in grid units
+    :param name: name to assign to the figure
+    :type name: str
+    :param figure: The figure to give this panel, this can either be an ATK structure that supports plotting (lightcurve, image, etc.) or a Bokeh figure. If filling empty space, None can instead be passed to create a blank panel.
+    :type figure: Plottable :ref:`ATK Data Structure <Data Structures>`/Bokeh figure/None
+    :param width: width of panel in grid units
+    :type width: int
+    :param height: height of panel in grid units
+    :type height: int
 
-    :return: dictionary of plots with keys = names assigned to each panel
+    :return: Dictionary with keys: names as given above, values: adjusted plots
     :rtype: dict
 
     |
 
     """
-    from .Input.input_validation import check_inputs
-    from .Misc.gridsetup import format_grid_plots
 
-    inputs = check_inputs(
-        {"dimensions": dimensions, "plots": plots, "grid_size": grid_size}, "gridsetup"
+    from .Misc.grid import format_grid_plots
+
+    corrected_inputs = check_inputs(
+        {
+            "dimensions": [dimensions, dict],
+            "plots": [panels, list],
+            "grid_size": [grid_size, int],
+        },
+        "datapage",
     )
-    dimensions, plots, grid_size = (
-        inputs["dimensions"],
-        inputs["plots"],
-        inputs["grid_size"],
-    )
+    dimensions, plots, grid_size = corrected_inputs
 
     config.read_config()
     if grid_size == "config":
         grid_size = int(config.datapage_grid_size)
 
-    return format_grid_plots(dimensions, plots, grid_size)
+    return format_grid_plots(dimensions, plots, grid_size, layout)

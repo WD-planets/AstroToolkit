@@ -4,7 +4,7 @@ import pandas as pd
 def format_data(data):
     data_exists = False
     for band in data:
-        if band["mag"] is not None:
+        if band["mag"]:
             data_exists = True
 
     if not data_exists:
@@ -14,10 +14,10 @@ def format_data(data):
         pd.DataFrame.from_dict(band) for band in data if band["mag"] is not None
     ]
     combined_data = pd.concat(dataframes)
-    if "hjd_ori" in list(combined_data.keys()):
-        combined_data.sort_values("hjd_ori", inplace=True)
-        x_data = combined_data["hjd_ori"] - 2400000.5
-    elif "mjd_ori" in list(combined_data.keys()):
+    if "hjd" in list(combined_data.keys()):
+        combined_data.sort_values("hjd", inplace=True)
+        x_data = combined_data["hjd"] - 2400000.5
+    elif "mjd" in list(combined_data.keys()):
         x_data = combined_data["mjd"]
     else:
         raise Exception("Failed to read input data structure.")

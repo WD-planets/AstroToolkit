@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (QApplication, QComboBox, QFileDialog, QLabel,
                              QLineEdit, QMainWindow, QPushButton)
 
 from .Configuration.baseconfig import ConfigStruct
-from .Data.dataquery import SurveyInfo
+from .PackageInfo import SurveyInfo
 from .Tools import query, readdata
 
 config = ConfigStruct()
@@ -71,15 +71,10 @@ class Window(QMainWindow):
     def setPosition(self, widget, position):
         x, y = position
 
-        widget.setGeometry(
-            margin + x * grid_width, margin + y * grid_height, grid_width, grid_height
-        )
+        widget.setGeometry(margin + x * grid_width, margin + y * grid_height, grid_width, grid_height)
 
     def getPosition(self, widget):
-        return [
-            int((widget.pos().x() - margin) / grid_width),
-            int((widget.pos().y() - margin) / grid_height),
-        ]
+        return [int((widget.pos().x() - margin) / grid_width), int((widget.pos().y() - margin) / grid_height)]
 
     def centerList(self, widget):
         widget.setEditable(True)
@@ -192,9 +187,7 @@ class Window(QMainWindow):
     # Read local files
     def get_file(self):
         path = os.getcwd()
-        fname, _ = QFileDialog.getOpenFileName(
-            self, "Open File", str(path), "ATK Data Files (*.csv *.fits)"
-        )
+        fname, _ = QFileDialog.getOpenFileName(self, "Open File", str(path), "ATK Data Files (*.csv *.fits)")
         if fname:
             self.data = readdata(fname=fname)
             if hasattr(self.data, "subkind"):
@@ -342,9 +335,7 @@ class Window(QMainWindow):
     # ADDITIONAL QUERY SETTINGS ----------------------------------------------------------------------------
 
     def QuerySettingsUiComponents(self):
-        self.query_settings_header = self.customLabel(
-            f"Additional{newline}Query Settings:"
-        )
+        self.query_settings_header = self.customLabel(f"Additional{newline}Query Settings:")
         self.setPosition(self.query_settings_header, [0, 3])
 
         self.additional_settings = {}
@@ -356,26 +347,18 @@ class Window(QMainWindow):
         query_radius_header = self.customLabel2(f"Query radius in{newline}arcseconds")
         self.additional_settings["query_radius"] = query_radius
         self.additional_settings_headers["query_radius"] = query_radius_header
-        self.default_values["query_radius"] = getattr(
-            config, f"query_{self.query_kind}_radius"
-        )
-        self.additional_settings["query_radius"].textChanged.connect(
-            self.on_query_radius_change
-        )
+        self.default_values["query_radius"] = getattr(config, f"query_{self.query_kind}_radius")
+        self.additional_settings["query_radius"].textChanged.connect(self.on_query_radius_change)
         self.radius = "config"
 
         # lightcurve raw
         return_raw = QComboBox(self)
         return_raw.addItems(["False", "True"])
-        return_raw_header = self.customLabel2(
-            f"Return raw data{newline}with no filtering"
-        )
+        return_raw_header = self.customLabel2(f"Return raw data{newline}with no filtering")
         self.additional_settings["return_raw"] = return_raw
         self.additional_settings_headers["return_raw"] = return_raw_header
         self.default_values["return_raw"] = False
-        self.additional_settings["return_raw"].currentTextChanged.connect(
-            self.on_return_raw_changed
-        )
+        self.additional_settings["return_raw"].currentTextChanged.connect(self.on_return_raw_changed)
         self.return_raw = False
 
         # image size
@@ -384,9 +367,7 @@ class Window(QMainWindow):
         self.additional_settings["image_size"] = image_size
         self.additional_settings_headers["image_size"] = image_size_header
         self.default_values["image_size"] = config.query_image_size
-        self.additional_settings["image_size"].textChanged.connect(
-            self.on_image_size_changed
-        )
+        self.additional_settings["image_size"].textChanged.connect(self.on_image_size_changed)
         self.image_size = "config"
 
         # image band
@@ -395,22 +376,16 @@ class Window(QMainWindow):
         self.additional_settings["image_band"] = image_band
         self.additional_settings_headers["image_band"] = image_band_header
         self.default_values["image_band"] = config.query_image_band
-        self.additional_settings["image_band"].textChanged.connect(
-            self.on_image_band_changed
-        )
+        self.additional_settings["image_band"].textChanged.connect(self.on_image_band_changed)
         self.band = "config"
 
         # image overlays
         image_overlays = QLineEdit(self)
-        image_overlays_header = self.customLabel2(
-            f"Sets which overlay{newline}surveys to use."
-        )
+        image_overlays_header = self.customLabel2(f"Sets which overlay{newline}surveys to use.")
         self.additional_settings["image_overlays"] = image_overlays
         self.additional_settings_headers["image_overlays"] = image_overlays_header
         self.default_values["image_overlays"] = config.query_image_overlays
-        self.additional_settings["image_overlays"].textChanged.connect(
-            self.on_image_overlays_changed
-        )
+        self.additional_settings["image_overlays"].textChanged.connect(self.on_image_overlays_changed)
         self.overlays = "config"
 
         self.query_kind_list.currentTextChanged.connect(self.set_additional_settings)
@@ -442,9 +417,7 @@ class Window(QMainWindow):
 
     def on_image_overlays_changed(self):
         if self.additional_settings["image_overlays"].text():
-            self.overlays = self.parseTextBox(
-                self.additional_settings["image_overlays"]
-            )
+            self.overlays = self.parseTextBox(self.additional_settings["image_overlays"])
         else:
             self.overlays = "config"
 
@@ -492,13 +465,9 @@ class Window(QMainWindow):
 
         for index, key in enumerate(params):
             if key == "query_radius":
-                self.default_values[key] = getattr(
-                    config, f"query_{self.query_kind}_radius"
-                )
+                self.default_values[key] = getattr(config, f"query_{self.query_kind}_radius")
 
-            self.additional_settings[key].setPlaceholderText(
-                str(self.default_values[key])
-            )
+            self.additional_settings[key].setPlaceholderText(str(self.default_values[key]))
 
             self.setPosition(self.additional_settings[key], [0, index + 4])
             self.setPosition(self.additional_settings_headers[key], [1, index + 4])
@@ -521,13 +490,13 @@ class Window(QMainWindow):
         self.showraw_box = QComboBox(self)
         self.showraw_box.addItems(["True", "False"])
         self.showraw_box.currentTextChanged.connect(self.on_showraw_box_change)
-        self.showraw = False
+        self.pprint = True
         self.data_manipulation_widgets.append([self.showraw_box, 2, 3])
 
         self.showraw_header = self.customLabel(f"Additional{newline}Settings:")
         self.data_manipulation_widgets.append([self.showraw_header, 2, 2])
 
-        self.showraw_header2 = self.customLabel2("Readable output")
+        self.showraw_header2 = self.customLabel2("Readable Output")
         self.data_manipulation_widgets.append([self.showraw_header2, 3, 3])
 
         self.savedata_fname_box = QLineEdit(self)
@@ -552,21 +521,15 @@ class Window(QMainWindow):
 
         query_button_position = self.getPosition(self.query_button)
         for widget in self.data_manipulation_widgets:
-            self.setPosition(
-                widget[0],
-                [
-                    query_button_position[0] + widget[1],
-                    query_button_position[1] + widget[2],
-                ],
-            )
+            self.setPosition(widget[0], [query_button_position[0] + widget[1], query_button_position[1] + widget[2]])
 
     def on_showdata_button_pressed(self):
-        self.data.showdata(raw=self.showraw)
+        self.data.showdata(pprint=self.pprint)
 
     def on_savedata_button_pressed(self):
         if self.savedata_fname_box.text():
             fname = self.savedata_fname_box.text()
-            fname = self.data.savedata(name=fname)
+            fname = self.data.savedata(fname=fname)
         else:
             fname = self.data.savedata()
 
@@ -586,24 +549,20 @@ class Window(QMainWindow):
                 fname += self.data_extension
             if fname in keep_files:
                 self.savedata_button.setText("Data Saved")
-                self.savedata_button.setStyleSheet(
-                    "background-color: rgba(0,255,0,0.75)"
-                )
+                self.savedata_button.setStyleSheet("background-color: rgba(0,255,0,0.75)")
         else:
             fname = self.savedata_fname_box.placeholderText()
             if not fname.endswith(self.data_extension):
                 fname += self.data_extension
             if fname in keep_files:
                 self.savedata_button.setText("Data Saved")
-                self.savedata_button.setStyleSheet(
-                    "background-color: rgba(0,255,0,0.75)"
-                )
+                self.savedata_button.setStyleSheet("background-color: rgba(0,255,0,0.75)")
 
     def on_showraw_box_change(self):
         if self.showraw_box.currentText().lower() == "true":
-            self.showraw = False
+            self.pprint = True
         else:
-            self.showraw = True
+            self.pprint = False
 
     # PLOTTING ---------------------------------------------------------------------------------------------
 
@@ -628,12 +587,8 @@ class Window(QMainWindow):
         self.saveplot_fname_header2 = self.customLabel2("File name")
         self.plotting_widgets.append([self.saveplot_fname_header2, 3, 10])
 
-        self.query_kind_list.currentTextChanged.connect(
-            self.update_plotting_button_positions
-        )
-        self.survey_list.currentTextChanged.connect(
-            self.update_plotting_button_positions
-        )
+        self.query_kind_list.currentTextChanged.connect(self.update_plotting_button_positions)
+        self.survey_list.currentTextChanged.connect(self.update_plotting_button_positions)
 
     def do_plotting(self):
         if self.query_kind == "lightcurve":
@@ -647,21 +602,11 @@ class Window(QMainWindow):
                     self.data.sigmaclip(sigmaclip)
                 if self.plotoptions["lightcurve_bin"].text():
                     bin_text = self.plotoptions["lightcurve_bin"].text()
-                    print(bin_text)
-                    if (
-                        bin_text.endswith("d")
-                        or bin_text.endswith("h")
-                        or bin_text.endswith("m")
-                    ):
+                    if bin_text.endswith("d") or bin_text.endswith("h") or bin_text.endswith("m"):
                         self.data.bin(binsize=bin_text)
                     else:
                         self.data.bin(bins=int(bin_text))
-                self.data.plot(
-                    kind=plot_kind,
-                    colours=colours,
-                    timeformat=timeformat,
-                    bands=bands,
-                )
+                self.data.plot(kind=plot_kind, colours=colours, timeformat=timeformat, bands=bands)
             elif plot_kind == "powspec":
                 method = self.plotoptions["powspec_method"].currentText()
                 self.data.plot(kind="powspec", method=method)
@@ -674,10 +619,7 @@ class Window(QMainWindow):
                     bins = int(self.plotoptions["phasefold_bins"].text())
                 else:
                     bins = None
-                if (
-                    self.plotoptions["phasefold_foverlay"].currentText().lower()
-                    == "true"
-                ):
+                if self.plotoptions["phasefold_foverlay"].currentText().lower() == "true":
                     foverlay = True
                 else:
                     foverlay = False
@@ -689,20 +631,10 @@ class Window(QMainWindow):
                     shift = float(self.plotoptions["phasefold_shift"].text())
                 else:
                     shift = self.plotoptions_defaults["phasefold_shift"]
-                self.data.plot(
-                    kind="phasefold",
-                    freq=freq,
-                    bins=bins,
-                    foverlay=foverlay,
-                    repeat=repeat,
-                    shift=shift,
-                )
+                self.data.plot(kind="phasefold", freq=freq, bins=bins, foverlay=foverlay, repeat=repeat, shift=shift)
         elif self.query_kind == "sed":
             if self.plotoptions["sed_spec"].currentText() != "---":
-                self.data.plot(
-                    spectrum_overlay=True,
-                    survey=self.plotoptions["sed_spec"].currentText(),
-                )
+                self.data.plot(spectrum_overlay=True, survey=self.plotoptions["sed_spec"].currentText())
             else:
                 self.data.plot()
         else:
@@ -735,18 +667,14 @@ class Window(QMainWindow):
                 fname += ".html"
             if fname in keep_files:
                 self.saveplot_button.setText("Data Saved")
-                self.saveplot_button.setStyleSheet(
-                    "background-color: rgba(0,255,0,0.75)"
-                )
+                self.saveplot_button.setStyleSheet("background-color: rgba(0,255,0,0.75)")
         else:
             fname = self.saveplot_fname_box.placeholderText()
             if not fname.endswith(".html"):
                 fname += ".html"
             if fname in keep_files:
                 self.saveplot_button.setText("Data Saved")
-                self.saveplot_button.setStyleSheet(
-                    "background-color: rgba(0,255,0,0.75)"
-                )
+                self.saveplot_button.setStyleSheet("background-color: rgba(0,255,0,0.75)")
 
     def update_plotting_button_positions(self):
         for widget in self.plotting_widgets:
@@ -754,20 +682,12 @@ class Window(QMainWindow):
 
         query_kind_position = self.getPosition(self.query_kind_list)
         for widget in self.plotting_widgets:
-            self.setPosition(
-                widget[0],
-                [
-                    query_kind_position[0] + widget[1],
-                    query_kind_position[1] + widget[2],
-                ],
-            )
+            self.setPosition(widget[0], [query_kind_position[0] + widget[1], query_kind_position[1] + widget[2]])
 
     # PLOTTING OPTIONS -------------------------------------------------------------------------------------
 
     def PlotOptionsUiComponents(self):
-        self.plotoptions_header = self.customLabel(
-            f"Additional{newline}Plotting Options:"
-        )
+        self.plotoptions_header = self.customLabel(f"Additional{newline}Plotting Options:")
         self.setPosition(self.plotoptions_header, [0, 10])
 
         self.plotoptions = {}
@@ -783,46 +703,32 @@ class Window(QMainWindow):
 
         # Lightcurve - bands
         self.plotoptions["lightcurve_bands"] = QLineEdit(self)
-        self.plotoptions_headers["lightcurve_bands"] = self.customLabel2(
-            "Light curve bands"
-        )
+        self.plotoptions_headers["lightcurve_bands"] = self.customLabel2("Light curve bands")
 
         # Lightcurve - colours
         self.plotoptions["lightcurve_colours"] = QLineEdit(self)
-        self.plotoptions_headers["lightcurve_colours"] = self.customLabel2(
-            "Light curve colours"
-        )
+        self.plotoptions_headers["lightcurve_colours"] = self.customLabel2("Light curve colours")
 
         # Lightcurve - timeformat
         self.plotoptions["lightcurve_timeformat"] = QComboBox(self)
         self.plotoptions["lightcurve_timeformat"].addItems(["reduced", "original"])
-        self.plotoptions_headers["lightcurve_timeformat"] = self.customLabel2(
-            "Time format"
-        )
+        self.plotoptions_headers["lightcurve_timeformat"] = self.customLabel2("Time format")
         self.plotoptions_defaults["lightcurve_timeformat"] = "reduced"
 
         # Lightcurve - sigmaclip()
         self.plotoptions["lightcurve_sigmaclip"] = QLineEdit(self)
-        self.plotoptions_headers["lightcurve_sigmaclip"] = self.customLabel2(
-            "Sigma clip"
-        )
+        self.plotoptions_headers["lightcurve_sigmaclip"] = self.customLabel2("Sigma clip")
         self.plotoptions_defaults["lightcurve_sigmaclip"] = "---"
 
         # Lightcurve - bin()
         self.plotoptions["lightcurve_bin"] = QLineEdit(self)
-        self.plotoptions_headers["lightcurve_bin"] = self.customLabel2(
-            f"Bins or binsize{newline}e.g. 30 or 1h"
-        )
+        self.plotoptions_headers["lightcurve_bin"] = self.customLabel2(f"Bins or binsize{newline}e.g. 30 or 1h")
         self.plotoptions_defaults["lightcurve_bin"] = "---"
 
         # Powspec - method
         self.plotoptions["powspec_method"] = QComboBox(self)
-        self.plotoptions["powspec_method"].addItems(
-            ["ls", "amhw", "pspw", "atrw", "aovw", "f_mw", "lomw"]
-        )
-        self.plotoptions_headers["powspec_method"] = self.customLabel2(
-            "Analysis Method"
-        )
+        self.plotoptions["powspec_method"].addItems(["ls"])
+        self.plotoptions_headers["powspec_method"] = self.customLabel2("Analysis Method")
         self.plotoptions_defaults["powspec_method"] = "ls"
 
         # Phasefold - freq
@@ -838,31 +744,23 @@ class Window(QMainWindow):
         # Phasefold - foverlay
         self.plotoptions["phasefold_foverlay"] = QComboBox(self)
         self.plotoptions["phasefold_foverlay"].addItems(["True", "False"])
-        self.plotoptions_headers["phasefold_foverlay"] = self.customLabel2(
-            "Sine wave overlay"
-        )
+        self.plotoptions_headers["phasefold_foverlay"] = self.customLabel2("Sine wave overlay")
         self.plotoptions_defaults["phasefold_foverlay"] = True
 
         # Phasefold - repeat
         self.plotoptions["phasefold_repeat"] = QLineEdit(self)
-        self.plotoptions_headers["phasefold_repeat"] = self.customLabel2(
-            "Number of repetitions"
-        )
+        self.plotoptions_headers["phasefold_repeat"] = self.customLabel2("Number of repetitions")
         self.plotoptions_defaults["phasefold_repeat"] = 2
 
         # Phasefold - shift587316166180416640
         self.plotoptions["phasefold_shift"] = QLineEdit(self)
-        self.plotoptions_headers["phasefold_shift"] = self.customLabel2(
-            "Shift in phase"
-        )
+        self.plotoptions_headers["phasefold_shift"] = self.customLabel2("Shift in phase")
         self.plotoptions_defaults["phasefold_shift"] = 0
 
         # SED - spectrum_overlay
         self.plotoptions["sed_spec"] = QComboBox(self)
         self.plotoptions["sed_spec"].addItems(["---"] + SurveyInfo().spectrum_surveys)
-        self.plotoptions_headers["sed_spec"] = self.customLabel2(
-            "Spectrum overlay survey"
-        )
+        self.plotoptions_headers["sed_spec"] = self.customLabel2("Spectrum overlay survey")
         self.plotoptions_defaults["sed_spec"] = "---"
 
         self.survey_list.currentTextChanged.connect(self.disable_widgets)
@@ -876,13 +774,7 @@ class Window(QMainWindow):
 
         for key, val in self.plotoptions.items():
             # put names of QComboBoxes here so that they don't get cleared
-            if key not in [
-                "kind",
-                "lightcurve_timeformat",
-                "powspec_method",
-                "phasefold_foverlay",
-                "sed_spec",
-            ]:
+            if key not in ["kind", "lightcurve_timeformat", "powspec_method", "phasefold_foverlay", "sed_spec"]:
                 val.hide()
                 val.clear()
             else:
@@ -904,9 +796,7 @@ class Window(QMainWindow):
                 lightcurve_bands = lightcurve_bands[:-2]
                 self.plotoptions_defaults["lightcurve_bands"] = lightcurve_bands
 
-                lightcurve_colours = (
-                    "black, " * len(SurveyInfo().lightcurve_bands[self.survey])
-                )[:-2]
+                lightcurve_colours = ("black, " * len(SurveyInfo().lightcurve_bands[self.survey]))[:-2]
                 self.plotoptions_defaults["lightcurve_colours"] = lightcurve_colours
 
                 if self.plotoptions["kind"].currentText() == "lightcurve":
@@ -954,9 +844,7 @@ class Window(QMainWindow):
                 self.plotoptions_header.show()
 
             for index, key in enumerate(params):
-                self.plotoptions[key].setPlaceholderText(
-                    str(self.plotoptions_defaults[key])
-                )
+                self.plotoptions[key].setPlaceholderText(str(self.plotoptions_defaults[key]))
 
                 self.setPosition(self.plotoptions[key], [0, index + 11])
                 self.setPosition(self.plotoptions_headers[key], [1, index + 11])
@@ -988,9 +876,9 @@ def appExec():
             os.remove(file)
 
 
-def openGUI():
-    """
-    Opens the ATK GUI. This function can also be called directly from the :ref:`Command-Line`.
+def openGUI() -> None:
+    """openGUI()
+    Opens the ATK GUI. The GUI can also be called from the :ref:`command line`.
 
     :return: None
 

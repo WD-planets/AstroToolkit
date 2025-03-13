@@ -42,7 +42,7 @@ Acknowledgements
 ----------------
 This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement No. 101020057).
 
-.. image:: ../images/erc_logo_light.png
+.. image:: images/erc_logo_light.png
    :scale: 15%
    :align: center
 
@@ -54,46 +54,46 @@ I would also like to give thanks to Prof. Boris Gänsicke for his assistance and
 
 |
 
-Installation
-------------
+.. toctree::
+   :titlesonly:
+   :hidden:
+   :caption: Tutorials
 
-The package can be installed like any other package, e.g. using pip:
-
-.. code-block:: python
-
-    pip install AstroToolkit
-
-This package also includes the PyAOV time series analysis routines by `A. Schwarzenberg-Czerny <https://users.camk.edu.pl/alex/#software>`_, which may require additional dependencies. See :ref:`Setup` for details.
-
-|
-
-Introduction
-------------
-
-ATK uses `Bokeh <https://bokeh.org/>`_ as its primary plotting library. A key property of Bokeh plots is that they can be saved as static .html files, which can then be shared/accessed while retaining all interactivity.
-
-Across ATK, there are two possible ways to target your system of interest:
-1. pos = [right ascension,declination] in degrees
-2. source = Gaia Source ID
-
-Where possible, it is usually best to use a Gaia source as input, as this enables a key feature of ATK: **Proper Motion Correction**.
-
-A good example of this is in imaging queries. If a 'pos' is used as input, the result will simply be the image data returned by the chosen imaging survey at those exact coordinates. However, this may not be ideal in the case of an object with a large proper motion. If a source is used instead, the data returned will have accounted for this, resulting in the image being centered on the target system. This concept is used throughout ATK when matching data from different surveys to a given system.
-
-.. image:: ../images/source_vs_pos.png
-
-|
+   Tutorial/getting_started
+   Tutorial/Tutorial_commandline
+   Tutorial/Tutorial_config
+   Tutorial/Tutorial_models
+   Tutorial/Tutorial_datapage
+   Tutorial/Tutorial_gui
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :caption: Information
 
-   modules 
+   Information/supported_surveys
 
-   datastructures
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Modules
+    
+   Modules/modules
 
-   configkeys
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Data Structures
 
-   commandline
+   DataStructures/datastructures 
 
-   examples
+.. toctree::
+   :titlesonly:
+   :hidden:
+   :caption: Additional Info:
+   
+   Misc/configkeys
+
+   Misc/commandline
+
+   Misc/examples

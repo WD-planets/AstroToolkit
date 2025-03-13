@@ -1,679 +1,341 @@
-def check_targeting(input):
-    if "pos" in input and "source" in input:
-        if input["pos"] and input["source"]:
-            raise ValueError(
-                "Simultaneous source and pos input detected. Only one may be used."
-            )
-        elif not input["pos"] and not input["source"]:
-            raise ValueError("Source or pos input required.")
-    return input
+import re
+from pathlib import Path
+
+from bokeh.models.layouts import Column as bokeh_column
+from bokeh.models.layouts import Row as bokeh_row
+from bokeh.models.widgets.tables import DataTable as bokeh_datatable
+from bokeh.plotting._figure import figure as bokeh_figure
+
+from ..PackageInfo import SurveyInfo
+
+DO_NOT_LOWER = ["fname"]
 
 
-def check_pos(pos):
-    if not isinstance(pos, list):
-        raise ValueError("Invalid pos input.")
-    for coord in pos:
-        if not isinstance(coord, int) and not isinstance(coord, float):
+def check_type(name, value, target_type):
+    basic_checks_passed = False
+
+    if not target_type:
+        return value
+
+    # check bools separately, as these should not be corrected due to ambiguity
+    if target_type is bool and type(value) is not bool:
+        raise ValueError(f"Invalid [{name}] input. Expected {target_type}, got {type(value)}.")
+
+    # general type check, this already validates e.g. lists - further type checking happens below
+    if not isinstance(value, target_type):
+        if target_type is list:
             try:
-                coord = float(coord)
+                value = [value]
+                basic_checks_passed = True
             except:
-                raise ValueError("Invalid pos input.")
-    return pos
-
-
-def check_source(source):
-    if not isinstance(source, int):
-        try:
-            source = int(source)
-        except:
-            raise ValueError("Invalid source input.")
-    return source
-
-
-def check_radius(radius):
-    if not isinstance(radius, int) and not isinstance(radius, float):
-        try:
-            radius = float(radius)
-        except:
-            raise ValueError("Invalid radius input.")
-    return radius
-
-
-def check_size(size, survey):
-    if not isinstance(size, int):
-        try:
-            size = int(size)
-        except:
-            raise ValueError("Invalid size input")
-    if survey == "panstarrs" and size > 1500:
-        raise ValueError('Size too large. Maximum supported by panstarrs is 1500".')
-    elif survey == "skymapper" and size > 600:
-        raise ValueError('Size too large. Maximum supported by skymapper is 600".')
-    elif survey == "dss" and size > 7200:
-        raise ValueError('Size too large. Maximum supported by dss is 7200".')
-    return size
-
-
-def check_band(band, survey):
-    import re
-
-    if survey == "panstarrs" and not re.match("^[grizy]+$", band):
-        raise ValueError("Invalid panstarrs bands. Supported bands are [g,r,i,z,y].")
-    elif survey == "skymapper":
-        if not re.match("^[grizuv]+$", band):
-            raise ValueError(
-                "Invalid skymapper bands. Supported bands are [g,r,i,z,u,v]."
-            )
+                basic_checks_passed = False
         else:
-            band = list(band)
-            temp_string = ""
-            for i in range(0, len(band)):
-                temp_string += band[i] + ","
-            band = temp_string[:-1]
-    elif survey == "dss" and band != "g":
-        raise ValueError("Invalid dss band. Only band supported by dss is g.")
-    return band
-
-
-def check_overlays(overlays):
-    from ..Data.dataquery import SurveyInfo
-
-    supported_overlays = SurveyInfo().supported_overlays
-
-    if isinstance(overlays, list):
-        for i, val in enumerate(overlays):
-            overlays[i] = str(val).lower()
-            if overlays[i] not in supported_overlays:
-                raise ValueError(f"Unsupported overlay '{val}'.")
-    elif isinstance(overlays, dict):
-        for key, val in overlays.items():
-            if key not in supported_overlays:
-                raise ValueError(f"Unsupported overlay: '{val}'.")
-
-    return overlays
-
-
-def check_username(username, survey):
-    if survey != "atlas":
-        raise ValueError("Username only required in atlas queries.")
-    if not isinstance(username, str):
-        try:
-            username = str(username)
-        except:
-            raise ValueError("Invalid atlas username.")
-    return username
-
-
-def check_password(password, survey):
-    if survey != "atlas":
-        raise ValueError("Password only required in atlas queries.")
-    if not isinstance(password, str):
-        try:
-            password = str(password)
-        except:
-            raise ValueError("Invalid atlas password")
-    return password
-
-
-def check_time(time):
-    if not isinstance(time, list):
-        for element in time:
-            if not isinstance(element, int):
-                raise ValueError("Invalid time format.")
-    return time
-
-
-def check_value(value):
-    if not isinstance(value, int) and not isinstance(value, float):
-        try:
-            value = float(value)
-        except:
-            raise ValueError(f"Invalid input. Expected int/float, got {type(value)}.")
-    return value
-
-
-def check_string(string):
-    if not isinstance(string, str):
-        try:
-            string = str(string)
-        except:
-            raise ValueError(f"Invalid input. Expected str, got {type(string)}.")
-    return string
-
-
-def check_selection(selection):
-    from ..Data.dataquery import SurveyInfo
-
-    supported_surveys = SurveyInfo().list
-
-    if not isinstance(selection, dict):
-        raise ValueError(
-            f"Invalid selection type. Expected dict, got {type(selection)}."
-        )
-
-    for survey, data in selection.items():
-        if data != "default":
-            if "parameters" not in data or "errors" not in data or "notes" not in data:
-                raise ValueError("Input datatable selection missing required keys.")
-            if survey not in supported_surveys:
-                if "values" not in data:
-                    raise ValueError("Input datatable selection missing required keys.")
-    return selection
-
-
-def check_dimensions(dimensions):
-    if not isinstance(dimensions, dict):
-        raise ValueError(f"Invalid input. Expected dict, got {type(dimensions)}.")
-
-    if "width" not in dimensions or "height" not in dimensions:
-        raise ValueError("Required keys for dimensions input: 'height', 'width'.")
-
-    for key, val in dimensions.items():
-        if not isinstance(val, int):
             try:
-                dimensions[key] = int(val)
+                value = target_type(value)
+                basic_checks_passed = True
             except:
-                raise ValueError("Dimensions must be integers.")
-    return dimensions
+                basic_checks_passed = False
+    else:
+        basic_checks_passed = True
 
+    if not basic_checks_passed:
+        raise ValueError(f"Invalid [{name}] input. Expected {target_type}, got {type(value)}.")
 
-def check_plots(plots):
-    from bokeh.models.layouts import Column as bokeh_column
-    from bokeh.models.layouts import Row as bokeh_row
-    from bokeh.models.widgets.tables import DataTable as bokeh_datatable
-    from bokeh.plotting._figure import figure as bokeh_figure
+    if target_type is str and name not in DO_NOT_LOWER:
+        value = value.lower()
 
-    from AstroToolkit.Data.hrdquery import HrdStruct
-    from AstroToolkit.Data.imagequery import ImageStruct
-    from AstroToolkit.Data.lightcurvequery import LightcurveStruct
-    from AstroToolkit.Data.sedquery import SedStruct
-    from AstroToolkit.Data.spectrumquery import SpectrumStruct
+    # perform additional checks for parameters that require a specific structure (e.g lists of a given type)
+    if name == "pos":
+        for index, coord in enumerate(value):
+            if not isinstance(coord, float):
+                try:
+                    value[index] = float(value[index])
+                except:
+                    raise ValueError(f"Invalid [{name}] input. Expected list[float].")
 
-    for plot_info in plots:
-        if (
-            "name" not in plot_info
-            or "width" not in plot_info
-            or "height" not in plot_info
-            or "figure" not in plot_info
-        ):
-            raise ValueError(
-                "Required keys for grid entries: 'name', 'width', 'height', 'figure'."
-            )
+    if name in ["time", "sources"]:
+        for element in value:
+            if not isinstance(element, int):
+                try:
+                    element = int(element)
+                except:
+                    raise ValueError(f"Invalid [{name}] input. Expected list[int].")
+
+    if name in ["colours", "plot_bands"]:
+        for index, element in enumerate(value):
+            if not isinstance(element, str):
+                try:
+                    value[index] = str(value[index])
+                except:
+                    raise ValueError(f"Invalid [{name}] input. Expected list[str].")
+
+    if name == "overlays":
+        supported_overlays = SurveyInfo().supported_overlays
+
+        if isinstance(value, list):
+            for i, val in enumerate(value):
+                value[i] = str(val).lower()
+                if value[i] not in supported_overlays:
+                    raise ValueError(f"Unsupported overlay '{val}'.")
+        elif isinstance(value, dict):
+            for key, val in value.items():
+                if key not in supported_overlays:
+                    raise ValueError(f"Unsupported overlay: '{val}'.")
+
+    if name == "selection":
+        supported_surveys = SurveyInfo().list
+
+        for entry in value:
+            if not isinstance(entry, dict):
+                raise ValueError("Invalid datatable selection. Expected list<dict>.")
+
+        for element in value:
+            if "kind" not in element:
+                raise ValueError("Datatable selection missing key [kind].")
+
+            if not isinstance(element["kind"], str):
+                try:
+                    element["kind"] = str(element["kind"]).lower()
+                except:
+                    raise ValueError(f"Invalid selection kind. Expected str, got {type(element['kind'])}.")
+
+            if "survey" in element:
+                if element["survey"] and not isinstance(element["survey"], str):
+                    try:
+                        element["survey"] = str(element["survey"])
+                    except:
+                        raise ValueError(f"Invalid selection survey. Expected str, got {type(element['survey'])}.")
+
+            if element["kind"] == "atk_defaults":
+                required_keys = ["kind", "surveys"]
+                keys_to_type_check = ["surveys"]
+            elif element["kind"] == "external":
+                required_keys = ["kind", "survey", "parameters", "values", "errors", "notes"]
+                keys_to_type_check = ["parameters", "values", "errors", "notes"]
+            else:
+                required_keys = ["kind", "survey", "parameters", "errors", "notes"]
+                keys_to_type_check = ["parameters", "errors", "notes"]
+
+            if not all(key in element for key in required_keys):
+                raise ValueError(f"Datatable selection missing keys. Required keys: {required_keys}.")
+
+            accepted_kinds = ["vizier", "atk_defaults", "external"]
+            if element["kind"] not in accepted_kinds:
+                raise ValueError(f"Invalid datatable selection kind. Accepted kinds: {accepted_kinds}.")
+
+            for key in keys_to_type_check:
+                if not isinstance(element[key], list):
+                    try:
+                        element[key] = [element[key]]
+                    except:
+                        raise ValueError(
+                            f"Invalid value for key [{key}] in datatable selection. Expected list, got {type(element[key])}."
+                        )
+
+            if element["kind"] in ["atk_defaults"]:
+                for survey in element["surveys"]:
+                    if survey not in supported_surveys:
+                        raise ValueError(f"Invalid selection survey. Supported surveys: {supported_surveys}.")
+
+    if name == "dimensions":
+        if "width" not in value or "height" not in value:
+            raise ValueError("Grid dimensions missing required keys.")
+        for key, val in value.items():
+            if not isinstance(val, int):
+                try:
+                    value[key] = int(val)
+                except:
+                    raise ValueError("Grid dimensions must be integers.")
+
+    if name == "panels":
+        for plot_info in value:
+            if (
+                "name" not in plot_info
+                or "width" not in plot_info
+                or "height" not in plot_info
+                or "figure" not in plot_info
+            ):
+                raise ValueError("datapage panels missing required keys.")
         if not isinstance(plot_info["name"], str):
             try:
                 plot_info["name"] = str(plot_info["name"])
             except:
-                raise ValueError("plot name must be string.")
+                raise ValueError(f"Plot names must be string, got {type(plot_info['name'])}.")
         if not isinstance(plot_info["width"], int):
             try:
                 plot_info["width"] = int(plot_info["width"])
             except:
-                raise ValueError("width must int.")
+                raise ValueError(f"Plot widths must int, got {type(plot_info['width'])}.")
         if not isinstance(plot_info["height"], int):
             try:
                 plot_info["height"] = int(plot_info["height"])
             except:
-                raise ValueError("height must be int.")
-        if plot_info["figure"] and not isinstance(
-            plot_info["figure"],
-            (
-                bokeh_figure,
-                bokeh_row,
-                bokeh_column,
-                bokeh_datatable,
-                ImageStruct,
-                HrdStruct,
-                LightcurveStruct,
-                SedStruct,
-                SpectrumStruct,
-            ),
-        ):
-            raise ValueError(
-                f"Note: Unsupported figure passed to gridsetup. Supported types are: ATK structure, bokeh row/column/figure/datatable or None, got {type(plot_info['figure'])}."
-            )
-    return plots
+                raise ValueError(f"Plot heights must be int, got {type(plot_info['height'])}.")
+
+    return value
 
 
-class InputObject(object):
-    def __init__(self, input):
-        self.input = input
+def targeting_check(input):
+    if input["pos"][0] and input["source"][0]:
+        raise ValueError("Simultaneous source and pos input detected.")
+    elif not input["pos"] and not input["source"]:
+        raise ValueError("Source or pos input required.")
 
 
-class ValidateDataInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
+def check_inputs(inputs, label, check_targeting=False):
+    """
+    Checks inputs, using a list of lists in form:
+    {name:[value,type],name:[value,type],...}
+    """
 
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    self.input[key] = check_string(val)
-                elif key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
+    if not inputs:
+        return inputs
+
+    from ..PackageInfo import SurveyInfo
+
+    survey_info = SurveyInfo()
+
+    """ 
+    Primary checks
+    """
+    corrected_inputs = {}
+    for name, entry in inputs.items():
+        value, target_type = entry
+        if value is not None and value != "config":
+            # automatic conversion to lists
+            if name in ["sources", "overlays", "columns", "colours", "plot_bands"] and not isinstance(value, list):
+                value = [value]
+            corrected_value = check_type(name, value, target_type)
+        else:
+            corrected_value = value
+        corrected_inputs[name] = corrected_value
+
+    # check pos/source input configuration
+    if check_targeting:
+        targeting_check(inputs)
+
+    """ 
+    Additional (per-function) checks
+    """
+    if label == "query":
+        kind = corrected_inputs["kind"]
+        if kind not in survey_info.supported_query_kinds:
+            raise ValueError(f"Unsupported query kind '{kind}'. Accepted kinds: {survey_info.supported_query_kinds}.")
+
+        # check supported surveys
+        survey = corrected_inputs["survey"]
+        if corrected_inputs["kind"] not in ["data", "hrd", "bulkphot", "sed"]:
+            supported_surveys = getattr(survey_info, f"{corrected_inputs['kind']}_surveys")
+            if survey not in supported_surveys:
+                raise ValueError(f"Unsupported survey in {kind} query. Supported surveys are: {supported_surveys}")
+
+        if kind == "data" and survey == "gaia_lc" and corrected_inputs["level"] != "internal":
+            raise ValueError(f"Unsupported survey in {kind} query. Use kind=lightcurve for gaia lightcurve queries.")
+
+        if kind == "image":
+            if survey == "panstarrs":
+                if corrected_inputs["size"] > 1500:
+                    raise ValueError('Size too large. Maximum supported by panstarrs is 1500".')
+                if not re.match("^[grizy]+$", corrected_inputs["band"]):
+                    raise ValueError("Invalid panstarrs bands. Supported bands are [g,r,i,z,y].")
+                corrected_inputs["size"] = int(corrected_inputs["size"])
+
+            elif survey == "skymapper":
+                if corrected_inputs["size"] > 600:
+                    raise ValueError('Size too large. Maximum supported by skymapper is 600".')
+                if not re.match("^[grizuv]+$", corrected_inputs["band"]):
+                    raise ValueError("Invalid skymapper bands. Supported bands are [g,r,i,z,u,v].")
                 else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidateSpectrumInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    from ..Data.dataquery import SurveyInfo
-
-                    supported_surveys = SurveyInfo().spectrum_surveys
-
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid survey input.")
-                elif key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidateImageInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    from ..Data.dataquery import SurveyInfo
-
-                    supported_surveys = SurveyInfo().image_surveys
-
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid survey input.")
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "size":
-                    self.input[key] = check_size(val, self.input["survey"])
-                elif key == "band":
-                    self.input[key] = check_band(val, self.input["survey"])
-                elif key == "overlays":
-                    self.input[key] = check_overlays(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidateLightcurveInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    from ..Data.dataquery import SurveyInfo
-
-                    supported_surveys = SurveyInfo().lightcurve_surveys
-
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid survey input.")
-                elif key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "username":
-                    self.input[key] = check_username(val, self.input["survey"])
-                elif key == "password":
-                    self.input[key] = check_password(val, self.input["survey"])
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidatePhotInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    from ..Data.dataquery import SurveyInfo
-
-                    supported_surveys = SurveyInfo().bulkphot_surveys
-
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid survey input.")
-                elif key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidateBulkphotInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateSedInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateReddeningInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "survey":
-                    from ..Data.dataquery import SurveyInfo
-
-                    supported_surveys = SurveyInfo().reddening_surveys
-
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid survey input.")
-                elif key == "radius":
-                    if self.input["survey"] == "stilism":
-                        raise ValueError(
-                            "Radius not needed for stilism reddening query."
-                        )
-                    self.input[key] = check_radius(val)
-                elif key == "pos":
-                    if self.input["survey"] == "stilism":
-                        raise ValueError("Stilism query does not support pos input.")
-                    self.input[key] = check_pos(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        if not self.input["survey"]:
-            raise ValueError("Survey required for query.")
-
-        return self.input
-
-
-class ValidateHrdInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "sources":
-                    if isinstance(val, list):
-                        for i, source in enumerate(val):
-                            val[i] = check_source(source)
-                        self.input[key] = val
-                    else:
-                        self.input[key] = check_source(val)
-
-        if not self.input["sources"]:
-            raise ValueError("Sources required for hrd query.")
-
-        return self.input
-
-
-class ValidateCorrectpmInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            from ..Data.dataquery import SurveyInfo
-
-            supported_surveys = list(SurveyInfo().times.keys())
-
-            if val and val != "config":
-                if key == "input_survey":
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid input_survey.")
-                elif key == "target_survey":
-                    if val not in supported_surveys:
-                        raise ValueError("Invalid target_survey")
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "input_time":
-                    self.input[key] = check_time(val)
-                elif key == "target_time":
-                    self.input[key] = check_time(val)
-                elif key == "pmra":
-                    self.input[key] = check_value(val)
-                elif key == "pmdec":
-                    self.input[key] = check_value(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateReaddataInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "fname":
-                    self.input[key] = check_string(val)
-
-        return self.input
-
-
-class ValidateSearchInput(InputObject):
-    def check_input(self):
-        check_targeting(self.input)
-
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "kind":
-                    if val not in ["simbad", "vizier"]:
-                        raise ValueError("Invalid search kind.")
-                elif key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateReadfitsInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "fname":
-                    self.input[key] = check_string(val)
-                elif key == "columns":
-                    if isinstance(val, list):
-                        for i, col in enumerate(val):
-                            val[i] = check_string(col)
-                        self.input[key] = val
-                    else:
-                        self.input[key] = check_string(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateDeg2hmsInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "pos":
-                    self.input[key] = check_pos(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateHms2degInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "pos":
-                    if not isinstance(val, str):
-                        raise ValueError("pos must be str in hms2deg.")
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateButtonsInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "grid_size":
-                    if not isinstance(val, int):
-                        try:
-                            self.input[key] = int(val)
-                        except:
-                            raise ValueError("grid_size must be int.")
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateDatatableInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "radius":
-                    self.input[key] = check_radius(val)
-                elif key == "source":
-                    self.input[key] = check_source(val)
-                elif key == "pos":
-                    self.input[key] = check_pos(val)
-                elif key == "selection":
-                    check_selection(val)
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateEditInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "key":
-                    from ..Configuration.baseconfig import ConfigStruct
-
-                    config = ConfigStruct()
-                    config.set_default_config()
-                    accepted_keys = config.supported_keys
-
-                    if val not in accepted_keys:
-                        raise ValueError("Invalid config key.")
-                elif key == "value":
-                    pass
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        return self.input
-
-
-class ValidateGridsetupInput(InputObject):
-    def check_input(self):
-        for key, val in self.input.items():
-            if val and val != "config":
-                if key == "dimensions":
-                    self.input[key] = check_dimensions(val)
-                elif key == "plots":
-                    self.input[key] = check_plots(val)
-                elif key == "grid_size":
-                    if not isinstance(val, int):
-                        try:
-                            self.input[key] = int(val)
-                        except:
-                            raise ValueError("grid_size must be int.")
-                else:
-                    raise ValueError(f"Invalid input parameter '{key}'.")
-
-        unit_area = 0
-        for plot_info in self.input["plots"]:
-            unit_area += plot_info["width"] * plot_info["height"]
-        if (
-            unit_area
-            < self.input["dimensions"]["width"] * self.input["dimensions"]["height"]
-        ):
-            raise ValueError(
-                "Given dimensions must be filled with figures. Pass entries with 'figure':None to fill empty space."
-            )
-        elif (
-            unit_area
-            > self.input["dimensions"]["width"] * self.input["dimensions"]["height"]
-        ):
-            raise ValueError(
-                "Total area of elements is larger than the given dimensions."
-            )
-
-        return self.input
-
-
-def check_inputs(input, kind):
-    input_object = globals()[f"Validate{kind.capitalize()}Input"](input)
-    return input_object.check_input()
+                    band = [corrected_inputs["band"]]
+                    temp_string = ""
+                    for i in range(0, len(band)):
+                        temp_string += band[i] + ","
+                    band = temp_string[:-1]
+
+            elif survey == "dss":
+                if corrected_inputs["size"] > 7200:
+                    raise ValueError('Size too large. Maximum supported by dss is 7200".')
+                if corrected_inputs["band"] != "g":
+                    raise ValueError("Invalid dss band. Only g band is supported by DSS.")
+
+    elif label == "search":
+        if corrected_inputs["kind"] not in ["vizier", "simbad"]:
+            raise ValueError(f"Invalid search kind '{corrected_inputs['kind']}'.")
+
+    elif label == "editconfig":
+        from ..Configuration.baseconfig import ConfigStruct
+
+        config = ConfigStruct()
+        config.read_config()
+        supported_keys = config.supported_keys
+
+        if corrected_inputs["key"] not in supported_keys:
+            raise ValueError(f"Invalid config key '{corrected_inputs['key']}'")
+
+    elif label == "plot":
+        if corrected_inputs["data_kind"] == "lightcurve":
+            plot_kind = corrected_inputs["kind"]
+            if plot_kind and plot_kind not in ["lightcurve", "powspec", "phasefold"]:
+                raise ValueError("Invalid light curve plot kind.")
+
+            if plot_kind == "lightcurve":
+                from ..Plotting.lightcurveplotting import SupportedColours
+
+                colours = corrected_inputs["colours"]
+                supported_colours = SupportedColours("green").supported_colours
+                if colours:
+                    for colour in colours:
+                        if colour not in supported_colours:
+                            raise ValueError(
+                                f"Invalid light curve colour {colour}. Supported colours are: {supported_colours}"
+                            )
+
+                timeformat = corrected_inputs["timeformat"]
+                if timeformat and timeformat not in ["reduced", "original"]:
+                    raise ValueError("Invalid light curve time format.")
+
+            elif plot_kind in ["powspec", "phasefold"]:
+                method = corrected_inputs["method"]
+                if method and method not in ["ls"]:
+                    raise ValueError("Invalid time series method, accepted methods are: ls")
+
+    elif label == "bin":
+        binsize = corrected_inputs["binsize"]
+        if binsize and binsize[-1] not in ["d", "h", "m"]:
+            raise ValueError("Invalid binsize unit. Accepted units are: d (days), h (hours) and m (mins).")
+
+    elif label == "crop":
+        start, stop = corrected_inputs["start"], corrected_inputs["stop"]
+        if start[-1] == "%" and not 0 <= float(start.rstrip("%")) <= 100:
+            raise ValueError("Invalid crop 'start' percentage.")
+        if stop[-1] == "%" and not 0 <= float(stop.rstrip("%")) <= 100:
+            raise ValueError("Invalid crop 'stop' percentage.")
+
+        if not (corrected_inputs["start"] and corrected_inputs["stop"]):
+            raise ValueError("Invalid crop parameters. Requires 'start' and 'stop' as absolute values or percentages.")
+
+    elif label == "sed_plot":
+        if corrected_inputs["survey"] not in survey_info.spectrum_surveys:
+            raise ValueError("Invalid spectrum overlay survey in SED plotting.")
+
+    elif label == "correctpm":
+        pos = corrected_inputs["pos"]
+        source = corrected_inputs["source"]
+        pmra, pmdec = corrected_inputs["pmra"], corrected_inputs["pmdec"]
+        input_time, target_time = (corrected_inputs["input_time"], corrected_inputs["target_time"])
+        input_survey, target_survey = (corrected_inputs["input_survey"], corrected_inputs["target_survey"])
+
+        if pos and pmra and pmdec and input_time and target_time:
+            pass
+        elif pos and pmra and pmdec and input_survey and target_survey:
+            pass
+        elif source and input_time and target_time:
+            pass
+        elif source and target_time:
+            pass
+        elif source and target_survey:
+            pass
+        else:
+            raise ValueError("Invalid correctpm input combination.")
+
+    return list(corrected_inputs.values())

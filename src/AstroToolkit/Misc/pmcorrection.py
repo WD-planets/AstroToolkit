@@ -1,3 +1,6 @@
+from ..PackageInfo import SurveyInfo
+
+
 class Correct(object):
     """Corrects coordinates using pmra and pmdec in mas/yr"""
 
@@ -125,7 +128,6 @@ def correctradius(source, input_time, target_time, radius):
 def autocorrect_survey(
     input_survey, target_survey, source=None, ra=None, dec=None, pmra=None, pmdec=None
 ):
-    from ..Data.dataquery import SurveyInfo
     from ..Tools import query
 
     survey_times = SurveyInfo().times
@@ -150,7 +152,6 @@ def autocorrect_survey(
 
 
 def autocorrect_source(source, target_time=None, target_survey=None):
-    from ..Data.dataquery import SurveyInfo
     from ..Tools import query
 
     survey_times = SurveyInfo().times

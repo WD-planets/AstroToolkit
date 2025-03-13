@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AstroToolkit.Data.imagequery &mdash; AstroToolkit 1.16.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+  <title>AstroToolkit.Data.imagequery &mdash; AstroToolkit 1.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/stylesheet.css?v=eea1f72d" />
 
   
   <!--[if lt IE 9]>
@@ -14,12 +15,14 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=e2aa0a4e"></script>
+        <script src="../../../_static/documentation_options.js?v=030dc6f6"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link href="../../../_static/stylesheet.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,10 +44,141 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../datastructures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../Tutorial/Tutorial_basic_info.html">Basic Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Tutorial/Tutorial_data_fetching.html">Fetching Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Tutorial/Tutorial_image_plotting.html">Plotting an Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Tutorial/Tutorial_lightcurve_plotting.html">Plotting a Light Curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Tutorial/Tutorial_data_saving.html">Saving to Local Files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/Tutorial_commandline.html">The Command Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/Tutorial_config.html">The Config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/Tutorial_models.html">Using External Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/Tutorial_datapage.html">Creating a Datapage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Tutorial/Tutorial_gui.html">Using the ATK GUI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Information/supported_surveys.html">Supported Surveys</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#data-surveys">Data Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#photometry-surveys">Photometry Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#reddening-surveys">Reddening Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#light-curve-surveys">Light Curve Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#image-surveys">Image Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#hrd-surveys">HRD Surveys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Information/supported_surveys.html#spectrum-surveys">Spectrum Surveys</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Modules/modules.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../Modules/Tools.html">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.query"><code class="docutils literal notranslate"><span class="pre">query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.correctpm"><code class="docutils literal notranslate"><span class="pre">correctpm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.readdata"><code class="docutils literal notranslate"><span class="pre">readdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.search"><code class="docutils literal notranslate"><span class="pre">search()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.readfits"><code class="docutils literal notranslate"><span class="pre">readfits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.deg2hms"><code class="docutils literal notranslate"><span class="pre">deg2hms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Tools.html#AstroToolkit.Tools.hms2deg"><code class="docutils literal notranslate"><span class="pre">hms2deg()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Modules/Datapages.html">Datapages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Datapages.html#AstroToolkit.Datapages.buttons"><code class="docutils literal notranslate"><span class="pre">buttons()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Datapages.html#AstroToolkit.Datapages.datapage"><code class="docutils literal notranslate"><span class="pre">datapage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Datapages.html#AstroToolkit.Datapages.datatable"><code class="docutils literal notranslate"><span class="pre">datatable()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Modules/Config.html">Config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Config.html#AstroToolkit.Config.editconfig"><code class="docutils literal notranslate"><span class="pre">editconfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Config.html#AstroToolkit.Config.openconfig"><code class="docutils literal notranslate"><span class="pre">openconfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Config.html#AstroToolkit.Config.resetconfig"><code class="docutils literal notranslate"><span class="pre">resetconfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Config.html#AstroToolkit.Config.showconfig"><code class="docutils literal notranslate"><span class="pre">showconfig()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Modules/Models.html">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomDataStruct"><code class="docutils literal notranslate"><span class="pre">CustomDataStruct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomHrdStruct"><code class="docutils literal notranslate"><span class="pre">CustomHrdStruct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomImageStruct"><code class="docutils literal notranslate"><span class="pre">CustomImageStruct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomLightcurveStruct"><code class="docutils literal notranslate"><span class="pre">CustomLightcurveStruct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomSedStruct"><code class="docutils literal notranslate"><span class="pre">CustomSedStruct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Models.html#AstroToolkit.Models.CustomSpectrumStruct"><code class="docutils literal notranslate"><span class="pre">CustomSpectrumStruct()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Modules/Gui.html">Gui</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../Modules/Gui.html#AstroToolkit.Gui.openGUI"><code class="docutils literal notranslate"><span class="pre">openGUI()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Data Structures</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../DataStructures/datastructures.html">Data Structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/DataStruct.html"><code class="docutils literal notranslate"><span class="pre">DataStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/DataStruct.html#AstroToolkit.Data.dataquery.DataStruct.savedata"><code class="docutils literal notranslate"><span class="pre">DataStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/DataStruct.html#AstroToolkit.Data.dataquery.DataStruct.showdata"><code class="docutils literal notranslate"><span class="pre">DataStruct.showdata()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/ImageStruct.html"><code class="docutils literal notranslate"><span class="pre">ImageStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.exportplot"><code class="docutils literal notranslate"><span class="pre">ImageStruct.exportplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.plot"><code class="docutils literal notranslate"><span class="pre">ImageStruct.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.savedata"><code class="docutils literal notranslate"><span class="pre">ImageStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.saveplot"><code class="docutils literal notranslate"><span class="pre">ImageStruct.saveplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showdata"><code class="docutils literal notranslate"><span class="pre">ImageStruct.showdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showplot"><code class="docutils literal notranslate"><span class="pre">ImageStruct.showplot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.bin"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.bin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.crop"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.crop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.exportplot"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.exportplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.plot"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.savedata"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.saveplot"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.saveplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.showdata"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.showdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.showplot"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.showplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/LightcurveStruct.html#AstroToolkit.Data.lightcurvequery.LightcurveStruct.sigmaclip"><code class="docutils literal notranslate"><span class="pre">LightcurveStruct.sigmaclip()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.exportplot"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.exportplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.plot"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.savedata"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.saveplot"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.saveplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.showdata"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.showdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SpectrumStruct.html#AstroToolkit.Data.spectrumquery.SpectrumStruct.showplot"><code class="docutils literal notranslate"><span class="pre">SpectrumStruct.showplot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/SedStruct.html"><code class="docutils literal notranslate"><span class="pre">SedStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.exportplot"><code class="docutils literal notranslate"><span class="pre">SedStruct.exportplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.plot"><code class="docutils literal notranslate"><span class="pre">SedStruct.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.savedata"><code class="docutils literal notranslate"><span class="pre">SedStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.saveplot"><code class="docutils literal notranslate"><span class="pre">SedStruct.saveplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.showdata"><code class="docutils literal notranslate"><span class="pre">SedStruct.showdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/SedStruct.html#AstroToolkit.Data.sedquery.SedStruct.showplot"><code class="docutils literal notranslate"><span class="pre">SedStruct.showplot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../DataStructures/HrdStruct.html"><code class="docutils literal notranslate"><span class="pre">HrdStruct</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.exportplot"><code class="docutils literal notranslate"><span class="pre">HrdStruct.exportplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.plot"><code class="docutils literal notranslate"><span class="pre">HrdStruct.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.savedata"><code class="docutils literal notranslate"><span class="pre">HrdStruct.savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.saveplot"><code class="docutils literal notranslate"><span class="pre">HrdStruct.saveplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.showdata"><code class="docutils literal notranslate"><span class="pre">HrdStruct.showdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../DataStructures/HrdStruct.html#AstroToolkit.Data.hrdquery.HrdStruct.showplot"><code class="docutils literal notranslate"><span class="pre">HrdStruct.showplot()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Info:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Misc/configkeys.html">Config Keys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Misc/commandline.html">Command Line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Misc/examples.html">Additional Examples</a></li>
 </ul>
 
         </div>
@@ -72,75 +206,65 @@
            <div itemprop="articleBody">
              
   <h1>Source code for AstroToolkit.Data.imagequery</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..StructureMethods.method_definitions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">exportplot</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">savedata</span><span class="p">,</span>
+                                                   <span class="n">saveplot</span><span class="p">,</span> <span class="n">showdata</span><span class="p">,</span>
+                                                   <span class="n">showplot</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="ImageStruct">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct">[docs]</a>
-<span></span><span class="k">class</span> <span class="nc">ImageStruct</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImageStruct</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ImageStruct()</span>
 <span class="sd">    This structure is returned from image queries, when read from a data file that was originally created by an image query, or through the Models module (in which case all attributes are set to None).</span>
 
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
+<span class="sd">    .. rubric:: Attributes</span>
+<span class="sd">        :heading-level: 1</span>
 
-<span class="sd">    kind : str</span>
+<span class="sd">    kind : *str*</span>
 <span class="sd">        &quot;image&quot;</span>
 
-<span class="sd">    survey: str</span>
-<span class="sd">        survey to which the data pertains, see image query description for details.</span>
+<span class="sd">    survey : *str*</span>
+<span class="sd">        survey to which the data belongs</span>
 
-<span class="sd">    source: int</span>
-<span class="sd">        Gaia source ID (if one was used to target the system, else None)</span>
+<span class="sd">    source : *int*</span>
+<span class="sd">        Gaia source ID of target system (if given, else None)</span>
 
-<span class="sd">    pos: list&lt;int&gt;</span>
-<span class="sd">        Target position [right ascension, declination] in degrees</span>
+<span class="sd">    pos : *list&lt;float&gt;*</span>
+<span class="sd">        Position of target system [right ascension, declination] in degrees</span>
 
-<span class="sd">    identifier: str</span>
-<span class="sd">        Target position in JHHMMSS.SS±DDMMSS.SS format</span>
+<span class="sd">    identifier : *str*</span>
+<span class="sd">        Position of target system in JHHMMSS.SS±DDMMSS.SS format</span>
 
-<span class="sd">    dataname: str</span>
-<span class="sd">        Default file name that data will be saved to when using the savedata() method</span>
+<span class="sd">    dataname : *str*</span>
+<span class="sd">        Default file for the :func:`savedata` method</span>
 
-<span class="sd">    plotname: str</span>
-<span class="sd">        Default file name that plot will be saved to when using the showplot() and saveplot() methods</span>
+<span class="sd">    plotname : *str*</span>
+<span class="sd">        Default file name for the :func:`showplot` and :func:`saveplot` methods</span>
 
-<span class="sd">    figure: None</span>
-<span class="sd">        Stores any figure resulting from the plot() method</span>
+<span class="sd">    figure : *Bokeh figure*</span>
+<span class="sd">        Stores figures generated by the :func:`plot` method</span>
 
-<span class="sd">    data: dict&lt;list&gt;</span>
+<span class="sd">    data: *dict*</span>
 <span class="sd">        Returned data in format:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
-<span class="sd">            &quot;image_data&quot;: image_data</span>
-<span class="sd">            &quot;image_header&quot;: image_header</span>
-<span class="sd">            &quot;size&quot;: size</span>
-<span class="sd">            &quot;image_time&quot;: image_time</span>
-<span class="sd">            &quot;wcs&quot;: wcs</span>
-<span class="sd">            &quot;image_focus&quot;: image_focus</span>
-<span class="sd">            &quot;overlay&quot;: overlay</span>
-
-<span class="sd">        where:</span>
-
-<span class="sd">        :**image_data**: list&lt;float&gt;, raw image data</span>
-
-<span class="sd">        :**image_header**: astropy image header</span>
-
-<span class="sd">        :**size**: int, image size in arcseconds</span>
-
-<span class="sd">        :**image_time**: list&lt;int&gt;, [year,month] time at which the image was taken</span>
-
-<span class="sd">        :**wcs**: astropy wcs object</span>
-
-<span class="sd">        :**image_focus**: list&lt;float&gt;, [right ascension, declination] of image focus in degrees</span>
-
-<span class="sd">        :**overlay**: list&lt;dict&gt;, detection information to overlay when plotting images with the plot() method</span>
+<span class="sd">            &quot;image_data&quot;: [raw image data]</span>
+<span class="sd">            &quot;image_header&quot;: astropy image header</span>
+<span class="sd">            &quot;size&quot;: image size (arcseconds)</span>
+<span class="sd">            &quot;image_time&quot;: time at which image was taken ([year,month])</span>
+<span class="sd">            &quot;wcs&quot;: astropy wcs</span>
+<span class="sd">            &quot;image_focus&quot;: centre of image ([right ascension,declination], degrees)</span>
+<span class="sd">            &quot;overlay&quot;: [data entries to overlay when plotting images]</span>
 
 <span class="sd">    |</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;image&quot;</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
@@ -149,110 +273,53 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;ATK Image Structure&gt;&quot;</span>
 
 <div class="viewcode-block" id="ImageStruct.plot">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.plot">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../DataStructures/ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.plot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plots image data and assigns the resulting figure to the **figure** attribute.</span>
+<span class="sd">        Plots data contained within a given data stucture and assigns the resulting figure to the data structure&#39;s &#39;figure&#39; attribute.</span>
 
-<span class="sd">        |</span>
+<span class="sd">        **Additional Parameters:**</span>
 
+<span class="sd">        :param searchradius: search radius to use in SIMBAD when generating objcet IDs and search URLs in overlays. Defaults to value given in key &#39;overlay_simbad_search_radius&#39; of :ref:`config &lt;config-keys&gt;`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">map_to_plot</span>
-
-        <span class="k">return</span> <span class="n">map_to_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ImageStruct.savedata">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.savedata">[docs]</a>
-    <span class="k">def</span> <span class="nf">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Saves data to local files. Default file name = dataname attribute.</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">showdata</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">showdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pprint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">print_methods</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">showdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pprint</span><span class="p">,</span> <span class="n">print_methods</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-<span class="sd">        :param str fname: overrides file name</span>
-<span class="sd">        :return: name of file to which data was saved</span>
-<span class="sd">        :rtype: str</span>
-
-<span class="sd">        |</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">.data_saving</span> <span class="kn">import</span> <span class="n">savedata</span>
-
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">savedata</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="n">savedata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">showplot</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">saveplot</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">exportplot</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exportplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">exportplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fname</span></div>
 
 
-<div class="viewcode-block" id="ImageStruct.showdata">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showdata">[docs]</a>
-    <span class="k">def</span> <span class="nf">showdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Prints data structure to stdout in a readable format.</span>
 
-<span class="sd">        :param bool raw: if True, doesn&#39;t collapse arrays to improve readability, default = False</span>
-<span class="sd">        :return: self</span>
-<span class="sd">        :rtype: class</span>
-
-<span class="sd">        |</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">.data_printing</span> <span class="kn">import</span> <span class="n">print_data</span>
-
-        <span class="n">print_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-
-<div class="viewcode-block" id="ImageStruct.showplot">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.showplot">[docs]</a>
-    <span class="k">def</span> <span class="nf">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Opens the figure stored in the **figure** attribute in the default web browser, and saves it to local files.</span>
-
-<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
-<span class="sd">        :return: file name to which the figure was saved</span>
-<span class="sd">        :rtype: str</span>
-
-<span class="sd">        |</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">showplot</span>
-
-        <span class="n">fname</span> <span class="o">=</span> <span class="n">showplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">fname</span></div>
-
-
-<div class="viewcode-block" id="ImageStruct.saveplot">
-<a class="viewcode-back" href="../../../ImageStruct.html#AstroToolkit.Data.imagequery.ImageStruct.saveplot">[docs]</a>
-    <span class="k">def</span> <span class="nf">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Saves the figure stored in the **figure** attribute to local files without opening it in the web browser.</span>
-
-<span class="sd">        :param str fname: file name to save the figure to, default file name = plotname attribute</span>
-<span class="sd">        :return: file name to which the figure was saved</span>
-<span class="sd">        :rtype: str</span>
-
-<span class="sd">        |</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">..Plotting.plotmap</span> <span class="kn">import</span> <span class="n">saveplot</span>
-
-        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">fname</span></div>
-</div>
-
-
-
-<span class="k">class</span> <span class="nc">GeneralQuery</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GeneralQuery</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for image queries&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
@@ -261,13 +328,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">get_image_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_image_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span>
 
-        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-        <span class="kn">import</span> <span class="nn">requests</span>
-        <span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
-        <span class="kn">from</span> <span class="nn">astropy.visualization</span> <span class="kn">import</span> <span class="n">AsinhStretch</span><span class="p">,</span> <span class="n">PercentileInterval</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">fits</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsinhStretch</span><span class="p">,</span> <span class="n">PercentileInterval</span>
 
         <span class="c1"># send request using the URL returned for the selected survey</span>
 
@@ -304,8 +371,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
 
         <span class="n">mjd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">[</span><span class="s2">&quot;MJD-OBS&quot;</span><span class="p">]</span>
 
@@ -316,16 +383,16 @@
         <span class="k">return</span> <span class="n">imageTime</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">get_wcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">astropy.wcs</span> <span class="kn">import</span> <span class="n">WCS</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_wcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.wcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">WCS</span>
 
         <span class="k">return</span> <span class="n">WCS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">PanstarrsQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-        <span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PanstarrsQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
 
         <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="mi">4</span>
 
@@ -361,10 +428,10 @@
             <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">class</span> <span class="nc">SkymapperQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-        <span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SkymapperQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
 
         <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3600</span>
 
@@ -390,16 +457,16 @@
             <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">class</span> <span class="nc">DssQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DssQuery</span><span class="p">(</span><span class="n">GeneralQuery</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">url_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">60</span>
 
         <span class="n">url_main</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://archive.stsci.edu/cgi-bin/dss_search?ra=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;v=3&amp;e=J2000&amp;f=fits&amp;h=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&amp;w=</span><span class="si">{</span><span class="n">url_size</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url_main</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">image_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.time</span><span class="w"> </span><span class="kn">import</span> <span class="n">Time</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_header</span><span class="p">[</span><span class="s2">&quot;DATE-OBS&quot;</span><span class="p">]</span>
 
@@ -429,13 +496,11 @@
         <span class="k">return</span> <span class="n">imageTime</span>
 
 
-<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overlays</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="n">survey</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overlays</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">f_return</span> <span class="o">=</span> <span class="n">ImageStruct</span><span class="p">(</span><span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">getimage</span><span class="p">():</span>
-        <span class="n">query_object</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">survey</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">Query&quot;</span><span class="p">](</span>
-            <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="n">band</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="n">survey</span>
-        <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getimage</span><span class="p">():</span>
+        <span class="n">query_object</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">survey</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2">Query&quot;</span><span class="p">](</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="n">band</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="n">survey</span><span class="p">)</span>
 
         <span class="n">query_object</span><span class="o">.</span><span class="n">set_url</span><span class="p">()</span>
 
@@ -465,18 +530,15 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">..Data.dataquery</span> <span class="kn">import</span> <span class="n">SurveyInfo</span>
-        <span class="kn">from</span> <span class="nn">..Tools</span> <span class="kn">import</span> <span class="n">correctpm</span>
-        <span class="kn">from</span> <span class="nn">..Tools</span> <span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">data_query</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..PackageInfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">SurveyInfo</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..Tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">correctpm</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..Tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">query</span> <span class="k">as</span> <span class="n">data_query</span>
 
         <span class="n">survey_times</span> <span class="o">=</span> <span class="n">SurveyInfo</span><span class="p">()</span><span class="o">.</span><span class="n">times</span>
 
-        <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">gaia_data</span> <span class="o">=</span> <span class="n">data_query</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">survey</span><span class="o">=</span><span class="s2">&quot;gaia&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="k">if</span> <span class="n">gaia_data</span><span class="p">:</span>
             <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;ra&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gaia_data</span><span class="p">[</span><span class="s2">&quot;dec&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Note: No gaia object found with given Source.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">f_return</span>
@@ -493,17 +555,17 @@
 
         <span class="c1"># correct coords of source to image_time</span>
 
-        <span class="n">pos</span> <span class="o">=</span> <span class="n">correctpm</span><span class="p">(</span>
-            <span class="n">input_time</span><span class="o">=</span><span class="n">survey_times</span><span class="p">[</span><span class="s2">&quot;gaia&quot;</span><span class="p">],</span> <span class="n">target_time</span><span class="o">=</span><span class="n">image_time</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span>
-        <span class="p">)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">correctpm</span><span class="p">(</span><span class="n">input_time</span><span class="o">=</span><span class="n">survey_times</span><span class="p">[</span><span class="s2">&quot;gaia&quot;</span><span class="p">],</span> <span class="n">target_time</span><span class="o">=</span><span class="n">image_time</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
 
     <span class="n">image</span> <span class="o">=</span> <span class="n">getimage</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">overlays</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">..Data.imageoverlay</span> <span class="kn">import</span> <span class="n">overlay_query</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..Data.imageoverlay</span><span class="w"> </span><span class="kn">import</span> <span class="n">overlay_query</span>
 
         <span class="n">overlay_data</span> <span class="o">=</span> <span class="n">overlay_query</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">overlays</span><span class="p">)</span>
         <span class="n">image</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;overlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">overlay_data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">image</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;overlay&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">image</span>
 </pre></div>

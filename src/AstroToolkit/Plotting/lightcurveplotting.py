@@ -9,6 +9,7 @@ from bokeh.transform import linear_cmap
 class SupportedColours(object):
     def __init__(self, colour):
         self.colour = colour
+        self.supported_colours = ["green", "red", "blue", "black", "orange", "purple"]
 
     @property
     def get_cmap(self):
@@ -16,83 +17,43 @@ class SupportedColours(object):
             colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
                 "", ["greenyellow", "forestgreen", "greenyellow"]
             )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "forestgreen"
         elif self.colour == "red":
-            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-                "", ["yellow", "red", "yellow"]
-            )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["yellow", "red", "yellow"])
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "red"
         elif self.colour == "blue":
-            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-                "", ["aqua", "royalblue", "aqua"]
-            )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["aqua", "royalblue", "aqua"])
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "royalblue"
         elif self.colour == "black":
-            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-                "", ["lightgray", "black", "lightgray"]
-            )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightgray", "black", "lightgray"])
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "black"
         elif self.colour == "orange":
-            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-                "", ["gold", "orange", "gold"]
-            )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["gold", "orange", "gold"])
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "orange"
         elif self.colour == "purple":
-            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-                "", ["orchid", "darkviolet", "orchid"]
-            )
-            palette = [
-                matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))
-            ]
+            colourmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["orchid", "darkviolet", "orchid"])
+            palette = [matplotlib.colors.rgb2hex(c) for c in colourmap(np.linspace(0, 1, 255))]
             error_colour = "darkviolet"
-        else:
-            raise ValueError(
-                "Unsupported colour. Supported colours are: green, red, blue, black, orange, purple"
-            )
 
         return palette, error_colour
 
 
 def plot_data(plot, band, colour, time_min, survey, timeformat):
     if timeformat == "reduced":
-        if using_original_times:
-            time = [x - time_min for x in band[time_unit]]
-        else:
-            time = band[time_unit]
-    elif timeformat == "original":
-        time = band[time_unit]
+        time = [x - time_min for x in band[time_unit]]
     else:
-        raise ValueError("Invalid timeformat. Accepted values: reduced, original.")
+        time = band[time_unit]
 
     palette, error_colour = SupportedColours(colour).get_cmap
     source = ColumnDataSource(data={"time": time, "mag": band["mag"]})
-    cmap = linear_cmap(
-        field_name="mag", palette=palette, low=min(band["mag"]), high=max(band["mag"])
-    )
+    cmap = linear_cmap(field_name="mag", palette=palette, low=min(band["mag"]), high=max(band["mag"]))
 
-    plot.scatter(
-        source=source,
-        x="time",
-        y="mag",
-        color=cmap,
-        marker="circle",
-        legend_label=f"{survey} {band['band']}",
-    )
+    plot.scatter(source=source, x="time", y="mag", color=cmap, marker="circle", legend_label=f"{survey} {band['band']}")
 
     err_xs = [[x, x] for x in time]
     err_ys = [[y - y_err, y + y_err] for y, y_err in zip(band["mag"], band["mag_err"])]
@@ -113,12 +74,12 @@ def plot_data(plot, band, colour, time_min, survey, timeformat):
 
 def plot_lightcurve(struct, colours, bands, timeformat):
     if bands:
-        data = [x for x in struct.data if x["band"] in bands]
+        data = [x for x in struct.data if x["band"] in bands and x["mag"] is not None]
     else:
         data = [x for x in struct.data if x["mag"] is not None]
 
     if len(data) == 0:
-        print("Note: Could not plot light curve, no data found.")
+        print("Note: Could not plot light curve, no data found in requested bands.")
         return None
 
     if not colours:
@@ -126,18 +87,11 @@ def plot_lightcurve(struct, colours, bands, timeformat):
     if len(colours) < len(data):
         for i in range(0, len(data) - len(colours)):
             colours.append("black")
-    if not isinstance(colours, list):
-        try:
-            colours = [colours]
-        except:
-            raise Exception(
-                f"Invalid colours type. Expected str or list, got {type(colours)}."
-            )
 
     lightcurve_bands = ""
     for band in data:
-        lightcurve_bands += f"{band['band']},"
-    lightcurve_bands = lightcurve_bands.rstrip(",")
+        lightcurve_bands += f"{band['band']}, "
+    lightcurve_bands = lightcurve_bands.rstrip(", ")
 
     plot = figure(
         width=400,
@@ -147,19 +101,15 @@ def plot_lightcurve(struct, colours, bands, timeformat):
         y_axis_label=f"{lightcurve_bands}",
     )
 
-    global using_original_times, time_unit
-    using_original_times = False
+    global time_unit
 
-    if "hjd_ori" in band:
+    if "hjd" in band:
         time_unit = "hjd"
-        if band["hjd_ori"]:
-            time_unit += "_ori"
-            using_original_times = True
-    elif "mjd_ori" in band:
+    elif "mjd" in band:
         time_unit = "mjd"
-        if band["mjd_ori"]:
-            time_unit += "_ori"
-            using_original_times = True
+
+    if timeformat == "original":
+        plot.xaxis.axis_label = time_unit.upper()
 
     combined_times = []
     for band in data:

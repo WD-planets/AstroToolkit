@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import re
 
 from AstroToolkit.Configuration.baseconfig import ConfigStruct
@@ -6,9 +7,20 @@ from AstroToolkit.Tools import query
 
 config = ConfigStruct()
 
+newline = "\n"
+
 
 def jobs_ui(data):
     while True:
+        if data.kind in ["data"]:
+            accepted_jobs = ["showdata", "savedata", "exit"]
+            accepted_jobs_str = "showdata, savedata <filename: str, optional>, exit"
+        else:
+            accepted_jobs = ["showdata", "savedata", "showplot", "saveplot", "exit"]
+            accepted_jobs_str = "showdata, savedata <filename: str, optional> showplot <filename: str, optional>, saveplot<filename: str, optional>, exit"
+
+        print(f"Available Jobs: {accepted_jobs_str}{newline}")
+
         job = str(input("Job? "))
         job = [a for a in re.split(r"(\s|\,)", job.strip()) if a]
         job = [x for x in job if x != " " and x != ","]
@@ -23,19 +35,12 @@ def jobs_ui(data):
         if job == "showdata" and fname:
             raise Exception("fname provided for showdata job.")
 
-        if data.kind in ["data"]:
-            accepted_jobs = ["showdata", "savedata", "exit"]
-            accepted_jobs_str = "showdata, savedata <filename (optional)>, exit"
-        else:
-            accepted_jobs = ["showdata", "savedata", "showplot", "saveplot", "exit"]
-            accepted_jobs_str = "showdata, savedata <filename (optional)> showplot <filename (optional)>, saveplot<filename (optional)>, exit"
-
         if job not in accepted_jobs:
             print(f"\nInvalid job. Accepted jobs: {accepted_jobs_str}\n")
             continue
 
         if job == "showdata":
-            data.showdata()
+            data.showdata(print_methods=False)
             print()
         elif job == "savedata":
             data.savedata(fname=fname)
@@ -43,38 +48,22 @@ def jobs_ui(data):
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in [
-                        "lightcurve",
-                        "phasefold",
-                        "powspec",
-                        "phase",
-                        "fold",
-                    ]:
+                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
                         data.plot(kind=plot_kind).showplot(fname=fname)
                         break
                     else:
-                        print(
-                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
-                        )
+                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
             else:
                 data.plot().showplot(fname=fname)
         elif job == "saveplot":
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in [
-                        "lightcurve",
-                        "phasefold",
-                        "powspec",
-                        "phase",
-                        "fold",
-                    ]:
+                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
                         data.plot(kind=plot_kind).saveplot()
                         break
                     else:
-                        print(
-                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
-                        )
+                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
             else:
                 data.plot().saveplot(fname=fname)
         elif job == "exit":

@@ -3,6 +3,13 @@ Contains the main tools for data fetching, plotting and analysis in ATK.
 """
 
 from .Configuration.baseconfig import ConfigStruct
+from .Data.dataquery import DataStruct
+from .Data.hrdquery import HrdStruct
+from .Data.imagequery import ImageStruct
+from .Data.lightcurvequery import LightcurveStruct
+from .Data.sedquery import SedStruct
+from .Data.spectrumquery import SpectrumStruct
+from .Input.input_validation import check_inputs
 
 config = ConfigStruct()
 config.read_config()
@@ -13,235 +20,240 @@ newline = "\n"
 
 
 def query(
-    kind,
-    survey=None,
+    kind: str,
+    survey: str = None,
     radius="config",
-    pos=None,
-    source=None,
-    size="config",
-    band="config",
-    username="config",
-    password="config",
-    overlays="config",
-    sources=None,
-    level="external",
-    raw=False,
-):
-    """query(kind,source/pos, *)
+    pos: list[float] = None,
+    source: int = None,
+    size: float = "config",
+    band: str = "config",
+    username: str = "config",
+    password: str = "config",
+    overlays: list[str] = "config",
+    sources: list[int] = None,
+    level: str = "external",
+    raw: bool = False,
+    check_exists: str = None,
+    retry: int = 1,
+) -> DataStruct | HrdStruct | LightcurveStruct | ImageStruct | SedStruct | SpectrumStruct:
+    """query(kind, source/pos, check_exists, **kwargs)
+    Returns a :ref:`data structure <Data Structures>` of a given type from a given survey. Accepted types are:
 
-    Returns data of a given type from a given survey.
+    - :ref:`data <data-query>`: returns survey data as listed in Vizier
+    - :ref:`phot <phot-query>`: returns only photometry from supported surveys
+    - :ref:`bulkphot <bulkphot-query>`: returns photometry from all supported surveys
+    - :ref:`reddening <reddening-query>`: returns reddening from a supported survey
+    - :ref:`lightcurve <lightcurve-query>`: returns light curve data from a supported survey
+    - :ref:`image <image-query>`: returns image data from a supported survey
+    - :ref:`hrd <hrd-query>`: returns Gaia Hertzsprung-Russell diagram data
+    - :ref:`sed <sed-query>`: returns spectral energy distribution data from all supported surveys
+    - :ref:`spectrum <spectrum-query>`: returns spectrum data from a supported survey
 
-    :param str kind: Type of query to perform, from:
+    The type of query to be performed is chosen via the 'kind' parameter:
 
-        - data: return survey data as listed in Vizier
-        - phot: return only photometry from supported surveys
-        - bulkphot: return photometry from all supported surveys
-        - reddening: return reddening from a supported survey
-        - lightcurve: return light curve data from a supported survey
-        - image: return image data from a supported survey
-        - hrd: return Gaia Hertzsprung-Russell diagram data
-        - sed: return spectral energy distribution data from all supported surveys
-        - spectrum: return spectrum data from a supported survey
+    :param kind: Type of query to perform, as listed above
+    :type kind: str
 
-    :param int source: Target GAIA DR3 Source ID
-    :param list<float> pos: Position [right ascension, declination] in degrees
+    |
 
-    Requires additional parameters depending on query type, and returns different data structures in each case.
+    :func:`query` requires additional parameters depending on query type, and returns different data structures in each case.
 
-    - kind = data
+    |
 
-    :param str survey: Target survey, from:
+    .. _data-query:
+    .. rubric:: Data Queries
+        :heading-level: 3
 
-        - any Vizier survey ID
-        - gaia
-        - panstarrs
-        - skymapper
-        - galex
-        - rosat
-        - sdss
-        - wise
-        - twomass (2MASS)
-        - erosita
+    :param survey: Target survey, from :ref:`supported surveys <Data Surveys>`
+    :type survey: str
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`query_data_radius <cfg_query_data_radius>` config key
+    :type radius: float, optional
+    :param check_exists: Path to check for existing data. If a file is found, data is generated without having to run a query. If a file is not found, query will go ahead and the resulting data will be saved to the requested Path for future executions. Defaults to None (i.e. this functionality is disabled)
+    :type check_exists: bool, optional
 
-    :param float, optional radius: Search radius in arcseconds, default: config
+    :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
 
-    :return: :ref:`DataStruct`
+    |
+
+    .. _phot-query:
+    .. rubric:: Photometry Queries
+        :heading-level: 3
+
+    :param survey: Target survey, from :ref:`supported surveys <Photometry Surveys>`
+    :type survey: str
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`query_phot_radius <cfg_query_phot_radius>` config key
+    :type radius: float, optional
+    :param check_exists: Path to check for existing data. If a file is found, data is generated without having to run a query. If a file is not found, query will go ahead and the resulting data will be saved to the requested Path for future executions. Defaults to None (i.e. this functionality is disabled)
+    :type check_exists: bool, optional
+
+    :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
+
+    |
+
+    .. _bulkphot-query:
+    .. rubric:: Bulkphot Queries
+        :heading-level: 3
+
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`query_bulkphot_radius <cfg_query_bulkphot_radius>` config key
+    :type radius: float, optional
+
+    :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
     :rtype: class
 
     |
 
-    - kind = phot
+    .. _reddening-query:
+    .. rubric:: Reddening Queries
+        :heading-level: 3
 
     :param str survey: Target survey, from:
 
-        - gaia
-        - panstarrs
-        - skymapper
-        - galex
-        - sdss
-        - wise
-        - twomass (2MASS)
+        - stilism - requires source input, **doesn't accept a radius**
+        - gdre - accepts source or pos input
 
-    :param float, optional radius: Search radius in arcseconds, default: config
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`query_reddening_radius <cfg_query_reddening_radius>` config key
+    :type radius: float, optional
 
-    :return: :ref:`DataStruct`
-    :rtype: class
 
-    |
-
-    - kind = bulkphot
-
-    :param float, optional radius: Search radius in arcseconds, default: config
-
-    :return: :ref:`DataStruct`
-    :rtype: class
+    :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
 
     |
 
-    - kind = reddening
+    .. _lightcurve-query:
+    .. rubric:: Light Curve Queries
+        :heading-level: 3
 
-    :param str survey: Target survey, from:
+    :param survey: Target survey, from :ref:`supported surveys <Light Curve Surveys>`
+    :type survey: str
 
-        - stilism, requires source input, doesn't accept a radius
-        - gdre, accepts source or pos input
+    :param radius: Search radius in arcseconds, default given by :ref:`query_lightcurve_radius <cfg_query_lightcurve_radius>` config key
+    :param raw: Return raw data with no filtering, defaults to False
+    :type raw: bool, optional
+    :param username: ATLAS username, only required in ATLAS queries. Default given by :ref:`query_lightcurve_atlas_username <cfg_query_lightcurve_atlas_username>` config key
+    :type usename: str, optional
+    :param password: ATLAS password, only required in ATLAS queries. Default given by :ref:`query_lightcurve_atlas_password <cfg_query_lightcurve_atlas_password>` config key
+    :type password: str, optional
 
-    :param float, optional radius: Search radius in arcseconds, default: config
-
-    :return: :ref:`DataStruct`
-    :rtype: class
-
-    |
-
-    - kind = lightcurve
-
-    :param str survey: Target survey, from:
-
-        - atlas, requires username and password
-        - ztf
-        - crts
-        - asassn
-        - gaia
-        - tess
-
-    :param float, optional radius: Search radius in arcseconds, default: config
-    :param bool, optional raw: Return raw data with no filtering, default: False
-    :param str, optional username: ATLAS username, only required in ATLAS queries
-    :param str, optional password: ATLAS password, only required in ATLAS queries
-
-    :return: :ref:`LightcurveStruct`
-    :rtype: class
+    :return: :class:`LightcurveStruct <AstroToolkit.Data.lightcurvequery.LightcurveStruct>`
 
     |
 
-    - kind = image
+    .. _image-query:
+    .. rubric:: Image Queries
+        :heading-level: 3
 
-    :param str survey: Target survey, from:
+    :param survey: Target survey, from :ref:`supported surveys <Image Surveys>`
+    :type survey: str
 
-        - panstarrs, accepted bands = grizy
-        - skymapper, accepted bands = grizuv
-        - dss, accepted bands = g
+    :param size: Size of image in arcseconds, default given by :ref:`query_image_size <cfg_query_image_size>` config key
+    :param size: float, optional
+    :param band: All required image bands as a single string (see :ref:`supported bands <Image Surveys>`). E.g. 'grizy' for all panstarrs bands. Defaults to 'g'
+    :type band: str, optional
+    :param overlays: Required detection overlays. Accepts any :ref:`data survey <Data Surveys>` or :ref:`light curve survey <Light Curve Surveys>`
+    :type overlays: list<str>, optional
 
-    :param float, optional size: Size of image in arcseconds, default: config
-    :param str, optional, band: All required image bands (as listed above) as a single string. E.g. 'grizy' for all panstarrs bands. Default = g
-    :param list<str>, optional overlays: Required detection overlays from:
+    **Note:** use 'gaia_lc' for Gaia light curve overlays, and 'gaia' for gaia detection overlays
 
-        - gaia
-        - galex
-        - wise
-        - sdss
-        - twomass  (2MASS)
-        - skymapper
-        - panstarrs
-        - rosat
-        - erosita
-        - atlas
-        - gaia_lc (Gaia light curve)
-        - asassn
-        - crts
-        - ztf
+    The default band in the detection overlay of a given survey is taken from the relevant :ref:`[survey]_overlay_mag <Image Overlay Settings>` config key. If you wish to use multiple bands from a single survey, detections can instead be requested using a dictionary.
 
-    The bands used in these detection overlays are taken from the config. If you wish to use multiple bands from a single survey, detections can instead be requested using a dict. E.g. to use all Gaia magnitudes:
+    E.g. to request an overlay that includes all Gaia magnitudes:
 
     .. code-block::  python
 
         overlays={'gaia':['phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_mag']}
 
-    :return: :ref:`ImageStruct`
-    :rtype: class
+    :return: :class:`ImageStruct <AstroToolkit.Data.imagequery.ImageStruct>`
 
     |
 
-    - kind = hrd
+    .. _hrd-query:
+    .. rubric:: HRD Queries
+        :heading-level: 3
 
-    :param list<int> sources: Target Gaia DR3 source(s)
+    :param sources: List of target Gaia DR3 sources
+    :type sources: list<int>
 
-    :return: :ref:`HrdStruct`
-    :rtype: class
-
-    |
-
-    - kind = sed
-
-    :param float, optional radius: Search radius in arcseconds, default: config
-
-    :return: :ref:`SedStruct`
-    :rtype: class
+    :return: :class:`HrdStruct <AstroToolkit.Data.hrdquery.HrdStruct>`
 
     |
 
-    - kind = spectrum
+    .. _sed-query:
+    .. rubric:: SED Queries
+        :heading-level: 3
 
-    :param str survey: Target survey, from:
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`query_sed_radius <cfg_query_sed_radius>` config key
+    :type radius: float, optional
 
-        - sdss
+    :return: :class:`SedStruct <AstroToolkit.Data.sedquery.SedStruct>`
 
-    :param float, optional radius: Search radius in arcseconds, default: config
+    |
 
-    :return: :ref:`SpectrumStruct`
-    :rtype: class
+    .. _spectrum-query:
+    .. rubric:: Spectrum Queries
+        :heading-level: 3
+
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param survey: Target survey, from :ref:`supported surveys <Spectrum Surveys>`
+    :type survey: str
+    :param radius: Search radius in arcseconds, default given by :ref:`query_spectrum_radius <cfg_query_spectrum_radius>` config key
+    :type radius: float, optional
+
+    :return: :class:`SpectrumStruct <AstroToolkit.Data.spectrumquery.SpectrumStruct>`
 
     |
 
     """
+    retry_count, data_found = 0, False
+
+    save_data = False
+    if check_exists:
+        import os
+        from pathlib import Path
+
+        try:
+            path = Path(check_exists)
+        except:
+            raise ValueError("Invalid path.")
+
+        base_file = os.path.basename(path)
+        if not base_file.endswith(".fits"):
+            base_file += ".fits"
+        path = Path(os.path.join(path.parent.absolute(), base_file))
+
+        if path.is_file():
+            print(f"Note: existing {kind} data found in {path}")
+            return readdata(path)
+        else:
+            save_data = True
 
     from .Data.dataquery import query as data_query
 
     config.read_config()
 
-    from .Input.input_validation import check_inputs
-
-    if not isinstance(overlays, (list, dict)) and overlays != "config":
-        overlays = [overlays]
-
-    inputs = check_inputs(
-        {
-            "survey": survey,
-            "radius": radius,
-            "pos": pos,
-            "source": source,
-            "size": size,
-            "band": band,
-            "username": username,
-            "password": password,
-            "overlays": overlays,
-            "sources": sources,
-        },
-        kind,
-    )
-
-    survey, radius, pos, source, size, band, username, password, overlays, sources = (
-        inputs["survey"],
-        inputs["radius"],
-        inputs["pos"],
-        inputs["source"],
-        inputs["size"],
-        inputs["band"],
-        inputs["username"],
-        inputs["password"],
-        inputs["overlays"],
-        inputs["sources"],
-    )
-
+    # gets config values (if required by given query kind)
     if radius == "config" and kind != "image" and kind != "hrd":
         radius = float(getattr(config, f"query_{kind}_radius"))
     if size == "config":
@@ -258,130 +270,136 @@ def query(
         survey = "Gaia"
         radius = None
 
-    if (
-        config.enable_notifications == "True"
-        and level != "internal"
-        and kind not in ["image", "bulkphot", "sed", "hrd"]
-    ):
-        print(
-            f"Running {survey} {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
-        )
-    elif (
-        config.enable_notifications == "True"
-        and level != "internal"
-        and kind == "image"
-    ):
-        print(
-            f"Running {survey} {kind} query{newline}source = {source}{newline}pos = {pos}{newline}size = {size}{newline}"
-        )
-    elif (
-        config.enable_notifications == "True"
-        and level != "internal"
-        and kind in ["bulkphot", "sed"]
-    ):
-        print(
-            f"Running {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
-        )
-    elif (
-        config.enable_notifications == "True"
-        and level != "internal"
-        and kind in ["hrd"]
-    ):
-        print(f"Running {kind} query{newline}sources = {sources}{newline}")
+    # check inputs
+    corrected_inputs = check_inputs(
+        {
+            "kind": [kind, str],
+            "survey": [survey, str],
+            "radius": [radius, float],
+            "pos": [pos, list],
+            "source": [source, int],
+            "size": [size, float],
+            "band": [band, str],
+            "username": [username, str],
+            "password": [password, str],
+            "overlays": [overlays, list],
+            "sources": [sources, list],
+            "level": [level, str],
+            "raw": [raw, bool],
+        },
+        label="query",
+        check_targeting=True,
+    )
 
-    if kind == "data":
-        data = data_query(survey=survey, radius=radius, pos=pos, source=source)
-        if source and survey == "gaia" and data.data:
-            data.pos = [data.data["ra"][0], data.data["dec"][0]]
-        elif source and survey != "gaia":
-            gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source)
-            if gaia_data.data:
-                data.pos = [gaia_data.data["ra"][0], gaia_data.data["dec"][0]]
-            else:
-                return data
+    # get validated inputs
+    (kind, survey, radius, pos, source, size, band, username, password, overlays, sources, level, raw) = (
+        corrected_inputs
+    )
 
-    elif kind == "spectrum":
-        from .Data.spectrumquery import query as spectrum_query
-
-        data = spectrum_query(survey=survey, radius=radius, pos=pos, source=source)
-
-    elif kind == "image":
-        from .Data.imagequery import query as image_query
-
-        if survey == "any":
-            for survey in ["panstarrs", "skymapper", "dss"]:
-                data = image_query(
-                    survey=survey,
-                    size=size,
-                    band=band,
-                    pos=pos,
-                    source=source,
-                    overlays=overlays,
-                )
-                if data.data:
-                    break
+    # Handles notification output depending on query kind
+    if config.enable_notifications and level != "internal":
+        if kind == "image":
+            print(
+                f"{newline}Running {survey} {kind} query{newline}source = {source}{newline}pos = {pos}{newline}size = {size}{newline}"
+            )
+        elif kind in ["bulkphot", "sed"]:
+            print(
+                f"{newline}Running {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
+            )
+        elif kind in ["hrd"]:
+            print(f"{newline}Running {kind} query{newline}sources = {sources}{newline}")
         else:
-            data = image_query(
-                survey=survey,
-                size=size,
-                band=band,
-                pos=pos,
-                source=source,
-                overlays=overlays,
+            print(
+                f"{newline}Running {survey} {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
             )
 
-    elif kind == "lightcurve":
-        from .Data.lightcurvequery import query as lightcurve_query
+    # perform queries based on kind
+    while retry_count < retry and not data_found:
+        if retry_count > 0:
+            print(f"{newline}Retrying... (attempt #{retry_count + 1}){newline}")
 
-        data = lightcurve_query(
-            survey=survey,
-            radius=radius,
-            pos=pos,
-            source=source,
-            username=username,
-            password=password,
-            raw=raw,
-        )
+        if kind == "data":
+            data = data_query(survey=survey, radius=radius, pos=pos, source=source)
 
-    elif kind == "phot":
-        from .Data.photquery import query as phot_query
+            if source and survey == "gaia" and data.data:
+                data.pos = [data.data["ra"][0], data.data["dec"][0]]
+            elif source and survey != "gaia":
+                gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source)
+                if gaia_data.data:
+                    data.pos = [gaia_data.data["ra"][0], gaia_data.data["dec"][0]]
+                else:
+                    return data
 
-        data = phot_query(pos=pos, source=source, radius=radius, survey=survey)
-    elif kind == "bulkphot":
-        from .Data.photquery import bulkphot_query
+        elif kind == "spectrum":
+            from .Data.spectrumquery import query as spectrum_query
 
-        data = bulkphot_query(pos=pos, source=source, radius=radius)
-    elif kind == "sed":
-        from .Data.sedquery import query as sed_query
+            data = spectrum_query(survey=survey, radius=radius, pos=pos, source=source)
 
-        data = sed_query(pos=pos, source=source, radius=radius)
-    elif kind == "reddening":
-        from .Data.reddeningquery import query as reddening_query
+        elif kind == "image":
+            from .Data.imagequery import query as image_query
 
-        data = reddening_query(survey=survey, source=source, pos=pos, radius=radius)
-    elif kind == "hrd":
-        from .Data.hrdquery import gather_data
+            data = image_query(survey=survey, size=size, band=band, pos=pos, source=source, overlays=overlays)
 
-        data = gather_data(sources)
-    else:
-        raise Exception("Invalid kind passed to query.")
+        elif kind == "lightcurve":
+            from .Data.lightcurvequery import query as lightcurve_query
+
+            data = lightcurve_query(
+                survey=survey, radius=radius, pos=pos, source=source, username=username, password=password, raw=raw
+            )
+
+        elif kind == "phot":
+            from .Data.photquery import query as phot_query
+
+            data = phot_query(pos=pos, source=source, radius=radius, survey=survey)
+        elif kind == "bulkphot":
+            from .Data.photquery import bulkphot_query
+
+            data = bulkphot_query(pos=pos, source=source, radius=radius)
+        elif kind == "sed":
+            from .Data.sedquery import query as sed_query
+
+            data = sed_query(pos=pos, source=source, radius=radius)
+        elif kind == "reddening":
+            from .Data.reddeningquery import query as reddening_query
+
+            data = reddening_query(survey=survey, source=source, pos=pos, radius=radius)
+        elif kind == "hrd":
+            from .Data.hrdquery import gather_data
+
+            data = gather_data(sources)
+
+        if kind in ["lightcurve"]:
+            for band in data.data:
+                if band["mag"]:
+                    data_found = True
+            if not data_found:
+                retry_count += 1
+        else:
+            if not data.data:
+                retry_count += 1
+            else:
+                data_found = True
 
     from .Misc.identifier_generation import identifier_from_pos
 
+    # generates identifier
     if hasattr(data, "source"):
-        if data.source and data.data:
+        if data.source:
             gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source)
             if gaia_data.data:
                 ra, dec = gaia_data.data["ra2000"][0], gaia_data.data["dec2000"][0]
                 data.identifier = identifier_from_pos([ra, dec])
+                data.pos = [ra, dec]
+            else:
+                raise ValueError(f"Could not find Gaia Source: {data.source}")
         else:
             data.identifier = identifier_from_pos(data.pos)
-    elif hasattr(data, "sources") and data.data:
+
+    # generates identifiers in HRD queries
+    elif hasattr(data, "sources"):
         identifiers = []
         for source in data.sources:
-            gaia_data = data_query(
-                survey="gaia", radius=radius, pos=pos, source=source
-            ).data
+            gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source).data
             ra, dec = gaia_data["ra2000"][0], gaia_data["dec2000"][0]
             identifiers.append(identifier_from_pos([ra, dec]))
         data.identifiers = identifiers
@@ -390,52 +408,78 @@ def query(
 
     from .FileHandling.file_naming import name_file
 
+    # generates data names
     fname = name_file(data)
     data.dataname = fname
 
+    # generates plot names
     if kind not in ["data", "phot", "bulkphot", "reddening"]:
         from .FileHandling.file_naming import generate_plotname
 
         generate_plotname(data)
 
+    if save_data:
+        data.savedata(check_exists)
+
     return data
 
 
 def correctpm(
-    input_survey=None,
-    target_survey=None,
-    pos=None,
-    source=None,
-    input_time=None,
-    target_time=None,
-    pmra=None,
-    pmdec=None,
-):
-    """correctpm(source/pos, *)
-    Corrects a system's coordinates for proper motion between times or supported surveys.
+    input_survey: str = None,
+    target_survey: str = None,
+    pos: list[float] = None,
+    source: int = None,
+    input_time: list[int] = None,
+    target_time: list[int] = None,
+    pmra: float = None,
+    pmdec: float = None,
+) -> list[float]:
+    """correctpm(source/pos, **kwargs)
+    Corrects coordinates for proper motion between times or supported surveys.
 
-    :param int source: Target GAIA DR3 Source ID
-    :param list<float> pos: Position [right ascension, declination] in degrees
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
 
-    Also additional parameters depending on whether a source or pos is used:
+    **Note:** Additional parameters are required depending on whether a source or pos is used:
 
-    - for source input, requires one of:
+    |
 
-    :param str target_survey: any supported survey in any supported query type
-    :param list<int> target_time: time to correct coordinates to in format [year,month]
+    .. rubric:: Source Input
+        :heading-level: 3
 
-    - for pos input, requires:
+    Requires one of:
 
-    :param list<int> input_time: epoch of supplied coordinates in format [year,month]
-    :param list<int> target_time: time to correct coordinates to in format [year,month]
-    :param float pmra: proper motion in right ascension in mas/yr
-    :param float pmdec: proper motion in declination in mas/yr
+    :param target_survey: any :ref:`supported survey <Supported Surveys>`
+    :type target_survey: str
+    :param target_time: target time in format [year,month]
+    :type target_time: list<int>
+
+    .. rubric:: Pos Input
+        :heading-level: 3
+
+    Requires:
+
+    :param input_time: epoch of supplied coordinates in format [year,month]
+    :type input_time: list<int>
+    :param target_time: target time in format [year,month]
+    :type target_time: list<int>
+    :param pmra: proper motion in right ascension in mas/yr
+    :type pmra: float
+    :param pmdec: proper motion in declination in mas/yr
+    :type pmdec: float
 
     or
 
-    :param str input_survey: any supported survey in any supported query type
-    :param str target_survey: any supported survey in any supported query type
-
+    :param input_survey: any :ref:`supported survey <Supported Surveys>`
+    :type input_survey: str
+    :param target_survey: any :ref:`supported survey <Supported Surveys>`
+    :type target_survey: str
+    :param pmra: proper motion in right ascension in mas/yr
+    :type pmra: float
+    :param pmdec: proper motion in declination in mas/yr
+    :type pmdec: float
 
     :return: [right ascension, declination] in degrees
     :rtype: list<int>
@@ -443,32 +487,23 @@ def correctpm(
     |
 
     """
-    from .Input.input_validation import check_inputs
 
-    inputs = check_inputs(
+    corrected_inputs = check_inputs(
         {
-            "input_survey": input_survey,
-            "target_survey": target_survey,
-            "pos": pos,
-            "source": source,
-            "input_time": input_time,
-            "target_time": target_time,
-            "pmra": pmra,
-            "pmdec": pmdec,
+            "input_survey": [input_survey, str],
+            "target_survey": [target_survey, str],
+            "pos": [pos, list],
+            "source": [source, int],
+            "input_time": [input_time, list],
+            "target_time": [target_time, list],
+            "pmra": [pmra, float],
+            "pmdec": [pmdec, float],
         },
-        "correctpm",
+        label="correctpm",
+        check_targeting=True,
     )
 
-    input_survey, target_survey, pos, source, input_time, target_time, pmra, pmdec = (
-        inputs["input_survey"],
-        inputs["target_survey"],
-        inputs["pos"],
-        inputs["source"],
-        inputs["input_time"],
-        inputs["target_time"],
-        inputs["pmra"],
-        inputs["pmdec"],
-    )
+    input_survey, target_survey, pos, source, input_time, target_time, pmra, pmdec = corrected_inputs
 
     if source and target_time:
         from .Misc.pmcorrection import autocorrect_source
@@ -486,36 +521,33 @@ def correctpm(
     elif pos and input_survey and target_survey:
         from .Misc.pmcorrection import autocorrect_survey
 
-        corrected_pos = autocorrect_survey(
-            input_survey, target_survey, ra=pos[0], dec=pos[1], pmra=pmra, pmdec=pmdec
-        )
+        corrected_pos = autocorrect_survey(input_survey, target_survey, ra=pos[0], dec=pos[1], pmra=pmra, pmdec=pmdec)
     else:
-        raise Exception("Invalid input combination passed to correctpm.")
+        raise ValueError("Invalid input combination passed to correctpm.")
 
     return corrected_pos
 
 
-def readdata(fname):
-    """
-    Reads data from a local file created by ATK, recreating the inital data structure.
+def readdata(fname: str) -> DataStruct | HrdStruct | LightcurveStruct | ImageStruct | SedStruct | SpectrumStruct:
+    """readdata(fname)
+    Reads data from a local file created by ATK, recreating the data structure.
 
-    :param str fname: name of file from which to read
+    :param fname: name of file from which to read
+    :type fname: str
 
-    :return: ATK Data Structure of same type as original data
-    :rtype: class
+    :return: :ref:`ATK Data Structure <Data Structures>`
 
     |
 
     """
     from .FileHandling.file_reading import read_local_file
-    from .Input.input_validation import check_inputs
 
-    inputs = check_inputs({"fname": fname}, "readdata")
-    fname = inputs["fname"]
+    corrected_inputs = check_inputs({"fname": [fname, str]}, "readdata")
+    fname = corrected_inputs[0]
 
     config.read_config()
-    if config.enable_notifications == "True":
-        print(f"Recreating data from local storage: {fname}{newline}")
+    if config.enable_notifications:
+        print(f"Recreating data from local storage: {fname}")
 
     from .FileHandling.file_naming import name_file
 
@@ -527,52 +559,23 @@ def readdata(fname):
 
         generate_plotname(struct)
 
-    def savedata(self, fname=None):
-        if fname:
-            if self.kind != "image":
-                if not fname.endswith(".csv"):
-                    fname += ".csv"
-            else:
-                if not fname.endswith(".fits"):
-                    fname += ".fits"
-        else:
-            fname = self.dataname
-
-        from .FileHandling.file_writing import generate_local_file
-
-        success = generate_local_file(self, fname)
-
-        if success:
-            config.read_config()
-            if config.enable_notifications == "True":
-                print(f"Saving data to local storage: {fname}{newline}")
-
-        return fname
-
-    import types
-
-    struct.savedata = types.MethodType(savedata, struct)
-
-    from .Data.data_printing import print_data
-
-    struct.showdata = types.MethodType(print_data, struct)
-
     return struct
 
 
-def search(kind, radius="config", source=None, pos=None):
+def search(kind: str, radius: float = "config", source: int = None, pos: float = None) -> None:
     """search(kind,source/pos, *)
 
     Searches for a given target in Vizier or SIMBAD.
 
-    :param str kind: where to search for target, from:
+    :param kind: where to search for target, from 'vizier', 'simbad'
+    :type kind: str
 
-        - vizier
-        - simbad
-
-    :param int source: Target GAIA DR3 Source ID
-    :param list<float> pos: Position [right ascension, declination] in degrees
-    :param float, optional radius: radius of search in arcseconds, default = config
+    :param source: Target GAIA DR3 Source ID
+    :type source: int
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+    :param radius: Search radius in arcseconds, default given by :ref:`search_radius <cfg_search_radius>` config key
+    :type radius: float, optional
 
     :return: None
 
@@ -580,39 +583,76 @@ def search(kind, radius="config", source=None, pos=None):
 
     """
 
-    from .Input.input_validation import check_inputs
     from .Misc.search import do_search
-
-    inputs = check_inputs(
-        {"kind": kind, "radius": radius, "source": source, "pos": pos}, "search"
-    )
-    kind, radius, source, pos = (
-        inputs["kind"],
-        inputs["radius"],
-        inputs["source"],
-        inputs["pos"],
-    )
 
     config.read_config()
     if radius == "config":
         radius = float(config.search_radius)
 
-    if config.enable_notifications == "True":
-        print(
-            f"Running {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
-        )
+    corrected_inputs = check_inputs(
+        {"kind": [kind, str], "radius": [radius, float], "source": [source, int], "pos": [pos, list]},
+        "search",
+        check_targeting=True,
+    )
+    kind, radius, source, pos = corrected_inputs
+
+    if config.enable_notifications:
+        print(f"Running {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}")
 
     do_search(kind=kind, radius=radius, source=source, pos=pos)
 
     return None
 
 
+def deg2hms(pos):
+    """
+    Converts coordinates in degrees to HMS±DMS format.
+
+    :param pos: Position [right ascension, declination] in degrees
+    :type pos: list<float>
+
+    :return: coordinates in HMS±DMS format
+    :rtype: str
+
+    |
+
+    """
+    from .Misc.identifier_generation import identifier_from_pos
+
+    corrected_inputs = check_inputs({"pos": [pos, list]}, "deg2hms")
+    pos = corrected_inputs["pos"]
+
+    return identifier_from_pos(pos, kind="conversion")
+
+
+def hms2deg(identifier):
+    """
+    Converts coordinates in HMS±DMS format to degrees.
+
+    :param str pos: position of target in HMS±DMS format, i.e. HHMMSS.SS...±DDMMSS.SS...
+
+    :return: [right ascension, declination] in degrees
+    :rtype: list<float>
+
+    |
+
+    """
+    from .Misc.coordinate_conversions import conv_hms_to_deg
+
+    corrected_inputs = check_inputs({"identifier": [identifier, str]}, "hms2deg")
+    identifier = corrected_inputs["identifier"]
+
+    return conv_hms_to_deg(identifier)
+
+
 def readfits(fname, columns):
     """
     Reads columns from a .fits file.
 
-    :param str fname: name of file from which to read
-    :param list<str>/str columns: name(s) of column(s) to read
+    :param fname: name of file from which to read
+    :type fname: str
+    :param columns: names of column(s) to read
+    :type columns: list<str>
 
     :return: Returned column data. E.g. if [ra, dec] requested, returns [[ra], [dec]]
     :rtype: list<list>
@@ -623,8 +663,8 @@ def readfits(fname, columns):
     from .Input.input_validation import check_inputs
     from .Misc.fitsfiles import get_columns
 
-    inputs = check_inputs({"fname": fname, "columns": columns}, "readfits")
-    fname, columns = inputs["fname"], inputs["columns"]
+    corrected_inputs = check_inputs({"fname": [fname, str], "columns": [columns, list]}, "readfits")
+    fname, columns = corrected_inputs
 
     config.read_config()
     if config.enable_notifications:
@@ -633,68 +673,12 @@ def readfits(fname, columns):
     return get_columns(filename=fname, columns=columns)
 
 
-def deg2hms(pos):
-    """
-    Converts coordinates in degrees to HMS±DMS format.
+"""
+def getspectype(sources):
+    from .Misc.estimate_spectral_type import get_spectral_types
 
-    :param list<float> pos: Position [right ascension, declination] in degrees
+    corrected_inputs = check_inputs({"sources": [sources, list]}, "getspectype")
+    sources = corrected_inputs[0]
 
-    :return: coordinates in HMS±DMS format
-    :rtype: str
-
-    |
-
-    """
-    from .Input.input_validation import check_inputs
-    from .Misc.identifier_generation import identifier_from_pos
-
-    inputs = check_inputs({"pos": pos}, "deg2hms")
-    pos = inputs["pos"]
-
-    return identifier_from_pos(pos, kind="conversion")
-
-
-def hms2deg(pos):
-    """
-    Converts coordinates in HMS±DMS format to degrees.
-
-    :param str pos: position of target in HMS±DMS format, i.e. HHMMSS.SS... ± DDMMSS.SS...
-
-    :return: [right ascension, declination] in degrees
-    :rtype: list<float>
-
-    |
-
-    """
-    from .Input.input_validation import check_inputs
-    from .Misc.coordinate_conversions import conv_hms_to_deg
-
-    inputs = check_inputs({"pos": pos}, "hms2deg")
-    pos = inputs["pos"]
-
-    return conv_hms_to_deg(pos)
-
-
-def tsanalysis(data):
-    """
-    Opens GUI for PyAOV time series analysis.
-
-    :param class LightcurveStruct: Light curve data in format of ATK LightcurveStruct
-
-    :return: None
-
-    |
-
-    """
-
-    import os
-    from pathlib import Path
-
-    from .Timeseries.pyaov import pyaov
-    from .Timeseries.pyaov.pyaov_interface import get_analysis
-
-    # path = Path(pyaov.__file__).parent.absolute()
-    # if str(path) not in os.environ["PATH"]:
-    #    os.environ["PATH"] += str(path)
-
-    get_analysis(struct=data, gui=True)
+    return get_spectral_types(sources)
+"""

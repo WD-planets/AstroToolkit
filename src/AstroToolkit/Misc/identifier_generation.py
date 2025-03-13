@@ -40,8 +40,8 @@ def identifier_from_pos(pos, kind="identifier"):
         dec_str_arr[2] += str("{:.2f}".format(round(dec_remainder, 2))[2:])
         prefix = "J"
     elif kind == "conversion":
-        ra_str_arr[2] += str(ra_remainder)[2:]
-        dec_str_arr[2] += str(dec_remainder)[2:]
+        ra_str_arr[2] += str("{:.4f}".format(round(ra_remainder, 4))[2:])
+        dec_str_arr[2] += str("{:.4f}".format(round(dec_remainder, 4))[2:])
         prefix = ""
     else:
         raise Exception("Invalid type.")

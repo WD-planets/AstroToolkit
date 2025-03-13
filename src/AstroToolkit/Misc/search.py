@@ -8,7 +8,7 @@ class DbSearch(object):
         self.radius = radius
 
     def get_params(self):
-        from ..Data.dataquery import SurveyInfo
+        from ..PackageInfo import SurveyInfo
         from ..Tools import query
         from .pmcorrection import correctradius
 

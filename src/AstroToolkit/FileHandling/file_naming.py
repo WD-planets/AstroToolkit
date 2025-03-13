@@ -5,17 +5,16 @@ def name_file(struct):
         suffix = struct.kind
 
     if hasattr(struct, "survey"):
-        if struct.survey:
+        if struct.kind == "hrd":
+            survey = "gaia"
+        elif struct.survey:
             survey_str = f"{struct.survey}_"
         else:
             survey_str = ""
     else:
         survey_str = ""
 
-    if struct.kind == "image":
-        extension = ".fits"
-    else:
-        extension = ".csv"
+    extension = ".fits"
 
     if hasattr(struct, "source"):
         if struct.source:

@@ -1,110 +1,68 @@
-def crop_lightcurve(
-    struct,
-    start=None,
-    stop=None,
-    start_percent=None,
-    stop_percent=None,
-    timeformat="reduced",
-):
-    input_error = "Light curve cropping requires either: start, stop or start_percent, stop_percent"
-
+def crop_lightcurve(struct, start=None, stop=None, timeformat=None):
     data = struct.data
 
-    def filter_data(data, mask):
-        return [val for i, val in enumerate(data) if i not in mask]
+    def filter_data(band, mask):
+        return [val for i, val in enumerate(band) if i not in mask]
 
-    def crop(data):
-        cropped_data = []
-        for band in data:
-            if band["mag"] is None:
-                cropped_data.append(band)
-                continue
+    combined_time, time_units = [], []
+    for band in data:
+        if "mjd" in band:
+            time_unit = "mjd"
+        elif "hjd" in band:
+            time_unit = "hjd"
+        time_units.append(time_unit)
+        combined_time += band[time_unit]
+    sync_time = min(combined_time)
+    max_time = max(combined_time)
 
-            if timeformat == "reduced":
-                if "mjd" in band:
-                    time = band["mjd"]
-                elif "hjd" in band:
-                    time = band["hjd"]
-                else:
-                    raise Exception("Could not find time data in given band.")
-            if timeformat == "original":
-                if "mjd_ori" in band:
-                    time = band["mjd_ori"]
-                elif "hjd_ori" in band:
-                    time = band["hjd_ori"]
-                else:
-                    raise Exception("Could not find time data in given band.")
-
-            bad_indices = [i for i, val in enumerate(time) if val < start or val > stop]
-
-            data_remaining = True
-            if len(bad_indices) == len(band["mag"]):
-                data_remaining = False
-
-            for key in band:
-                if data_remaining:
-                    if key != "band":
-                        band[key] = filter_data(band[key], bad_indices)
-                else:
-                    if key != "band":
-                        band[key] = None
-
-            cropped_data.append(band)
-
-        return cropped_data
-
-    def crop_percent(data):
-        cropped_data = []
-        for band in data:
-            if band["mag"] is None:
-                cropped_data.append(band)
-                continue
-
-            if timeformat == "reduced":
-                if "mjd" in band:
-                    time = band["mjd"]
-                elif "hjd" in band:
-                    time = band["hjd"]
-                else:
-                    raise Exception("Could not find time data in given band.")
-            if timeformat == "original":
-                if "mjd_ori" in band:
-                    time = band["mjd_ori"]
-                elif "hjd_ori" in band:
-                    time = band["hjd_ori"]
-                else:
-                    raise Exception("Could not find time data in given band.")
-
-            bad_indices = [
-                i
-                for i, val in enumerate(time)
-                if val < (start_percent / 100 * max(time))
-                or val > (stop_percent / 100 * max(time))
-            ]
-
-            data_remaining = True
-            if len(bad_indices) == len(band["mag"]):
-                data_remaining = False
-
-            for key in band:
-                if data_remaining:
-                    if key != "band":
-                        band[key] = filter_data(band[key], bad_indices)
-                else:
-                    if key != "band":
-                        band[key] = None
-
-            cropped_data.append(band)
-
-        return cropped_data
-
-    if (start is not None and stop is not None) and (
-        start_percent is None and stop_percent is None
-    ):
-        return crop(data)
-    elif (start_percent is not None and stop_percent is not None) and (
-        start is None and stop is None
-    ):
-        return crop_percent(data)
+    if start[-1] == "%":
+        start = float(start.rstrip("%"))
+        start = sync_time + start / 100 * (max_time - sync_time)
     else:
-        raise ValueError(input_error)
+        start = float(start)
+        if timeformat == "reduced":
+            start += sync_time
+    if stop[-1] == "%":
+        stop = float(stop.rstrip("%"))
+        stop = sync_time + stop / 100 * (max_time - sync_time)
+    else:
+        stop = float(stop)
+        if timeformat == "reduced":
+            stop += sync_time
+
+    """ Old
+    if timeformat == "reduced" and kind == "time":
+        start += sync_time
+        stop += sync_time
+    if kind == "percent":
+        start = sync_time + start / 100 * (max_time - sync_time)
+        stop = sync_time + stop / 100 * (max_time - sync_time)
+    """
+
+    cropped_data = []
+    for i, band in enumerate(data):
+        # skips any bands that did not return any data
+        if not band["mag"]:
+            return band
+
+        # original time
+        time = band[time_unit]
+
+        bad_indices = [i for i, val in enumerate(time) if val < start or val > stop]
+
+        # if no data within requested range in time, band is empty -> None
+        data_remaining = True
+        if len(bad_indices) == len(band["mag"]):
+            data_remaining = False
+
+        for key in band:
+            if data_remaining:
+                if key != "band":
+                    band[key] = filter_data(band[key], bad_indices)
+            else:
+                if key != "band":
+                    band[key] = None
+
+        cropped_data.append(band)
+
+    return cropped_data

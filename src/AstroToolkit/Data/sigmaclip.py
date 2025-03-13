@@ -65,7 +65,6 @@ def sigma_clip(data, sigma, window_size=11):
         time_unit = "mjd"
 
     time_arr = data[time_unit]
-    time_ori_arr = data[time_unit + "_ori"]
     mag_arr = data["mag"]
     mag_err_arr = data["mag_err"]
     ra_arr = data["ra"]
@@ -77,7 +76,6 @@ def sigma_clip(data, sigma, window_size=11):
         sigma_clip_data.append(
             {
                 time_unit: time_arr[i],
-                f"{time_unit}_ori": time_ori_arr[i],
                 "mag": mag_arr[i],
                 "mag_err": mag_err_arr[i],
                 "ra": ra_arr[i],
@@ -85,9 +83,9 @@ def sigma_clip(data, sigma, window_size=11):
             }
         )
 
-    # sort by mjd_ori
+    # sort by time
     sigma_clip_data = sorted(
-        sigma_clip_data, key=itemgetter(f"{time_unit}_ori"), reverse=False
+        sigma_clip_data, key=itemgetter(f"{time_unit}"), reverse=False
     )
 
     sigma_clip_mag = []
@@ -102,11 +100,10 @@ def sigma_clip(data, sigma, window_size=11):
     except:
         sigma_clip_data = []
 
-    data['mag'] = [x["mag"] for x in sigma_clip_data]
-    data['mag_err'] = [x["mag_err"] for x in sigma_clip_data]
+    data["mag"] = [x["mag"] for x in sigma_clip_data]
+    data["mag_err"] = [x["mag_err"] for x in sigma_clip_data]
     data[time_unit] = [x[time_unit] for x in sigma_clip_data]
-    data[f'{time_unit}_ori'] = [x[f"{time_unit}_ori"] for x in sigma_clip_data]
-    data['ra'] = [x["ra"] for x in sigma_clip_data]
-    data['dec'] = [x["dec"] for x in sigma_clip_data]
+    data["ra"] = [x["ra"] for x in sigma_clip_data]
+    data["dec"] = [x["dec"] for x in sigma_clip_data]
 
     return data

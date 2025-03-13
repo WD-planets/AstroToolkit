@@ -2,19 +2,26 @@ import astropy.units as u
 import numpy as np
 from astropy.timeseries import LombScargle
 from bokeh import events
-from bokeh.models import CustomJS
+from bokeh.models import CustomJS, Range1d
 from bokeh.plotting import figure
 
 newline = "\n"
 
 
 def lomb_scargle(
-    data, freq=None, bins=None, foverlay=True, repeat=1, shift=0, survey=None
+    data,
+    freq=None,
+    bins=None,
+    foverlay=True,
+    repeat=1,
+    shift=0,
+    survey=None,
+    start_freq=0,
+    stop_freq=60,
+    samples=150000,
 ):
     class timeseries_data(object):
-        def __init__(
-            self, time, mag, mag_err, power, frequency, freq, foverlay, repeat, shift
-        ):
+        def __init__(self, time, mag, mag_err, power, frequency, freq, foverlay, repeat, shift):
             self.time = time
             self.mag = mag
             self.mag_err = mag_err
@@ -42,9 +49,13 @@ def lomb_scargle(
             plot.line(
                 x=self.frequency,
                 y=self.power,
-                legend_label=f"Max Frequency: {round(max_freq.value,2)} 1/d {newline}Period: {round(period.value,2)} h",
+                legend_label=f"Max Frequency: {round(max_freq.value, 2)} 1/d {newline}Period: {round(period.value, 2)} h",
             )
 
+            plot.y_range = Range1d(0, np.nanmax(self.power.value) * 1.1)
+            plot.x_range = Range1d(np.nanmin(self.frequency.value), np.nanmax(self.frequency.value))
+
+            plot.legend.click_policy = "hide"
             toggle_legend_js = CustomJS(
                 args=dict(leg=plot.legend[0]),
                 code="""
@@ -77,9 +88,7 @@ def lomb_scargle(
                     if len(mag[mask]) > 0:
                         bin_phase += [bphase + 0.5 / bins]
                         weights = 1 / (mag_err[mask] ** 2)
-                        baverage, norm = np.average(
-                            mag[mask], weights=weights, returned=True
-                        )
+                        baverage, norm = np.average(mag[mask], weights=weights, returned=True)
                         bin_y += [baverage]
                         bin_y_err += [1 / np.sqrt(norm)]
 
@@ -90,9 +99,7 @@ def lomb_scargle(
                 freq_multiplier = 1.0
             else:
                 best_frequency = self.phase_freq / u.day
-                freq_multiplier = (
-                    self.frequency[np.nanargmax(self.power)].value / best_frequency
-                ) / u.day
+                freq_multiplier = (self.frequency[np.nanargmax(self.power)].value / best_frequency) / u.day
 
             t_fit = np.linspace(0, 1 / best_frequency.value, 1000) * u.day
             ls = LombScargle(self.time, self.mag, self.mag_err)
@@ -106,12 +113,8 @@ def lomb_scargle(
 
             cut_indices = [i for i, val in enumerate(t_fit) if val > 1]
 
-            t_fit_formatted = [
-                val for i, val in enumerate(t_fit) if i not in cut_indices
-            ]
-            y_fit_formatted = [
-                val for i, val in enumerate(y_fit) if i not in cut_indices
-            ]
+            t_fit_formatted = [val for i, val in enumerate(t_fit) if i not in cut_indices]
+            y_fit_formatted = [val for i, val in enumerate(y_fit) if i not in cut_indices]
 
             median_mag = np.median(self.mag).value
 
@@ -148,9 +151,7 @@ def lomb_scargle(
                         (x + self.shift)
                         if (x + self.shift <= self.repeat and x + self.shift >= 0)
                         else (
-                            (x + self.shift + self.repeat)
-                            if (x + self.shift < 0)
-                            else (x + self.shift - self.repeat)
+                            (x + self.shift + self.repeat) if (x + self.shift < 0) else (x + self.shift - self.repeat)
                         )
                     )
                     for x in phase
@@ -160,27 +161,18 @@ def lomb_scargle(
                         (x + self.shift)
                         if (x + self.shift <= self.repeat and x + self.shift >= 0)
                         else (
-                            (x + self.shift + self.repeat)
-                            if (x + self.shift < 0)
-                            else (x + self.shift - self.repeat)
+                            (x + self.shift + self.repeat) if (x + self.shift < 0) else (x + self.shift - self.repeat)
                         )
                     )
                     for x in t_fit_formatted
                 ]
 
-                t_fit_formatted, y_fit_formatted = zip(
-                    *sorted(zip(t_fit_formatted, y_fit_formatted))
-                )
+                t_fit_formatted, y_fit_formatted = zip(*sorted(zip(t_fit_formatted, y_fit_formatted)))
 
             err_xs = [[x, x] for x in phase]
             err_ys = [[y - y_err, y + y_err] for y, y_err in zip(mag, mag_err)]
 
-            plot = figure(
-                width=400,
-                height=400,
-                x_axis_label="Phase",
-                y_axis_label="Magnitude (relative to median)",
-            )
+            plot = figure(width=400, height=400, x_axis_label="Phase", y_axis_label="Magnitude (relative to median)")
             plot.scatter(x=phase, y=mag, level="guide")
 
             if self.foverlay:
@@ -190,20 +182,15 @@ def lomb_scargle(
                     line_width=3,
                     line_color="black",
                     level="overlay",
-                    legend_label=f"Period: {round(24/(best_frequency.value),2)} h",
-                    alpha=0.75,
+                    legend_label=f"Period: {round(24 / (best_frequency.value), 2)} h",
+                    alpha=0.5,
                 )
 
-            plot.multi_line(
-                xs=err_xs,
-                ys=err_ys,
-                line_width=0.5,
-                level="glyph",
-                line_cap="square",
-            )
+            plot.multi_line(xs=err_xs, ys=err_ys, line_width=0.5, level="glyph", line_cap="square")
 
             plot.y_range.flipped = True
 
+            plot.legend.click_policy = "hide"
             if self.foverlay:
                 toggle_legend_js = CustomJS(
                     args=dict(leg=plot.legend[0]),
@@ -226,18 +213,14 @@ def lomb_scargle(
     try:
         time, mag, mag_err = format_data(data)
     except:
-        print(
-            "Note: No data passed to timeseries tool, suggests no light curve data was found."
-        )
+        print("Note: No data passed to timeseries tool, suggests no light curve data was found.")
         return None
 
     time, mag, mag_err = time * u.day, mag * u.mag, mag_err * u.mag
 
-    freqs = np.linspace(0, 60, 1500000) / u.day
+    freqs = np.linspace(start_freq, stop_freq, samples) / u.day
     power = LombScargle(time, mag, mag_err, fit_mean=False).power(freqs)
 
-    data_class = timeseries_data(
-        time, mag, mag_err, power, freqs, freq, foverlay, repeat, shift
-    )
+    data_class = timeseries_data(time, mag, mag_err, power, freqs, freq, foverlay, repeat, shift)
 
     return data_class
