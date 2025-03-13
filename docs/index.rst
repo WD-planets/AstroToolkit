@@ -95,5 +95,3 @@ I would also like to give thanks to Prof. Boris Gänsicke for his assistance and
    Misc/configkeys
 
    Misc/commandline
-
-   Misc/examples
