@@ -4,8 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt pyproject.toml
 #
-AstroToolkit
-    # self
+
 alabaster==0.7.16
     # via sphinx
 astropy==6.0.1
