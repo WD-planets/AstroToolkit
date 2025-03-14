@@ -7,10 +7,9 @@ dist/
 __pycache__/
 docs/_build/
 *.pyc
-*.egg-info
 *.html
 !docs/_static/*.html
 
 src/AstroToolkit/CRTS_TIMER.txt
-src/AstroToolkit/*.egg-info
+src/AstroToolkit.egg-info
 src/AstroToolkit/Timeseries/pyaov/path.dat
