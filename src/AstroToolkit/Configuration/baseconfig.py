@@ -4,7 +4,11 @@ import os
 from ..PackageInfo import SurveyInfo
 
 overlay_marker_surveys = SurveyInfo().marker_overlays
-keys_to_not_lower = ["query_lightcurve_atlas_username", "query_lightcurve_atlas_password", "font"]
+keys_to_not_lower = [
+    "query_lightcurve_atlas_username",
+    "query_lightcurve_atlas_password",
+    "font",
+]
 for survey in overlay_marker_surveys:
     keys_to_not_lower.append(f"{survey}_overlay_mag")
 
@@ -78,8 +82,19 @@ class ConfigStruct(object):
         sections.append(Config["search_settings"])
         sections.append(Config["datapage_settings"])
 
+        sections_strings = [
+            "global_settings",
+            "query_settings",
+            "image_overlay_settings",
+            "search_settings",
+            "datapage_settings",
+        ]
+
+        self.structured_out = {}
+
         # read config values, apply some transformations from str -> None/bool
-        for section in sections:
+        for section, section_str in zip(sections, sections_strings):
+            self.structured_out[section_str] = []
             for key, val in section.items():
                 if key not in keys_to_not_lower:
                     val = val.lower()
@@ -92,6 +107,7 @@ class ConfigStruct(object):
                 if key == "font":
                     val = val.title()
 
+                self.structured_out[section_str].append({key: val})
                 setattr(self, key, val)
 
     def write_config(self):
@@ -118,34 +134,78 @@ class ConfigStruct(object):
         config.add_section("query_settings")
         config.set("query_settings", "query_data_radius", self.query_data_radius)
         config.set("query_settings", "query_phot_radius", self.query_phot_radius)
-        config.set("query_settings", "query_bulkphot_radius", self.query_bulkphot_radius)
-        config.set("query_settings", "query_lightcurve_radius", self.query_lightcurve_radius)
-        config.set("query_settings", "query_spectrum_radius", self.query_spectrum_radius)
+        config.set(
+            "query_settings", "query_bulkphot_radius", self.query_bulkphot_radius
+        )
+        config.set(
+            "query_settings", "query_lightcurve_radius", self.query_lightcurve_radius
+        )
+        config.set(
+            "query_settings", "query_spectrum_radius", self.query_spectrum_radius
+        )
         config.set("query_settings", "query_sed_radius", self.query_sed_radius)
-        config.set("query_settings", "query_reddening_radius", self.query_reddening_radius)
+        config.set(
+            "query_settings", "query_reddening_radius", self.query_reddening_radius
+        )
         config.set("query_settings", "query_image_size", self.query_image_size)
         config.set("query_settings", "query_image_overlays", self.query_image_overlays)
         config.set("query_settings", "query_image_band", self.query_image_band)
-        config.set("query_settings", "query_lightcurve_atlas_username", self.query_lightcurve_atlas_username)
-        config.set("query_settings", "query_lightcurve_atlas_password", self.query_lightcurve_atlas_password)
+        config.set(
+            "query_settings",
+            "query_lightcurve_atlas_username",
+            self.query_lightcurve_atlas_username,
+        )
+        config.set(
+            "query_settings",
+            "query_lightcurve_atlas_password",
+            self.query_lightcurve_atlas_password,
+        )
 
         config.add_section("image_overlay_settings")
         config.set("image_overlay_settings", "gaia_overlay_mag", self.gaia_overlay_mag)
-        config.set("image_overlay_settings", "galex_overlay_mag", self.galex_overlay_mag)
+        config.set(
+            "image_overlay_settings", "galex_overlay_mag", self.galex_overlay_mag
+        )
         config.set("image_overlay_settings", "wise_overlay_mag", self.wise_overlay_mag)
         config.set("image_overlay_settings", "sdss_overlay_mag", self.sdss_overlay_mag)
-        config.set("image_overlay_settings", "twomass_overlay_mag", self.twomass_overlay_mag)
-        config.set("image_overlay_settings", "skymapper_overlay_mag", self.skymapper_overlay_mag)
-        config.set("image_overlay_settings", "panstarrs_overlay_mag", self.panstarrs_overlay_mag)
-        config.set("image_overlay_settings", "overlay_piggyback_radius", self.overlay_piggyback_radius)
-        config.set("image_overlay_settings", "overlay_simbad_search_radius", self.overlay_simbad_search_radius)
+        config.set(
+            "image_overlay_settings", "twomass_overlay_mag", self.twomass_overlay_mag
+        )
+        config.set(
+            "image_overlay_settings",
+            "skymapper_overlay_mag",
+            self.skymapper_overlay_mag,
+        )
+        config.set(
+            "image_overlay_settings",
+            "panstarrs_overlay_mag",
+            self.panstarrs_overlay_mag,
+        )
+        config.set(
+            "image_overlay_settings",
+            "overlay_piggyback_radius",
+            self.overlay_piggyback_radius,
+        )
+        config.set(
+            "image_overlay_settings",
+            "overlay_simbad_search_radius",
+            self.overlay_simbad_search_radius,
+        )
 
         config.add_section("search_settings")
         config.set("search_settings", "search_radius", self.search_radius)
 
         config.add_section("datapage_settings")
-        config.set("datapage_settings", "datapage_search_button_radius", self.datapage_search_button_radius)
-        config.set("datapage_settings", "datapage_datatable_radius", self.datapage_datatable_radius)
+        config.set(
+            "datapage_settings",
+            "datapage_search_button_radius",
+            self.datapage_search_button_radius,
+        )
+        config.set(
+            "datapage_settings",
+            "datapage_datatable_radius",
+            self.datapage_datatable_radius,
+        )
         config.set("datapage_settings", "datapage_font_size", self.datapage_font_size)
         config.set("datapage_settings", "datapage_grid_size", self.datapage_grid_size)
 
@@ -166,6 +226,10 @@ class ConfigStruct(object):
 
     def output_config(self):
         self.read_config()
-        for key, val in vars(self).items():
-            if key != "config_file":
-                print(f"{key} = {val}")
+        for label, section in self.structured_out.items():
+            print(f"[{label}]")
+            for entry in section:
+                for key, val in entry.items():
+                    print(f"{key} = {val}")
+
+            print()

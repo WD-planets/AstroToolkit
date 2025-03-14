@@ -13,6 +13,7 @@ To have a look at the current state of the config (which is also the default sta
     
     Current ATKConfig.ini values:
 
+    [global_settings]
     enable_notifications = True
     unit_size = 500
     output_backend = canvas
@@ -21,6 +22,8 @@ To have a look at the current state of the config (which is also the default sta
     show_titles = True
     font_size = 14
     font = Helvetica
+
+    [query_settings]
     query_data_radius = 3
     query_phot_radius = 3
     query_bulkphot_radius = 3
@@ -33,16 +36,22 @@ To have a look at the current state of the config (which is also the default sta
     query_image_band = g
     query_lightcurve_atlas_username = None
     query_lightcurve_atlas_password = None
+
+    [image_overlay_settings]
     gaia_overlay_mag = phot_g_mean_mag
     galex_overlay_mag = NUVmag
     wise_overlay_mag = W1mag
     sdss_overlay_mag = gPmag
-    twomass_overlay_mag = jmag
+    twomass_overlay_mag = Jmag
     skymapper_overlay_mag = gPSF
     panstarrs_overlay_mag = gmag
     overlay_piggyback_radius = 5
     overlay_simbad_search_radius = 3
+
+    [search_settings]
     search_radius = 3
+
+    [datapage_settings]
     datapage_search_button_radius = 3
     datapage_datatable_radius = 3
     datapage_font_size = 12
@@ -57,9 +66,10 @@ Config keys can be edited from the command line via the :ref:`ATKeditconfig` com
     ATKeditconfig query_data_radius 5
 
 .. code-block:: console
-
+    
     Written change to ATKConfig.ini. New Values:
 
+    [global_settings]
     enable_notifications = True
     unit_size = 500
     output_backend = canvas
@@ -68,6 +78,8 @@ Config keys can be edited from the command line via the :ref:`ATKeditconfig` com
     show_titles = True
     font_size = 14
     font = Helvetica
+
+    [query_settings]
     query_data_radius = 5
     ...
 
