@@ -1,5 +1,13 @@
+import os
+from pathlib import Path
+
 from AstroToolkit.Datapages import buttons, datapage, datatable
 from AstroToolkit.Tools import query
+
+from .examples_utilities import go_to_static
+
+file_dir = Path(__file__).parent.absolute()
+os.chdir(Path(__file__).parent.absolute())
 
 source = 587316166180416640
 
@@ -11,10 +19,15 @@ image = query(
     check_exists="datapage_image",
 ).plot()
 
-hrd = query(kind="hrd", sources=source, check_exists="datapage_hrd").plot()
+hrd = query(
+    kind="hrd", sources=source, check_exists=os.path.join(file_dir, "datapage_hrd")
+).plot()
 
 spectrum = query(
-    kind="spectrum", survey="sdss", source=source, check_exists="datapage_spectrum"
+    kind="spectrum",
+    survey="sdss",
+    source=source,
+    check_exists=os.path.join(file_dir, "datapage_spectrum"),
 ).plot()
 
 sed = query(kind="sed", source=source, check_exists="datapage_sed").plot(
@@ -22,11 +35,17 @@ sed = query(kind="sed", source=source, check_exists="datapage_sed").plot(
 )
 
 lightcurves = query(
-    kind="lightcurve", survey="ztf", source=source, check_exists="datapage_lightcurve"
+    kind="lightcurve",
+    survey="ztf",
+    source=source,
+    check_exists=os.path.join(file_dir, "datapage_lightcurve"),
 ).plot(colours=["green", "red", "blue"])
 
 powspec = query(
-    kind="lightcurve", survey="ztf", source=source, check_exists="datapage_lightcurve"
+    kind="lightcurve",
+    survey="ztf",
+    source=source,
+    check_exists=os.path.join(file_dir, "datapage_lightcurve"),
 ).plot(kind="powspec")
 
 buttons = buttons(source=source)
@@ -69,4 +88,5 @@ datapage = datapage(
     ],
 )
 
+go_to_static()
 datapage.showplot(f"{source}_datapage")
