@@ -55,7 +55,7 @@ We can now use one of the new methods to plot our data! The :func:`plot() <Astro
 
 .. code-block:: python
     
-    data.plot()
+    image_data.plot()
 
 Using :func:`showdata() <AstroToolkit.Data.imagequery.ImageStruct.showdata>` again reveals that the **figure** attribute of our data structure has now been filled:
 
@@ -87,7 +87,7 @@ We can open the resulting figure in the web browser using another of the new met
 
 .. code-block:: python
 
-   data.showplot()
+   image_data.showplot()
 
 .. _example-image:
 
@@ -96,3 +96,11 @@ We can open the resulting figure in the web browser using another of the new met
     <div align="center"><embed src="../_static/image.html" width=100% height=450></embed></div>
 
 And with that, we have recreated the image from the :ref:`first tutorial <Basic Info>`! Here, we first generated the plot using :func:`plot() <AstroToolkit.Data.imagequery.ImageStruct.plot>` and then opened it with :func:`showplot() <AstroToolkit.Data.imagequery.ImageStruct.showplot>`, but we since we did not customise the plot in any way we also could have just used :func:`showplot() <AstroToolkit.Data.imagequery.ImageStruct.showplot>` and one would have automatically been generated. The use case for :func:`plot() <AstroToolkit.Data.imagequery.ImageStruct.plot>` will be shown in the :ref:`next section <Plotting a Light Curve>`.
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import image_plotting 

@@ -46,6 +46,10 @@ We then import and create a custom :class:`ATK Lightcurve Structure <AstroToolki
 
 As we can see, we now have an empty :class:`LightcurveStruct <AstroToolkit.Data.lightcurvequery.LightcurveStruct>` which we can fill with data. Since we know the source (or position) of our data, we can get a head start by providing this to :class:`CustomLightcurveStruct <AstroToolkit.Models.CustomLightcurveStruct>`:
 
+.. code-block:: python
+
+    lightcurve = CustomLightcurveStruct(source=6050296829033196032).showdata()
+
 .. code-block:: console 
 
     Running gaia data query
@@ -104,3 +108,11 @@ And that is it! We can now use our external data throughout ATK as if it were of
 .. raw:: html
     
     <div align="center"><embed src="../_static/AR_Sco_TNT_Phasefold.html" width=100% height=500></embed></div>
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import external_data

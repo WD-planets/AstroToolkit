@@ -79,3 +79,11 @@ The :func:`query() <AstroToolkit.Tools.query>` tool also provides a **check_exis
     lightcurve_data = query(kind="lightcurve",source=6050296829033196032,survey="ztf",check_exists="test_lightcurve.fits")
 
 The first time this is run, a query will be performed since the file does not currently exist. The resulting light curve will be saved to local files under the filename "test_lightcurve.fits". Any future executions of this script will then recreate the data structure from local files instead of running a new query.
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import local_files

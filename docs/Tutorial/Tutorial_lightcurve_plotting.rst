@@ -117,3 +117,11 @@ Additional plotting options are available depending on the kind of data being pl
     <div align="center";><embed src="../_static/phasefold2.html" width=100% height=425></embed></div>
 
 For a full description of available parameters, see each :ref:`data structure's <Data Structures>` documentation.
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import lightcurve_plotting 

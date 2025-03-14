@@ -75,7 +75,7 @@ In :class:`DataStructs <AstroToolkit.Data.data.DataStruct>`, the resulting data 
 
 .. code-block:: python
 
-    print(galex_data["FUVmag"][0],galex_data["NUVmag"][0])
+    print(galex_data.data["FUVmag"][0],galex_data.data["NUVmag"][0])
 
 .. code-block:: console
 
@@ -96,3 +96,11 @@ We have now seen an example of a data query, but this is only one of many kinds 
 - spectrum query, returns a :class:`SpectrumStruct <AstroToolkit.Data.spectrumquery.SpectrumStruct>`
 
 While there are some differences between the various :ref:`data structures <Data Structures>` in ATK (more specifically, the format of their .data attribute will of course differ significantly), all share a similar form to the :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>` explored above.
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import data_fetching

@@ -6,7 +6,7 @@
 AstroToolkit Documentation
 ==========================
 
-AstroToolkit (ATK) is a set of tools for fetching, plotting, and analysing astronomical data. The package is in active development, so please report any issues/suggestions/contributions to its `GitHub repository <https://github.com/WD-planets/AstroToolkit>`_.
+AstroToolkit (ATK) is a set of tools for fetching, plotting, and analysing astronomical data. The package is in active development, so please report any issues/suggestions/contributions on `GitHub <https://github.com/WD-planets/AstroToolkit>`_.
 
 |
 
@@ -48,9 +48,7 @@ This project has received funding from the European Research Council (ERC) under
 
 |
 
-I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development, and particularly for his help in integrating the PyAOV time series analysis routines.
-
-I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package's development.
+I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development. I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package's development.
 
 |
 

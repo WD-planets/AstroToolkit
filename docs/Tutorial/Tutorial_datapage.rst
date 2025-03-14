@@ -117,3 +117,11 @@ The resulting datapage is shown below - try out the interactive elements!
 .. raw:: html
     
     <div align="center"><embed src="../_static/587316166180416640_datapage.html" width=100% height=1625</embed></div>
+
+|
+
+Note: The code used in this tutorial can be executed using:
+
+.. code-block:: python
+
+    from AstroToolkit.Examples import datapage_creation

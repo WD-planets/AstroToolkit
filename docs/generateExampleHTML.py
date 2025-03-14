@@ -39,7 +39,13 @@ data.figure = format(data.figure, 0.5, 0.5)
 output_file(os.path.join(base_path, "image.html"))
 save(data.figure)
 
-data = query(kind="lightcurve", source=6050296829033196032, survey="ztf", radius=3, check_exists="lightcurve.fits")
+data = query(
+    kind="lightcurve",
+    source=6050296829033196032,
+    survey="ztf",
+    radius=3,
+    check_exists="lightcurve.fits",
+)
 data.plot()
 data.figure = format(data.figure, change_size=False)
 output_file(os.path.join(base_path, "lightcurve1.html"))
@@ -65,7 +71,12 @@ data.figure = format(data.figure, 0.5, 0.5)
 output_file(os.path.join(base_path, "phasefold2.html"))
 save(data.figure)
 
-data = query(kind="lightcurve", pos=[141.185, 8.031], survey="ztf", check_exists="commandline_lightcurve.fits").plot()
+data = query(
+    kind="lightcurve",
+    pos=[141.185, 8.031],
+    survey="ztf",
+    check_exists="commandline_lightcurve.fits",
+).plot()
 data.figure = format(data.figure, change_size=False)
 output_file(os.path.join(base_path, "commandline_lightcurve.html"))
 save(data.figure)
@@ -76,12 +87,19 @@ import pandas as pd
 
 from AstroToolkit.Models import CustomLightcurveStruct
 
-data = pd.read_csv("AR_Sco_TNT.txt", delimiter="\s+", dtype=float)
+data = pd.read_csv(
+    "../src/AstroToolkit/Examples/AR_Sco_TNT.txt", delimiter="\s+", dtype=float
+)
 
 lightcurve = CustomLightcurveStruct(source=6050296829033196032)
 
 lightcurve.data = [
-    {"band": "g", "hjd": data["mjd"].tolist(), "mag": data["flux"].tolist(), "mag_err": data["error"].tolist()}
+    {
+        "band": "g",
+        "hjd": data["mjd"].tolist(),
+        "mag": data["flux"].tolist(),
+        "mag_err": data["error"].tolist(),
+    }
 ]
 lightcurve.survey = "TNT"
 
