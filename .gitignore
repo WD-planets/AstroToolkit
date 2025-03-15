@@ -1,4 +1,5 @@
 src/AstroToolkit/Configuration/ATKConfig.ini
+src/AstroToolkit/Configuration/ATKAliases.ini
 
 notes/
 test_scripts/

@@ -9,8 +9,8 @@ config = ConfigStruct()
 config.read_config()
 
 
-def editconfig(key: str, value: str) -> None:
-    """editconfig(key, value)
+def editConfig(key: str, value: str) -> None:
+    """editConfig(key, value)
     Edits config values. See :ref:`Config Keys` for a list and description of available keys.
 
     :param key: config key
@@ -24,7 +24,9 @@ def editconfig(key: str, value: str) -> None:
 
     """
 
-    corrected_inputs = check_inputs({"key": [key, str], "value": [value, str]}, "editconfig")
+    corrected_inputs = check_inputs(
+        {"key": [key, str], "value": [value, str]}, "editconfig"
+    )
     key, value = corrected_inputs
 
     print("Written change to ATKConfig.ini. New Values:\n")
@@ -33,8 +35,8 @@ def editconfig(key: str, value: str) -> None:
     return None
 
 
-def openconfig() -> None:
-    """
+def openConfig() -> None:
+    """openConfig()
     Opens the config in the default text editor. See :ref:`Config Keys` for a list and description of available keys.
 
     :return: None
@@ -59,8 +61,8 @@ def openconfig() -> None:
     return None
 
 
-def showconfig() -> None:
-    """
+def showConfig() -> None:
+    """showConfig()
     Prints the current config file to stdout.
 
     :return: None
@@ -75,8 +77,8 @@ def showconfig() -> None:
     return None
 
 
-def resetconfig() -> None:
-    """
+def resetConfig() -> None:
+    """resetConfig()
     Resets the config to default values. A list of available keys and their default values can be found in :ref:`Config Keys`.
 
     :return: None

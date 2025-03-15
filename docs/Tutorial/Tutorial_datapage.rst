@@ -104,9 +104,9 @@ We then use the :func:`datapage() <AstroToolkit.Datapages.datapage>` tool to gen
         ],
     )
 
-We start by specifying the total dimensions of the grid we wish to use (in this case 6x6). We then pass a list of data structures, giving them a label and specifying their individual dimensions within the grid. Here, we have used only elements provided by ATK, but any Bokeh figure may be used. Finally, we specify the layout of our grid row-by-row (columns are also supported, see :func:`datapage <AstroToolkit.Datapages.datapage>` for a full description.
+We start by specifying the total dimensions of the grid we wish to use (in this case 6x6). We then pass a list of data structures, giving them a label and specifying their individual dimensions within the grid. Here, we have used only elements provided by ATK, but any Bokeh figure may be used. Finally, we specify the layout of our grid row-by-row (columns are also supported, see :func:`datapage <AstroToolkit.Datapages.datapage>` for a full description).
 
-We then show the resulting datapage as we would with any other :ref:`data structure <Data Structures>` (although in this case providing a file name is required!):
+The :func:`datapage() <AstroToolkit.Datapages.datapage>` tool returns a :class:`Datapage <AstroToolkit.Misc.grid.Datapage>`, which acts similarly to the other :ref:`data structures <Data Structures>` that we have seen so far. We can hence show the resulting datapage as we would with any other :ref:`data structure <Data Structures>` (although in this case providing a file name is required!):
 
 .. code-block:: python
 

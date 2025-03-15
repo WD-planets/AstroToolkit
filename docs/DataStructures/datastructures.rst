@@ -13,3 +13,4 @@ Data Structures
    SpectrumStruct
    SedStruct
    HrdStruct
+   Datapage

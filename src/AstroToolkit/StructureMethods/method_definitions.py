@@ -57,7 +57,7 @@ def savedata(self, fname):
 
 def showplot(self, fname):
     """
-    Opens the figure stored in the 'figure' attribute in the default web browser, and saves it to local files. If the data structure doesn't yet ghold a figure, one will be generated with a default configuration first.
+    Opens the figure stored in the 'figure' attribute in the default web browser, and saves it to local files. If the data structure doesn't yet hold a figure, one will be generated with a default configuration first.
 
     :param fname: file name to save the figure to, defaults to file name given by the data structure's 'plotname' attribute
     :type fname: str, optional

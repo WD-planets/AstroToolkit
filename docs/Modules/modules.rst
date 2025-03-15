@@ -8,6 +8,7 @@ Modules
 
    Tools
    Datapages
+   Aliases
    Config
    Models
    Gui

@@ -18,6 +18,20 @@ data_structures = (DataStruct, HrdStruct, ImageStruct, LightcurveStruct, SedStru
 
 
 class Datapage(object):
+    """Datapage()
+    This structure is returned from the :func:`datapage() <AstroToolkit.Datapages.datapage>` tool.
+
+    .. rubric:: Attributes
+        :heading-level: 1
+
+    figure : *bokeh layout*
+        the stored datapage
+
+
+    |
+
+    """
+
     def __init__(self, figure):
         self.figure = figure
 
@@ -25,6 +39,16 @@ class Datapage(object):
         return "<ATK Datapage>"
 
     def showplot(self, fname=None):
+        """showplot(fname)
+
+        Opens the datapage stored in the ‘figure’ attribute in the default web browser, and saves it to local files.
+
+        :param fname: file name to save the datapage to
+        :type fname: str
+
+        |
+
+        """
         if not fname:
             raise ValueError("Datapage showplot() requires fname.")
 
@@ -34,6 +58,17 @@ class Datapage(object):
         show(self.figure)
 
     def saveplot(self, fname=None):
+        """saveplot(fname)
+
+        Saves the datapage stored in the 'figure' attribute to local files without opening it in the web browser.
+
+        :param fname: file name to save the figure to
+        :type fname: str
+
+        |
+
+        """
+
         if not fname:
             raise ValueError("Datapage saveplot() requires fname.")
 

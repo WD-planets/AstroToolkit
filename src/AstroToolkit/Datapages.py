@@ -13,12 +13,7 @@ config.read_config()
 newline = "\n"
 
 
-def buttons(
-    radius: float = "config",
-    grid_size: int = "config",
-    pos: list[float] = None,
-    source: int = None,
-) -> Button:
+def buttons(radius: float = "config", grid_size: int = "config", pos: list[float] = None, source: int = None) -> Button:
     """buttons(source/pos, **kwargs)
 
     Generates Vizier and SIMBAD search buttons for a given target.
@@ -45,12 +40,7 @@ def buttons(
         print(f"Generating datapage SIMBAD/Vizier buttons{newline}")
 
     corrected_inputs = check_inputs(
-        {
-            "radius": [radius, float],
-            "pos": [pos, list],
-            "source": [source, int],
-            "grid_size": [grid_size, int],
-        },
+        {"radius": [radius, float], "pos": [pos, list], "source": [source, int], "grid_size": [grid_size, int]},
         "buttons",
     )
     radius, pos, source, grid_size = corrected_inputs
@@ -61,15 +51,11 @@ def buttons(
     if grid_size == "config":
         grid_size = int(config.datapage_grid_size)
 
-    buttons = get_search_buttons(
-        radius=radius, source=source, pos=pos, grid_size=grid_size
-    )
+    buttons = get_search_buttons(radius=radius, source=source, pos=pos, grid_size=grid_size)
     return buttons
 
 
-def datatable(
-    entries: dict, source: int = None, pos: list[float] = None, radius: float = "config"
-) -> DataTable:
+def datatable(entries: dict, source: int = None, pos: list[float] = None, radius: float = "config") -> DataTable:
     """datatable(entries, source/pos, **kwargs)
     Generates a datatable for a given target.
 
@@ -175,12 +161,7 @@ def datatable(
     from .DatapageElements.metadata_table import gettable
 
     corrected_inputs = check_inputs(
-        {
-            "selection": [entries, list],
-            "source": [source, int],
-            "pos": [pos, list],
-            "radius": [radius, float],
-        },
+        {"selection": [entries, list], "source": [source, int], "pos": [pos, list], "radius": [radius, float]},
         "datatable",
     )
     entries, source, pos, radius = corrected_inputs
@@ -193,12 +174,10 @@ def datatable(
     return gettable(selection=entries, source=source, pos=pos, radius=radius)
 
 
-def datapage(
-    dimensions: dict, panels: list[dict], grid_size: int = "config", layout: list = None
-) -> dict:
+def datapage(dimensions: dict, panels: list[dict], grid_size: int = "config", layout: list = None) -> dict:
     """datapage(dimensions, panels, layout, **kwargs)
 
-    Assists in setting up figures for use in datapages by adjusting scaling, sizing and style.
+    Assists in generating datapages from a set of figures or ATK data structures by adjusting scaling, sizing, style and layout. See the :ref:`Creating a Datapage` tutorial for an example.
 
     :param dimensions: dimensions of datapage, in the form:
     :type dimensions: dict
@@ -213,28 +192,46 @@ def datapage(
     :param plots: list of plot entries with each entry in format:
     :type plots: list<dict>
 
-    .. code-block:: python
+    .. code-block:: console
 
         entry = {
-                'name': name
-                'figure': figure
-                'width': width
-                'height': height
+                'name': name to assign to the figure
+                'figure': The figure to give this panel, this can either be an ATK structure that supports plotting (lightcurve, image, etc.)
+                          or a Bokeh figure. If filling empty space, None can instead be passed to create a blank panel
+                'width': width of panel in grid units
+                'height': height of panel in grid units
                 }
 
-    where:
+    :param layout: layout of grid, e.g.:
+    :type layout: list<list>
 
-    :param name: name to assign to the figure
-    :type name: str
-    :param figure: The figure to give this panel, this can either be an ATK structure that supports plotting (lightcurve, image, etc.) or a Bokeh figure. If filling empty space, None can instead be passed to create a blank panel.
-    :type figure: Plottable :ref:`ATK Data Structure <Data Structures>`/Bokeh figure/None
-    :param width: width of panel in grid units
-    :type width: int
-    :param height: height of panel in grid units
-    :type height: int
+    .. code-block:: console
 
-    :return: Dictionary with keys: names as given above, values: adjusted plots
-    :rtype: dict
+        layouts = [
+            [plot0, plot1, [plot2, plot3]],
+            [plot4, plot5, plot6],
+            [plot7, plot8, plot9],
+        ]
+
+    Which would generate the following datapage (assuming all panel sizes were set correctly):
+
+    .. code-block:: console
+
+        +---------+---------+---------+
+        |         |         |  plot2  |
+        |  plot0  |  plot1  +---------+
+        |         |         |  plot3  |
+        +---------+---------+---------+
+        |         |         |         |
+        |  plot4  |  plot5  |  plot6  |
+        |         |         |         |
+        +---------+---------+---------+
+        |         |         |         |
+        |  plot7  |  plot8  |  plot9  |
+        |         |         |         |
+        +---------+---------+---------+
+
+    :return: :class:`Datapage <AstroToolkit.Misc.grid.Datapage>`
 
     |
 
@@ -243,12 +240,7 @@ def datapage(
     from .Misc.grid import format_grid_plots
 
     corrected_inputs = check_inputs(
-        {
-            "dimensions": [dimensions, dict],
-            "plots": [panels, list],
-            "grid_size": [grid_size, int],
-        },
-        "datapage",
+        {"dimensions": [dimensions, dict], "plots": [panels, list], "grid_size": [grid_size, int]}, "datapage"
     )
     dimensions, plots, grid_size = corrected_inputs
 
