@@ -10,7 +10,6 @@ Features
 
 * A GUI through which most of the package can be utilised
 * Command-line integration
-* Scripting integration for greater control
 * Proper motion correction through Gaia, utilised across the entire package
 * Light curve, spectral energy distribution, spectrum and image queries from a wide range of surveys
 * Gaia HRD queries for any Gaia sources
@@ -18,7 +17,7 @@ Features
 * Data queries from any [Vizier](https://vizier.cds.unistra.fr/) survey, with many commonly used surveys built-in
 * Reddening queries from [Stilism](https://stilism.obspm.fr/) and [GDRE](https://irsa.ipac.caltech.edu/applications/DUST/)
 * Data analysis tools: 
-    * Timeseries analysis using a variety of methods (Lomb-Scargle, AOVMHW, ...)
+    * Timeseries analysis
     * Light curve binning, clipping, phase folding and sigma-clipping
     * Image detection and tracer overlays
     * Spectral band highlighting

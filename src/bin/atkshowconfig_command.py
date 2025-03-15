@@ -1,5 +1,5 @@
-from AstroToolkit.Config import showconfig
+from AstroToolkit.Config import showConfig
 
 
 def main():
-    showconfig()
+    showConfig()

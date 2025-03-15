@@ -1,5 +1,5 @@
-from AstroToolkit.Config import resetconfig
+from AstroToolkit.Config import resetConfig
 
 
 def main():
-    resetconfig()
+    resetConfig()

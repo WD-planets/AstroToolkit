@@ -1,5 +1,5 @@
-from AstroToolkit.Config import openconfig
+from AstroToolkit.Config import openConfig
 
 
 def main():
-    openconfig()
+    openConfig()

@@ -65,6 +65,16 @@ class CatalogueStruct(object):
         with open(self.catalogue_file, "w") as file:
             Catalogues.write(file)
 
+    def delete_catalogue(self, key):
+        self.get_catalogues()
+
+        if hasattr(self, key):
+            delattr(self, key)
+        else:
+            raise Exception(f"Could not find Alias with label {key}.")
+
+        self.write_catalogues()
+
     def add_catalogue(self, key, value):
         default_catalogues = SurveyInfo().catalogues
 

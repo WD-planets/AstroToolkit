@@ -1,6 +1,6 @@
 import argparse
 
-from AstroToolkit.Config import editConfig
+from AstroToolkit.Aliases import addAlias
 
 
 def main():
@@ -10,4 +10,4 @@ def main():
 
     args = parser.parse_args()
 
-    editConfig(key=args.key, value=args.value)
+    addAlias(name=args.key, id=args.value)

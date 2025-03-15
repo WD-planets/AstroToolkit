@@ -8,7 +8,7 @@ def addAlias(name: str, id: str) -> None:
     """addAlias(name,id)
     Adds a Vizier catalogue alias to ATK for use in data queries.
 
-    :param name: catalogue name, e.g. 'allwise'
+    :param name: alias name, e.g. 'allwise'
     :type name: str
     :param id: Vizier catalogue ID, e.g. 'II/328/allwise'
     :type id: str
@@ -23,6 +23,23 @@ def addAlias(name: str, id: str) -> None:
     print(f"Added alias for {id} with label {name}.")
 
     return None
+
+
+def delAlias(name: str) -> None:
+    """delAlias(name)
+    Deletes an existing catalogue alias.
+
+    :param name: alias name to be deleted
+    :type name: str
+
+    :return: None
+
+    |
+
+    """
+
+    catalogues.delete_catalogue(name)
+    print(f"Deleted alias with label {name}.")
 
 
 def openAliases() -> None:
