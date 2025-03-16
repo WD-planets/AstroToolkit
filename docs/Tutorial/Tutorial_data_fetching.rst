@@ -21,7 +21,7 @@ where the cataclysmic variable Hu Leo has been targeted using its Gaia DR3 sourc
 
 Here, the system's Gaia DR3 coordinates are corrected for proper motion back to GALEX's epoch, and any data is returned. We have not provided a radius, and so one has been taken from the :ref:`config <Config Keys>`.
 
-We have now fetched some data, but what can we do with it? Data, photometry, bulk photometry, and reddening queries all return a specific ATK data structure: a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`. Since these forms of data aren't going to be plotted, we have two methods available: :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>` and :func:`savedata() <AstroToolkit.Data.dataquery.DataStruct.savedata>`. The latter will be covered later, so let's focus on the former.
+We have now fetched some data, but what can we do with it? Data, bulkdata, and reddening queries all return a specific ATK data structure: a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`. Since these forms of data aren't going to be plotted, we have two methods available: :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>` and :func:`savedata() <AstroToolkit.Data.dataquery.DataStruct.savedata>`. The latter will be covered later, so let's focus on the former.
 
 The :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>` method is available on all ATK data structures, and prints the data structure to stdout in a readable format. Continuing from the above:
 
@@ -63,7 +63,7 @@ The :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>` method 
 
 The first section in the above output notifies us that the query is running, and the rest is the result of :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>`. We can now look at the data structure's attributes.
 
-- The **kind** attribute simply describes the type of data being stored (in this case, "data" means catalogue data). **Subkind** is an attribute only found in :class:`DataStructs <AstroToolkit.Data.data.DataStruct>` (as these are shared between data, photometry, bulk photometry and reddening queries) and denotes which of these the structure is storing. 
+- The **kind** attribute simply describes the type of data being stored (in this case, "data" means catalogue data). **Subkind** is an attribute only found in :class:`DataStructs <AstroToolkit.Data.data.DataStruct>` (as these are shared between data, bulkdata and reddening queries) and denotes which of these the structure is storing. 
 
 - The **survey** attribute describes which survey the data originates from, and **catalogue** holds the `Vizier <https://vizier.cds.unistra.fr/>`_ ID of that survey (for data queries such as those performed above, any Vizier catalogue can be queried).
 
@@ -86,8 +86,7 @@ In :class:`DataStructs <AstroToolkit.Data.data.DataStruct>`, the resulting data 
 We have now seen an example of a data query, but this is only one of many kinds of data that can be fetched through ATK. Below is a full list of the various kinds of query and the data structures that they return:
 
 - data query, returns a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
-- photometry ('phot') query, returns a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
-- bulk photometry ('bulkphot') query, returns a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
+- bulk data ('bulkdata') query, returns a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
 - reddening query, returns a :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
 - image query, returns an :class:`ImageStruct <AstroToolkit.Data.imagequery.ImageStruct>`
 - lightcurve query, returns a :class:`LightcurveStruct <AstroToolkit.Data.lightcurvequery.LightcurveStruct>`

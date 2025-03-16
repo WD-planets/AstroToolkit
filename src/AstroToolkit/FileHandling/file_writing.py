@@ -29,6 +29,8 @@ def CreateLocalData(struct, fname):
 
     df = pd.DataFrame.from_dict(data_dict)
     df = df.fillna(value=np.nan).infer_objects(copy=False)
+    for col in df.columns.values.tolist():
+        print(df[col].tolist())
     table = Table.from_pandas(df)
     hdu = fits.table_to_hdu(table)
 
@@ -51,12 +53,7 @@ def CreateLocalData(struct, fname):
     return True
 
 
-def CreateLocalPhot(struct, fname):
-    success = CreateLocalData(struct, fname)
-    return success
-
-
-def CreateLocalBulkphot(struct, fname):
+def CreateLocalBulkdata(struct, fname):
     try:
         ra, dec = struct.pos[0], struct.pos[1]
     except:
@@ -70,7 +67,7 @@ def CreateLocalBulkphot(struct, fname):
                 data_dict[key] = struct.data[survey][key]
 
         df = pd.DataFrame.from_dict(data_dict)
-        df.fillna(value=np.nan).infer_objects(copy=False)
+        df = df.fillna(value=np.nan).infer_objects(copy=False)
         table = Table.from_pandas(df)
         table_hdu = fits.table_to_hdu(table)
         table_hdu.header["atk_survey"] = survey

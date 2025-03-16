@@ -44,10 +44,6 @@ class SurveyInfo:
             "gaia_lc": "I/355/epphot",
         }
 
-        self.phot_surveys = ["gaia", "galex", "sdss", "twomass", "wise", "panstarrs", "skymapper"]
-
-        self.bulkphot_surveys = ["gaia", "galex", "sdss", "twomass", "wise", "panstarrs", "skymapper"]
-
         self.sed_param_names = {
             "gaia": {
                 "filter_wavelengths": [5850.88, 5041.61, 7690.74],
@@ -191,17 +187,7 @@ class SurveyInfo:
 
         self.reddening_surveys = ["stilism", "gdre"]
 
-        self.supported_query_kinds = [
-            "data",
-            "phot",
-            "bulkphot",
-            "reddening",
-            "image",
-            "lightcurve",
-            "hrd",
-            "sed",
-            "spectrum",
-        ]
+        self.supported_query_kinds = ["data", "bulkdata", "reddening", "image", "lightcurve", "hrd", "sed", "spectrum"]
 
         self.survey_id_names = {
             "gaia": "designation",

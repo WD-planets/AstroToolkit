@@ -12,40 +12,23 @@ os.chdir(Path(__file__).parent.absolute())
 source = 587316166180416640
 
 image = query(
-    kind="image",
-    survey="panstarrs",
-    source=source,
-    overlays=["gaia", "galex"],
-    check_exists="datapage_image",
+    kind="image", survey="panstarrs", source=source, overlays=["gaia", "galex"], check_exists="datapage_image"
 ).plot()
 
-hrd = query(
-    kind="hrd", sources=source, check_exists=os.path.join(file_dir, "datapage_hrd")
-).plot()
+hrd = query(kind="hrd", sources=source, check_exists=os.path.join(file_dir, "datapage_hrd")).plot()
 
 spectrum = query(
-    kind="spectrum",
-    survey="sdss",
-    source=source,
-    check_exists=os.path.join(file_dir, "datapage_spectrum"),
+    kind="spectrum", survey="sdss", source=source, check_exists=os.path.join(file_dir, "datapage_spectrum")
 ).plot()
 
-sed = query(kind="sed", source=source, check_exists="datapage_sed").plot(
-    spectrum_overlay=spectrum
-)
+sed = query(kind="sed", source=source, check_exists="datapage_sed").plot(spectrum_overlay=spectrum)
 
 lightcurves = query(
-    kind="lightcurve",
-    survey="ztf",
-    source=source,
-    check_exists=os.path.join(file_dir, "datapage_lightcurve"),
+    kind="lightcurve", survey="ztf", source=source, check_exists=os.path.join(file_dir, "datapage_lightcurve")
 ).plot(colours=["green", "red", "blue"])
 
 powspec = query(
-    kind="lightcurve",
-    survey="ztf",
-    source=source,
-    check_exists=os.path.join(file_dir, "datapage_lightcurve"),
+    kind="lightcurve", survey="ztf", source=source, check_exists=os.path.join(file_dir, "datapage_lightcurve")
 ).plot(kind="powspec")
 
 buttons = buttons(source=source)
@@ -53,18 +36,7 @@ buttons = buttons(source=source)
 metadata = datatable(
     source=source,
     entries=[
-        {
-            "kind": "atk_defaults",
-            "surveys": [
-                "gaia",
-                "galex",
-                "panstarrs",
-                "skymapper",
-                "sdss",
-                "wise",
-                "twomass",
-            ],
-        }
+        {"kind": "atk_defaults", "surveys": ["gaia", "galex", "panstarrs", "skymapper", "sdss", "wise", "twomass"]}
     ],
 )
 
@@ -80,12 +52,7 @@ datapage = datapage(
         {"name": "spectrum", "figure": spectrum, "width": 5, "height": 2},
         {"name": "metadata_table", "figure": metadata, "width": 7, "height": 2},
     ],
-    layout=[
-        ["image", "sed", "buttons"],
-        ["hrd", "spectrum"],
-        ["lightcurves", "powspec"],
-        ["metadata_table"],
-    ],
+    layout=[["image", "sed", "buttons"], ["hrd", "spectrum"], ["lightcurves", "powspec"], ["metadata_table"]],
 )
 
 go_to_static()

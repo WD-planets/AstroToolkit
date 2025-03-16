@@ -32,8 +32,7 @@ class ConfigStruct(object):
 
         self.enable_notifications = "True"
         self.query_data_radius = "3"
-        self.query_phot_radius = "3"
-        self.query_bulkphot_radius = "3"
+        self.query_bulkdata_radius = "3"
         self.query_lightcurve_radius = "3"
         self.query_spectrum_radius = "3"
         self.query_sed_radius = "3"
@@ -127,8 +126,7 @@ class ConfigStruct(object):
 
         config.add_section("query_settings")
         config.set("query_settings", "query_data_radius", self.query_data_radius)
-        config.set("query_settings", "query_phot_radius", self.query_phot_radius)
-        config.set("query_settings", "query_bulkphot_radius", self.query_bulkphot_radius)
+        config.set("query_settings", "query_bulkdata_radius", self.query_bulkdata_radius)
         config.set("query_settings", "query_lightcurve_radius", self.query_lightcurve_radius)
         config.set("query_settings", "query_spectrum_radius", self.query_spectrum_radius)
         config.set("query_settings", "query_sed_radius", self.query_sed_radius)

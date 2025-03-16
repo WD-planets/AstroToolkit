@@ -25,8 +25,7 @@ To have a look at the current state of the config (which is also the default sta
 
     [query_settings]
     query_data_radius = 3
-    query_phot_radius = 3
-    query_bulkphot_radius = 3
+    query_bulkdata_radius = 3
     query_lightcurve_radius = 3
     query_spectrum_radius = 3
     query_sed_radius = 3

@@ -60,6 +60,7 @@ I would like to give thanks to Dr. Keith Inight for his guidance at various stag
    Tutorial/getting_started
    Tutorial/Tutorial_commandline
    Tutorial/Tutorial_config
+   Tutorial/Tutorial_adding_aliases
    Tutorial/Tutorial_models
    Tutorial/Tutorial_datapage
    Tutorial/Tutorial_gui

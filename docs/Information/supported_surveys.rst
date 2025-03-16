@@ -15,16 +15,6 @@ Data Surveys
 - 2MASS
 - eROSITA
 
-Photometry Surveys
-------------------
-- Gaia
-- Pan-STARRS
-- SkyMapper
-- GALEX
-- SDSS
-- WISE
-- 2MASS
-
 Reddening Surveys
 -----------------
 - STILISM

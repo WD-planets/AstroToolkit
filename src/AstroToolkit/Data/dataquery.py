@@ -21,7 +21,7 @@ Vizier.ROW_LIMIT = -1
 
 class DataStruct(object):
     """DataStruct()
-    This structure is returned from data, phot, bulkphot and reddening queries, when read from a data file that was originally created by a data, phot, bulkphot or reddening query, or through the Models module (in which case all attributes are set to None).
+    This structure is returned from data, bulkdata and reddening queries, when read from a data file that was originally created by a data, bulkdata or reddening query, or through the Models module (in which case all attributes are set to None).
 
     .. rubric:: Attributes
         :heading-level: 1
@@ -30,10 +30,10 @@ class DataStruct(object):
         "data"
 
     subkind: *str*
-        data query kind, from: "data", "phot", "bulkphot", "reddening"
+        data query kind, from: "data", "bulkdata", "reddening"
 
     survey: *str*
-        survey from which data originates. For bulkphot queries, defaults to None.
+        survey from which data originates. For bulkdata queries, defaults to None.
 
     catalogue: *str*
         Vizier catalogue ID from which data originates
@@ -149,16 +149,21 @@ class VizierQuery(object):
 
 # maps coordinates to vizier surveys, performing proper motion correction for source queries.
 def query(survey, radius, pos=None, source=None):
+    from ..Configuration.catalogue_setup import CatalogueStruct
+
+    aliases = CatalogueStruct()
+    all_surveys = aliases.get_catalogue_list()
+
     # get the necessary basic survey info
-    supported_surveys = SurveyInfo().list
+    default_surveys = SurveyInfo().list
     supported_catalogues = SurveyInfo().catalogues
     survey_times = SurveyInfo().times
 
     # if survey isn't a supported survey, take the 'survey' to be a vizier catalogue ID
-    if survey not in supported_surveys:
+    if survey not in all_surveys:
         catalogue = survey
     else:
-        catalogue = supported_catalogues[survey]
+        catalogue = all_surveys[survey]
 
     # perform coordinate Vizier query
     if pos:
@@ -187,8 +192,12 @@ def query(survey, radius, pos=None, source=None):
                 print("Note: data query unsuccessful or returned no data.")
                 return DataStruct(survey=survey, catalogue=catalogue, source=source, pos=pos, data=None)
 
-            if survey in supported_surveys:
+            if survey in default_surveys:
                 ra, dec = correctpm([2016, 0], survey_times[str(survey)], ra, dec, pmra, pmdec)
+            else:
+                print(
+                    f"Note: {survey} uses a custom-defined alias, and hence no epoch has been defined. Proper motion has therefore not been corrected for this survey."
+                )
             data = VizierQuery(
                 survey=survey, catalogue=catalogue, radius=radius, pos=[ra, dec], source=source
             ).pos_query()

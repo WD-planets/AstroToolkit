@@ -98,7 +98,56 @@ Below is a list and description of the available command-line tools in ATK. All 
       resets the ATK config to default values
 
    |
+
+   .. _ATKshowaliases:
     
+   **ATKshowaliases**
+      prints all catalogue aliases to stdout
+
+   |
+
+   .. _ATKaddalias:
+
+   **ATKaddalias**
+      adds a catalogue alias
+      
+      **Usage:**
+         .. code-block:: console
+            
+            ATKaddalias <name> <id>
+
+      where **name** is the name of the alias (e.g. allwise) and **id** is its Vizier catalogue ID (e.g. II/328/allwise) 
+
+   |
+
+   .. _ATKdelalias:
+
+   **ATKdelalias**
+      removes an existing catalogue alias
+      
+      **Usage:**
+         .. code-block:: console
+
+            ATKdelalias <name>
+
+      where **name** is the name of the alias
+
+   |
+
+   .. _ATKopenaliases:
+
+   **ATKopenaliases**
+      opens the ATK catalogue aliases file in the default text editor
+
+   |
+
+   .. _ATKresetaliases:
+
+   **ATKresetaliases**
+      resets the alias file to its default state (i.e. deletes all added aliases)
+
+   |
+
    .. _ATKconv:
 
    **ATKconv** 

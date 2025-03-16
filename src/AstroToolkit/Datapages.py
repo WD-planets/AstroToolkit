@@ -111,7 +111,7 @@ def datatable(entries: dict, source: int = None, pos: list[float] = None, radius
 
     where:
 
-    :param survey: any Vizier catalogue ID
+    :param survey: any Vizier catalogue ID, or the name of a user-defined catalogue :ref:`alias <Adding Catalogue Aliases>`
     :type survey: str
     :param parameters: names of parameters (i.e. Vizier column headers) that exist in chosen catalogue
     :type parameters: list<str>

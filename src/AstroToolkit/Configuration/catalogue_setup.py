@@ -17,6 +17,7 @@ class CatalogueStruct(object):
         Catalogues = configparser.ConfigParser()
 
         default_catalogues = SurveyInfo().catalogues
+        del default_catalogues["gaia_lc"]
         Catalogues.add_section("default_catalogues")
         Catalogues.add_section("additional_catalogues")
         for key, val in default_catalogues.items():
@@ -41,6 +42,14 @@ class CatalogueStruct(object):
             for key, val in section.items():
                 self.structured_out[section_str].append({key: val})
                 setattr(self, key, val)
+
+    def get_catalogue_list(self):
+        self.get_catalogues()
+        surveys = {}
+        for survey, id in vars(self).items():
+            if survey not in ["catalogue_file", "structured_out"]:
+                surveys[survey] = id
+        return surveys
 
     def write_catalogues(self):
         Catalogues = configparser.ConfigParser()

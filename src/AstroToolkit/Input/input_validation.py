@@ -1,10 +1,4 @@
 import re
-from pathlib import Path
-
-from bokeh.models.layouts import Column as bokeh_column
-from bokeh.models.layouts import Row as bokeh_row
-from bokeh.models.widgets.tables import DataTable as bokeh_datatable
-from bokeh.plotting._figure import figure as bokeh_figure
 
 from ..PackageInfo import SurveyInfo
 
@@ -224,7 +218,7 @@ def check_inputs(inputs, label, check_targeting=False):
 
         # check supported surveys
         survey = corrected_inputs["survey"]
-        if corrected_inputs["kind"] not in ["data", "hrd", "bulkphot", "sed"]:
+        if corrected_inputs["kind"] not in ["data", "hrd", "bulkdata", "sed"]:
             supported_surveys = getattr(survey_info, f"{corrected_inputs['kind']}_surveys")
             if survey not in supported_surveys:
                 raise ValueError(f"Unsupported survey in {kind} query. Supported surveys are: {supported_surveys}")

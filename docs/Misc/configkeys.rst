@@ -58,15 +58,10 @@ Query Settings
     query_data_radius: *float*, defaults to 3
         sets the default search radius used in :ref:`data queries <data-query>` in arcseconds
 
-    .. _cfg_query_phot_radius:
+    .. _cfg_query_bulkdata_radius:
 
-    query_phot_radius: *float*, defaults to 3
-        sets the default search radius for :ref:`photometry queries <phot-query>` in arcseconds
-
-    .. _cfg_query_bulkphot_radius:
-
-    query_bulkphot_radius: *float*, defaults to 3
-        sets the default search radius for :ref:`bulkphot queries <bulkphot-query>` in arcseconds
+    query_bulkdata_radius: *float*, defaults to 3
+        sets the default search radius for :ref:`bulkdata queries <bulkdata-query>` in arcseconds
 
     .. _cfg_query_lightcurve_radius:
 

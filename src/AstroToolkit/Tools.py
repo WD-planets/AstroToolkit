@@ -39,9 +39,8 @@ def query(
     """query(kind, source/pos, check_exists, **kwargs)
     Returns a :ref:`data structure <Data Structures>` of a given type from a given survey. Accepted types are:
 
-    - :ref:`data <data-query>`: returns survey data as listed in Vizier
-    - :ref:`phot <phot-query>`: returns only photometry from supported surveys
-    - :ref:`bulkphot <bulkphot-query>`: returns photometry from all supported surveys
+    - :ref:`data <data-query>`: returns catalogue data as listed in Vizier
+    - :ref:`bulkdata <bulkdata-query>`: returns data from all supported catalogues (including user-defined :ref:`aliases <Adding Catalogue Aliases>`)
     - :ref:`reddening <reddening-query>`: returns reddening from a supported survey
     - :ref:`lightcurve <lightcurve-query>`: returns light curve data from a supported survey
     - :ref:`image <image-query>`: returns image data from a supported survey
@@ -79,34 +78,15 @@ def query(
 
     |
 
-    .. _phot-query:
-    .. rubric:: Photometry Queries
-        :heading-level: 3
-
-    :param survey: Target survey, from :ref:`supported surveys <Photometry Surveys>`
-    :type survey: str
-    :param source: Target GAIA DR3 Source ID
-    :type source: int
-    :param pos: Position [right ascension, declination] in degrees
-    :type pos: list<float>
-    :param radius: Search radius in arcseconds, default given by :ref:`query_phot_radius <cfg_query_phot_radius>` config key
-    :type radius: float, optional
-    :param check_exists: Path to check for existing data. If a file is found, data is generated without having to run a query. If a file is not found, query will go ahead and the resulting data will be saved to the requested Path for future executions. Defaults to None (i.e. this functionality is disabled)
-    :type check_exists: bool, optional
-
-    :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
-
-    |
-
-    .. _bulkphot-query:
-    .. rubric:: Bulkphot Queries
+    .. _bulkdata-query:
+    .. rubric:: Bulkdata Queries
         :heading-level: 3
 
     :param source: Target GAIA DR3 Source ID
     :type source: int
     :param pos: Position [right ascension, declination] in degrees
     :type pos: list<float>
-    :param radius: Search radius in arcseconds, default given by :ref:`query_bulkphot_radius <cfg_query_bulkphot_radius>` config key
+    :param radius: Search radius in arcseconds, default given by :ref:`query_bulkdata_radius <cfg_query_bulkdata_radius>` config key
     :type radius: float, optional
 
     :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
@@ -302,7 +282,7 @@ def query(
             print(
                 f"{newline}Running {survey} {kind} query{newline}source = {source}{newline}pos = {pos}{newline}size = {size}{newline}"
             )
-        elif kind in ["bulkphot", "sed"]:
+        elif kind in ["bulkdata", "sed"]:
             print(
                 f"{newline}Running {kind} query{newline}source = {source}{newline}pos = {pos}{newline}radius = {radius}{newline}"
             )
@@ -347,22 +327,21 @@ def query(
                 survey=survey, radius=radius, pos=pos, source=source, username=username, password=password, raw=raw
             )
 
-        elif kind == "phot":
-            from .Data.photquery import query as phot_query
+        elif kind == "bulkdata":
+            from .Data.bulkquery import bulkdata_query
 
-            data = phot_query(pos=pos, source=source, radius=radius, survey=survey)
-        elif kind == "bulkphot":
-            from .Data.photquery import bulkphot_query
+            data = bulkdata_query(pos=pos, source=source, radius=radius)
 
-            data = bulkphot_query(pos=pos, source=source, radius=radius)
         elif kind == "sed":
             from .Data.sedquery import query as sed_query
 
             data = sed_query(pos=pos, source=source, radius=radius)
+
         elif kind == "reddening":
             from .Data.reddeningquery import query as reddening_query
 
             data = reddening_query(survey=survey, source=source, pos=pos, radius=radius)
+
         elif kind == "hrd":
             from .Data.hrdquery import gather_data
 
@@ -413,7 +392,7 @@ def query(
     data.dataname = fname
 
     # generates plot names
-    if kind not in ["data", "phot", "bulkphot", "reddening"]:
+    if kind not in ["data", "bulkdata", "reddening"]:
         from .FileHandling.file_naming import generate_plotname
 
         generate_plotname(data)
@@ -554,7 +533,7 @@ def readdata(fname: str) -> DataStruct | HrdStruct | LightcurveStruct | ImageStr
     struct = read_local_file(fname)
     struct.dataname = name_file(struct)
 
-    if struct.kind not in ["data", "phot", "bulkphot", "reddening"]:
+    if struct.kind not in ["data", "bulkdata", "reddening"]:
         from .FileHandling.file_naming import generate_plotname
 
         generate_plotname(struct)

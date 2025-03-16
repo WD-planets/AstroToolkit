@@ -20,7 +20,6 @@ config.read_config()
 
 supported_surveys = {
     "data": SurveyInfo().list + ["other"],
-    "phot": SurveyInfo().bulkphot_surveys,
     "reddening": SurveyInfo().reddening_surveys,
     "image": SurveyInfo().image_surveys,
     "lightcurve": SurveyInfo().lightcurve_surveys,
@@ -237,7 +236,7 @@ class Window(QMainWindow):
 
     # handles hiding of survey button if not needed, and updates survey list
     def on_query_kind_change(self):
-        if self.query_kind in ["bulkphot", "sed", "hrd"]:
+        if self.query_kind in ["bulkdata", "sed", "hrd"]:
             self.survey_list.hide()
             self.survey_header.hide()
             self.setPosition(self.query_button, [2, 1])
@@ -280,7 +279,7 @@ class Window(QMainWindow):
         self.password = self.atlas_password.text()
 
     def execute_query(self):
-        if self.query_kind in ["bulkphot", "sed", "hrd"]:
+        if self.query_kind in ["bulkdata", "sed", "hrd"]:
             self.survey = None
         if self.query_kind not in ["hrd"]:
             self.sources = None
@@ -308,7 +307,7 @@ class Window(QMainWindow):
             for band in self.data.data:
                 if band["mag"]:
                     success = True
-        elif self.query_kind in ["bulkphot"]:
+        elif self.query_kind in ["bulkdata"]:
             for survey in self.data.data:
                 if self.data.data[survey] is not None:
                     success = True
@@ -321,12 +320,12 @@ class Window(QMainWindow):
 
             self.query_button.setStyleSheet("background-color : rgba(0,255,0,0.75)")
             self.savedata_fname_box.setPlaceholderText(self.data.dataname)
-            if self.query_kind not in ["data", "reddening", "phot", "bulkphot"]:
+            if self.query_kind not in ["data", "reddening", "bulkdata"]:
                 self.saveplot_fname_box.setPlaceholderText(self.data.plotname)
                 self.set_plotoptions()
             for widget in self.data_manipulation_widgets:
                 widget[0].show()
-            if self.query_kind not in ["data", "phot", "bulkphot", "reddening"]:
+            if self.query_kind not in ["data", "bulkdata", "reddening"]:
                 for widget in self.plotting_widgets:
                     widget[0].show()
         else:
@@ -433,11 +432,7 @@ class Window(QMainWindow):
         for key, val in self.additional_settings_headers.items():
             val.hide()
 
-        if self.query_kind == "data":
-            params = ["query_radius"]
-        elif self.query_kind == "phot":
-            params = ["query_radius"]
-        elif self.query_kind == "bulkphot":
+        if self.query_kind in ["data", "bulkdata"]:
             params = ["query_radius"]
         elif self.query_kind == "reddening":
             if self.survey == "stilism":
@@ -829,11 +824,7 @@ class Window(QMainWindow):
                 params = []
 
             # Don't have plotting, but included here so that it doesn't break if these kinds are selected
-            elif self.query_kind == "data":
-                params = []
-            elif self.query_kind == "phot":
-                params = []
-            elif self.query_kind == "bulkphot":
+            elif self.query_kind in ["data", "bulkdata"]:
                 params = []
             elif self.query_kind == "reddening":
                 params = []

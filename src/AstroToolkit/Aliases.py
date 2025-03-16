@@ -1,4 +1,5 @@
 from .Configuration.catalogue_setup import CatalogueStruct
+from .Input.input_validation import check_inputs
 
 catalogues = CatalogueStruct()
 catalogues.get_catalogues()
@@ -19,6 +20,9 @@ def addAlias(name: str, id: str) -> None:
 
     """
 
+    corrected_inputs = check_inputs({"name": [name, str], "id": [id, str]}, "addalias")
+    name, id = corrected_inputs
+
     catalogues.add_catalogue(name, id)
     print(f"Added alias for {id} with label {name}.")
 
@@ -37,6 +41,9 @@ def delAlias(name: str) -> None:
     |
 
     """
+
+    corrected_inputs = check_inputs({"name": [name, str]}, "delalias")
+    name = corrected_inputs[0]
 
     catalogues.delete_catalogue(name)
     print(f"Deleted alias with label {name}.")

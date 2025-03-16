@@ -107,7 +107,7 @@ def mag_to_flux(mag, zp, wl):
     return flux
 
 
-def format_data(survey, photometry, filter_wavelengths, mag_names, error_names):
+def format_data(survey, survey_data, filter_wavelengths, mag_names, error_names):
     import numpy as np
 
     if survey != "gaia":
@@ -119,7 +119,7 @@ def format_data(survey, photometry, filter_wavelengths, mag_names, error_names):
     for filter_wavelength, mag_name, error_name, zero_point in zip(
         filter_wavelengths, mag_names, error_names, zero_points
     ):
-        mag, mag_err = photometry[mag_name][0], photometry[error_name][0]
+        mag, mag_err = survey_data[mag_name][0], survey_data[error_name][0]
 
         # offsets for converting WISE Vega magnitudes -> AB magnitudes (https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html)
         if mag_name == "W1mag":
@@ -157,15 +157,18 @@ def query(radius, pos=None, source=None):
 
     sed_params = SurveyInfo().sed_param_names
 
-    bulkphot = query(kind="bulkphot", pos=pos, source=source, radius=radius, level="internal")
-    if bulkphot.data:
+    bulkdata = query(kind="bulkdata", pos=pos, source=source, radius=radius, level="internal")
+    if bulkdata.data:
         if source:
-            pos = bulkphot.data["gaia"]["ra"][0], bulkphot.data["gaia"]["dec"][0]
+            pos = bulkdata.data["gaia"]["ra"][0], bulkdata.data["gaia"]["dec"][0]
 
-        bulkphot.data = {key: value for key, value in bulkphot.data.items() if value is not None}
+        bulkdata.data = {key: value for key, value in bulkdata.data.items() if value is not None}
 
     sed_data = []
-    for survey in bulkphot.data:
+    for survey in bulkdata.data:
+        if survey not in sed_params:
+            continue
+
         filter_wavelengths, mag_names, error_names = (
             sed_params[survey]["filter_wavelengths"],
             sed_params[survey]["mag_names"],
@@ -175,7 +178,7 @@ def query(radius, pos=None, source=None):
         sed_data.append(
             format_data(
                 survey=survey,
-                photometry=bulkphot.data[survey],
+                survey_data=bulkdata.data[survey],
                 filter_wavelengths=filter_wavelengths,
                 mag_names=mag_names,
                 error_names=error_names,

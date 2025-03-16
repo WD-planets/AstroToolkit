@@ -45,12 +45,7 @@ def ReadLocalData(hdul):
     return recreated_data
 
 
-def ReadLocalPhot(fname):
-    recreated_data = ReadLocalData(fname)
-    return recreated_data
-
-
-def ReadLocalBulkphot(hdul):
+def ReadLocalBulkdata(hdul):
     data = {}
     for hdu in hdul[1:]:
         survey = hdu.header["atk_survey"]
@@ -67,7 +62,7 @@ def ReadLocalBulkphot(hdul):
     source, pos = checkTargeting(source, pos)
 
     recreated_data = DataStruct(
-        survey="all", catalogue=None, source=source, pos=pos, identifier=identifier, data=data, sub_kind="bulkphot"
+        survey="all", catalogue=None, source=source, pos=pos, identifier=identifier, data=data, sub_kind="bulkdata"
     )
 
     return recreated_data
