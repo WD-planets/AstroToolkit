@@ -9,6 +9,7 @@ Modules
    Tools
    Datapages
    Aliases
+   Epochs
    Config
    Models
    Gui
