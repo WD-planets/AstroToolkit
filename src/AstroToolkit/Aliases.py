@@ -1,3 +1,7 @@
+"""
+ATK supports the creation of aliases to any Vizier catalogue, which are set via an aliases file. This module allows the aliases file to be viewed and edited.
+"""
+
 from .Configuration.catalogue_setup import CatalogueStruct
 from .Input.input_validation import check_inputs
 
@@ -20,7 +24,7 @@ def addAlias(name: str, id: str) -> None:
 
     """
 
-    corrected_inputs = check_inputs({"name": [name, str], "id": [id, str]}, "addalias")
+    corrected_inputs = check_inputs({"name": [name, str], "id": [id, str]}, "addAlias")
     name, id = corrected_inputs
 
     catalogues.add_catalogue(name, id)
@@ -42,7 +46,7 @@ def delAlias(name: str) -> None:
 
     """
 
-    corrected_inputs = check_inputs({"name": [name, str]}, "delalias")
+    corrected_inputs = check_inputs({"name": [name, str]}, "delAlias")
     name = corrected_inputs[0]
 
     catalogues.delete_catalogue(name)

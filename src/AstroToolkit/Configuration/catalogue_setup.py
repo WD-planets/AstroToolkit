@@ -80,7 +80,7 @@ class CatalogueStruct(object):
         if hasattr(self, key):
             delattr(self, key)
         else:
-            raise Exception(f"Could not find Alias with label {key}.")
+            raise ValueError(f"Could not find Alias with label {key}.")
 
         self.write_catalogues()
 
@@ -90,7 +90,7 @@ class CatalogueStruct(object):
         self.get_catalogues()
         key, value = str(key), str(value)
         if key in default_catalogues:
-            raise Exception(f"Cannot override default alias '{key}'.")
+            raise ValueError(f"Cannot override default alias '{key}'.")
         if hasattr(self, key):
             print(f"Note: {key} alias was already defined, and has hence been overwritten.")
         setattr(self, key, value)
