@@ -3,11 +3,11 @@ Adding Catalogue Aliases
 
 Along with the config, ATK supports `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue aliases. These save you from having to remember the Vizier catalogue IDs in :ref:`data queries <data-query>`, :ref:`bulkdata queries <bulkdata-query>` and :func:`datatable <AstroToolkit.Datapages.datatable>` entries.
 
-As with the config, the easiest way to manages aliases is via the commandline. Upon first using ATK, a default aliases file will be generated which contains only the default data surveys that are :ref:`supported <Supported Surveys>` by the package out of the box. We can have a look at these using the :ref:`ATKshowaliases` command-line tool:
+As with the config, the easiest way to manages aliases is via the commandline. Upon first using ATK, a default aliases file will be generated which contains only the default data surveys that are :ref:`supported <Supported Surveys>` by the package out of the box. We can have a look at these using the :ref:`ATKalias` command-line tool:
 
 .. code-block:: console
     
-    ATKshowaliases
+    ATKaliases show
 
 .. code-block:: console
     
@@ -31,7 +31,7 @@ Currently, the only aliases are those that are supported by default. We can add 
 
 .. code-block:: console
 
-    ATKaddalias allwise II/328/allwise
+    ATKalias add allwise II/328/allwise
 
 .. code-block:: console
 
@@ -41,7 +41,7 @@ If we now show our alias file again, we will see that our new alias has been add
 
 .. code-block:: console
 
-    ATKshowaliases
+    ATKalias add
 
 .. code-block:: console
 
@@ -169,11 +169,21 @@ Aliases will also be used when searching through all catalogues via :ref:`bulkda
             ...
 
 
-Any number of aliases can be added, and any that you no longer need can be deleted using the :ref:`ATKdelalias` command. Alternatively, the alias file can be reset using the :ref:`ATKresetaliases` command.
+Any number of aliases can be added, and any that you no longer need can be deleted using the del mode of the :ref:`ATKalias` command:
+
+.. code-block:: console
+
+    ATKalias del allwise
+
+Alternatively, the alias file can be reset entirely:
+
+.. code-block:: console
+
+    ATKalias reset
 
 Just like the config, aliases can be viewed and edited at the same time by opening the alias file in the default text editor:
 
 .. code-block:: console
 
-   ATKopenaliases
+   ATKalias open
 

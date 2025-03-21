@@ -17,7 +17,7 @@ def jobs_ui(data):
             accepted_jobs_str = "showdata, savedata <filename: str, optional>, exit"
         else:
             accepted_jobs = ["showdata", "savedata", "showplot", "saveplot", "exit"]
-            accepted_jobs_str = "showdata, savedata <filename: str, optional> showplot <filename: str, optional>, saveplot<filename: str, optional>, exit"
+            accepted_jobs_str = "showdata, savedata <filename: str, optional> showplot <filename: str, optional>, saveplot <filename: str, optional>, exit"
 
         print(f"Available Jobs: {accepted_jobs_str}{newline}")
 
@@ -48,22 +48,38 @@ def jobs_ui(data):
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
+                    if plot_kind in [
+                        "lightcurve",
+                        "phasefold",
+                        "powspec",
+                        "phase",
+                        "fold",
+                    ]:
                         data.plot(kind=plot_kind).showplot(fname=fname)
                         break
                     else:
-                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
+                        print(
+                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
+                        )
             else:
                 data.plot().showplot(fname=fname)
         elif job == "saveplot":
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
+                    if plot_kind in [
+                        "lightcurve",
+                        "phasefold",
+                        "powspec",
+                        "phase",
+                        "fold",
+                    ]:
                         data.plot(kind=plot_kind).saveplot()
                         break
                     else:
-                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
+                        print(
+                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
+                        )
             else:
                 data.plot().saveplot(fname=fname)
         elif job == "exit":
@@ -73,63 +89,108 @@ def jobs_ui(data):
 def main():
     config.read_config()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("kind", type=str)
-    parser.add_argument("survey", type=str)
-    parser.add_argument("target", nargs="+")
+    params = {
+        "data": ["target", "survey", "r"],
+        "reddening": ["target", "survey", "r"],
+        "bulkdata": ["target", "r"],
+        "image": ["target", "survey", "s"],
+        "lightcurve": ["target", "survey", "r", "username", "password"],
+        "hrd": ["sources"],
+        "sed": ["target", "r"],
+        "spectrum": ["target", "survey", "r"],
+    }
+
+    all_params = ["target", "survey", "r", "s", "username", "password", "sources"]
+
+    parser = argparse.ArgumentParser(
+        description="Fetches data for a target from a given survey"
+    )
+    sub_parsers = parser.add_subparsers(dest="kind")
+
+    for kind in params:
+        sub_parser = sub_parsers.add_parser(kind, help=f"Performs a {kind} query")
+
+        if "survey" in params[kind]:
+            survey_msg = "Target Survey"
+            if kind == "data":
+                survey_msg += " or Vizier catalogue alias"
+            sub_parser.add_argument("survey", help="Target survey")
+
+        if "username" in params[kind]:
+            sub_parser.add_argument(
+                "--username",
+                nargs=1,
+                type=str,
+                help="ATLAS username (only needed in ATLAS queries)",
+            )
+        if "password" in params[kind]:
+            sub_parser.add_argument(
+                "--password",
+                nargs=1,
+                type=str,
+                help="ATLAS password (only needed in ATLAS queries)",
+            )
+
+        if "target" in params[kind]:
+            group = sub_parser.add_mutually_exclusive_group(required=True)
+            group.add_argument("--source", nargs=1, type=int, help="Gaia DR3 Source ID")
+            group.add_argument(
+                "--pos",
+                nargs=2,
+                type=float,
+                help="Position in degrees",
+                metavar=("RA", "DEC"),
+            )
+
+        if "sources" in params[kind]:
+            sub_parser.add_argument(
+                "sources", type=int, nargs="+", help="Sources to overlay"
+            )
+
+        if "r" in params[kind]:
+            sub_parser.add_argument(
+                "-r",
+                help="Radius of search in arcseconds",
+                type=float,
+                metavar=("RADIUS"),
+            )
+
+        elif "s" in params[kind]:
+            sub_parser.add_argument(
+                "-s", help="Size of image in arcseconds", type=float, metavar=("SIZE")
+            )
 
     args = parser.parse_args()
 
-    if len(args.target) > 2:
-        pos = [float(args.target[0]), float(args.target[1])]
-        source = None
-        radius = float(args.target[2])
+    if hasattr(args, "source") and isinstance(args.source, list):
+        args.source = args.source[0]
+    if hasattr(args, "password") and isinstance(args.password, list):
+        args.password = args.password[0]
+    if hasattr(args, "username") and isinstance(args.username, list):
+        args.username = args.username[0]
 
-    elif len(args.target) > 1:
-        if float(args.target[0]) > pow(10, 10):
-            source = args.target[0]
-            radius = args.target[1]
-            pos = None
-        else:
-            pos = [float(args.target[0]), float(args.target[1])]
-            source = None
-            radius = None
-    else:
-        source = int(args.target[0])
-        pos = None
-        radius = None
+    for arg in vars(args):
+        if arg not in params[args.kind] and arg not in ["kind", "source", "pos"]:
+            setattr(args, arg, None)
 
-    if not radius:
-        if args.kind not in ["image"]:
-            radius = getattr(config, f"query_{args.kind}_radius")
-        else:
-            size = config.query_image_size
-            radius = None
+    for param in all_params:
+        if not hasattr(args, param):
+            setattr(args, param, None)
 
-    if args.kind != "image":
-        size = None
-
-    if args.survey == "atlas":
-        atlas_login = str(input("ATLAS username and password: "))
-        atlas_login = [a for a in re.split(r"(\s|\,)", atlas_login.strip()) if a]
-        atlas_login = [x for x in atlas_login if x != " " and x != ","]
-
-        if len(atlas_login) < 2:
-            raise Exception("Only one argument for ATLAS login provided.")
-        else:
-            atlas_username, atlas_password = atlas_login[0], atlas_login[1]
-    else:
-        atlas_username, atlas_password = None, None
+    if hasattr(args, "s") and not args.s:
+        args.s = config.query_image_size
+    if hasattr(args, "r") and not args.r:
+        args.r = getattr(config, f"query_{kind}_radius")
 
     data = query(
         kind=args.kind,
         survey=args.survey,
-        pos=pos,
-        source=source,
-        radius=radius,
-        username=atlas_username,
-        password=atlas_password,
-        size=size,
+        pos=args.pos,
+        source=args.source,
+        radius=args.r,
+        size=args.s,
+        username=args.username,
+        password=args.password,
     )
 
     data_exists = False

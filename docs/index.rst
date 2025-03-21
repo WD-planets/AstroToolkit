@@ -57,20 +57,11 @@ I would like to give thanks to Dr. Keith Inight for his guidance at various stag
    :hidden:
    :caption: Tutorials
 
-   Tutorial/getting_started
-   Tutorial/Tutorial_commandline
-   Tutorial/Tutorial_config
-   Tutorial/Tutorial_adding_aliases
+   Tutorial/section_getting_started
+   Tutorial/section_configuration
    Tutorial/Tutorial_models
    Tutorial/Tutorial_datapage
    Tutorial/Tutorial_gui
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Information
-
-   Information/supported_surveys
 
 .. toctree::
    :maxdepth: 2
@@ -87,10 +78,10 @@ I would like to give thanks to Dr. Keith Inight for his guidance at various stag
    DataStructures/datastructures 
 
 .. toctree::
-   :titlesonly:
+   :maxdepth: 2
    :hidden:
-   :caption: Additional Info:
-   
-   Misc/configkeys
+   :caption: Information
 
-   Misc/commandline
+   Information/supported_surveys
+   Misc/configkeys
+   Commandline/commandline 

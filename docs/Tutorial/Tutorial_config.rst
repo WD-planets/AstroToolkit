@@ -3,11 +3,11 @@ The Config
 
 You may have noticed that many specifics in previous tutorials have been chosen for us (e.g. the magnitudes which were used in :ref:`image overlays <example-image>` or the search radius of any of our queries). Because we have not explicitly provided these, they have been taken from the :ref:`config <Config>`. Upon first using ATK, a config file is generated with default values. This config contains a list of keys which set the defaults used throughout the package.
 
-To have a look at the current state of the config (which is also the default state assuming you haven't edited it), we can print it to stdout via the :ref:`ATKshowconfig` command in the command line:
+To have a look at the current state of the config (which is also the default state assuming you haven't edited it), we can print it to stdout via the :ref:`ATKconfig` command in the command line:
 
 .. code-block:: console
 
-    ATKshowconfig
+    ATKconfig show
 
 .. code-block:: console
     
@@ -58,11 +58,11 @@ To have a look at the current state of the config (which is also the default sta
 
 A full description of each of these can be found :ref:`here <Config Keys>`, but hopefully some of them are self-explanatory.
 
-Config keys can be edited from the command line via the :ref:`ATKeditconfig` command:
+Config keys can be edited from the command line via the edit mode of the :ref:`ATKconfig` command:
 
 .. code-block:: console
 
-    ATKeditconfig query_data_radius 5
+    ATKconfig edit query_data_radius 5
 
 .. code-block:: console
     
@@ -86,13 +86,13 @@ Or the config can be viewed and edited at the same time by opening it in the def
 
 .. code-block:: console
 
-   ATKopenconfig
+   ATKconfig open
 
-The config can be reset to its default state at any time via the :ref:`ATKresetconfig` command:
+The config can be reset to its default state at any time via the reset mode of the :ref:`ATKconfig` command:
 
 .. code-block:: console
 
-    ATKresetconfig
+    ATKconfig reset
 
 .. code-block:: console
 

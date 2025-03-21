@@ -6,8 +6,10 @@ from .atkquery_command import jobs_ui
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("fname", type=str)
+    parser = argparse.ArgumentParser(
+        description="Reads a local ATK file and provides a set of jobs to perform on the returned data structure."
+    )
+    parser.add_argument("fname", type=str, help="File path")
 
     args = parser.parse_args()
 

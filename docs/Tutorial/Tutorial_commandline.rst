@@ -5,7 +5,7 @@ Now that we have seen how ATK can be used in scripts, we can have a look at its 
 
 .. code-block:: console
 
-    ATKquery data gaia 587316166180416640
+    ATKquery data gaia --source 587316166180416640
 
 .. code-block:: console
 
@@ -56,7 +56,7 @@ Jobs can be continuously entered until "exit" is entered, at which point the pro
 
 .. code-block:: console
 
-    ATKquery lightcurve ztf 141.185 8.031
+    ATKquery lightcurve ztf --pos 141.185 8.031
 
 .. code-block:: console
 

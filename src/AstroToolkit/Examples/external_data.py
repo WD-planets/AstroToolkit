@@ -35,6 +35,8 @@ lightcurve.showplot()
 lightcurve.plot(kind="powspec", start_freq=650, stop_freq=800)
 lightcurve.plotname = "AR_Sco_TNT_Powspec.html"
 lightcurve.figure = format(lightcurve.figure, 0.5, 0.5)
+lightcurve.figure.legend.visible = False
+lightcurve.figure.xaxis.ticker.desired_num_ticks = 4
 lightcurve.showplot()
 
 lightcurve.plot(kind="phasefold", bins=300, foverlay=False, freq=6.74157303371)

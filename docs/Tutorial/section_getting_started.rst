@@ -11,3 +11,4 @@ Getting Started
    Tutorial_image_plotting
    Tutorial_lightcurve_plotting
    Tutorial_data_saving
+   Tutorial_commandline
