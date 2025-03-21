@@ -368,6 +368,7 @@ def query(
             if gaia_data.data:
                 ra, dec = gaia_data.data["ra2000"][0], gaia_data.data["dec2000"][0]
                 data.identifier = identifier_from_pos([ra, dec])
+                data.corrections += " -> [2000,0]"
                 data.pos = [ra, dec]
             else:
                 raise ValueError(f"Could not find Gaia Source: {data.source}")

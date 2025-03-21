@@ -117,4 +117,8 @@ def gather_data(sources):
 
     sources_formatted = [source for i, source in enumerate(sources) if i not in bad_indices]
 
-    return HrdStruct(sources=sources_formatted, data={"bp-rp": x, "absg": y})
+    data = HrdStruct(sources=sources_formatted, data={"bp-rp": x, "absg": y})
+
+    data.corrections = "queries performed by sources -> [2000,0]"
+
+    return data

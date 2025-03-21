@@ -74,6 +74,23 @@ class EpochStruct(object):
 
         return self.epochs
 
+    @property
+    def epoch_list(self):
+        epoch_dict = self.get_epochs()
+
+        epochs = {}
+        for label, section in epoch_dict.items():
+            for survey, epoch in section.items():
+                if label == "lightcurve_surveys" and survey == "gaia":
+                    epochs["gaia_lc"] = epoch
+                else:
+                    epochs[survey] = epoch
+
+        for survey in epochs:
+            epochs[survey] = [int(x) for x in epochs[survey]]
+
+        return epochs
+
     def output_epochs(self):
         self.get_epochs()
         for label, section in self.structured_out.items():

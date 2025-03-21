@@ -48,38 +48,22 @@ def jobs_ui(data):
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in [
-                        "lightcurve",
-                        "phasefold",
-                        "powspec",
-                        "phase",
-                        "fold",
-                    ]:
+                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
                         data.plot(kind=plot_kind).showplot(fname=fname)
                         break
                     else:
-                        print(
-                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
-                        )
+                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
             else:
                 data.plot().showplot(fname=fname)
         elif job == "saveplot":
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in [
-                        "lightcurve",
-                        "phasefold",
-                        "powspec",
-                        "phase",
-                        "fold",
-                    ]:
+                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
                         data.plot(kind=plot_kind).saveplot()
                         break
                     else:
-                        print(
-                            "Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec"
-                        )
+                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
             else:
                 data.plot().saveplot(fname=fname)
         elif job == "exit":
@@ -102,9 +86,7 @@ def main():
 
     all_params = ["target", "survey", "r", "s", "username", "password", "sources"]
 
-    parser = argparse.ArgumentParser(
-        description="Fetches data for a target from a given survey"
-    )
+    parser = argparse.ArgumentParser(description="Fetches data for a target from a given survey")
     sub_parsers = parser.add_subparsers(dest="kind")
 
     for kind in params:
@@ -118,47 +100,26 @@ def main():
 
         if "username" in params[kind]:
             sub_parser.add_argument(
-                "--username",
-                nargs=1,
-                type=str,
-                help="ATLAS username (only needed in ATLAS queries)",
+                "--username", nargs=1, type=str, help="ATLAS username (only needed in ATLAS queries)"
             )
         if "password" in params[kind]:
             sub_parser.add_argument(
-                "--password",
-                nargs=1,
-                type=str,
-                help="ATLAS password (only needed in ATLAS queries)",
+                "--password", nargs=1, type=str, help="ATLAS password (only needed in ATLAS queries)"
             )
 
         if "target" in params[kind]:
             group = sub_parser.add_mutually_exclusive_group(required=True)
             group.add_argument("--source", nargs=1, type=int, help="Gaia DR3 Source ID")
-            group.add_argument(
-                "--pos",
-                nargs=2,
-                type=float,
-                help="Position in degrees",
-                metavar=("RA", "DEC"),
-            )
+            group.add_argument("--pos", nargs=2, type=float, help="Position in degrees", metavar=("RA", "DEC"))
 
         if "sources" in params[kind]:
-            sub_parser.add_argument(
-                "sources", type=int, nargs="+", help="Sources to overlay"
-            )
+            sub_parser.add_argument("sources", type=int, nargs="+", help="Sources to overlay")
 
         if "r" in params[kind]:
-            sub_parser.add_argument(
-                "-r",
-                help="Radius of search in arcseconds",
-                type=float,
-                metavar=("RADIUS"),
-            )
+            sub_parser.add_argument("-r", help="Radius of search in arcseconds", type=float, metavar=("RADIUS"))
 
         elif "s" in params[kind]:
-            sub_parser.add_argument(
-                "-s", help="Size of image in arcseconds", type=float, metavar=("SIZE")
-            )
+            sub_parser.add_argument("-s", help="Size of image in arcseconds", type=float, metavar=("SIZE"))
 
     args = parser.parse_args()
 
@@ -172,6 +133,9 @@ def main():
     for arg in vars(args):
         if arg not in params[args.kind] and arg not in ["kind", "source", "pos"]:
             setattr(args, arg, None)
+    if "target" not in params[args.kind]:
+        args.source = None
+        args.pos = None
 
     for param in all_params:
         if not hasattr(args, param):
@@ -187,6 +151,7 @@ def main():
         survey=args.survey,
         pos=args.pos,
         source=args.source,
+        sources=args.sources,
         radius=args.r,
         size=args.s,
         username=args.username,

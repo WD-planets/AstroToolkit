@@ -1,4 +1,7 @@
+from ..Configuration.epochs import EpochStruct
 from ..PackageInfo import SurveyInfo
+
+epochs = EpochStruct().epoch_list
 
 
 class Correct(object):
@@ -18,9 +21,7 @@ class Correct(object):
         import math
 
         if math.isnan(self.pmra) or math.isnan(self.pmdec):
-            print(
-                "Note: could not retrieve object's pmra/pmdec, and so coordinates/radius were not corrected."
-            )
+            print("Note: could not retrieve object's pmra/pmdec, and so coordinates/radius were not corrected.")
             return False
         else:
             return True
@@ -40,17 +41,11 @@ class Correct(object):
         import math
 
         self.ra += (
-            (
-                self.year_delta * self.pmra / 3600000
-                + self.month_delta * self.pmra / 43200000
-            )
+            (self.year_delta * self.pmra / 3600000 + self.month_delta * self.pmra / 43200000)
             * 1
             / math.cos(self.dec / 360 * 2 * math.pi)
         )
-        self.dec += (
-            self.year_delta * self.pmdec / 3600000
-            + self.month_delta * self.pmdec / 43200000
-        )
+        self.dec += self.year_delta * self.pmdec / 3600000 + self.month_delta * self.pmdec / 43200000
 
         return [self.ra, self.dec]
 
@@ -71,14 +66,11 @@ class CorrectRadius(Correct):
         import math
 
         time_delta = abs(self.year_delta + self.month_delta / 12)
-        self.radius += (
-            math.sqrt((self.pmra / 1000) ** 2 + (self.pmdec / 1000) ** 2) * time_delta
-        )
+        self.radius += math.sqrt((self.pmra / 1000) ** 2 + (self.pmdec / 1000) ** 2) * time_delta
 
         return self.radius
 
 
-# main
 """Corrects coordinates for proper motion given in mas/yr"""
 
 
@@ -100,15 +92,11 @@ def correctpm(input_time, target_time, ra, dec, pmra, pmdec):
 def correctradius(source, input_time, target_time, radius):
     from ..Tools import query
 
-    gaia_data = query(
-        kind="data", source=source, survey="gaia", radius=3, level="internal"
-    ).data
+    gaia_data = query(kind="data", source=source, survey="gaia", radius=3, level="internal").data
     if gaia_data:
         pmra, pmdec = gaia_data["pmra"][0], gaia_data["pmdec"][0]
     else:
-        print(
-            "Note: radius correction failed. Some detections may be missing for high proper motion systems."
-        )
+        print("Note: radius correction failed. Some detections may be missing for high proper motion systems.")
         return radius
 
     input = CorrectRadius(input_time, target_time, radius, pmra, pmdec)
@@ -125,51 +113,21 @@ def correctradius(source, input_time, target_time, radius):
 """Performs automatic proper motion correction between two surveys for a Gaia source"""
 
 
-def autocorrect_survey(
-    input_survey, target_survey, source=None, ra=None, dec=None, pmra=None, pmdec=None
-):
-    from ..Tools import query
-
-    survey_times = SurveyInfo().times
-
-    if source:
-        gaia_data = query(
-            kind="data", survey="gaia", source=source, radius=3, level="internal"
-        ).data
-        if gaia_data:
-            ra, dec, pmra, pmdec = (
-                gaia_data["ra"][0],
-                gaia_data["dec"][0],
-                gaia_data["pmra"][0],
-                gaia_data["pmdec"][0],
-            )
-        else:
-            print("Note: proper motion correction unsuccessful.")
-            return None
-
-    input_time, target_time = survey_times[input_survey], survey_times[target_survey]
+def autocorrect_pos(input_survey, target_survey, ra=None, dec=None, pmra=None, pmdec=None):
+    input_time, target_time = epochs[input_survey], epochs[target_survey]
     return correctpm(input_time, target_time, ra, dec, pmra, pmdec)
 
 
 def autocorrect_source(source, target_time=None, target_survey=None):
     from ..Tools import query
 
-    survey_times = SurveyInfo().times
-
     if target_survey:
-        target_time = survey_times[target_survey]
+        target_time = epochs[target_survey]
 
-    gaia_data = query(
-        kind="data", survey="gaia", source=source, radius=3, level="internal"
-    ).data
+    gaia_data = query(kind="data", survey="gaia", source=source, radius=3, level="internal").data
     if gaia_data:
-        ra, dec, pmra, pmdec = (
-            gaia_data["ra"][0],
-            gaia_data["dec"][0],
-            gaia_data["pmra"][0],
-            gaia_data["pmdec"][0],
-        )
-        return correctpm(survey_times["gaia"], target_time, ra, dec, pmra, pmdec)
+        ra, dec, pmra, pmdec = (gaia_data["ra"][0], gaia_data["dec"][0], gaia_data["pmra"][0], gaia_data["pmdec"][0])
+        return correctpm(epochs["gaia"], target_time, ra, dec, pmra, pmdec)
     else:
         print("Note: proper motion correction unsuccessful.")
         return None

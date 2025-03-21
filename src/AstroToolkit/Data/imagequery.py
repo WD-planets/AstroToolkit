@@ -1,8 +1,11 @@
 from functools import wraps
 
+from ..Configuration.epochs import EpochStruct
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+epochs = EpochStruct().epoch_list
 
 
 class ImageStruct(object):
@@ -316,11 +319,8 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
         return data
 
     if source:
-        from ..PackageInfo import SurveyInfo
         from ..Tools import correctpm
         from ..Tools import query as data_query
-
-        survey_times = SurveyInfo().times
 
         gaia_data = data_query(kind="data", survey="gaia", source=source, level="internal").data
         if gaia_data:
@@ -341,7 +341,10 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
 
         # correct coords of source to image_time
 
-        pos = correctpm(input_time=survey_times["gaia"], target_time=image_time, source=source)
+        pos = correctpm(input_time=epochs["gaia"], target_time=image_time, source=source)
+        corrections = f"gaia: {epochs['gaia']} -> initial query performed -> {survey} (image_time): {image_time} -> final query performed"
+    else:
+        corrections = None
 
     image = getimage()
 
@@ -352,5 +355,7 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
         image.data["overlay"] = overlay_data
     else:
         image.data["overlay"] = None
+
+    image.corrections = corrections
 
     return image

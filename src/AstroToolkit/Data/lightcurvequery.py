@@ -1,9 +1,12 @@
 from functools import wraps
 
+from ..Configuration.epochs import EpochStruct
 from ..Input.input_validation import check_inputs
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+epochs = EpochStruct().epoch_list
 
 
 class LightcurveStruct(object):
@@ -771,6 +774,11 @@ def query(survey, source, pos, radius, raw, username=None, password=None):
         from ..Tools import correctpm
 
         pos = correctpm(source=source, target_survey=survey)
+        if survey == "gaia":
+            corrections = f"gaia: {epochs['gaia']} -> gaia (lightcurve): {epochs['gaia_lc']} -> query performed"
+        else:
+            corrections = f"gaia: {epochs['gaia']} -> {survey}: {epochs[survey]} -> query performed"
+
         if not pos:
             return f_return
 
@@ -791,7 +799,13 @@ def query(survey, source, pos, radius, raw, username=None, password=None):
             if math.isnan(pmra) or math.isnan(pmdec):
                 print("Note: could not correct coordinates due to missing pmra/pmdec")
                 pmra, pmdec = None, None
+                corrections = f"gaia: {epochs['gaia']} -> correction failed -> query performed"
+            else:
+                corrections = f"gaia: {epochs['gaia']} -> corrected by ATLAS API + query performed"
+    else:
+        corrections = None
 
     lightcurve = LightcurveStruct(survey=survey, source=source, pos=pos, data=get_lightcurve())
+    lightcurve.corrections = corrections
 
     return lightcurve

@@ -6,6 +6,7 @@ import astropy.units as u
 import pandas as pd
 from astroquery.vizier import Vizier
 
+from ..Configuration.epochs import EpochStruct
 from ..Misc.pmcorrection import correctpm
 from ..Misc.rename_headers import renameHeadersDR3
 from ..PackageInfo import SurveyInfo
@@ -13,6 +14,8 @@ from ..StructureMethods.method_definitions import savedata
 from ..StructureMethods.method_definitions import showdata as showdata
 
 warnings.simplefilter(action="ignore", category=UserWarning)
+
+epochs = EpochStruct().epoch_list
 
 # ensure that the row limit in returned data is infinite
 row_limit = -1
@@ -155,26 +158,29 @@ def query(survey, radius, pos=None, source=None):
     all_surveys = aliases.get_catalogue_list()
 
     # get the necessary basic survey info
-    default_surveys = SurveyInfo().list
     supported_catalogues = SurveyInfo().catalogues
-    survey_times = SurveyInfo().times
 
     # if survey isn't a supported survey, take the 'survey' to be a vizier catalogue ID
-    if survey not in all_surveys:
+    if survey not in all_surveys and survey != "gaia_lc":
         catalogue = survey
+    elif survey == "gaia_lc":
+        catalogue = supported_catalogues[survey]
     else:
         catalogue = all_surveys[survey]
 
     # perform coordinate Vizier query
     if pos:
         data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, pos=pos).pos_query()
+        corrections = None
 
     # perform source Vizier query
     elif source:
         if catalogue == "I/355/gaiadr3":
             data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
+            corrections = "query performed by source"
         elif catalogue == "I/355/epphot":
             data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
+            corrections = None
         else:
             gaia_data = (
                 VizierQuery(survey=survey, catalogue=supported_catalogues["gaia"], radius=radius, source=source)
@@ -192,17 +198,20 @@ def query(survey, radius, pos=None, source=None):
                 print("Note: data query unsuccessful or returned no data.")
                 return DataStruct(survey=survey, catalogue=catalogue, source=source, pos=pos, data=None)
 
-            if survey in default_surveys:
-                ra, dec = correctpm([2016, 0], survey_times[str(survey)], ra, dec, pmra, pmdec)
+            if survey in epochs and survey != "gaia":
+                ra, dec = correctpm(epochs["gaia"], epochs[survey], ra, dec, pmra, pmdec)
+                corrections = f"gaia: {epochs['gaia']} -> {survey}: {epochs[survey]} -> query performed"
             else:
-                print(
-                    f"Note: {survey} uses a custom-defined alias, and hence no epoch has been defined. Proper motion has therefore not been corrected for this survey."
-                )
+                print(f"Note: {survey} has no epoch definition. Proper motion has therefore not been corrected.")
+                corrections = None
+
             data = VizierQuery(
                 survey=survey, catalogue=catalogue, radius=radius, pos=[ra, dec], source=source
             ).pos_query()
     else:
         raise Exception("No source or coordinates provided.")
+
+    data.corrections = corrections
 
     if catalogue == "I/355/gaiadr3" and data.data:
         data = renameHeadersDR3(data)
