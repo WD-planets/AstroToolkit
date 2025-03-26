@@ -49,8 +49,6 @@ def main_new1():
         config.read_config()
         args.radius = config.search_radius
 
-    print(args.source, args.pos)
-
     search(kind=args.kind, pos=args.pos, source=args.source, radius=args.radius)
 
 

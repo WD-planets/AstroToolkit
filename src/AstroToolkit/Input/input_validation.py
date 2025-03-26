@@ -197,7 +197,9 @@ def check_inputs(inputs, label, check_targeting=False):
         value, target_type = entry
         if value is not None and value != "config":
             # automatic conversion to lists
-            if name in ["sources", "overlays", "columns", "colours", "plot_bands"] and not isinstance(value, list):
+            if name in ["sources", "columns", "colours", "plot_bands"] and not isinstance(value, list):
+                value = [value]
+            if name in ["overlays"] and not isinstance(value, (list, dict)):
                 value = [value]
             corrected_value = check_type(name, value, target_type)
         else:

@@ -1,8 +1,12 @@
 from functools import wraps
 
+from ..Configuration.epochs import EpochStruct
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+break_str = "|"
+epochs = EpochStruct().epoch_list
 
 
 class HrdStruct(object):
@@ -46,7 +50,7 @@ class HrdStruct(object):
 
     """
 
-    def __init__(self, sources, data, identifiers=None, survey="gaia"):
+    def __init__(self, sources, data, identifiers=None, survey="gaia", positions=None, traces=None):
         self.kind = "hrd"
 
         self.survey = survey
@@ -55,6 +59,8 @@ class HrdStruct(object):
         self.data = data
         self.figure = None
         self.dataname = None
+        self.positions = positions
+        self.traces = traces
 
     def __str__(self):
         return "<ATK HRD Structure>"
@@ -99,17 +105,24 @@ def gather_data(sources):
 
     from ..Tools import query
 
-    bad_indices = []
+    bad_indices, positions, pmras, pmdecs = [], [], [], []
     for index, source in enumerate(sources):
         gaia_data = query(kind="data", source=source, survey="gaia", level="internal").data
         if gaia_data:
-            gmag, bpmag, rpmag, parallax = (
+            ra, dec, pmra, pmdec, gmag, bpmag, rpmag, parallax = (
+                gaia_data["ra"][0],
+                gaia_data["dec"][0],
+                gaia_data["pmra"][0],
+                gaia_data["pmdec"][0],
                 gaia_data["phot_g_mean_mag"][0],
                 gaia_data["phot_bp_mean_mag"][0],
                 gaia_data["phot_rp_mean_mag"][0],
                 gaia_data["parallax"][0],
             )
 
+            positions.append([ra, dec])
+            pmras.append(pmra)
+            pmdecs.append(pmdec)
             x.append(bpmag - rpmag)
             y.append(gmag + 5 * np.log10(parallax / 1000) + 5)
         else:
@@ -119,6 +132,34 @@ def gather_data(sources):
 
     data = HrdStruct(sources=sources_formatted, data={"bp-rp": x, "absg": y})
 
-    data.corrections = "queries performed by sources -> [2000,0]"
+    from ..Tools import correctpm
+
+    corrected_positions, trace = [], ""
+
+    for index, (source, pmra, pmdec, position) in enumerate(zip(sources, pmras, pmdecs, positions)):
+        pos, success = correctpm(
+            pos=position, input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec, check_success=True
+        )
+        corrected_positions.append(pos)
+
+        if index == 0:
+            start_str = "start"
+        else:
+            start_str = f"{break_str}"
+        if index == len(sources) - 1:
+            if len(sources) > 1:
+                end_str = f"{break_str} -> end"
+            else:
+                end_str = " -> end"
+        else:
+            end_str = ""
+
+        if success:
+            trace += f"{start_str} -> {source}: pos extracted from source query, assumed {epochs['gaia']} -> [2000,0]{end_str}"
+        else:
+            trace += f"{start_str} -> {source}: pos extracted from source query, assumed {epochs['gaia']} -> proper motion correction failed{end_str}"
+
+    data.positions = corrected_positions
+    data.traces = trace
 
     return data

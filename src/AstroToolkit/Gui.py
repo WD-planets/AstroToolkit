@@ -869,7 +869,7 @@ def appExec():
 
 def openGUI() -> None:
     """openGUI()
-    Opens the ATK GUI. The GUI can also be called from the :ref:`command line`.
+    Opens the ATK GUI. The GUI can also be called from the :ref:`command line <Command-Line Tools>`.
 
     :return: None
 

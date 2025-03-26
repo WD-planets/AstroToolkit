@@ -36,9 +36,10 @@ Upon the successful retrieval of data, a more limited selection of the relevant 
     .survey:     gaia
     .catalogue:  I/355/gaiadr3
     .source:     587316166180416640
-    .pos:        [141.18533044458, 8.03083432206]
+    .pos:        [141.1853304444077, 8.030834321974444]
     .identifier: J092444.48+080151.00
     .dataname:   J092444.48+080151.00_587316166180416640_gaia_ATKdata.fits
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> [2000,0] -> end
 
     .data:
         designation:                     ['Gaia DR3 587316166180416640']
@@ -94,9 +95,10 @@ We can also read files from the command line using the :ref:`ATKread` command, f
     .survey:     galex
     .catalogue:  II/335/galex_ais
     .source:     587316166180416640
-    .pos:        [141.18533044458, 8.03083432206]
-    .identifier: J092444.48+080151.00
-    .dataname:   J092444.48+080151.00_587316166180416640_galex_ATKdata.fits
+    .pos:        [141.18528951298822, 8.030870532715186]
+    .identifier: J092444.47+080151.13
+    .dataname:   J092444.47+080151.13_587316166180416640_galex_ATKdata.fits
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> galex: [2006, 8] -> galex query performed -> [2000,0] -> end
 
     .data:
         RAJ2000:  [141.185551]
@@ -110,4 +112,4 @@ We can also read files from the command line using the :ref:`ATKread` command, f
         ...
 
 
-Many other command line tools are available, some of which will be used in future sections. See :ref:`Command Line` for a full list and description of the available commands.
+Many other command line tools are available, some of which will be used in future sections. See :ref:`Command-Line Tools` for a full list and description of the available commands.

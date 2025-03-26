@@ -76,16 +76,18 @@ And we can now use this alias in a :ref:`data query <data-query>`!
     source = 6050296829033196032
     pos = None
     radius = 5.0
-
+    
+    Note: allwise has no epoch definition. Proper motion has therefore not been corrected.
 
     .kind:       data
     .subkind:    data
     .survey:     allwise
-    .catalogue:  II/328/allwise
+    .catalogue:  ii/328/allwise
     .source:     6050296829033196032
-    .pos:        [245.44701332769, -22.88621824697]
-    .identifier: J162147.28-225310.39
-    .dataname:   J162147.28-225310.39_6050296829033196032_allwise_ATKdata.fits
+    .pos:        [245.44706007515, -22.88644708704]
+    .identifier: J162147.29-225311.21
+    .dataname:   J162147.29-225311.21_6050296829033196032_allwise_ATKdata.fits
+    .trace:      None
 
     .data:
         _r:        [0.485]
@@ -123,6 +125,26 @@ Aliases will also be used when searching through all catalogues via :ref:`bulkda
     source = 6050296829033196032
     pos = None
     radius = 3.0
+    
+    .kind:       data
+    .subkind:    bulkdata
+    .survey:     all
+    .catalogue:  None
+    .source:     6050296829033196032
+    .pos:        [245.44701332846378, -22.886218247040002]
+    .identifier: J162147.28-225310.39
+    .dataname:   J162147.28-225310.39_6050296829033196032_all_ATKbulkdata.fits
+    .trace:      start -> extracted pos from source query, assumed [2016, 0]
+                       -> panstarrs: [2012, 0] -> panstarrs query performed
+                       -> skymapper: [2016, 0] -> skymapper query performed
+                       -> galex: [2006, 8] -> galex query performed
+                       -> rosat: [1991, 0] -> rosat query performed
+                       -> sdss: [2017, 0] -> sdss query performed
+                       -> wise: [2010, 5] -> wise query performed
+                       -> twomass: [1999, 0] -> twomass query performed
+                       -> erosita: [2022, 0] -> erosita query performed
+                       -> allwise lacking epoch definition, proper motion correction failed
+                 -> [2000,0] -> end
 
     .data:
         gaia:

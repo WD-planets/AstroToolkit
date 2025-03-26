@@ -17,11 +17,12 @@ The first step is to fetch some light curve data. For this, we introduce another
     .kind:       lightcurve
     .survey:     ztf
     .source:     6050296829033196032
-    .pos:        [245.44701332769, -22.88621824697]
+    .pos:        [245.44701332846378, -22.886218247040002]
     .identifier: J162147.28-225310.39
     .figure:     None
     .dataname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.fits
     .plotname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.html
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> ztf: [2019, 0] -> ztf query performed -> [2000,0] -> end
 
     .data:
         band: g

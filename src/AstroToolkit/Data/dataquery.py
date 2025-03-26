@@ -67,7 +67,7 @@ class DataStruct(object):
 
     """
 
-    def __init__(self, survey, catalogue, source, pos, data, identifier=None, sub_kind="data"):
+    def __init__(self, survey, catalogue, source, pos, data, identifier=None, sub_kind="data", trace=None):
         self.kind = "data"
         self.subkind = sub_kind
         self.survey = survey
@@ -77,6 +77,7 @@ class DataStruct(object):
         self.identifier = identifier
         self.data = data
         self.dataname = None
+        self.trace = trace
 
     def __str__(self):
         return "<ATK Data Structure>"
@@ -171,47 +172,60 @@ def query(survey, radius, pos=None, source=None):
     # perform coordinate Vizier query
     if pos:
         data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, pos=pos).pos_query()
-        corrections = None
+        trace = None
+        final_pos = pos
 
     # perform source Vizier query
     elif source:
+        gaia_data = (
+            VizierQuery(survey=survey, catalogue=supported_catalogues["gaia"], radius=radius, source=source)
+            .source_query()
+            .data
+        )
+        if not gaia_data:
+            raise ValueError(f"Gaia source {source} not found.")
+        ra, dec, pmra, pmdec = (
+            gaia_data["RA_ICRS"][0],
+            gaia_data["DE_ICRS"][0],
+            gaia_data["pmRA"][0],
+            gaia_data["pmDE"][0],
+        )
+
         if catalogue == "I/355/gaiadr3":
             data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
-            corrections = "query performed by source"
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> [2000,0] -> end"
+            final_pos = correctpm(
+                input_time=epochs["gaia"], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
+            )
         elif catalogue == "I/355/epphot":
             data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
-            corrections = None
-        else:
-            gaia_data = (
-                VizierQuery(survey=survey, catalogue=supported_catalogues["gaia"], radius=radius, source=source)
-                .source_query()
-                .data
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> [2000,0] -> end"
+            final_pos = correctpm(
+                input_time=epochs["gaia"], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
             )
-            if gaia_data:
-                ra, dec, pmra, pmdec = (
-                    gaia_data["RA_ICRS"][0],
-                    gaia_data["DE_ICRS"][0],
-                    gaia_data["pmRA"][0],
-                    gaia_data["pmDE"][0],
-                )
-            else:
-                print("Note: data query unsuccessful or returned no data.")
-                return DataStruct(survey=survey, catalogue=catalogue, source=source, pos=pos, data=None)
-
+        else:
             if survey in epochs and survey != "gaia":
-                ra, dec = correctpm(epochs["gaia"], epochs[survey], ra, dec, pmra, pmdec)
-                corrections = f"gaia: {epochs['gaia']} -> {survey}: {epochs[survey]} -> query performed"
+                pos, success = correctpm(epochs["gaia"], epochs[survey], ra, dec, pmra, pmdec, check_success=True)
+                if success:
+                    trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> {survey}: {epochs[survey]} -> {survey} query performed -> [2000,0] -> end"
+                    final_pos = correctpm(
+                        input_time=epochs[survey], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
+                    )
+                else:
+                    trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> {survey} query performed -> end"
+                    final_pos = pos
             else:
                 print(f"Note: {survey} has no epoch definition. Proper motion has therefore not been corrected.")
-                corrections = None
+                trace = None
+                pos = [ra, dec]
+                final_pos = pos
 
-            data = VizierQuery(
-                survey=survey, catalogue=catalogue, radius=radius, pos=[ra, dec], source=source
-            ).pos_query()
+            data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, pos=pos, source=source).pos_query()
     else:
         raise Exception("No source or coordinates provided.")
 
-    data.corrections = corrections
+    data.pos = final_pos
+    data.trace = trace
 
     if catalogue == "I/355/gaiadr3" and data.data:
         data = renameHeadersDR3(data)

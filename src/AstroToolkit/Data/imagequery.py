@@ -1,9 +1,16 @@
+import os
+import sys
+import warnings
 from functools import wraps
+
+from astropy.utils.exceptions import AstropyWarning
 
 from ..Configuration.epochs import EpochStruct
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+warnings.simplefilter("ignore", category=AstropyWarning)
 
 epochs = EpochStruct().epoch_list
 
@@ -56,7 +63,7 @@ class ImageStruct(object):
 
     """
 
-    def __init__(self, survey, source, pos, data, identifier=None):
+    def __init__(self, survey, source, pos, data, identifier=None, trace=None):
         self.kind = "image"
         self.survey = survey
         self.source = source
@@ -65,6 +72,8 @@ class ImageStruct(object):
         self.data = data
         self.figure = None
         self.dataname = None
+        self.plotname = None
+        self.trace = trace
 
     def __str__(self):
         return "<ATK Image Structure>"
@@ -126,10 +135,8 @@ class GeneralQuery(object):
         from astropy.visualization import AsinhStretch, PercentileInterval
 
         # send request using the URL returned for the selected survey
-
         try:
             r = requests.get(self.url, timeout=15)
-
         except:
             print(f"Note: experiencing issues with {self.survey}.")
 
@@ -188,11 +195,15 @@ class PanstarrsQuery(GeneralQuery):
         url = f"https://ps1images.stsci.edu/cgi-bin/ps1filenames.py?ra={self.pos[0]}&dec={self.pos[1]}&band={self.band}"
 
         try:
-            table = Table.read(url, format="ascii")
+            # supresses panstarrs query stdout by directing it to null
+            with open(os.devnull, "w") as stdout_null:
+                stdout_sys = sys.stdout
+                sys.stdout = stdout_null
+                table = Table.read(url, format="ascii")
+                sys.stdout = stdout_sys
 
             if not len(table) > 0:
                 print(f"Note: {self.survey} image query returned no data.")
-
                 return None
 
             sub_url = f"https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra={self.pos[0]}&dec={self.pos[1]}&size={url_size}&format=fits"
@@ -228,21 +239,16 @@ class SkymapperQuery(GeneralQuery):
 
         try:
             table = pd.read_csv(url)
-
             table = Table.from_pandas(table)
-
         except:
             print(f"Note: experiencing issues with {self.survey}.")
-
             return None
 
         if len(table) > 0:
             url_main = table["get_image"][0]
             self.url = url_main
-
         else:
             print(f"Note: {self.survey} image query returned no data.")
-
             return None
 
 
@@ -286,20 +292,18 @@ class DssQuery(GeneralQuery):
 
 
 def query(survey, size, band, pos=None, source=None, overlays=None):
-    f_return = ImageStruct(survey=survey, source=source, pos=pos, data=None)
-
-    def getimage():
-        query_object = globals()[f"{survey.capitalize()}Query"](pos=pos, size=size, band=band, survey=survey)
+    def getimage(position):
+        query_object = globals()[f"{survey.capitalize()}Query"](pos=position, size=size, band=band, survey=survey)
 
         query_object.set_url()
 
-        if query_object.url is None:
-            return f_return
+        if not query_object.url:
+            return None
 
         image_data, image_header = query_object.get_image_data()
 
         if image_data is None or image_header is None:
-            return f_return
+            return None
 
         image_time = query_object.image_time
 
@@ -311,10 +315,10 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
             "size": size,
             "image_time": image_time,
             "wcs": wcs,
-            "image_focus": pos,
+            "image_focus": position,
         }
 
-        data = ImageStruct(survey=survey, source=source, pos=pos, data=data_dict)
+        data = ImageStruct(survey=survey, source=source, pos=position, data=data_dict)
 
         return data
 
@@ -323,30 +327,34 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
         from ..Tools import query as data_query
 
         gaia_data = data_query(kind="data", survey="gaia", source=source, level="internal").data
-        if gaia_data:
-            pos = [gaia_data["ra"][0], gaia_data["dec"][0]]
-        else:
-            print("Note: No gaia object found with given Source.")
-            return f_return
+        ra, dec, pmra, pmdec = (gaia_data["ra"][0], gaia_data["dec"][0], gaia_data["pmra"][0], gaia_data["pmdec"][0])
+        gaia_pos = [ra, dec]
 
         # get an initial image to get image_time
+        image = getimage(position=gaia_pos)
 
-        image = getimage()
-
-        if image.data:
+        if image:
             image_time = image.data["image_time"]
-
         else:
-            return f_return
+            return ImageStruct(survey=survey, source=source, pos=pos, data=None)
 
         # correct coords of source to image_time
+        corrected_pos, success1 = correctpm(
+            pos=gaia_pos, input_time=epochs["gaia"], target_time=image_time, pmra=pmra, pmdec=pmdec, check_success=True
+        )
+        final_pos, success2 = correctpm(
+            pos=gaia_pos, input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec, check_success=True
+        )
 
-        pos = correctpm(input_time=epochs["gaia"], target_time=image_time, source=source)
-        corrections = f"gaia: {epochs['gaia']} -> initial query performed -> {survey} (image_time): {image_time} -> final query performed"
+        if success1 and success2:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> initial query performed -> {survey} (image_time): {image_time} -> final query performed -> [2000,0] -> end"
+        else:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> initial query performed -> proper motion correction failed -> final query performed -> proper motion correction failed -> end"
     else:
-        corrections = None
+        final_pos = pos
+        trace = None
 
-    image = getimage()
+    image = getimage(corrected_pos)
 
     if overlays:
         from ..Data.imageoverlay import overlay_query
@@ -356,6 +364,7 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
     else:
         image.data["overlay"] = None
 
-    image.corrections = corrections
+    image.trace = trace
+    image.pos = final_pos
 
     return image

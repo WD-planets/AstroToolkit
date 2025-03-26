@@ -3,14 +3,16 @@ import math
 import numpy as np
 
 from ..Configuration.baseconfig import ConfigStruct
+from ..Configuration.epochs import EpochStruct
 from ..Data.simbad_query import pos_query
 from ..Misc.pmcorrection import correctradius
 from ..PackageInfo import SurveyInfo
 from ..Tools import correctpm, query
 
-survey_times = SurveyInfo().times
 survey_params = SurveyInfo().overlay_param_names
 survey_obj_ids = SurveyInfo().survey_id_names
+
+epochs = EpochStruct().epoch_list
 
 config = ConfigStruct()
 config.read_config()
@@ -30,8 +32,8 @@ class OverlayData(object):
                 self.returned_data["gaia"]["pmdec"][i]
             ):
                 (self.returned_data["gaia"]["ra"][i], self.returned_data["gaia"]["dec"][i]) = correctpm(
-                    input_time=survey_times["gaia"],
-                    target_time=survey_times[self.survey],
+                    input_time=epochs["gaia"],
+                    target_time=epochs[self.survey],
                     pos=[self.returned_data["gaia"]["ra"][i], self.returned_data["gaia"]["dec"][i]],
                     pmra=self.returned_data["gaia"]["pmra"][i],
                     pmdec=self.returned_data["gaia"]["pmdec"][i],
@@ -52,7 +54,7 @@ class OverlayData(object):
                         self.returned_data["gaia"]["pmdec"][j]
                     ):
                         (self.returned_data["non_gaia"]["ra"][i], self.returned_data["non_gaia"]["dec"][i]) = correctpm(
-                            input_time=survey_times[self.survey],
+                            input_time=epochs[self.survey],
                             target_time=image_time,
                             pos=[self.returned_data["non_gaia"]["ra"][i], self.returned_data["non_gaia"]["dec"][i]],
                             pmra=self.returned_data["gaia"]["pmra"][j],
@@ -84,10 +86,7 @@ def get_overlay_data(data, survey):
 
     if data.source:
         radius = correctradius(
-            source=data.source,
-            input_time=survey_times["gaia"],
-            target_time=survey_times[survey],
-            radius=data.data["size"],
+            source=data.source, input_time=epochs["gaia"], target_time=epochs[survey], radius=data.data["size"]
         )
     else:
         radius = data.data["size"]
@@ -154,6 +153,7 @@ def get_overlay_data(data, survey):
                         "marker_size": formatted_data["non_gaia"][f"{mag}_marker_size"][i],
                         "colour": params["colours"][params["mag_names"].index(mag)],
                         "mag_name": mag,
+                        "mag": formatted_data["non_gaia"][mag][i],
                         "survey": survey,
                         "obj_id": str(formatted_data["non_gaia"]["obj_id"][i]),
                         "correction_pmra": formatted_data["non_gaia"]["correction_pmra"][i],
@@ -262,10 +262,6 @@ def overlay_query(data, overlays):
             identifier = pos_query([search_ra, search_dec])
             data_point["simbad_id"] = str(identifier)
         overlays_data[index] = data_point
-
-    image_centre_ra = data.data["image_focus"][0]
-    image_centre_dec = data.data["image_focus"][0]
-    image_half_width = data.data["size"] / 7200
 
     # cull data points that are outside the image (also need to actually fix the query radius at some point)
     image_header = data.data["image_header"]

@@ -6,7 +6,7 @@ def print_data(struct, pprint, print_methods):
     methods = ["savedata", "showdata", "saveplot", "showplot"]
     headings = ["band", "survey"]
     newline = "\n"
-    list_exceptions = ["pos", "sources", "identifiers"]
+    list_exceptions = ["pos", "sources", "identifiers", "positions"]
     header_exceptions = {
         "image_data": "<Image Data>",
         "image_header": "<Image Header>",
@@ -104,7 +104,26 @@ def print_data(struct, pprint, print_methods):
                 else:
                     print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
             else:
-                print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
+                if var in ["trace", "traces"]:
+                    if var == "trace":
+                        shift = 1
+                    else:
+                        shift = 0
+                    if not getattr(struct, var):
+                        print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
+                        continue
+
+                    split = getattr(struct, var).split("|")
+                    if len(split) > 1:
+                        print(f".{(var + ':').ljust(pad_length)} {split[0]}")
+                        for element in split[1:-1]:
+                            print(f"{' ' * (len(var) + shift + pad_length)} {element}")
+                        print(f"{' ' * pad_length} {split[-1]}")
+                    else:
+                        print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
+
+                else:
+                    print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
 
     if print_methods:
         import inspect

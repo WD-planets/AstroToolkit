@@ -13,7 +13,7 @@ The :func:`query() <AstroToolkit.Tools.query>` tool takes different arguments de
     
     gaia_data = query(kind="data",source=587316166180416640,survey="gaia")
 
-where the cataclysmic variable Hu Leo has been targeted using its Gaia DR3 source ID. This returns any Gaia DR3 catalogue data that is found for that source. We can also query the same system in another of the supported surveys, e.g. GALEX:
+where the cataclysmic variable Hu Leo has been targeted using its Gaia DR3 source ID. This returns any Gaia DR3 catalogue data that is found for that source. We can also query the same system in another survey, e.g. GALEX:
 
 .. code-block:: python
 
@@ -42,9 +42,10 @@ The :func:`showdata() <AstroToolkit.Data.dataquery.DataStruct.showdata>` method 
     .survey:     galex
     .catalogue:  II/335/galex_ais
     .source:     587316166180416640
-    .pos:        [141.18526027626, 8.03089639753]
-    .identifier: J092444.48+080151.00
-    .dataname:   J092444.48+080151.00_587316166180416640_galex_ATKdata.fits
+    .pos:        [141.18528658931538, 8.030873119196666]
+    .identifier: J092444.47+080151.14
+    .dataname:   J092444.47+080151.14_587316166180416640_galex_ATKdata.fits
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> galex: [2006, 8] -> galex query performed -> [2000,0] -> end
 
     .data:
         RAJ2000:  [141.185551]
@@ -69,7 +70,9 @@ The first section in the above output notifies us that the query is running, and
 
 - The **source** attribute holds the Gaia source to which the data pertains, **pos** holds its J2000 coordinates [right ascension, declination] in degrees, and identifier gives these as a string in HHMMSS.SS±DDMMSS.SS format.
 
-- Finally, the **dataname** attribute gives the default file name to which data will be saved locally using the :func:`savedata() <AstroToolkit.Data.dataquery.DataStruct.savedata>` method (again, this will be covered later). 
+- The **dataname** attribute gives the default file name to which data will be saved locally using the :func:`savedata() <AstroToolkit.Data.dataquery.DataStruct.savedata>` method (again, this will be covered later). 
+
+- Finally, the **trace** attribute describes the correction of coordinates between various epochs using the object's proper motion. Here, we can see that the object's coordinates were taken from Gaia, with an assumed epoch of January 2016. These were then corrected for proper motion back to GALEX's epoch of September 2006, at which point the query was performed. The coordinates were then corrected to January 2000, which is the epoch of the coordinates that are stored in the **pos** attribute.
 
 In :class:`DataStructs <AstroToolkit.Data.data.DataStruct>`, the resulting data is stored as a dictionary, and hence we can access the value of a certain parameter using its column heading:
 

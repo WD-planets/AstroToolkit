@@ -4,6 +4,8 @@ from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
 
+newline = "\n"
+
 
 class SedStruct(object):
     """SedStruct()
@@ -51,7 +53,7 @@ class SedStruct(object):
 
     """
 
-    def __init__(self, source, pos, data, identifier=None):
+    def __init__(self, source, pos, data, identifier=None, trace=None):
         self.kind = "sed"
         self.source = source
         self.pos = pos
@@ -59,6 +61,8 @@ class SedStruct(object):
         self.data = data
         self.figure = None
         self.dataname = None
+        self.plotname = None
+        self.trace = trace
 
     def __str__(self):
         return "<ATK SED Structure>"
@@ -158,9 +162,23 @@ def query(radius, pos=None, source=None):
     sed_params = SurveyInfo().sed_param_names
 
     bulkdata = query(kind="bulkdata", pos=pos, source=source, radius=radius, level="internal")
+    final_pos = bulkdata.pos
+    if source:
+        split_trace = bulkdata.trace.split("|")
+        # use trace string from bulkdata query, but remove parts that aren't needed
+        for survey in bulkdata.data:
+            if survey not in sed_params:
+                split_trace = [x for x in split_trace if survey not in x]
+        trace = ""
+        for entry in split_trace[:-1]:
+            trace += f"{entry}{'|'}"
+        trace += split_trace[-1]
+    else:
+        trace = None
+
     if bulkdata.data:
         if source:
-            pos = bulkdata.data["gaia"]["ra"][0], bulkdata.data["gaia"]["dec"][0]
+            pos = [bulkdata.data["gaia"]["ra"][0], bulkdata.data["gaia"]["dec"][0]]
 
         bulkdata.data = {key: value for key, value in bulkdata.data.items() if value is not None}
 
@@ -186,4 +204,7 @@ def query(radius, pos=None, source=None):
         )
 
     data_struct = SedStruct(pos=pos, source=source, data=sed_data)
+    data_struct.trace = trace
+    data_struct.pos = final_pos
+
     return data_struct

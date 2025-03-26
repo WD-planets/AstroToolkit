@@ -1,8 +1,11 @@
 from functools import wraps
 
+from ..Configuration.epochs import EpochStruct
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+epochs = EpochStruct().epoch_list
 
 
 class SpectrumStruct(object):
@@ -48,7 +51,7 @@ class SpectrumStruct(object):
 
     """
 
-    def __init__(self, survey, source, pos, data, identifier=None):
+    def __init__(self, survey, source, pos, data, identifier=None, trace=None):
         self.kind = "spectrum"
         self.survey = survey
         self.source = source
@@ -57,6 +60,8 @@ class SpectrumStruct(object):
         self.data = data
         self.figure = None
         self.dataname = None
+        self.plotname = None
+        self.trace = trace
 
     def __str__(self):
         return "<ATK Spectrum Structure>"
@@ -127,9 +132,24 @@ def query(survey, radius, pos=None, source=None):
     if source:
         from ..Tools import correctpm
 
-        pos = correctpm(target_survey="sdss", source=source)
-        if not pos:
-            return SpectrumStruct(survey=survey, source=source, pos=pos, data=None)
+        pos, success = correctpm(target_survey="sdss", source=source, check_success=True)
+        if success:
+            final_pos = correctpm(source=source, target_time=[2000, 0])
+        else:
+            final_pos = pos
+
+        if success:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> {survey}: {epochs[survey]} -> {survey} query performed -> [2000,0] -> end"
+        else:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> {survey} query performed -> end"
+    else:
+        final_pos = pos
+        trace = None
 
     data = SurveyMap(survey=survey, radius=radius, pos=pos).query()
-    return SpectrumStruct(survey=survey, source=source, pos=pos, data=data)
+    struct = SpectrumStruct(survey=survey, source=source, pos=pos, data=data)
+
+    struct.trace = trace
+    struct.pos = final_pos
+
+    return struct

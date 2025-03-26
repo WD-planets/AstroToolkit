@@ -29,8 +29,6 @@ def CreateLocalData(struct, fname):
 
     df = pd.DataFrame.from_dict(data_dict)
     df = df.fillna(value=np.nan).infer_objects(copy=False)
-    for col in df.columns.values.tolist():
-        print(df[col].tolist())
     table = Table.from_pandas(df)
     hdu = fits.table_to_hdu(table)
 
@@ -44,6 +42,7 @@ def CreateLocalData(struct, fname):
         "atk_pos_ra": ra,
         "atk_pos_dec": dec,
         "atk_identifier": struct.identifier,
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdr[key] = val
@@ -82,6 +81,7 @@ def CreateLocalBulkdata(struct, fname):
         "atk_pos_ra": ra,
         "atk_pos_dec": dec,
         "atk_identifier": struct.identifier,
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdr[key] = val
@@ -122,6 +122,7 @@ def CreateLocalLightcurve(struct, fname):
         "atk_pos_ra": ra,
         "atk_pos_dec": dec,
         "atk_identifier": struct.identifier,
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdr[key] = val
@@ -156,6 +157,7 @@ def CreateLocalImage(struct, fname):
         "atk_image_size": struct.data["size"],
         "atk_image_time_year": struct.data["image_time"][0],
         "atk_image_time_month": struct.data["image_time"][1],
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdu_list[0].header[key] = val
@@ -202,6 +204,7 @@ def CreateLocalSed(struct, fname):
         "atk_pos_ra": ra,
         "atk_pos_dec": dec,
         "atk_identifier": struct.identifier,
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdr[key] = val
@@ -240,6 +243,7 @@ def CreateLocalSpectrum(struct, fname):
         "atk_pos_ra": ra,
         "atk_pos_dec": dec,
         "atk_identifier": struct.identifier,
+        "atk_t": struct.trace,
     }
     for key, val in header_info.items():
         hdr[key] = val
@@ -257,13 +261,15 @@ def CreateLocalSpectrum(struct, fname):
 
 def CreateLocalHrd(struct, fname):
     hdr = fits.Header()
-    header_info = {"atk_kind": struct.kind, "atk_survey": struct.survey}
+    header_info = {"atk_kind": struct.kind, "atk_survey": struct.survey, "atk_t": struct.traces}
     for key, val in header_info.items():
         hdr[key] = val
 
     df = pd.DataFrame.from_dict(struct.data)
     df["sources"] = struct.sources
     df["identifiers"] = struct.identifiers
+    df["position_ra"] = [x[0] for x in struct.positions]
+    df["position_dec"] = [x[1] for x in struct.positions]
     df = df.fillna(value=np.nan).infer_objects(copy=False)
     table = Table.from_pandas(df)
     hdu = fits.table_to_hdu(table)

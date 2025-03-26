@@ -74,22 +74,27 @@ class CorrectRadius(Correct):
 """Corrects coordinates for proper motion given in mas/yr"""
 
 
-def correctpm(input_time, target_time, ra, dec, pmra, pmdec):
+def correctpm(input_time, target_time, ra, dec, pmra, pmdec, check_success=False):
     input = Correct(input_time, target_time, ra, dec, pmra, pmdec)
     check = input.check_nans
     if check:
         input.get_deltas
         corrected_coords = input.correction
-        return corrected_coords
+        if check_success:
+            return corrected_coords, True
+        else:
+            return corrected_coords
     else:
-        print("Note: proper motion correction unsuccessful.")
-        return [ra, dec]
+        if check_success:
+            return [ra, dec], False
+        else:
+            return [ra, dec]
 
 
 """Corrects a radius for proper motion given in mas/yr"""
 
 
-def correctradius(source, input_time, target_time, radius):
+def correctradius(source, input_time, target_time, radius, check_success=False):
     from ..Tools import query
 
     gaia_data = query(kind="data", source=source, survey="gaia", radius=3, level="internal").data
@@ -104,30 +109,31 @@ def correctradius(source, input_time, target_time, radius):
     if check:
         input.get_deltas
         corrected_radius = input.correction
-        return corrected_radius
+        if check_success:
+            return corrected_radius, True
+        else:
+            return corrected_radius
     else:
-        print("Note: proper motion correction unsuccessful.")
-        return radius
+        if check_success:
+            return radius, False
+        else:
+            return radius
 
 
 """Performs automatic proper motion correction between two surveys for a Gaia source"""
 
 
-def autocorrect_pos(input_survey, target_survey, ra=None, dec=None, pmra=None, pmdec=None):
+def autocorrect_pos(input_survey, target_survey, ra=None, dec=None, pmra=None, pmdec=None, check_success=False):
     input_time, target_time = epochs[input_survey], epochs[target_survey]
-    return correctpm(input_time, target_time, ra, dec, pmra, pmdec)
+    return correctpm(input_time, target_time, ra, dec, pmra, pmdec, check_success=check_success)
 
 
-def autocorrect_source(source, target_time=None, target_survey=None):
+def autocorrect_source(source, target_time=None, target_survey=None, check_success=False):
     from ..Tools import query
 
     if target_survey:
         target_time = epochs[target_survey]
 
     gaia_data = query(kind="data", survey="gaia", source=source, radius=3, level="internal").data
-    if gaia_data:
-        ra, dec, pmra, pmdec = (gaia_data["ra"][0], gaia_data["dec"][0], gaia_data["pmra"][0], gaia_data["pmdec"][0])
-        return correctpm(epochs["gaia"], target_time, ra, dec, pmra, pmdec)
-    else:
-        print("Note: proper motion correction unsuccessful.")
-        return None
+    ra, dec, pmra, pmdec = (gaia_data["ra"][0], gaia_data["dec"][0], gaia_data["pmra"][0], gaia_data["pmdec"][0])
+    return correctpm(epochs["gaia"], target_time, ra, dec, pmra, pmdec, check_success=check_success)

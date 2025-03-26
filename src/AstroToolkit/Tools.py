@@ -3,6 +3,7 @@ Contains the main tools for data fetching, plotting and analysis in ATK.
 """
 
 from .Configuration.baseconfig import ConfigStruct
+from .Configuration.epochs import EpochStruct
 from .Data.dataquery import DataStruct
 from .Data.hrdquery import HrdStruct
 from .Data.imagequery import ImageStruct
@@ -15,8 +16,9 @@ config = ConfigStruct()
 config.read_config()
 newline = "\n"
 
-
 # 'pos' has epoch of 2000 if given as input, 2016 if found as a result of source query. 'identifier' is therefore always J2000
+
+epochs = EpochStruct().get_epochs()
 
 
 def query(
@@ -262,7 +264,7 @@ def query(
             "band": [band, str],
             "username": [username, str],
             "password": [password, str],
-            "overlays": [overlays, list],
+            "overlays": [overlays, (list, dict)],
             "sources": [sources, list],
             "level": [level, str],
             "raw": [raw, bool],
@@ -300,15 +302,6 @@ def query(
 
         if kind == "data":
             data = data_query(survey=survey, radius=radius, pos=pos, source=source)
-
-            if source and survey == "gaia" and data.data:
-                data.pos = [data.data["ra"][0], data.data["dec"][0]]
-            elif source and survey != "gaia":
-                gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source)
-                if gaia_data.data:
-                    data.pos = [gaia_data.data["ra"][0], gaia_data.data["dec"][0]]
-                else:
-                    return data
 
         elif kind == "spectrum":
             from .Data.spectrumquery import query as spectrum_query
@@ -361,27 +354,12 @@ def query(
 
     from .Misc.identifier_generation import identifier_from_pos
 
-    # generates identifier
-    if hasattr(data, "source"):
-        if data.source:
-            gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source)
-            if gaia_data.data:
-                ra, dec = gaia_data.data["ra2000"][0], gaia_data.data["dec2000"][0]
-                data.identifier = identifier_from_pos([ra, dec])
-                data.corrections += " -> [2000,0]"
-                data.pos = [ra, dec]
-            else:
-                raise ValueError(f"Could not find Gaia Source: {data.source}")
-        else:
-            data.identifier = identifier_from_pos(data.pos)
-
     # generates identifiers in HRD queries
-    elif hasattr(data, "sources"):
+    if hasattr(data, "sources"):
         identifiers = []
-        for source in data.sources:
-            gaia_data = data_query(survey="gaia", radius=radius, pos=pos, source=source).data
-            ra, dec = gaia_data["ra2000"][0], gaia_data["dec2000"][0]
-            identifiers.append(identifier_from_pos([ra, dec]))
+        for position in data.positions:
+            identifiers.append(identifier_from_pos(position))
+
         data.identifiers = identifiers
     else:
         data.identifier = identifier_from_pos(data.pos)
@@ -413,6 +391,7 @@ def correctpm(
     target_time: list[int] = None,
     pmra: float = None,
     pmdec: float = None,
+    check_success: bool = False,
 ) -> list[float]:
     """correctpm(source/pos, **kwargs)
     Corrects coordinates for proper motion between times or supported surveys.
@@ -478,34 +457,40 @@ def correctpm(
             "target_time": [target_time, list],
             "pmra": [pmra, float],
             "pmdec": [pmdec, float],
+            "check_success": [check_success, bool],
         },
         label="correctpm",
         check_targeting=True,
     )
 
-    input_survey, target_survey, pos, source, input_time, target_time, pmra, pmdec = corrected_inputs
+    (input_survey, target_survey, pos, source, input_time, target_time, pmra, pmdec, check_success) = corrected_inputs
 
     if source and target_time:
         from .Misc.pmcorrection import autocorrect_source
 
-        corrected_pos = autocorrect_source(source=source, target_time=target_time)
+        corrected_pos, success = autocorrect_source(source=source, target_time=target_time, check_success=True)
     elif source and target_survey:
         from .Misc.pmcorrection import autocorrect_source
 
-        corrected_pos = autocorrect_source(source=source, target_survey=target_survey)
+        corrected_pos, success = autocorrect_source(source=source, target_survey=target_survey, check_success=True)
 
     elif pos and input_time and target_time:
         from .Misc.pmcorrection import correctpm
 
-        corrected_pos = correctpm(input_time, target_time, pos[0], pos[1], pmra, pmdec)
+        corrected_pos, success = correctpm(input_time, target_time, pos[0], pos[1], pmra, pmdec, check_success=True)
     elif pos and input_survey and target_survey:
-        from .Misc.pmcorrection import autocorrect_survey
+        from .Misc.pmcorrection import autocorrect_pos
 
-        corrected_pos = autocorrect_survey(input_survey, target_survey, ra=pos[0], dec=pos[1], pmra=pmra, pmdec=pmdec)
+        corrected_pos, success = autocorrect_pos(
+            input_survey, target_survey, ra=pos[0], dec=pos[1], pmra=pmra, pmdec=pmdec, check_success=True
+        )
     else:
         raise ValueError("Invalid input combination passed to correctpm.")
 
-    return corrected_pos
+    if check_success:
+        return corrected_pos, success
+    else:
+        return corrected_pos
 
 
 def readdata(fname: str) -> DataStruct | HrdStruct | LightcurveStruct | ImageStruct | SedStruct | SpectrumStruct:

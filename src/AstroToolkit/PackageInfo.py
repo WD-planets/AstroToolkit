@@ -80,6 +80,10 @@ class SurveyInfo:
                 "mag_names": ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"],
                 "error_names": ["e_gPSF", "e_rPSF", "e_iPSF", "e_zPSF", "e_uPSF", "e_vPSF"],
             },
+            "allwise": {
+                "mag_names": ["W1mag", "W2mag", "W3mag", "W4mag"],
+                "error_names": ["e_W1mag", "e_W2mag", "e_W3mag", "e_W4mag"],
+            },
         }
 
         self.lightcurve_bands = {

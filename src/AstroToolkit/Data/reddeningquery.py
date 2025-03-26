@@ -1,4 +1,7 @@
+from ..Configuration.epochs import EpochStruct
 from ..Data.dataquery import DataStruct
+
+epochs = EpochStruct().epoch_list
 
 
 class GeneralQuery(object):
@@ -12,13 +15,7 @@ class GeneralQuery(object):
         self.distance = distance
         self.radius = radius
 
-        self.f_return = DataStruct(
-            catalogue=None,
-            survey=self.survey,
-            source=self.source,
-            pos=self.pos,
-            data=None,
-        )
+        self.f_return = DataStruct(catalogue=None, survey=self.survey, source=self.source, pos=self.pos, data=None)
 
     def send_request(self):
         import requests
@@ -53,9 +50,7 @@ class StilismQuery(GeneralQuery):
 
         from ..Tools import query as data_query
 
-        gaia_data = data_query(
-            kind="data", survey="gaia", source=self.source, level="internal"
-        ).data
+        gaia_data = data_query(kind="data", survey="gaia", source=self.source, level="internal").data
         if gaia_data:
             ra, dec, gal_lon, gal_lat, parallax, parallax_error = (
                 gaia_data["ra"][0],
@@ -76,32 +71,16 @@ class StilismQuery(GeneralQuery):
         upper_distance = 1 / ((parallax + parallax_error) / 1000)
         lower_distance = 1 / ((parallax - parallax_error) / 1000)
 
-        data = {
-            "distance": pd.DataFrame(),
-            "upper_distance": pd.DataFrame(),
-            "lower_distance": pd.DataFrame(),
-        }
-        for dist, label in zip(
-            [distance, upper_distance, lower_distance], list(data.keys())
-        ):
+        data = {"distance": pd.DataFrame(), "upper_distance": pd.DataFrame(), "lower_distance": pd.DataFrame()}
+        for dist, label in zip([distance, upper_distance, lower_distance], list(data.keys())):
             self.set_url(distance=dist, gal_lon=gal_lon, gal_lat=gal_lat)
             response = self.send_request()
             if not response:
-                return GeneralQuery(
-                    survey=self.survey,
-                    source=self.source,
-                    pos=self.pos,
-                    radius=self.radius,
-                )
+                return GeneralQuery(survey=self.survey, source=self.source, pos=self.pos, radius=self.radius)
             gen_data = self.generate_data(response)
             if response is None:
                 print("Note: Reddening query returned no data.")
-                return GeneralQuery(
-                    survey=self.survey,
-                    source=self.source,
-                    pos=self.pos,
-                    radius=self.radius,
-                ).f_return
+                return GeneralQuery(survey=self.survey, source=self.source, pos=self.pos, radius=self.radius).f_return
 
             data[label] = gen_data
 
@@ -109,12 +88,10 @@ class StilismQuery(GeneralQuery):
 
     def format_data(self, data):
         reddening_upper_error = (
-            data["upper_distance"]["reddening[mag]"].tolist()[0]
-            - data["distance"]["reddening[mag]"].tolist()[0]
+            data["upper_distance"]["reddening[mag]"].tolist()[0] - data["distance"]["reddening[mag]"].tolist()[0]
         )
         reddening_lower_error = (
-            data["lower_distance"]["reddening[mag]"].tolist()[0]
-            - data["distance"]["reddening[mag]"].tolist()[0]
+            data["lower_distance"]["reddening[mag]"].tolist()[0] - data["distance"]["reddening[mag]"].tolist()[0]
         )
 
         dist, dist_err, reddening, reddening_min_err, reddening_max_err = (
@@ -164,95 +141,48 @@ class GdreQuery(GeneralQuery):
         self.set_url()
         response = self.send_request()
         if not response:
-            return GeneralQuery(
-                survey=self.survey, source=self.source, pos=self.pos, radius=self.radius
-            ).f_return
+            return GeneralQuery(survey=self.survey, source=self.source, pos=self.pos, radius=self.radius).f_return
 
         tree = ET.ElementTree(ET.fromstring(response.text))
         root = tree.getroot()
 
         status = root.attrib["status"]
         if status != "ok":
-            return GeneralQuery(
-                survey=self.survey, source=self.source, pos=self.pos, radius=self.radius
-            ).f_return
+            return GeneralQuery(survey=self.survey, source=self.source, pos=self.pos, radius=self.radius).f_return
 
         def get_value(element, param, kind):
             if kind == "ext":
-                return float(
-                    element.find("statistics")
-                    .find(param)
-                    .text.lstrip()
-                    .rstrip()
-                    .removesuffix(" (mag)")
-                )
+                return float(element.find("statistics").find(param).text.lstrip().rstrip().removesuffix(" (mag)"))
             elif kind == "mic":
-                return float(
-                    element.find("statistics")
-                    .find(param)
-                    .text.lstrip()
-                    .rstrip()
-                    .removesuffix(" (MJy/sr)")
-                )
+                return float(element.find("statistics").find(param).text.lstrip().rstrip().removesuffix(" (MJy/sr)"))
             elif kind == "dust":
-                return float(
-                    element.find("statistics")
-                    .find(param)
-                    .text.lstrip()
-                    .rstrip()
-                    .removesuffix(" (K)")
-                )
+                return float(element.find("statistics").find(param).text.lstrip().rstrip().removesuffix(" (K)"))
 
         try:
             for element in root:
                 if element.find("desc") is not None:
-                    if (
-                        element.find("desc").text.lstrip().rstrip()
-                        == "E(B-V) Reddening"
-                    ):
-                        extinction_table_url = (
-                            element.find("data").find("table").text.lstrip().rstrip()
-                        )
-                        extinction_image_url = (
-                            element.find("data").find("image").text.lstrip().rstrip()
-                        )
-                        extinction_pixel_value_2011 = get_value(
-                            element, "refPixelValueSandF", "ext"
-                        )
-                        extinction_pixel_value_1998 = get_value(
-                            element, "refPixelValueSFD", "ext"
-                        )
-                        extinction_mean_value_2011 = get_value(
-                            element, "meanValueSandF", "ext"
-                        )
-                        extinction_mean_value_1998 = get_value(
-                            element, "meanValueSFD", "ext"
-                        )
+                    if element.find("desc").text.lstrip().rstrip() == "E(B-V) Reddening":
+                        extinction_table_url = element.find("data").find("table").text.lstrip().rstrip()
+                        extinction_image_url = element.find("data").find("image").text.lstrip().rstrip()
+                        extinction_pixel_value_2011 = get_value(element, "refPixelValueSandF", "ext")
+                        extinction_pixel_value_1998 = get_value(element, "refPixelValueSFD", "ext")
+                        extinction_mean_value_2011 = get_value(element, "meanValueSandF", "ext")
+                        extinction_mean_value_1998 = get_value(element, "meanValueSFD", "ext")
                         extinction_stdev_2011 = get_value(element, "stdSandF", "ext")
                         extinction_stdev_1998 = get_value(element, "stdSFD", "ext")
                         extinction_max_2011 = get_value(element, "maxValueSandF", "ext")
                         extinction_max_1998 = get_value(element, "maxValueSFD", "ext")
                         extinction_min_2011 = get_value(element, "minValueSandF", "ext")
                         extinction_min_1998 = get_value(element, "minValueSFD", "ext")
-                    elif (
-                        element.find("desc").text.lstrip().rstrip()
-                        == "100 Micron Emission"
-                    ):
-                        micron_image_url = (
-                            element.find("data").find("image").text.lstrip().rstrip()
-                        )
+                    elif element.find("desc").text.lstrip().rstrip() == "100 Micron Emission":
+                        micron_image_url = element.find("data").find("image").text.lstrip().rstrip()
                         micron_pixel_value = get_value(element, "refPixelValue", "mic")
                         micron_mean_value = get_value(element, "meanValue", "mic")
                         micron_stdev = get_value(element, "std", "mic")
                         micron_max = get_value(element, "maxValue", "mic")
                         micron_min = get_value(element, "minValue", "mic")
-                    elif (
-                        element.find("desc").text.lstrip().rstrip()
-                        == "Dust Temperature"
-                    ):
-                        dust_image_url = (
-                            element.find("data").find("image").text.lstrip().rstrip()
-                        )
+                    elif element.find("desc").text.lstrip().rstrip() == "Dust Temperature":
+                        dust_image_url = element.find("data").find("image").text.lstrip().rstrip()
                         dust_pixel_value = get_value(element, "refPixelValue", "dust")
                         dust_mean_value = get_value(element, "meanValue", "dust")
                         dust_stdev = get_value(element, "std", "dust")
@@ -260,9 +190,7 @@ class GdreQuery(GeneralQuery):
                         dust_min = get_value(element, "minValue", "dust")
         except:
             print("Note: reddening query returned data, but failed to read response.")
-            return GeneralQuery(
-                survey=self.survey, source=self.source, pos=self.pos, radius=self.radius
-            ).f_return
+            return GeneralQuery(survey=self.survey, source=self.source, pos=self.pos, radius=self.radius).f_return
 
         data_dict = {
             "extinction_2011": extinction_pixel_value_2011,
@@ -295,12 +223,7 @@ class GdreQuery(GeneralQuery):
 
     def format_data(self, data):
         return DataStruct(
-            survey=self.survey,
-            catalogue=None,
-            pos=self.pos,
-            source=self.source,
-            data=data,
-            sub_kind="reddening",
+            survey=self.survey, catalogue=None, pos=self.pos, source=self.source, data=data, sub_kind="reddening"
         )
 
 
@@ -310,16 +233,38 @@ def query(survey, source=None, pos=None, radius=None):
             "Note: STILISM does not (currently) seem to be available at http://stilism.obspm.fr as it used to be. This will be re-enabled if support comes back."
         )
 
-    query_object = globals()[f"{survey.capitalize()}Query"](
-        survey=survey, source=source, pos=pos, radius=radius
-    )
+    query_object = globals()[f"{survey.capitalize()}Query"](survey=survey, source=source, pos=pos, radius=radius)
     data = query_object.read_response()
 
     if data:
         data = query_object.format_data(data)
     if not data:
-        return GeneralQuery(
-            survey=survey, source=source, pos=pos, radius=radius
-        ).f_return
+        return GeneralQuery(survey=survey, source=source, pos=pos, radius=radius).f_return
+
+    if source:
+        from ..Tools import correctpm
+        from ..Tools import query as data_query
+
+        gaia_data = data_query(kind="data", source=source, survey="gaia", level="internal").data
+        ra, dec, pmra, pmdec = (gaia_data["ra"][0], gaia_data["dec"][0], gaia_data["pmra"][0], gaia_data["pmdec"][0])
+        final_pos, success = correctpm(
+            pos=[ra, dec], input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec, check_success=True
+        )
+
+        if survey == "stilism":
+            if success:
+                data.trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> {survey} query performed using source -> [2000,0] -> end"
+            else:
+                data.trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed' -> survey query performed using source -> proper motion correction failed -> end"
+        elif survey == "gdre":
+            if success:
+                data.trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> [2000,0] -> query performed -> end"
+            else:
+                data.trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> query performed -> end"
+    else:
+        data.trace = None
+        final_pos = pos
+
+    data.pos = final_pos
 
     return data

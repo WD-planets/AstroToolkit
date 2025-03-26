@@ -26,11 +26,12 @@ where we have used some additional parameters that are specific to :ref:`image q
     .kind:       image
     .survey:     panstarrs
     .source:     2552928187080872832
-    .pos:        [12.29124307015, 5.38860939472]
+    .pos:        [12.291243181037652, 5.388609421763333]
     .identifier: J004909.90+052318.99
     .figure:     None
     .dataname:   J004909.90+052318.99_2552928187080872832_panstarrs_ATKimage.fits
     .plotname:   J004909.90+052318.99_2552928187080872832_panstarrs_ATKimage.html
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> initial query performed -> panstarrs (image_time): [2012, 1] -> final query performed -> [2000,0] -> end
 
     .data:
         image_data:   <Image Data>
@@ -59,18 +60,19 @@ We can now use one of the new methods to plot our data! The :func:`plot() <Astro
 
 Using :func:`showdata() <AstroToolkit.Data.imagequery.ImageStruct.showdata>` again reveals that the **figure** attribute of our data structure has now been filled:
 
-   .. code-block:: console
+.. code-block:: console
 
     Plotting image data...
 
     .kind:       image
     .survey:     panstarrs
     .source:     2552928187080872832
-    .pos:        [12.29124307015, 5.38860939472]
+    .pos:        [12.291243181037652, 5.388609421763333]
     .identifier: J004909.90+052318.99
     .figure:     figure(id='p1001', ...)
     .dataname:   J004909.90+052318.99_2552928187080872832_panstarrs_ATKimage.fits
     .plotname:   J004909.90+052318.99_2552928187080872832_panstarrs_ATKimage.html
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> initial query performed -> panstarrs (image_time): [2012, 1] -> final query performed -> [2000,0] -> end
 
     .data:
         image_data:   <Image Data>

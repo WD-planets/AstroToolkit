@@ -15,14 +15,15 @@ All ATK :ref:`data structures <Data Structures>` support local file saving. Retu
 
 .. code-block:: console
 
-    .kind:       data
-    .subkind:    data
-    .survey:     galex
-    .catalogue:  II/335/galex_ais
-    .source:     587316166180416640
-    .pos:        [141.18526027626, 8.03089639753]
-    .identifier: J092444.48+080151.00
-    .dataname:   J092444.48+080151.00_587316166180416640_galex_ATKdata.fits
+    .kind:       lightcurve
+    .survey:     ztf
+    .source:     6050296829033196032
+    .pos:        [245.44701332846378, -22.886218247040002]
+    .identifier: J162147.28-225310.39
+    .figure:     None
+    .dataname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.fits
+    .plotname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.html
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> ztf: [2019, 0] -> ztf query performed -> [2000,0] -> end
 
     .data:
         RAJ2000:  [141.185551]
@@ -48,14 +49,15 @@ This generates a .fits file which contains the data structure. We have overriden
 
 .. code-block:: console
 
-    .kind:       data
-    .subkind:    data
-    .survey:     galex
-    .catalogue:  II/335/galex_ais
-    .source:     587316166180416640
-    .pos:        [141.18526027626, 8.03089639753]
-    .identifier: J092444.48+080151.00
-    .dataname:   J092444.48+080151.00_587316166180416640_galex_ATKdata.fits
+    .kind:       lightcurve
+    .survey:     ztf
+    .source:     6050296829033196032
+    .pos:        [245.44701332846378, -22.886218247040002]
+    .identifier: J162147.28-225310.39
+    .figure:     None
+    .dataname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.fits
+    .plotname:   J162147.28-225310.39_6050296829033196032_ztf_ATKlightcurve.html
+    .trace:      start -> extracted pos from source query, assumed [2016, 0] -> ztf: [2019, 0] -> ztf query performed -> [2000,0] -> end
 
     .data:
         RAJ2000:  [141.185551]

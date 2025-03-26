@@ -23,8 +23,8 @@ def checkTargeting(source, pos):
 def ReadLocalData(hdul):
     data = Table.read(hdul[1], format="fits").to_pandas()
 
-    subkind, identifier, source, pos_ra, pos_dec, survey, catalogue = readHeader(
-        hdul, "subkind", "identifier", "source", "pos_ra", "pos_dec", "survey", "catalogue"
+    subkind, identifier, source, pos_ra, pos_dec, survey, catalogue, trace = readHeader(
+        hdul, "subkind", "identifier", "source", "pos_ra", "pos_dec", "survey", "catalogue", "t"
     )
     pos = [pos_ra, pos_dec]
     source, pos = checkTargeting(source, pos)
@@ -39,7 +39,14 @@ def ReadLocalData(hdul):
     from ..Data.dataquery import DataStruct
 
     recreated_data = DataStruct(
-        survey=survey, catalogue=catalogue, source=source, pos=pos, identifier=identifier, data=data, sub_kind=subkind
+        survey=survey,
+        catalogue=catalogue,
+        source=source,
+        pos=pos,
+        identifier=identifier,
+        data=data,
+        sub_kind=subkind,
+        trace=trace,
     )
 
     return recreated_data
@@ -57,12 +64,19 @@ def ReadLocalBulkdata(hdul):
 
     from ..Data.dataquery import DataStruct
 
-    source, pos_ra, pos_dec, identifier = readHeader(hdul, "source", "pos_ra", "pos_dec", "identifier")
+    source, pos_ra, pos_dec, identifier, trace = readHeader(hdul, "source", "pos_ra", "pos_dec", "identifier", "t")
     pos = [pos_ra, pos_dec]
     source, pos = checkTargeting(source, pos)
 
     recreated_data = DataStruct(
-        survey="all", catalogue=None, source=source, pos=pos, identifier=identifier, data=data, sub_kind="bulkdata"
+        survey="all",
+        catalogue=None,
+        source=source,
+        pos=pos,
+        identifier=identifier,
+        data=data,
+        sub_kind="bulkdata",
+        trace=trace,
     )
 
     return recreated_data
@@ -71,8 +85,8 @@ def ReadLocalBulkdata(hdul):
 def ReadLocalLightcurve(hdul):
     from ..Data.lightcurvequery import LightcurveStruct
 
-    survey, source, pos_ra, pos_dec, identifier = readHeader(
-        hdul, "survey", "source", "pos_ra", "pos_dec", "identifier"
+    survey, source, pos_ra, pos_dec, identifier, trace = readHeader(
+        hdul, "survey", "source", "pos_ra", "pos_dec", "identifier", "t"
     )
     pos = [pos_ra, pos_dec]
     source, pos = checkTargeting(source, pos)
@@ -95,7 +109,9 @@ def ReadLocalLightcurve(hdul):
 
         data.append(entry)
 
-    recreated_data = LightcurveStruct(survey=survey, source=str(source), pos=pos, identifier=identifier, data=data)
+    recreated_data = LightcurveStruct(
+        survey=survey, source=str(source), pos=pos, identifier=identifier, data=data, trace=trace
+    )
 
     return recreated_data
 
@@ -116,6 +132,7 @@ def ReadLocalImage(hdul):
         size,
         image_time_year,
         image_time_month,
+        trace,
     ) = readHeader(
         hdul,
         "survey",
@@ -128,6 +145,7 @@ def ReadLocalImage(hdul):
         "image_size",
         "image_time_year",
         "image_time_month",
+        "t",
     )
     pos = [pos_ra, pos_dec]
     image_focus = [image_focus_ra, image_focus_dec]
@@ -167,7 +185,9 @@ def ReadLocalImage(hdul):
             "image_focus": image_focus,
             "overlay": overlay,
         },
+        trace=trace,
     )
+
     return recreated_data
 
 
@@ -182,7 +202,7 @@ def ReadLocalSed(hdul):
     surveys = list(dict.fromkeys(data["survey"].tolist()))
     data_arr = [data[data["survey"] == survey].reset_index(drop=True) for survey in surveys]
 
-    source, pos_ra, pos_dec, identifier = readHeader(hdul, "source", "pos_ra", "pos_dec", "identifier")
+    source, pos_ra, pos_dec, identifier, trace = readHeader(hdul, "source", "pos_ra", "pos_dec", "identifier", "t")
     pos = [pos_ra, pos_dec]
 
     recreated_data = []
@@ -200,14 +220,16 @@ def ReadLocalSed(hdul):
 
     from ..Data.sedquery import SedStruct
 
-    return SedStruct(source=source, pos=pos, identifier=identifier, data=recreated_data)
+    recreated_data = SedStruct(source=source, pos=pos, identifier=identifier, data=recreated_data, trace=trace)
+
+    return recreated_data
 
 
 def ReadLocalSpectrum(hdul):
     data = Table.read(hdul[1], format="fits").to_pandas()
 
-    survey, source, pos_ra, pos_dec, identifier = readHeader(
-        hdul, "survey", "source", "pos_ra", "pos_dec", "identifier"
+    survey, source, pos_ra, pos_dec, identifier, trace = readHeader(
+        hdul, "survey", "source", "pos_ra", "pos_dec", "identifier", "t"
     )
 
     recreated_data = {"wavelength": data["wavelength"].tolist(), "flux": data["flux"].tolist()}
@@ -215,16 +237,21 @@ def ReadLocalSpectrum(hdul):
     from ..Data.spectrumquery import SpectrumStruct
 
     return SpectrumStruct(
-        survey=survey, source=source, pos=[pos_ra, pos_dec], identifier=identifier, data=recreated_data
+        survey=survey, source=source, pos=[pos_ra, pos_dec], identifier=identifier, data=recreated_data, trace=trace
     )
 
 
 def ReadLocalHrd(hdul):
     data = Table.read(hdul[1], format="fits").to_pandas()
 
-    survey = readHeader(hdul, "survey")[0]
+    survey, traces = readHeader(hdul, "survey", "t")
     sources = data["sources"].tolist()
     identifiers = data["identifiers"].tolist()
+    positions_ra = data["position_ra"].tolist()
+    positions_dec = data["position_dec"].tolist()
+    positions = []
+    for ra, dec in zip(positions_ra, positions_dec):
+        positions.append([ra, dec])
 
     data.drop(columns=["sources", "identifiers"], inplace=True)
 
@@ -232,7 +259,9 @@ def ReadLocalHrd(hdul):
 
     from ..Data.hrdquery import HrdStruct
 
-    return HrdStruct(survey=survey, sources=sources, identifiers=identifiers, data=recreated_data)
+    return HrdStruct(
+        survey=survey, sources=sources, identifiers=identifiers, data=recreated_data, positions=positions, traces=traces
+    )
 
 
 def read_local_file(fname):

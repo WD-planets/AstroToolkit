@@ -65,7 +65,7 @@ class LightcurveStruct(object):
 
     """
 
-    def __init__(self, survey, source, pos, data, identifier=None):
+    def __init__(self, survey, source, pos, data, identifier=None, trace=None):
         self.kind = "lightcurve"
         self.survey = survey
         self.source = source
@@ -74,7 +74,8 @@ class LightcurveStruct(object):
         self.data = data
         self.figure = None
         self.dataname = None
-        self.figure = None
+        self.plotname = None
+        self.trace = trace
 
     def __str__(self):
         return "<ATK Lightcurve Structure>"
@@ -249,9 +250,10 @@ class LightcurveStruct(object):
 
 
 class GeneralQuery(object):
-    def __init__(self, survey, radius, pos, username, password, pmra, pmdec, raw):
+    def __init__(self, survey, radius, source, pos, username, password, pmra, pmdec, raw):
         self.survey = survey
         self.radius = radius
+        self.source = source
         self.pos = pos
         self.url = ""
         self.username = username
@@ -348,6 +350,11 @@ class AtlasQuery(GeneralQuery):
         if self.pmra and self.pmdec:
             do_correction = True
 
+        if self.source:
+            coord_epoch = epochs["gaia"][0]
+        else:
+            coord_epoch = 2000
+
         task_url = None
         while not task_url:
             with requests.Session() as s:
@@ -358,10 +365,10 @@ class AtlasQuery(GeneralQuery):
                         data={
                             "ra": self.pos[0],
                             "dec": self.pos[1],
-                            "mjd_min": 50000.0,
+                            "mjd_min": 60000.0,
                             "propermotion_ra": self.pmra,
                             "propermotion_dec": self.pmdec,
-                            "radec_epoch_year": 2000,
+                            "radec_epoch_year": coord_epoch,
                             "use_reduced": True,
                         },
                     )
@@ -372,8 +379,8 @@ class AtlasQuery(GeneralQuery):
                         data={
                             "ra": self.pos[0],
                             "dec": self.pos[1],
-                            "mjd_min": 50000.0,
-                            "radec_epoch_year": 2000,
+                            "mjd_min": 60000.0,
+                            "radec_epoch_year": coord_epoch,
                             "use_reduced": True,
                         },
                     )
@@ -742,11 +749,17 @@ def get_f_return(survey):
 
 
 def query(survey, source, pos, radius, raw, username=None, password=None):
-    f_return = LightcurveStruct(survey=survey, source=source, pos=pos, data=None)
-
     def get_lightcurve():
         query_object = globals()[f"{survey.capitalize()}Query"](
-            pos=pos, radius=radius, survey=survey, username=username, password=password, pmra=pmra, pmdec=pmdec, raw=raw
+            source=source,
+            pos=pos,
+            radius=radius,
+            survey=survey,
+            username=username,
+            password=password,
+            pmra=pmra,
+            pmdec=pmdec,
+            raw=raw,
         )
 
         if survey == "gaia":
@@ -773,39 +786,47 @@ def query(survey, source, pos, radius, raw, username=None, password=None):
     if source and survey != "atlas":
         from ..Tools import correctpm
 
-        pos = correctpm(source=source, target_survey=survey)
+        pos, success = correctpm(source=source, target_survey=survey, check_success=True)
         if survey == "gaia":
-            corrections = f"gaia: {epochs['gaia']} -> gaia (lightcurve): {epochs['gaia_lc']} -> query performed"
+            survey_str = "gaia (lightcurve)"
+            epoch_label = "gaia_lc"
         else:
-            corrections = f"gaia: {epochs['gaia']} -> {survey}: {epochs[survey]} -> query performed"
+            survey_str = survey
+            epoch_label = survey
 
-        if not pos:
-            return f_return
+        if success:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> {survey_str}: {epochs[epoch_label]} -> {survey_str} query performed -> [2000,0] -> end"
+            final_pos = correctpm(source=source, target_time=[2000, 0], pmra=pmra, pmdec=pmdec)
+        else:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> {survey_str} query performed -> end"
+            final_pos = pos
 
     elif source and survey == "atlas":
-        from ..Tools import query
+        from ..Tools import correctpm, query
 
         gaia_data = query(kind="data", source=source, survey="gaia", level="internal")
-        if gaia_data:
-            import math
+        import math
 
-            ra2000, dec2000, pmra, pmdec = (
-                gaia_data.data["ra2000"][0],
-                gaia_data.data["dec2000"][0],
-                gaia_data.data["pmra"][0],
-                gaia_data.data["pmdec"][0],
-            )
-            pos = [ra2000, dec2000]
-            if math.isnan(pmra) or math.isnan(pmdec):
-                print("Note: could not correct coordinates due to missing pmra/pmdec")
-                pmra, pmdec = None, None
-                corrections = f"gaia: {epochs['gaia']} -> correction failed -> query performed"
-            else:
-                corrections = f"gaia: {epochs['gaia']} -> corrected by ATLAS API + query performed"
+        ra, dec, pmra, pmdec = (
+            gaia_data.data["ra"][0],
+            gaia_data.data["dec"][0],
+            gaia_data.data["pmra"][0],
+            gaia_data.data["pmdec"][0],
+        )
+        pos = [ra, dec]
+        if math.isnan(pmra) or math.isnan(pmdec):
+            print("Note: could not correct coordinates due to missing pmra/pmdec")
+            pmra, pmdec = None, None
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> {survey} query performed -> end"
+            final_pos = pos
+        else:
+            trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction by ATLAS API -> {survey} query performed -> [2000,0] -> end"
+            final_pos = correctpm(pos=pos, input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec)
     else:
-        corrections = None
+        trace = None
 
     lightcurve = LightcurveStruct(survey=survey, source=source, pos=pos, data=get_lightcurve())
-    lightcurve.corrections = corrections
+    lightcurve.trace = trace
+    lightcurve.pos = final_pos
 
     return lightcurve
