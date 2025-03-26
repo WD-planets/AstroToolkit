@@ -9,18 +9,13 @@ This tool calls :func:`readdata() <AstroToolkit.Tools.readdata>`, reading a loca
         
 .. code-block:: console
 
-    ATkread [-h] <fname>
+    ATkread [-h] [fname]
 
-Reads a file at the location <fname>.
-
-**Positional Arguments:**
-
-    .. code-block:: console
-
-        fname       File path
+Reads a file at the location <fname>. If no file name is provided, a file dialogue will open in which a file may be selected.
 
 **Optional Arguments:**
 
     .. code-block:: console
 
         -h, --help  Show help message and exit
+        fname       File path

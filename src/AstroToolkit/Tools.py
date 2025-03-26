@@ -493,12 +493,12 @@ def correctpm(
         return corrected_pos
 
 
-def readdata(fname: str) -> DataStruct | HrdStruct | LightcurveStruct | ImageStruct | SedStruct | SpectrumStruct:
+def readdata(fname: str = None) -> DataStruct | HrdStruct | LightcurveStruct | ImageStruct | SedStruct | SpectrumStruct:
     """readdata(fname)
-    Reads data from a local file created by ATK, recreating the data structure.
+    Reads data from a local file created by ATK, recreating the original data structure. If no file name is provided, a file dialogue will open in which a file may be selected.
 
     :param fname: name of file from which to read
-    :type fname: str
+    :type fname: str, optional
 
     :return: :ref:`ATK Data Structure <Data Structures>`
 
@@ -515,6 +515,11 @@ def readdata(fname: str) -> DataStruct | HrdStruct | LightcurveStruct | ImageStr
         print(f"Recreating data from local storage: {fname}")
 
     from .FileHandling.file_naming import name_file
+
+    if not fname:
+        from Utility import openFileDialogue
+
+        fname = openFileDialogue()
 
     struct = read_local_file(fname)
     struct.dataname = name_file(struct)
