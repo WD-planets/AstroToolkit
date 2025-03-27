@@ -1,5 +1,4 @@
 from ..Configuration.epochs import EpochStruct
-from ..PackageInfo import SurveyInfo
 
 epochs = EpochStruct().epoch_list
 

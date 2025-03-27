@@ -1,7 +1,6 @@
 import configparser
 import os
 
-from ..Aliases import CatalogueStruct
 from ..PackageInfo import SurveyInfo
 
 
@@ -16,19 +15,19 @@ class EpochStruct(object):
 
     def default_setup(self):
         Epochs = configparser.ConfigParser()
-        packageInfo = SurveyInfo()
+        surveyInfo = SurveyInfo()
 
-        default_data_surveys = packageInfo.catalogues
+        default_data_surveys = surveyInfo.defaultDataSurveys
         del default_data_surveys["gaia_lc"]
-        lightcurve_surveys = packageInfo.lightcurve_surveys
-        spectrum_surveys = packageInfo.spectrum_surveys
+        lightcurve_surveys = surveyInfo.defaultLightcurveSurveys
+        spectrum_surveys = surveyInfo.defaultSpectrumSurveys
 
         Epochs.add_section("default_data_surveys")
         Epochs.add_section("additional_data_surveys")
         Epochs.add_section("lightcurve_surveys")
         Epochs.add_section("spectrum_surveys")
 
-        survey_epochs = packageInfo.times
+        survey_epochs = surveyInfo.defaultSurveyTimes
         for survey in default_data_surveys:
             Epochs.set("default_data_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
         for survey in lightcurve_surveys:

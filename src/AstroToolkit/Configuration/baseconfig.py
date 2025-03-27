@@ -3,7 +3,9 @@ import os
 
 from ..PackageInfo import SurveyInfo
 
-overlay_marker_surveys = SurveyInfo().marker_overlays
+surveyInfo = SurveyInfo()
+
+overlay_marker_surveys = surveyInfo.magSurveys
 keys_to_not_lower = ["query_lightcurve_atlas_username", "query_lightcurve_atlas_password", "font"]
 for survey in overlay_marker_surveys:
     keys_to_not_lower.append(f"{survey}_overlay_mag")
@@ -28,8 +30,6 @@ class ConfigStruct(object):
         return keys
 
     def set_default_config(self):
-        overlay_info = SurveyInfo().overlay_param_names
-
         self.enable_notifications = "True"
         self.query_data_radius = "3"
         self.query_bulkdata_radius = "3"
@@ -45,13 +45,6 @@ class ConfigStruct(object):
         self.unit_size = "500"
         self.search_radius = "3"
         self.datapage_search_button_radius = "3"
-        self.gaia_overlay_mag = overlay_info["gaia"]["default_overlay_mag"]
-        self.galex_overlay_mag = overlay_info["galex"]["default_overlay_mag"]
-        self.wise_overlay_mag = overlay_info["wise"]["default_overlay_mag"]
-        self.sdss_overlay_mag = overlay_info["sdss"]["default_overlay_mag"]
-        self.twomass_overlay_mag = overlay_info["twomass"]["default_overlay_mag"]
-        self.skymapper_overlay_mag = overlay_info["skymapper"]["default_overlay_mag"]
-        self.panstarrs_overlay_mag = overlay_info["panstarrs"]["default_overlay_mag"]
         self.overlay_simbad_search_radius = "3"
         self.datapage_datatable_radius = "3"
         self.datapage_grid_size = "250"
@@ -138,13 +131,6 @@ class ConfigStruct(object):
         config.set("query_settings", "query_lightcurve_atlas_password", self.query_lightcurve_atlas_password)
 
         config.add_section("image_overlay_settings")
-        config.set("image_overlay_settings", "gaia_overlay_mag", self.gaia_overlay_mag)
-        config.set("image_overlay_settings", "galex_overlay_mag", self.galex_overlay_mag)
-        config.set("image_overlay_settings", "wise_overlay_mag", self.wise_overlay_mag)
-        config.set("image_overlay_settings", "sdss_overlay_mag", self.sdss_overlay_mag)
-        config.set("image_overlay_settings", "twomass_overlay_mag", self.twomass_overlay_mag)
-        config.set("image_overlay_settings", "skymapper_overlay_mag", self.skymapper_overlay_mag)
-        config.set("image_overlay_settings", "panstarrs_overlay_mag", self.panstarrs_overlay_mag)
         config.set("image_overlay_settings", "overlay_piggyback_radius", self.overlay_piggyback_radius)
         config.set("image_overlay_settings", "overlay_simbad_search_radius", self.overlay_simbad_search_radius)
 

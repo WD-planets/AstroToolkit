@@ -1,13 +1,19 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from bokeh import events
 from bokeh.models import (ColumnDataSource, CustomJS, HoverTool,
-                          NumeralTickFormatter, OpenURL, Range1d, TapTool)
+                          LinearColorMapper, NumeralTickFormatter, OpenURL,
+                          Range1d, TapTool)
 from bokeh.plotting import figure
 
 from ..Configuration.baseconfig import ConfigStruct
 
 config = ConfigStruct()
 config.read_config()
+
+
+CMAP_MIN_VALUE = 25
+CMAP_MAX_VALUE = 240
 
 
 def plot_image(struct, simbad_search_radius=None):
@@ -66,8 +72,16 @@ def plot_image(struct, simbad_search_radius=None):
     clickable_markers = []
     if "overlay" in struct.data:
         overlay_data = struct.data["overlay"]
+        colour_indices = [x["colour_index"] for x in overlay_data]
+        index_range = max(colour_indices) - min(colour_indices)
+        cmap_increment = (CMAP_MAX_VALUE - CMAP_MIN_VALUE) / index_range
         for data_point in overlay_data:
-            source = ColumnDataSource({"ra": [data_point["ra"]], "dec": [data_point["dec"]]})
+            cmap = LinearColorMapper(palette="Turbo256", low=0, high=255)
+            mapped_index = (data_point["colour_index"] - min(colour_indices)) * cmap_increment + CMAP_MIN_VALUE
+            colour = {"field": "colour_index", "transform": cmap}
+            source = ColumnDataSource(
+                {"ra": [data_point["ra"]], "dec": [data_point["dec"]], "colour_index": [mapped_index]}
+            )
             if data_point["overlay_type"] == "detection_mag":
                 legend_label = f"{data_point['survey']} {data_point['mag_name']}"
                 if data_point["marker_type"] == "circle":
@@ -76,7 +90,7 @@ def plot_image(struct, simbad_search_radius=None):
                         x="ra",
                         y="dec",
                         radius=data_point["marker_size"],
-                        line_color=data_point["colour"],
+                        line_color=colour,
                         line_width=3,
                         fill_color=None,
                         legend_label=legend_label,
@@ -88,7 +102,7 @@ def plot_image(struct, simbad_search_radius=None):
                     x="ra",
                     y="dec",
                     marker="cross",
-                    color=data_point["colour"],
+                    color=colour,
                     legend_label=legend_label,
                     size=20,
                     line_width=3,
@@ -99,7 +113,7 @@ def plot_image(struct, simbad_search_radius=None):
                     x=data_point["ra"],
                     y=data_point["dec"],
                     marker="dot",
-                    color=data_point["colour"],
+                    color=colour,
                     size=30,
                     legend_label=legend_label,
                 )
@@ -135,6 +149,7 @@ def plot_image(struct, simbad_search_radius=None):
                         "simbad_id": [data_point["simbad_id"]],
                         "corrected": [data_point["corrected"]],
                         "url": [url],
+                        "colour_index": [mapped_index],
                     }
                 )
 
@@ -143,9 +158,9 @@ def plot_image(struct, simbad_search_radius=None):
                     x="ra",
                     y="dec",
                     radius=data_point["marker_size"] / 7.5,
-                    line_color=data_point["colour"],
+                    line_color=colour,
                     line_width=2,
-                    fill_color=data_point["colour"],
+                    fill_color=colour,
                     alpha=0.5,
                     legend_label=legend_label,
                 )

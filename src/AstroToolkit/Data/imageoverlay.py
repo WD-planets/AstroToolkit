@@ -6,11 +6,11 @@ from ..Configuration.baseconfig import ConfigStruct
 from ..Configuration.epochs import EpochStruct
 from ..Data.simbad_query import pos_query
 from ..Misc.pmcorrection import correctradius
-from ..PackageInfo import SurveyInfo
+from ..PackageInfo import OverlayInfo, SurveyInfo
 from ..Tools import correctpm, query
 
-survey_params = SurveyInfo().overlay_param_names
-survey_obj_ids = SurveyInfo().survey_id_names
+overlayInfo = OverlayInfo().defaultOverlayParams
+dataSurveyInfo = SurveyInfo().dataSurveyInfo
 
 epochs = EpochStruct().epoch_list
 
@@ -65,7 +65,7 @@ class OverlayData(object):
                         self.corrected_systems.append(i)
 
     def scale_magnitudes(self):
-        for mag in survey_params[self.survey]["mag_names"]:
+        for mag in overlayInfo[self.survey]["mag_names"]:
             self.returned_data["non_gaia"][f"{mag}_marker_size"] = []
             for i in range(0, len(self.returned_data["non_gaia"]["ra"])):
                 if not math.isnan(self.returned_data["non_gaia"][mag][i]):
@@ -80,9 +80,9 @@ class OverlayData(object):
 
 
 def get_overlay_data(data, survey):
-    params = survey_params[survey]
+    params = overlayInfo[survey]
     if params["overlay_type"] != "tracer":
-        obj_id_name = survey_obj_ids[survey]
+        obj_id_name = dataSurveyInfo[survey]["id"]
 
     if data.source:
         radius = correctradius(
@@ -120,7 +120,7 @@ def get_overlay_data(data, survey):
         }
 
     if params["overlay_type"] == "detection_mag":
-        for mag in survey_params["gaia"]["mag_names"]:
+        for mag in overlayInfo["gaia"]["mag_names"]:
             returned_data["gaia"][mag] = gaia_systems[mag]
 
         for mag in params["mag_names"]:
@@ -151,7 +151,7 @@ def get_overlay_data(data, survey):
                         "ra": formatted_data["non_gaia"]["ra"][i],
                         "dec": formatted_data["non_gaia"]["dec"][i],
                         "marker_size": formatted_data["non_gaia"][f"{mag}_marker_size"][i],
-                        "colour": params["colours"][params["mag_names"].index(mag)],
+                        "colour_index": params["colour_index"][params["mag_names"].index(mag)],
                         "mag_name": mag,
                         "mag": formatted_data["non_gaia"][mag][i],
                         "survey": survey,
@@ -174,7 +174,7 @@ def get_overlay_data(data, survey):
                 "dec": formatted_data["non_gaia"]["dec"][i],
                 "j2000_ra": "",
                 "j2000_dec": "",
-                "colour": params["colour"],
+                "colour_index": params["colour_index"],
                 "mag_name": "NA",
                 "correction_pmra": formatted_data["non_gaia"]["correction_pmra"][i],
                 "correction_pmdec": formatted_data["non_gaia"]["correction_pmdec"][i],
@@ -211,7 +211,7 @@ def get_overlay_data(data, survey):
                 "marker_size": "NA",
                 "ra": ra,
                 "dec": dec,
-                "colour": params["colour"],
+                "colour": params["colour_index"],
             }
             overlay.append(overlay_entry)
 
@@ -229,8 +229,8 @@ def overlay_query(data, overlays):
     if isinstance(overlays, list):
         for survey in overlays:
             if survey:
-                if survey_params[survey]["overlay_type"] == "detection_mag":
-                    survey_params[survey]["mag_names"] = [getattr(config, f"{survey}_overlay_mag")]
+                if overlayInfo[survey]["overlay_type"] == "detection_mag":
+                    overlayInfo[survey]["mag_names"] = [getattr(config, f"{survey}_overlay_mag")]
                 overlay_data = get_overlay_data(data, survey)
                 if overlay_data:
                     overlays_data += overlay_data
@@ -239,7 +239,7 @@ def overlay_query(data, overlays):
             if mag_names:
                 if not isinstance(mag_names, list):
                     mag_names = [mag_names]
-                survey_params[survey]["mag_names"] = mag_names
+                overlayInfo[survey]["mag_names"] = mag_names
             overlay_data = get_overlay_data(data, survey)
             if overlay_data:
                 overlays_data += overlay_data

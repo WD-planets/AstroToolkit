@@ -1,6 +1,9 @@
 from bokeh.models import InlineStyleSheet
 
 from ..Configuration.baseconfig import ConfigStruct
+from ..PackageInfo import metadataInfo
+
+metadataInfo = metadataInfo()
 
 config = ConfigStruct()
 config.read_config()
@@ -35,10 +38,9 @@ def gettable(selection, source, pos, radius):
     from bokeh.models import ColumnDataSource, DataTable, TableColumn
 
     from ..Misc.identifier_generation import identifier_from_pos
-    from ..PackageInfo import SurveyInfo
     from ..Tools import query
 
-    metadata_defaults = SurveyInfo().metadata_defaults
+    metadata_defaults = metadataInfo.metadataDefaults
 
     survey_col = []
     parameters_col = []

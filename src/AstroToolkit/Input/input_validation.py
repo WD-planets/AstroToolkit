@@ -1,6 +1,10 @@
 import re
 
-from ..PackageInfo import SurveyInfo
+from ..PackageInfo import OverlayInfo, SurveyInfo, ToolInfo
+
+surveyInfo = SurveyInfo()
+overlayInfo = OverlayInfo()
+toolInfo = ToolInfo()
 
 DO_NOT_LOWER = ["fname"]
 
@@ -64,7 +68,7 @@ def check_type(name, value, target_type):
                     raise ValueError(f"Invalid [{name}] input. Expected list[str].")
 
     if name == "overlays":
-        supported_overlays = SurveyInfo().supported_overlays
+        supported_overlays = overlayInfo.supportedOverlays
 
         if isinstance(value, list):
             for i, val in enumerate(value):
@@ -77,7 +81,7 @@ def check_type(name, value, target_type):
                     raise ValueError(f"Unsupported overlay: '{val}'.")
 
     if name == "selection":
-        supported_surveys = SurveyInfo().list
+        supported_surveys = surveyInfo.defaultDataSurveys
 
         for entry in value:
             if not isinstance(entry, dict):
@@ -185,10 +189,6 @@ def check_inputs(inputs, label, check_targeting=False):
     if not inputs:
         return inputs
 
-    from ..PackageInfo import SurveyInfo
-
-    survey_info = SurveyInfo()
-
     """ 
     Primary checks
     """
@@ -215,13 +215,13 @@ def check_inputs(inputs, label, check_targeting=False):
     """
     if label == "query":
         kind = corrected_inputs["kind"]
-        if kind not in survey_info.supported_query_kinds:
-            raise ValueError(f"Unsupported query kind '{kind}'. Accepted kinds: {survey_info.supported_query_kinds}.")
+        if kind not in toolInfo.supported_query_kinds:
+            raise ValueError(f"Unsupported query kind '{kind}'. Accepted kinds: {toolInfo.supported_query_kinds}.")
 
         # check supported surveys
         survey = corrected_inputs["survey"]
         if corrected_inputs["kind"] not in ["data", "hrd", "bulkdata", "sed"]:
-            supported_surveys = getattr(survey_info, f"{corrected_inputs['kind']}_surveys")
+            supported_surveys = getattr(surveyInfo, f"default{corrected_inputs['kind'].capitalize()}Surveys")
             if survey not in supported_surveys:
                 raise ValueError(f"Unsupported survey in {kind} query. Supported surveys are: {supported_surveys}")
 
@@ -309,10 +309,6 @@ def check_inputs(inputs, label, check_targeting=False):
 
         if not (corrected_inputs["start"] and corrected_inputs["stop"]):
             raise ValueError("Invalid crop parameters. Requires 'start' and 'stop' as absolute values or percentages.")
-
-    elif label == "sed_plot":
-        if corrected_inputs["survey"] not in survey_info.spectrum_surveys:
-            raise ValueError("Invalid spectrum overlay survey in SED plotting.")
 
     elif label == "correctpm":
         pos = corrected_inputs["pos"]

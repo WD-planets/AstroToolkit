@@ -19,11 +19,11 @@ config = ConfigStruct()
 config.read_config()
 
 supported_surveys = {
-    "data": SurveyInfo().list + ["other"],
-    "reddening": SurveyInfo().reddening_surveys,
-    "image": SurveyInfo().image_surveys,
-    "lightcurve": SurveyInfo().lightcurve_surveys,
-    "spectrum": SurveyInfo().spectrum_surveys,
+    "data": SurveyInfo().defaultDataSurveys + ["other"],
+    "reddening": SurveyInfo().defaultReddeningSurveys,
+    "image": SurveyInfo().defaultImageSurveys,
+    "lightcurve": SurveyInfo().defaultLightcurveSurveys,
+    "spectrum": SurveyInfo().defaultSpectrumSurveys,
 }
 
 grid_width = 150

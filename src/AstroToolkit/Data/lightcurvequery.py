@@ -2,10 +2,12 @@ from functools import wraps
 
 from ..Configuration.epochs import EpochStruct
 from ..Input.input_validation import check_inputs
+from ..PackageInfo import SurveyInfo
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
 
+surveyInfo = SurveyInfo()
 epochs = EpochStruct().epoch_list
 
 
@@ -739,9 +741,7 @@ class TessQuery(GeneralQuery):
 def get_f_return(survey):
     f_return = []
 
-    from ..PackageInfo import SurveyInfo
-
-    bands = SurveyInfo().lightcurve_bands[survey]
+    bands = surveyInfo.lightcurveSurveyInfo[survey]["bands"]
     for band in bands:
         f_return.append({"band": band, "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 

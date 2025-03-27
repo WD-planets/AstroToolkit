@@ -3,6 +3,8 @@ import os
 
 from ..PackageInfo import SurveyInfo
 
+surveyInfo = SurveyInfo()
+
 
 class CatalogueStruct(object):
     def __init__(self):
@@ -16,7 +18,7 @@ class CatalogueStruct(object):
     def default_setup(self):
         Catalogues = configparser.ConfigParser()
 
-        default_catalogues = SurveyInfo().catalogues
+        default_catalogues = surveyInfo.getCatalogueDict
         del default_catalogues["gaia_lc"]
         Catalogues.add_section("default_catalogues")
         Catalogues.add_section("additional_catalogues")
@@ -61,7 +63,7 @@ class CatalogueStruct(object):
                 labels.append(key)
                 ids.append(val)
 
-        catalogues = SurveyInfo().catalogues
+        catalogues = surveyInfo.getCatalogueDict
 
         Catalogues.add_section("default_catalogues")
         Catalogues.add_section("additional_catalogues")
@@ -85,7 +87,7 @@ class CatalogueStruct(object):
         self.write_catalogues()
 
     def add_catalogue(self, key, value):
-        default_catalogues = SurveyInfo().catalogues
+        default_catalogues = surveyInfo.getCatalogueDict
 
         self.get_catalogues()
         key, value = str(key), str(value)

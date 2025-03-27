@@ -15,6 +15,7 @@ from ..StructureMethods.method_definitions import showdata as showdata
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
+surveyInfo = SurveyInfo()
 epochs = EpochStruct().epoch_list
 
 # ensure that the row limit in returned data is infinite
@@ -159,7 +160,7 @@ def query(survey, radius, pos=None, source=None):
     all_surveys = aliases.get_catalogue_list()
 
     # get the necessary basic survey info
-    supported_catalogues = SurveyInfo().catalogues
+    supported_catalogues = surveyInfo.getCatalogueDict
 
     # if survey isn't a supported survey, take the 'survey' to be a vizier catalogue ID
     if survey not in all_surveys and survey != "gaia_lc":

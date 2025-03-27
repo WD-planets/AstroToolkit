@@ -1,8 +1,11 @@
 from functools import wraps
 
+from ..PackageInfo import SurveyInfo
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+
+surveyInfo = SurveyInfo()
 
 newline = "\n"
 
@@ -156,10 +159,9 @@ def format_data(survey, survey_data, filter_wavelengths, mag_names, error_names)
 
 
 def query(radius, pos=None, source=None):
-    from ..PackageInfo import SurveyInfo
     from ..Tools import query
 
-    sed_params = SurveyInfo().sed_param_names
+    sed_params = surveyInfo.dataSurveyInfo
 
     bulkdata = query(kind="bulkdata", pos=pos, source=source, radius=radius, level="internal")
     final_pos = bulkdata.pos
@@ -189,8 +191,8 @@ def query(radius, pos=None, source=None):
 
         filter_wavelengths, mag_names, error_names = (
             sed_params[survey]["filter_wavelengths"],
-            sed_params[survey]["mag_names"],
-            sed_params[survey]["error_names"],
+            sed_params[survey]["mags"],
+            sed_params[survey]["errors"],
         )
 
         sed_data.append(

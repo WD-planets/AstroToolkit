@@ -3,6 +3,8 @@ from astropy.table import Table
 
 from ..PackageInfo import SurveyInfo
 
+surveyInfo = SurveyInfo()
+
 
 def readHeader(hdul, *args):
     header = hdul[0].header
@@ -91,7 +93,7 @@ def ReadLocalLightcurve(hdul):
     pos = [pos_ra, pos_dec]
     source, pos = checkTargeting(source, pos)
 
-    time_type = SurveyInfo().time_units[survey]
+    time_type = SurveyInfo().lightcurveSurveyInfo[survey]["time_unit"]
 
     empty_band = {"ra": None, "dec": None, time_type: None, "mag": None, "mag_err": None}
 

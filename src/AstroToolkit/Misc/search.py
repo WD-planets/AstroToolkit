@@ -1,5 +1,9 @@
 import webbrowser
 
+from ..PackageInfo import SurveyInfo
+
+surveyInfo = SurveyInfo()
+
 
 class DbSearch(object):
     def __init__(self, radius, pos=None, source=None):
@@ -8,23 +12,17 @@ class DbSearch(object):
         self.radius = radius
 
     def get_params(self):
-        from ..PackageInfo import SurveyInfo
         from ..Tools import query
         from .pmcorrection import correctradius
 
-        survey_times = SurveyInfo().times
+        survey_times = surveyInfo.defaultSurveyTimes
 
         if self.source:
             self.radius = correctradius(
-                source=self.source,
-                input_time=survey_times["gaia"],
-                target_time=[1990, 0],
-                radius=self.radius,
+                source=self.source, input_time=survey_times["gaia"], target_time=[1990, 0], radius=self.radius
             )
 
-            gaia_data = query(
-                kind="data", survey="gaia", source=self.source, level="internal"
-            ).data
+            gaia_data = query(kind="data", survey="gaia", source=self.source, level="internal").data
             if gaia_data:
                 self.pos = [gaia_data["ra"][0], gaia_data["dec"][0]]
             else:
@@ -52,8 +50,6 @@ class DatapageButtons(DbSearch):
 
 
 def do_search(kind, radius, pos=None, source=None):
-    query_object = globals()[f"{kind.capitalize()}Query"](
-        radius=radius, pos=pos, source=source
-    )
+    query_object = globals()[f"{kind.capitalize()}Query"](radius=radius, pos=pos, source=source)
     query_object.get_params()
     query_object.do_search()

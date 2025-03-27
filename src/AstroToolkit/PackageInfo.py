@@ -1,283 +1,329 @@
-class SurveyInfo:
+class ToolInfo(object):
     def __init__(self):
-        self.list = [
-            "gaia",
-            "gaia_lc",
-            "panstarrs",
-            "skymapper",
-            "galex",
-            "rosat",
-            "sdss",
-            "wise",
-            "twomass",
-            "erosita",
-        ]
-
-        self.times = {
-            "gaia": [2016, 0],
-            "panstarrs": [2012, 0],
-            "skymapper": [2016, 0],
-            "galex": [2006, 8],
-            "rosat": [1991, 0],
-            "sdss": [2017, 0],
-            "wise": [2010, 5],
-            "twomass": [1999, 0],
-            "ztf": [2019, 0],
-            "erosita": [2022, 0],
-            "atlas": [2021, 0],
-            "gaia_lc": [2016, 0],
-            "asassn": [2015, 0],
-            "crts": [2000, 0],
-            "tess": [2020, 0],
-        }
-
-        self.catalogues = {
-            "gaia": "I/355/gaiadr3",
-            "panstarrs": "II/349/ps1",
-            "skymapper": "II/379/smssdr4",
-            "galex": "II/335/galex_ais",
-            "rosat": "IX/11/rosatsrc",
-            "sdss": "V/154/sdss16",
-            "wise": "II/311/wise",
-            "twomass": "II/246/out",
-            "erosita": "J/A+A/682/A34/erass1-m",
-            "gaia_lc": "I/355/epphot",
-        }
-
-        self.sed_param_names = {
-            "gaia": {
-                "filter_wavelengths": [5850.88, 5041.61, 7690.74],
-                "mag_names": ["phot_g_mean_mag", "phot_bp_mean_mag", "phot_rp_mean_mag"],
-                "error_names": ["phot_g_mean_mag_error", "phot_bp_mean_mag_error", "phot_rp_mean_mag_error"],
-            },
-            "galex": {
-                "filter_wavelengths": [2303.37, 1548.85],
-                "mag_names": ["NUVmag", "FUVmag"],
-                "error_names": ["e_NUVmag", "e_FUVmag"],
-            },
-            "sdss": {
-                "filter_wavelengths": [3608.04, 4671.78, 6141.12, 7457.89, 8922.78],
-                "mag_names": ["uPmag", "gPmag", "rPmag", "iPmag", "zPmag"],
-                "error_names": ["e_uPmag", "e_gPmag", "e_rPmag", "e_iPmag", "e_zPmag"],
-            },
-            "twomass": {
-                "filter_wavelengths": [12350.00, 16620.00, 21590.00],
-                "mag_names": ["Jmag", "Hmag", "Kmag"],
-                "error_names": ["e_Jmag", "e_Hmag", "e_Kmag"],
-            },
-            "wise": {
-                "filter_wavelengths": [33526.00, 46028.00, 115608.00, 220883.00],
-                "mag_names": ["W1mag", "W2mag", "W3mag", "W4mag"],
-                "error_names": ["e_W1mag", "e_W2mag", "e_W3mag", "e_W4mag"],
-            },
-            "panstarrs": {
-                "filter_wavelengths": [4810.16, 6155.47, 7503.03, 8668.36, 9613.60],
-                "mag_names": ["gmag", "rmag", "imag", "zmag", "ymag"],
-                "error_names": ["e_gmag", "e_rmag", "e_imag", "e_zmag", "e_ymag"],
-            },
-            "skymapper": {
-                "filter_wavelengths": [5016.05, 6076.85, 6076.85, 9120.25, 3500.22, 3878.68],
-                "mag_names": ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"],
-                "error_names": ["e_gPSF", "e_rPSF", "e_iPSF", "e_zPSF", "e_uPSF", "e_vPSF"],
-            },
-            "allwise": {
-                "mag_names": ["W1mag", "W2mag", "W3mag", "W4mag"],
-                "error_names": ["e_W1mag", "e_W2mag", "e_W3mag", "e_W4mag"],
-            },
-        }
-
-        self.lightcurve_bands = {
-            "ztf": ["g", "r", "i"],
-            "atlas": ["o", "c", "i"],
-            "gaia": ["g", "bp", "rp"],
-            "asassn": ["g", "v"],
-            "crts": ["v"],
-            "tess": ["TESS mag"],
-        }
-
-        self.metadata_defaults = {
-            "gaia": {
-                "parameters": [
-                    "source_id",
-                    "ra",
-                    "dec",
-                    "pmra",
-                    "pmdec",
-                    "parallax",
-                    "phot_g_mean_mag",
-                    "phot_bp_mean_mag",
-                    "phot_rp_mean_mag",
-                ],
-                "errors": [
-                    None,
-                    "ra_error",
-                    "dec_error",
-                    "pmra_error",
-                    "pmdec_error",
-                    "parallax_error",
-                    "phot_g_mean_mag_error",
-                    "phot_bp_mean_mag_error",
-                    "phot_rp_mean_mag_error",
-                ],
-                "notes": [
-                    "source id",
-                    "right ascension [deg]",
-                    "declination [deg]",
-                    "Proper motion in RA [mas/yr]",
-                    "Proper motion in DEC [mas/yr]",
-                    "parallax [mas]",
-                    "g mag",
-                    "bp mag",
-                    "rp mag",
-                ],
-            },
-            "panstarrs": {
-                "parameters": ["gmag", "rmag", "imag", "zmag", "ymag"],
-                "errors": ["e_gmag", "e_rmag", "e_imag", "e_zmag", "e_ymag"],
-                "notes": ["g mag", "r mag", "i mag", "z mag", "y mag"],
-            },
-            "skymapper": {
-                "parameters": ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"],
-                "errors": ["e_gPSF", "e_rPSF", "e_iPSF", "e_zPSF", "e_uPSF", "e_vPSF"],
-                "notes": ["g mag", "r mag", "i mag", "z mag", "u mag", "v mag"],
-            },
-            "galex": {
-                "parameters": ["NUVmag", "FUVmag"],
-                "errors": ["e_NUVmag", "e_FUVmag"],
-                "notes": ["FUV mag", "NUV mag"],
-            },
-            "sdss": {
-                "parameters": ["gPmag", "rPmag", "iPmag", "zPmag", "uPmag"],
-                "errors": ["e_gPmag", "e_rPmag", "e_iPmag", "e_zPmag", "e_uPmag"],
-                "notes": ["g mag", "r mag", "i mag", "z mag", "u mag"],
-            },
-            "wise": {
-                "parameters": ["W1mag", "W2mag", "W3mag", "W4mag"],
-                "errors": ["e_W1mag", "e_W2mag", "e_W3mag", "e_W4mag"],
-                "notes": ["W1 mag", "W2 mag", "W3 mag", "W4 mag"],
-            },
-            "twomass": {
-                "parameters": ["Jmag", "Hmag", "Kmag"],
-                "errors": ["e_Jmag", "e_Hmag", "e_Kmag"],
-                "notes": ["J mag", "H mag", "K mag"],
-            },
-            "rosat": {"parameters": ["Name"], "errors": [None], "notes": ["ROSAT source name"]},
-        }
-
-        self.spectrum_surveys = ["sdss"]
-
-        self.image_surveys = ["panstarrs", "skymapper", "dss"]
-
-        self.marker_overlays = ["gaia", "galex", "wise", "sdss", "twomass", "skymapper", "panstarrs"]
-
-        self.supported_overlays = [
-            "gaia",
-            "galex",
-            "wise",
-            "sdss",
-            "twomass",
-            "skymapper",
-            "panstarrs",
-            "rosat",
-            "erosita",
-            "atlas",
-            "gaia_lc",
-            "asassn",
-            "crts",
-            "ztf",
-        ]
-
-        self.lightcurve_surveys = ["atlas", "ztf", "crts", "asassn", "gaia", "tess"]
-
-        self.reddening_surveys = ["stilism", "gdre"]
-
         self.supported_query_kinds = ["data", "bulkdata", "reddening", "image", "lightcurve", "hrd", "sed", "spectrum"]
 
-        self.survey_id_names = {
-            "gaia": "designation",
-            "galex": "Name",
-            "panstarrs": "objID",
-            "skymapper": "ObjectId",
-            "rosat": "Name",
-            "sdss": "objID",
-            "wise": "WISE",
-            "twomass": "_2MASS",
-            "erosita": "IAUName",
-        }
 
-        self.time_units = {"ztf": "hjd", "crts": "mjd", "asassn": "mjd", "gaia": "mjd", "atlas": "mjd", "tess": "mjd"}
+class SurveyInfo(object):
+    @property
+    def defaultSurveyTimes(self):
+        data = {}
+        for survey in self.defaultDataSurveys:
+            data[survey] = None
+        for survey in self.defaultLightcurveSurveys:
+            data[survey] = None
+
+        # data surveys
+        data["gaia"] = [2016, 0]
+        data["panstarrs"] = [2012, 0]
+        data["skymapper"] = [2016, 0]
+        data["galex"] = [2006, 8]
+        data["rosat"] = [1991, 0]
+        data["sdss"] = [2017, 0]
+        data["wise"] = [2010, 5]
+        data["twomass"] = [1999, 0]
+        data["erosita"] = [2022, 0]
+
+        # lightcurve surveys
+        data["ztf"] = [2019, 0]
+        data["atlas"] = [2021, 0]
+        data["gaia_lc"] = [2016, 0]
+        data["asassn"] = [2015, 0]
+        data["crts"] = [2000, 0]
+        data["tess"] = [2020, 0]
+
+        return data
 
     @property
-    def overlay_param_names(self):
-        data = {
-            "gaia": {
-                "overlay_type": "detection_mag",
-                "ra_name": "ra",
-                "dec_name": "dec",
-                "colours": ["limegreen", "blue", "red"],
-                "default_overlay_mag": "phot_g_mean_mag",
-            },
-            "galex": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RAJ2000",
-                "dec_name": "DEJ2000",
-                "colours": ["purple", "violet"],
-                "default_overlay_mag": "NUVmag",
-            },
-            "wise": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RAJ2000",
-                "dec_name": "DEJ2000",
-                "colours": ["firebrick", "orange", "gold", "yellow"],
-                "default_overlay_mag": "W1mag",
-            },
-            "sdss": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RA_ICRS",
-                "dec_name": "DE_ICRS",
-                "colours": ["tomato", "darkorange", "khaki", "aqua", "mediumblue"],
-                "default_overlay_mag": "gPmag",
-            },
-            "twomass": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RAJ2000",
-                "dec_name": "DEJ2000",
-                "colours": ["orangered", "goldenrod", "lightyellow"],
-                "default_overlay_mag": "Jmag",
-            },
-            "skymapper": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RAICRS",
-                "dec_name": "DEICRS",
-                "colours": ["indianred", "darkgoldenrod", "lawngreen", "dodgerblue", "stateblue", "blueviolet"],
-                "default_overlay_mag": "gPSF",
-            },
-            "panstarrs": {
-                "overlay_type": "detection_mag",
-                "ra_name": "RAJ2000",
-                "dec_name": "DEJ2000",
-                "colours": ["salmon", "yellowgreen", "turquoise", "midnightblue", "indigo"],
-                "default_overlay_mag": "gmag",
-            },
-            "rosat": {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "DEJ2000", "colour": "deeppink"},
-            "erosita": {
-                "overlay_type": "detection",
-                "ra_name": "RA_ICRS",
-                "dec_name": "DE_ICRS",
-                "colour": "lightpink",
-            },
-            "atlas": {"overlay_type": "tracer", "colour": "bisque"},
-            "gaia_lc": {"overlay_type": "tracer", "colour": "forestgreen"},
-            "asassn": {"overlay_type": "tracer", "colour": "mediumorchid"},
-            "crts": {"overlay_type": "tracer", "colour": "teal"},
-            "ztf": {"overlay_type": "tracer", "colour": "orange"},
+    def defaultDataSurveys(self):
+        return ["gaia", "gaia_lc", "panstarrs", "skymapper", "galex", "rosat", "sdss", "wise", "twomass", "erosita"]
+
+    @property
+    def defaultReddeningSurveys(self):
+        return ["stilism", "gdre"]
+
+    @property
+    def defaultLightcurveSurveys(self):
+        return ["ztf", "atlas", "gaia_lc", "asassn", "crts", "tess"]
+
+    @property
+    def defaultSpectrumSurveys(self):
+        return ["sdss"]
+
+    @property
+    def defaultImageSurveys(self):
+        return ["panstarrs", "skymapper", "dss"]
+
+    @property
+    def dataSurveyInfo(self):
+        data = {}
+        for survey in self.defaultDataSurveys:
+            data[survey] = {}
+
+        data["gaia"]["mags"] = ["phot_g_mean_mag", "phot_bp_mean_mag", "phot_rp_mean_mag"]
+        data["gaia"]["errors"] = [f"{x}_error" for x in data["gaia"]["mags"]]
+        data["gaia"]["filter_wavelengths"] = [5850.88, 5041.61, 7690.74]
+        data["gaia"]["catalogue"] = "I/355/gaiadr3"
+        data["gaia"]["id"] = "designation"
+
+        data["galex"]["mags"] = ["FUVmag", "NUVmag"]
+        data["galex"]["errors"] = [f"e_{x}" for x in data["galex"]["mags"]]
+        data["galex"]["filter_wavelengths"] = [2303.37, 1548.85]
+        data["galex"]["catalogue"] = "II/355/galex_ais"
+        data["galex"]["id"] = "Name"
+
+        data["sdss"]["mags"] = ["uPmag", "gPmag", "rPmag", "iPmag", "zPmag"]
+        data["sdss"]["errors"] = [f"e_{x}" for x in data["sdss"]["mags"]]
+        data["sdss"]["filter_wavelengths"] = [3608.04, 4671.78, 6141.12, 7457.89, 8922.78]
+        data["sdss"]["catalogue"] = "V/154/sdss16"
+        data["sdss"]["id"] = "objID"
+
+        data["twomass"]["mags"] = ["Jmag", "Hmag", "Kmag"]
+        data["twomass"]["errors"] = [f"e_{x}" for x in data["twomass"]["mags"]]
+        data["twomass"]["filter_wavelengths"] = [12350.00, 16620.00, 21590.00]
+        data["twomass"]["catalogue"] = "II/246/out"
+        data["twomass"]["id"] = "_2MASS"
+
+        data["wise"]["mags"] = ["W1mag", "W2mag", "W3mag", "W4mag"]
+        data["wise"]["errors"] = [f"e_{x}" for x in data["wise"]["mags"]]
+        data["wise"]["filter_wavelengths"] = [33526.00, 46028.00, 115608.00, 220883.00]
+        data["wise"]["catalogue"] = "II/311/wise"
+        data["wise"]["id"] = "WISE"
+
+        data["panstarrs"]["mags"] = ["gmag", "rmag", "imag", "zmag", "ymag"]
+        data["panstarrs"]["errors"] = [f"e_{x}" for x in data["panstarrs"]["mags"]]
+        data["panstarrs"]["filter_wavelengths"] = [4810.16, 6155.47, 7503.03, 8668.36, 9613.60]
+        data["panstarrs"]["catalogue"] = "II/349/ps1"
+        data["panstarrs"]["id"] = "objID"
+
+        data["skymapper"]["mags"] = ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"]
+        data["skymapper"]["errors"] = [f"e_{x}" for x in data["skymapper"]["mags"]]
+        data["skymapper"]["filter_wavelengths"] = [5016.05, 6076.85, 6076.85, 9120.25, 3500.22, 3878.68]
+        data["skymapper"]["catalogue"] = "II/379/smssdr4"
+        data["skymapper"]["id"] = "ObjectId"
+
+        data["rosat"]["catalogue"] = "IX/11/rosatsrc"
+        data["rosat"]["id"] = "Name"
+
+        data["erosita"]["catalogue"] = "J/A+A/682/A34/erass1-m"
+        data["erosita"]["id"] = "IAUName"
+
+        data["gaia_lc"]["catalogue"] = "I/355/epphot"
+
+        return data
+
+    @property
+    def magSurveys(self):
+        data = {}
+        for survey, info in self.dataSurveyInfo.items():
+            if "mags" in info:
+                data[survey] = info
+
+        return data
+
+    @property
+    def nonMagSurveys(self):
+        data = {}
+        for survey, info in self.dataSurveyInfo.items():
+            if "mags" not in info:
+                data[survey] = info
+
+        return data
+
+    @property
+    def getCatalogueDict(self):
+        data = self.dataSurveyInfo
+
+        catalogueDict = {}
+        for survey, info in data.items():
+            catalogueDict[survey] = data[survey]["catalogue"]
+        return catalogueDict
+
+    @property
+    def lightcurveSurveyInfo(self):
+        data = {}
+        for survey in self.defaultLightcurveSurveys:
+            data[survey] = {}
+
+        data["ztf"]["bands"] = ["g", "r", "i"]
+        data["ztf"]["time_unit"] = "hjd"
+
+        data["gaia_lc"]["bands"] = ["g", "bp", "rp"]
+        data["gaia_lc"]["time_unit"] = "mjd"
+
+        data["asassn"]["bands"] = ["g", "v"]
+        data["asassn"]["time_unit"] = "mjd"
+
+        data["crts"]["bands"] = ["v"]
+        data["crts"]["time_unit"] = "mjd"
+
+        data["tess"]["bands"] = ["TESS mag"]
+        data["tess"]["time_unit"] = "mjd"
+
+        return data
+
+
+class metadataInfo(object):
+    @property
+    def metadataDefaults(self):
+        data = {}
+        for survey in SurveyInfo().defaultDataSurveys:
+            data[survey] = {}
+
+        data["gaia"]["parameters"] = [
+            "source_id",
+            "ra",
+            "dec",
+            "pmra",
+            "pmdec",
+            "parallax",
+            "phot_g_mean_mag",
+            "phot_bp_mean_mag",
+            "phot_rp_mean_mag",
+        ]
+        data["gaia"]["errors"] = [
+            None,
+            "ra_error",
+            "dec_error",
+            "pmra_error",
+            "pmdec_error",
+            "parallax_error",
+            "phot_g_mean_mag_error",
+            "phot_bp_mean_mag_error",
+            "phot_rp_mean_mag_error",
+        ]
+        data["gaia"]["notes"] = [
+            "source id",
+            "right ascension [deg]",
+            "declination [deg]",
+            "Proper motion in RA [mas/yr]",
+            "Proper motion in DEC [mas/yr]",
+            "parallax [mas]",
+            "g mag",
+            "bp mag",
+            "rp mag",
+        ]
+
+        data["panstarrs"]["parameters"] = ["gmag", "rmag", "imag", "zmag", "ymag"]
+        data["panstarrs"]["errors"] = ["e_gmag", "e_rmag", "e_imag", "e_zmag", "e_ymag"]
+        data["panstarrs"]["notes"] = ["g mag", "r mag", "i mag", "z mag", "y mag"]
+
+        data["skymapper"]["parameters"] = ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"]
+        data["skymapper"]["errors"] = ["e_gPSF", "e_rPSF", "e_iPSF", "e_zPSF", "e_uPSF", "e_vPSF"]
+        data["skymapper"]["notes"] = ["g mag", "r mag", "i mag", "z mag", "u mag", "v mag"]
+
+        data["galex"]["parameters"] = ["NUVmag", "FUVmag"]
+        data["galex"]["errors"] = ["e_NUVmag", "e_FUVmag"]
+        data["galex"]["notes"] = ["FUV mag", "NUV mag"]
+
+        data["sdss"]["parameters"] = ["gPmag", "rPmag", "iPmag", "zPmag", "uPmag"]
+        data["sdss"]["errors"] = ["e_gPmag", "e_rPmag", "e_iPmag", "e_zPmag", "e_uPmag"]
+        data["sdss"]["notes"] = ["g mag", "r mag", "i mag", "z mag", "u mag"]
+
+        data["wise"]["parameters"] = ["W1mag", "W2mag", "W3mag", "W4mag"]
+        data["wise"]["errors"] = ["e_W1mag", "e_W2mag", "e_W3mag", "e_W4mag"]
+        data["wise"]["notes"] = ["W1 mag", "W2 mag", "W3 mag", "W4 mag"]
+
+        data["twomass"]["parameters"] = ["Jmag", "Hmag", "Kmag"]
+        data["twomass"]["errors"] = ["e_Jmag", "e_Hmag", "e_Kmag"]
+        data["twomass"]["notes"] = ["J mag", "H mag", "K mag"]
+
+        data["rosat"]["parameters"] = ["Name"]
+        data["rosat"]["errors"] = [None]
+        data["rosat"]["notes"] = ["ROSAT source name"]
+
+        return data
+
+
+class OverlayInfo(object):
+    @property
+    def defaultOverlayParams(self):
+        data = {}
+        vizierInfo = SurveyInfo().dataSurveyInfo
+
+        # scaled detection overlays
+        data["gaia"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "ra",
+            "dec_name": "dec",
+            "mag_names": vizierInfo["gaia"]["mags"],
+            "default_overlay_mag": vizierInfo["gaia"]["mags"][0],
         }
+        data["galex"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RAJ2000",
+            "dec_name": "DEJ2000",
+            "mag_names": vizierInfo["galex"]["mags"],
+            "default_mag": vizierInfo["galex"]["mags"][0],
+        }
+        data["wise"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RAJ2000",
+            "dec_name": "DEJ2000",
+            "mag_names": vizierInfo["wise"]["mags"],
+            "default_mag": vizierInfo["wise"]["mags"][0],
+        }
+        data["sdss"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RA_ICRS",
+            "dec_name": "DE_ICRS",
+            "mag_names": vizierInfo["sdss"]["mags"],
+            "default_mag": vizierInfo["sdss"]["mags"][0],
+        }
+        data["twomass"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RAJ2000",
+            "dec_name": "DEJ2000",
+            "mag_names": vizierInfo["twomass"]["mags"],
+            "default_mag": vizierInfo["twomass"]["mags"][0],
+        }
+        data["skymapper"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RAICRS",
+            "dec_name": "DEICRS",
+            "mag_names": vizierInfo["skymapper"]["mags"],
+            "default_mag": vizierInfo["skymapper"]["mags"][0],
+        }
+        data["panstarrs"] = {
+            "overlay_type": "detection_mag",
+            "ra_name": "RAJ2000",
+            "dec_name": "DEJ2000",
+            "mag_names": vizierInfo["panstarrs"]["mags"],
+            "default_mag": vizierInfo["panstarrs"]["mags"][0],
+        }
+
+        # non-scaled detection overlays
+        data["rosat"] = {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "RA_ICRS"}
+        data["erosita"] = {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "DE_ICRS"}
+
+        # tracer overlays
+        data["ztf"] = {"overlay_type": "tracer"}
+        data["atlas"] = {"overlay_type": "tracer"}
+        data["gaia_lc"] = {"overlay_type": "tracer"}
+        data["asassn"] = {"overlay_type": "tracer"}
+        data["crts"] = {"overlay_type": "tracer"}
 
         for survey in data:
             if data[survey]["overlay_type"] == "detection_mag":
-                data[survey]["mag_names"] = self.sed_param_names[survey]["mag_names"]
+                data[survey]["mag_names"] = vizierInfo[survey]["mags"]
+                data[survey]["default_mag"] = vizierInfo[survey]["mags"][0]
                 data[survey]["marker_type"] = "circle"
             elif data[survey]["overlay_type"] == "detection" or data[survey]["overlay_type"] == "tracer":
                 data[survey]["marker_type"] = "cross"
 
+        rolling_index = 0
+        for survey, info in data.items():
+            indexes = []
+            if info["overlay_type"] == "detection_mag":
+                length = len(info["mag_names"])
+            else:
+                length = 1
+            for i in range(0, length):
+                indexes.append(rolling_index)
+                rolling_index += 1
+            data[survey]["colour_index"] = indexes
+
         return data
+
+    @property
+    def supportedOverlays(self):
+        return list(self.defaultOverlayParams.keys())
