@@ -63,49 +63,40 @@ class SurveyInfo(object):
         data["gaia"]["errors"] = [f"{x}_error" for x in data["gaia"]["mags"]]
         data["gaia"]["filter_wavelengths"] = [5850.88, 5041.61, 7690.74]
         data["gaia"]["catalogue"] = "I/355/gaiadr3"
-        data["gaia"]["id"] = "designation"
 
         data["galex"]["mags"] = ["FUVmag", "NUVmag"]
         data["galex"]["errors"] = [f"e_{x}" for x in data["galex"]["mags"]]
         data["galex"]["filter_wavelengths"] = [2303.37, 1548.85]
         data["galex"]["catalogue"] = "II/355/galex_ais"
-        data["galex"]["id"] = "Name"
 
         data["sdss"]["mags"] = ["uPmag", "gPmag", "rPmag", "iPmag", "zPmag"]
         data["sdss"]["errors"] = [f"e_{x}" for x in data["sdss"]["mags"]]
         data["sdss"]["filter_wavelengths"] = [3608.04, 4671.78, 6141.12, 7457.89, 8922.78]
         data["sdss"]["catalogue"] = "V/154/sdss16"
-        data["sdss"]["id"] = "objID"
 
         data["twomass"]["mags"] = ["Jmag", "Hmag", "Kmag"]
         data["twomass"]["errors"] = [f"e_{x}" for x in data["twomass"]["mags"]]
         data["twomass"]["filter_wavelengths"] = [12350.00, 16620.00, 21590.00]
         data["twomass"]["catalogue"] = "II/246/out"
-        data["twomass"]["id"] = "_2MASS"
 
         data["wise"]["mags"] = ["W1mag", "W2mag", "W3mag", "W4mag"]
         data["wise"]["errors"] = [f"e_{x}" for x in data["wise"]["mags"]]
         data["wise"]["filter_wavelengths"] = [33526.00, 46028.00, 115608.00, 220883.00]
         data["wise"]["catalogue"] = "II/311/wise"
-        data["wise"]["id"] = "WISE"
 
         data["panstarrs"]["mags"] = ["gmag", "rmag", "imag", "zmag", "ymag"]
         data["panstarrs"]["errors"] = [f"e_{x}" for x in data["panstarrs"]["mags"]]
         data["panstarrs"]["filter_wavelengths"] = [4810.16, 6155.47, 7503.03, 8668.36, 9613.60]
         data["panstarrs"]["catalogue"] = "II/349/ps1"
-        data["panstarrs"]["id"] = "objID"
 
         data["skymapper"]["mags"] = ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"]
         data["skymapper"]["errors"] = [f"e_{x}" for x in data["skymapper"]["mags"]]
         data["skymapper"]["filter_wavelengths"] = [5016.05, 6076.85, 6076.85, 9120.25, 3500.22, 3878.68]
         data["skymapper"]["catalogue"] = "II/379/smssdr4"
-        data["skymapper"]["id"] = "ObjectId"
 
         data["rosat"]["catalogue"] = "IX/11/rosatsrc"
-        data["rosat"]["id"] = "Name"
 
         data["erosita"]["catalogue"] = "J/A+A/682/A34/erass1-m"
-        data["erosita"]["id"] = "IAUName"
 
         data["gaia_lc"]["catalogue"] = "I/355/epphot"
 
@@ -241,59 +232,42 @@ class OverlayInfo(object):
         vizierInfo = SurveyInfo().dataSurveyInfo
 
         # scaled detection overlays
-        data["gaia"] = {
-            "overlay_type": "detection_mag",
-            "ra_name": "ra",
-            "dec_name": "dec",
-            "mag_names": vizierInfo["gaia"]["mags"],
-            "default_overlay_mag": vizierInfo["gaia"]["mags"][0],
-        }
+        data["gaia"] = {"overlay_type": "detection_mag", "ra_name": "ra", "dec_name": "dec", "id_name": "designation"}
         data["galex"] = {
             "overlay_type": "detection_mag",
             "ra_name": "RAJ2000",
             "dec_name": "DEJ2000",
-            "mag_names": vizierInfo["galex"]["mags"],
-            "default_mag": vizierInfo["galex"]["mags"][0],
+            "id_name": "Name",
         }
-        data["wise"] = {
-            "overlay_type": "detection_mag",
-            "ra_name": "RAJ2000",
-            "dec_name": "DEJ2000",
-            "mag_names": vizierInfo["wise"]["mags"],
-            "default_mag": vizierInfo["wise"]["mags"][0],
-        }
+        data["wise"] = {"overlay_type": "detection_mag", "ra_name": "RAJ2000", "dec_name": "DEJ2000", "id_name": "WISE"}
         data["sdss"] = {
             "overlay_type": "detection_mag",
             "ra_name": "RA_ICRS",
             "dec_name": "DE_ICRS",
-            "mag_names": vizierInfo["sdss"]["mags"],
-            "default_mag": vizierInfo["sdss"]["mags"][0],
+            "id_name": "objID",
         }
         data["twomass"] = {
             "overlay_type": "detection_mag",
             "ra_name": "RAJ2000",
             "dec_name": "DEJ2000",
-            "mag_names": vizierInfo["twomass"]["mags"],
-            "default_mag": vizierInfo["twomass"]["mags"][0],
+            "id_name": "_2MASS",
         }
-        data["skymapper"] = {
-            "overlay_type": "detection_mag",
-            "ra_name": "RAICRS",
-            "dec_name": "DEICRS",
-            "mag_names": vizierInfo["skymapper"]["mags"],
-            "default_mag": vizierInfo["skymapper"]["mags"][0],
-        }
+        data["skymapper"] = {"overlay_type": "detection_mag", "ra_name": "RAICRS", "dec_name": "DEICRS"}
         data["panstarrs"] = {
             "overlay_type": "detection_mag",
             "ra_name": "RAJ2000",
             "dec_name": "DEJ2000",
-            "mag_names": vizierInfo["panstarrs"]["mags"],
-            "default_mag": vizierInfo["panstarrs"]["mags"][0],
+            "id_name": "objID",
         }
 
         # non-scaled detection overlays
-        data["rosat"] = {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "RA_ICRS"}
-        data["erosita"] = {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "DE_ICRS"}
+        data["rosat"] = {"overlay_type": "detection", "ra_name": "RAJ2000", "dec_name": "RA_ICRS", "id_name": "Name"}
+        data["erosita"] = {
+            "overlay_type": "detection",
+            "ra_name": "RAJ2000",
+            "dec_name": "DE_ICRS",
+            "id_name": "IAUName",
+        }
 
         # tracer overlays
         data["ztf"] = {"overlay_type": "tracer"}
@@ -305,25 +279,36 @@ class OverlayInfo(object):
         for survey in data:
             if data[survey]["overlay_type"] == "detection_mag":
                 data[survey]["mag_names"] = vizierInfo[survey]["mags"]
-                data[survey]["default_mag"] = vizierInfo[survey]["mags"][0]
-                data[survey]["marker_type"] = "circle"
-            elif data[survey]["overlay_type"] == "detection" or data[survey]["overlay_type"] == "tracer":
-                data[survey]["marker_type"] = "cross"
-
-        rolling_index = 0
-        for survey, info in data.items():
-            indexes = []
-            if info["overlay_type"] == "detection_mag":
-                length = len(info["mag_names"])
-            else:
-                length = 1
-            for i in range(0, length):
-                indexes.append(rolling_index)
-                rolling_index += 1
-            data[survey]["colour_index"] = indexes
 
         return data
 
     @property
     def supportedOverlays(self):
         return list(self.defaultOverlayParams.keys())
+
+    @property
+    def detection_magSurveys(self):
+        data = {}
+        for survey, info in self.defaultOverlayParams.items():
+            if info["overlay_type"] == "detection_mag":
+                data[survey] = info
+
+        return data
+
+    @property
+    def detectionSurveys(self):
+        data = {}
+        for survey, info in self.defaultOverlayParams.items():
+            if info["overlay_type"] == "detection":
+                data[survey] = info
+
+        return data
+
+    @property
+    def tracerSurveys(self):
+        data = {}
+        for survey, info in self.defaultOverlayParams.items():
+            if info["overlay_type"] == "tracer":
+                data[survey] = info
+
+        return data

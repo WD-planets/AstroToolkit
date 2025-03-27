@@ -9,3 +9,4 @@ Package Configuration
    Tutorial_config
    Tutorial_adding_aliases
    Tutorial_epochs
+   Tutorial_adding_overlays

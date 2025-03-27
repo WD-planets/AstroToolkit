@@ -4,12 +4,14 @@ import numpy as np
 
 from ..Configuration.baseconfig import ConfigStruct
 from ..Configuration.epochs import EpochStruct
+from ..Configuration.overlays import OverlayStruct
 from ..Data.simbad_query import pos_query
 from ..Misc.pmcorrection import correctradius
-from ..PackageInfo import OverlayInfo, SurveyInfo
+from ..PackageInfo import SurveyInfo
 from ..Tools import correctpm, query
 
-overlayInfo = OverlayInfo().defaultOverlayParams
+overlayInfo = OverlayStruct().read_overlays()
+print(overlayInfo)
 dataSurveyInfo = SurveyInfo().dataSurveyInfo
 
 epochs = EpochStruct().epoch_list
@@ -82,7 +84,7 @@ class OverlayData(object):
 def get_overlay_data(data, survey):
     params = overlayInfo[survey]
     if params["overlay_type"] != "tracer":
-        obj_id_name = dataSurveyInfo[survey]["id"]
+        obj_id_name = overlayInfo[survey]["id_name"]
 
     if data.source:
         radius = correctradius(
@@ -230,7 +232,7 @@ def overlay_query(data, overlays):
         for survey in overlays:
             if survey:
                 if overlayInfo[survey]["overlay_type"] == "detection_mag":
-                    overlayInfo[survey]["mag_names"] = [getattr(config, f"{survey}_overlay_mag")]
+                    overlayInfo[survey]["mag_names"] = [overlayInfo[survey]["default_mag"]]
                 overlay_data = get_overlay_data(data, survey)
                 if overlay_data:
                     overlays_data += overlay_data

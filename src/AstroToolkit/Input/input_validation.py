@@ -1,9 +1,9 @@
 import re
 
-from ..PackageInfo import OverlayInfo, SurveyInfo, ToolInfo
+from ..Configuration.overlays import OverlayStruct
+from ..PackageInfo import SurveyInfo, ToolInfo
 
 surveyInfo = SurveyInfo()
-overlayInfo = OverlayInfo()
 toolInfo = ToolInfo()
 
 DO_NOT_LOWER = ["fname"]
@@ -68,7 +68,7 @@ def check_type(name, value, target_type):
                     raise ValueError(f"Invalid [{name}] input. Expected list[str].")
 
     if name == "overlays":
-        supported_overlays = overlayInfo.supportedOverlays
+        supported_overlays = OverlayStruct().supportedOverlays
 
         if isinstance(value, list):
             for i, val in enumerate(value):

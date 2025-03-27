@@ -1,6 +1,7 @@
 src/AstroToolkit/Configuration/ATKConfig.ini
 src/AstroToolkit/Configuration/ATKAliases.ini
 src/AstroToolkit/Configuration/ATKEpochs.ini
+src/AstroToolkit/Configuration/ATKoverlays.yaml
 
 notes/
 test_scripts/
