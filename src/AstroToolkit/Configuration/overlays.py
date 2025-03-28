@@ -23,7 +23,9 @@ class OverlayStruct(object):
     def __init__(self):
         from importlib_resources import files
 
-        self.overlay_file = files("AstroToolkit.Configuration").joinpath("ATKoverlays.yaml")
+        self.overlay_file = files("AstroToolkit.Configuration").joinpath(
+            "ATKOverlays.yaml"
+        )
         if not os.path.isfile(self.overlay_file):
             print("No ATKoverlays.yaml found. Generating one with default values...")
             self.default_setup()
@@ -47,13 +49,18 @@ class OverlayStruct(object):
         defaults["detections"] = detection_surveys
         defaults["tracers"] = tracer_surveys
 
+        # don't include tracers
+        # del defaults["tracers"]
+
         with open(self.overlay_file, "w") as file:
             yaml.dump(defaults, file, sort_keys=False, indent=4, Dumper=customDumper)
 
-    def read_overlays(self):
+    def read_overlays(self, raw=False):
         with open(self.overlay_file) as file:
             try:
                 data = yaml.safe_load(file)
+                if raw:
+                    return data
             except yaml.YAMLError as e:
                 print(e)
 
@@ -90,3 +97,51 @@ class OverlayStruct(object):
     def supportedOverlays(self):
         data = self.read_overlays()
         return list(data.keys())
+
+    def add_overlay(self, survey, ra_name, dec_name, id_name, mag_names):
+        from .catalogue_setup import CatalogueStruct
+
+        aliases = CatalogueStruct().get_alias_list()
+        if survey not in aliases:
+            raise ValueError(
+                f"No alias found for survey '{survey}'. One should first be added using: ATKalias add {survey} <Vizier ID>"
+            )
+
+        overlayData = self.read_overlays(raw=True)
+
+        if mag_names:
+            section = "scaled_detection"
+            overlayData["scaled_detections"][survey] = {
+                "ra_name": ra_name,
+                "dec_name": dec_name,
+                "id_name": id_name,
+                "mag_names": mag_names,
+            }
+        else:
+            section = "detection"
+            overlayData["detections"][survey] = {
+                "ra_name": ra_name,
+                "dec_name": dec_name,
+                "id_name": id_name,
+            }
+
+        with open(self.overlay_file, "w") as file:
+            yaml.dump(overlayData, file, sort_keys=False, indent=4, Dumper=customDumper)
+
+        print(f"Added {section} overlay defintion for survey '{survey}'.")
+
+    def del_overlay(self, section, survey):
+        overlayData = self.read_overlays(raw=True)
+
+        if survey in overlayData[f"{section}s"]:
+            del overlayData[f"{section}s"][survey]
+        else:
+            raise ValueError(
+                f"Could not find existing {section} overlay definition for survey '{survey}'."
+            )
+
+        with open(self.overlay_file, "w") as file:
+            yaml.dump(overlayData, file, sort_keys=False, indent=4, Dumper=customDumper)
+
+    def reset_overlays(self):
+        self.default_setup()

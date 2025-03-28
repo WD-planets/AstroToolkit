@@ -10,7 +10,9 @@ class CatalogueStruct(object):
     def __init__(self):
         from importlib_resources import files
 
-        self.catalogue_file = files("AstroToolkit.Configuration").joinpath("ATKAliases.ini")
+        self.catalogue_file = files("AstroToolkit.Configuration").joinpath(
+            "ATKAliases.ini"
+        )
         if not os.path.isfile(self.catalogue_file):
             print("No ATKAliases.ini found. Generating one with default values...")
             self.default_setup()
@@ -53,6 +55,11 @@ class CatalogueStruct(object):
                 surveys[survey] = id
         return surveys
 
+    def get_alias_list(self):
+        return [
+            x for x in self.get_catalogue_list() if x not in surveyInfo.dataSurveyInfo
+        ]
+
     def write_catalogues(self):
         Catalogues = configparser.ConfigParser()
 
@@ -94,7 +101,9 @@ class CatalogueStruct(object):
         if key in default_catalogues:
             raise ValueError(f"Cannot override default alias '{key}'.")
         if hasattr(self, key):
-            print(f"Note: {key} alias was already defined, and has hence been overwritten.")
+            print(
+                f"Note: {key} alias was already defined, and has hence been overwritten."
+            )
         setattr(self, key, value)
         self.write_catalogues()
 

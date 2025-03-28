@@ -11,7 +11,6 @@ from ..PackageInfo import SurveyInfo
 from ..Tools import correctpm, query
 
 overlayInfo = OverlayStruct().read_overlays()
-print(overlayInfo)
 dataSurveyInfo = SurveyInfo().dataSurveyInfo
 
 epochs = EpochStruct().epoch_list
@@ -33,10 +32,16 @@ class OverlayData(object):
             if not math.isnan(self.returned_data["gaia"]["pmra"][i]) and not math.isnan(
                 self.returned_data["gaia"]["pmdec"][i]
             ):
-                (self.returned_data["gaia"]["ra"][i], self.returned_data["gaia"]["dec"][i]) = correctpm(
+                (
+                    self.returned_data["gaia"]["ra"][i],
+                    self.returned_data["gaia"]["dec"][i],
+                ) = correctpm(
                     input_time=epochs["gaia"],
                     target_time=epochs[self.survey],
-                    pos=[self.returned_data["gaia"]["ra"][i], self.returned_data["gaia"]["dec"][i]],
+                    pos=[
+                        self.returned_data["gaia"]["ra"][i],
+                        self.returned_data["gaia"]["dec"][i],
+                    ],
                     pmra=self.returned_data["gaia"]["pmra"][i],
                     pmdec=self.returned_data["gaia"]["pmdec"][i],
                 )
@@ -46,24 +51,42 @@ class OverlayData(object):
             for j in range(0, len(self.returned_data["gaia"]["sources"])):
                 delta = (
                     math.sqrt(
-                        (self.returned_data["non_gaia"]["ra"][i] - self.returned_data["gaia"]["ra"][j]) ** 2
-                        + (self.returned_data["non_gaia"]["dec"][i] - self.returned_data["gaia"]["dec"][j]) ** 2
+                        (
+                            self.returned_data["non_gaia"]["ra"][i]
+                            - self.returned_data["gaia"]["ra"][j]
+                        )
+                        ** 2
+                        + (
+                            self.returned_data["non_gaia"]["dec"][i]
+                            - self.returned_data["gaia"]["dec"][j]
+                        )
+                        ** 2
                     )
                     * 3600
                 )
                 if delta < piggyback_radius:
-                    if not math.isnan(self.returned_data["gaia"]["pmra"][j]) and not math.isnan(
-                        self.returned_data["gaia"]["pmdec"][j]
-                    ):
-                        (self.returned_data["non_gaia"]["ra"][i], self.returned_data["non_gaia"]["dec"][i]) = correctpm(
+                    if not math.isnan(
+                        self.returned_data["gaia"]["pmra"][j]
+                    ) and not math.isnan(self.returned_data["gaia"]["pmdec"][j]):
+                        (
+                            self.returned_data["non_gaia"]["ra"][i],
+                            self.returned_data["non_gaia"]["dec"][i],
+                        ) = correctpm(
                             input_time=epochs[self.survey],
                             target_time=image_time,
-                            pos=[self.returned_data["non_gaia"]["ra"][i], self.returned_data["non_gaia"]["dec"][i]],
+                            pos=[
+                                self.returned_data["non_gaia"]["ra"][i],
+                                self.returned_data["non_gaia"]["dec"][i],
+                            ],
                             pmra=self.returned_data["gaia"]["pmra"][j],
                             pmdec=self.returned_data["gaia"]["pmdec"][j],
                         )
-                        self.returned_data["non_gaia"]["correction_pmra"][i] = self.returned_data["gaia"]["pmra"][j]
-                        self.returned_data["non_gaia"]["correction_pmdec"][i] = self.returned_data["gaia"]["pmdec"][j]
+                        self.returned_data["non_gaia"]["correction_pmra"][i] = (
+                            self.returned_data["gaia"]["pmra"][j]
+                        )
+                        self.returned_data["non_gaia"]["correction_pmdec"][i] = (
+                            self.returned_data["gaia"]["pmdec"][j]
+                        )
                         self.corrected_systems.append(i)
 
     def scale_magnitudes(self):
@@ -74,7 +97,11 @@ class OverlayData(object):
                     radius_multiplier = self.returned_data["non_gaia"][mag][i] / 20.7
                     base_marker_size = 0.75
                     self.returned_data["non_gaia"][f"{mag}_marker_size"].append(
-                        (half_image_size / 50 + (half_image_size / 75) ** (radius_multiplier * 1.15)) * base_marker_size
+                        (
+                            half_image_size / 50
+                            + (half_image_size / 75) ** (radius_multiplier * 1.15)
+                        )
+                        * base_marker_size
                         + 0.0005
                     )
                 else:
@@ -88,19 +115,33 @@ def get_overlay_data(data, survey):
 
     if data.source:
         radius = correctradius(
-            source=data.source, input_time=epochs["gaia"], target_time=epochs[survey], radius=data.data["size"]
+            source=data.source,
+            input_time=epochs["gaia"],
+            target_time=epochs[survey],
+            radius=data.data["size"],
         )
     else:
         radius = data.data["size"]
 
-    if params["overlay_type"] == "detection_mag" or params["overlay_type"] == "detection":
+    if (
+        params["overlay_type"] == "detection_mag"
+        or params["overlay_type"] == "detection"
+    ):
         non_gaia_systems = query(
-            kind="data", survey=survey, pos=data.data["image_focus"], radius=radius, level="internal"
+            kind="data",
+            survey=survey,
+            pos=data.data["image_focus"],
+            radius=radius,
+            level="internal",
         ).data
         if not non_gaia_systems:
             return None
         gaia_systems = query(
-            kind="data", survey="gaia", pos=data.data["image_focus"], radius=radius, level="internal"
+            kind="data",
+            survey="gaia",
+            pos=data.data["image_focus"],
+            radius=radius,
+            level="internal",
         ).data
 
         # When generating a Gaia overlay, Gaia is considered a non_gaia survey. Correcting this using Gaia obviously does nothing
@@ -115,8 +156,12 @@ def get_overlay_data(data, survey):
             "non_gaia": {
                 "ra": non_gaia_systems[params["ra_name"]],
                 "dec": non_gaia_systems[params["dec_name"]],
-                "correction_pmra": [np.nan for x in non_gaia_systems[params["ra_name"]]],
-                "correction_pmdec": [np.nan for x in non_gaia_systems[params["ra_name"]]],
+                "correction_pmra": [
+                    np.nan for x in non_gaia_systems[params["ra_name"]]
+                ],
+                "correction_pmdec": [
+                    np.nan for x in non_gaia_systems[params["ra_name"]]
+                ],
                 "obj_id": non_gaia_systems[obj_id_name],
             },
         }
@@ -128,7 +173,10 @@ def get_overlay_data(data, survey):
         for mag in params["mag_names"]:
             returned_data["non_gaia"][mag] = non_gaia_systems[mag]
 
-    if params["overlay_type"] == "detection_mag" or params["overlay_type"] == "detection":
+    if (
+        params["overlay_type"] == "detection_mag"
+        or params["overlay_type"] == "detection"
+    ):
         global image_time
         image_time = data.data["image_time"]
         global half_image_size
@@ -139,7 +187,10 @@ def get_overlay_data(data, survey):
         overlay_data.do_piggyback_correction()
         if params["overlay_type"] == "detection_mag":
             overlay_data.scale_magnitudes()
-        formatted_data, corrected_systems = (overlay_data.returned_data, overlay_data.corrected_systems)
+        formatted_data, corrected_systems = (
+            overlay_data.returned_data,
+            overlay_data.corrected_systems,
+        )
 
     if params["overlay_type"] == "detection_mag":
         overlay = []
@@ -152,14 +203,22 @@ def get_overlay_data(data, survey):
                         "corrected": i in corrected_systems,
                         "ra": formatted_data["non_gaia"]["ra"][i],
                         "dec": formatted_data["non_gaia"]["dec"][i],
-                        "marker_size": formatted_data["non_gaia"][f"{mag}_marker_size"][i],
-                        "colour_index": params["colour_index"][params["mag_names"].index(mag)],
+                        "marker_size": formatted_data["non_gaia"][f"{mag}_marker_size"][
+                            i
+                        ],
+                        "colour_index": params["colour_index"][
+                            params["mag_names"].index(mag)
+                        ],
                         "mag_name": mag,
                         "mag": formatted_data["non_gaia"][mag][i],
                         "survey": survey,
                         "obj_id": str(formatted_data["non_gaia"]["obj_id"][i]),
-                        "correction_pmra": formatted_data["non_gaia"]["correction_pmra"][i],
-                        "correction_pmdec": formatted_data["non_gaia"]["correction_pmdec"][i],
+                        "correction_pmra": formatted_data["non_gaia"][
+                            "correction_pmra"
+                        ][i],
+                        "correction_pmdec": formatted_data["non_gaia"][
+                            "correction_pmdec"
+                        ][i],
                     }
                     overlay.append(overlay_entry)
     elif params["overlay_type"] == "detection":
@@ -185,7 +244,11 @@ def get_overlay_data(data, survey):
 
     if params["overlay_type"] == "tracer":
         lightcurve_data = query(
-            kind="lightcurve", survey=survey, pos=data.data["image_focus"], radius=radius, level="internal"
+            kind="lightcurve",
+            survey=survey,
+            pos=data.data["image_focus"],
+            radius=radius,
+            level="internal",
         ).data
 
         if not lightcurve_data:
@@ -232,7 +295,9 @@ def overlay_query(data, overlays):
         for survey in overlays:
             if survey:
                 if overlayInfo[survey]["overlay_type"] == "detection_mag":
-                    overlayInfo[survey]["mag_names"] = [overlayInfo[survey]["default_mag"]]
+                    overlayInfo[survey]["mag_names"] = [
+                        overlayInfo[survey]["default_mag"]
+                    ]
                 overlay_data = get_overlay_data(data, survey)
                 if overlay_data:
                     overlays_data += overlay_data
@@ -273,7 +338,10 @@ def overlay_query(data, overlays):
         xlim = ylim
 
     wcs = data.data["wcs"]
-    x_points, y_points = (np.arange(start=0, stop=xlim + 1, step=1), np.arange(start=0, stop=ylim + 1, step=1))
+    x_points, y_points = (
+        np.arange(start=0, stop=xlim + 1, step=1),
+        np.arange(start=0, stop=ylim + 1, step=1),
+    )
 
     coords = wcs.all_pix2world(x_points, y_points, 1)
     x_points, y_points = coords[0], coords[1]
