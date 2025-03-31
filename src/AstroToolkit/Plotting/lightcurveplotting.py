@@ -5,6 +5,8 @@ from bokeh.models import BasicTickFormatter, ColumnDataSource, CustomJS
 from bokeh.plotting import figure
 from bokeh.transform import linear_cmap
 
+from ..Utility import getBrightnessType
+
 
 class SupportedColours(object):
     def __init__(self, colour):
@@ -50,13 +52,17 @@ def plot_data(plot, band, colour, time_min, survey, timeformat):
         time = band["mjd"]
 
     palette, error_colour = SupportedColours(colour).get_cmap
-    source = ColumnDataSource(data={"time": time, "mag": band["mag"]})
-    cmap = linear_cmap(field_name="mag", palette=palette, low=min(band["mag"]), high=max(band["mag"]))
+    source = ColumnDataSource(data={"time": time, brightness_type: band[brightness_type]})
+    cmap = linear_cmap(
+        field_name=brightness_type, palette=palette, low=min(band[brightness_type]), high=max(band[brightness_type])
+    )
 
-    plot.scatter(source=source, x="time", y="mag", color=cmap, marker="circle", legend_label=f"{survey} {band['band']}")
+    plot.scatter(
+        source=source, x="time", y=brightness_type, color=cmap, marker="circle", legend_label=f"{survey} {band['band']}"
+    )
 
     err_xs = [[x, x] for x in time]
-    err_ys = [[y - y_err, y + y_err] for y, y_err in zip(band["mag"], band["mag_err"])]
+    err_ys = [[y - y_err, y + y_err] for y, y_err in zip(band[brightness_type], band[f"{brightness_type}_err"])]
     plot.multi_line(
         err_xs,
         err_ys,
@@ -73,10 +79,13 @@ def plot_data(plot, band, colour, time_min, survey, timeformat):
 
 
 def plot_lightcurve(struct, colours, bands, timeformat):
+    global brightness_type
+    brightness_type = getBrightnessType(struct.data)
+
     if bands:
-        data = [x for x in struct.data if x["band"] in bands and x["mag"] is not None]
+        data = [x for x in struct.data if x["band"] in bands and x[brightness_type] is not None]
     else:
-        data = [x for x in struct.data if x["mag"] is not None]
+        data = [x for x in struct.data if x[brightness_type] is not None]
 
     if len(data) == 0:
         print("Note: Could not plot light curve, no data found in requested bands.")
@@ -92,6 +101,16 @@ def plot_lightcurve(struct, colours, bands, timeformat):
     for band in data:
         lightcurve_bands += f"{band['band']}, "
     lightcurve_bands = lightcurve_bands.rstrip(", ")
+    if len(data) > 1:
+        if brightness_type == "flux":
+            lightcurve_bands += " fluxes"
+        else:
+            lightcurve_bands += " mags"
+    elif len(data) == 1:
+        if brightness_type == "flux":
+            lightcurve_bands += " flux"
+        else:
+            lightcurve_bands += " mag"
 
     plot = figure(
         width=400,

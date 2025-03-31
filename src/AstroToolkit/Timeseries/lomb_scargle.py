@@ -5,6 +5,8 @@ from bokeh import events
 from bokeh.models import CustomJS, Range1d
 from bokeh.plotting import figure
 
+from ..Utility import getBrightnessType
+
 newline = "\n"
 
 
@@ -21,10 +23,10 @@ def lomb_scargle(
     samples=150000,
 ):
     class timeseries_data(object):
-        def __init__(self, time, mag, mag_err, power, frequency, freq, foverlay, repeat, shift):
+        def __init__(self, time, brightness, brightness_err, power, frequency, freq, foverlay, repeat, shift):
             self.time = time
-            self.mag = mag
-            self.mag_err = mag_err
+            self.brightness = brightness
+            self.brightness_err = brightness_err
             self.power = power
             self.frequency = frequency
             self.phase_freq = freq
@@ -75,20 +77,20 @@ def lomb_scargle(
         @property
         def phasefold_plot(self):
             # code for this function adapted from Keith
-            def do_binning(bins, phase, mag, mag_err):
+            def do_binning(bins, phase, brightness, brightness_err):
                 bin_phase = []
                 bin_y = []
                 bin_y_err = []
 
-                mag = np.asarray(mag)
-                mag_err = np.asarray(mag_err)
+                brightness = np.asarray(brightness)
+                brightness_err = np.asarray(brightness_err)
 
                 for bphase in np.linspace(0, 1 - 1 / bins, num=bins):
                     mask = (phase < bphase + 1 / bins) & (phase >= bphase)
-                    if len(mag[mask]) > 0:
+                    if len(brightness[mask]) > 0:
                         bin_phase += [bphase + 0.5 / bins]
-                        weights = 1 / (mag_err[mask] ** 2)
-                        baverage, norm = np.average(mag[mask], weights=weights, returned=True)
+                        weights = 1 / (brightness_err[mask] ** 2)
+                        baverage, norm = np.average(brightness[mask], weights=weights, returned=True)
                         bin_y += [baverage]
                         bin_y_err += [1 / np.sqrt(norm)]
 
@@ -102,7 +104,7 @@ def lomb_scargle(
                 freq_multiplier = (self.frequency[np.nanargmax(self.power)].value / best_frequency) / u.day
 
             t_fit = np.linspace(0, 1 / best_frequency.value, 1000) * u.day
-            ls = LombScargle(self.time, self.mag, self.mag_err)
+            ls = LombScargle(self.time, self.brightness, self.brightness_err)
 
             # this uses the frequency determined by L-S
             y_fit = ls.model(t=t_fit, frequency=freq_multiplier * best_frequency)
@@ -116,30 +118,30 @@ def lomb_scargle(
             t_fit_formatted = [val for i, val in enumerate(t_fit) if i not in cut_indices]
             y_fit_formatted = [val for i, val in enumerate(y_fit) if i not in cut_indices]
 
-            median_mag = np.median(self.mag).value
+            median_brightness = np.median(self.brightness).value
 
             phase = [x.value for x in phase]
-            self.mag = [x.value - median_mag for x in self.mag]
+            self.brightness = [x.value - median_brightness for x in self.brightness]
             t_fit_formatted = [x.value for x in t_fit_formatted]
-            y_fit_formatted = [x.value - median_mag for x in y_fit_formatted]
-            self.mag_err = [x.value for x in self.mag_err]
+            y_fit_formatted = [x.value - median_brightness for x in y_fit_formatted]
+            self.brightness_err = [x.value for x in self.brightness_err]
 
-            mag = self.mag
-            mag_err = self.mag_err
+            brightness = self.brightness
+            brightness_err = self.brightness_err
 
             if self.phase_bins:
-                phase, mag, mag_err = do_binning(self.phase_bins, phase, mag, mag_err)
+                phase, brightness, brightness_err = do_binning(self.phase_bins, phase, brightness, brightness_err)
 
             if self.repeat > 1:
-                base_mag = mag.copy()
-                base_mag_err = mag_err.copy()
+                base_brightness = brightness.copy()
+                base_brightness_err = brightness_err.copy()
                 base_phase = phase.copy()
                 t_fit_base = t_fit_formatted.copy()
                 y_fit_base = y_fit_formatted.copy()
 
                 for i in range(1, self.repeat):
-                    mag += base_mag
-                    mag_err += base_mag_err
+                    brightness += base_brightness
+                    brightness_err += base_brightness_err
                     phase += [x + i for x in base_phase]
                     t_fit_formatted += [x + i for x in t_fit_base]
                     y_fit_formatted += y_fit_base
@@ -170,10 +172,15 @@ def lomb_scargle(
                 t_fit_formatted, y_fit_formatted = zip(*sorted(zip(t_fit_formatted, y_fit_formatted)))
 
             err_xs = [[x, x] for x in phase]
-            err_ys = [[y - y_err, y + y_err] for y, y_err in zip(mag, mag_err)]
+            err_ys = [[y - y_err, y + y_err] for y, y_err in zip(brightness, brightness_err)]
 
-            plot = figure(width=400, height=400, x_axis_label="Phase", y_axis_label="Magnitude (relative to median)")
-            plot.scatter(x=phase, y=mag, level="guide")
+            plot = figure(
+                width=400,
+                height=400,
+                x_axis_label="Phase",
+                y_axis_label=f"{brightness_type.capitalize()} relative to median",
+            )
+            plot.scatter(x=phase, y=brightness, level="guide")
 
             if self.foverlay:
                 plot.line(
@@ -210,17 +217,20 @@ def lomb_scargle(
 
     from .timeseries_formatting import format_data
 
+    global brightness_type
+    brightness_type = getBrightnessType(data)
+
     try:
-        time, mag, mag_err = format_data(data)
+        time, brightness, brightness_err = format_data(data)
     except:
         print("Note: No data passed to timeseries tool, suggests no light curve data was found.")
         return None
 
-    time, mag, mag_err = time * u.day, mag * u.mag, mag_err * u.mag
+    time, brightness, brightness_err = (time * u.day, brightness * u.mag, brightness_err * u.mag)
 
     freqs = np.linspace(start_freq, stop_freq, samples) / u.day
-    power = LombScargle(time, mag, mag_err, fit_mean=False).power(freqs)
+    power = LombScargle(time, brightness, brightness_err, fit_mean=False).power(freqs)
 
-    data_class = timeseries_data(time, mag, mag_err, power, freqs, freq, foverlay, repeat, shift)
+    data_class = timeseries_data(time, brightness, brightness_err, power, freqs, freq, foverlay, repeat, shift)
 
     return data_class

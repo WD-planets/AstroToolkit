@@ -29,3 +29,27 @@ def HJDtoMJD(hjd):
         return calculated_mjds
     elif isinstance(hjd, float):
         return get_mjd(hjd)
+
+
+def getBrightnessType(data):
+    brightness_types = []
+    for band in data:
+        if "mag" in band:
+            if "flux_err" in band:
+                raise ValueError("Invalid combination of 'mag' and 'flux_err'.")
+            brightness_type = "mag"
+            brightness_types.append("mag")
+        elif "flux" in band:
+            if "mag_err" in band:
+                raise ValueError("Invalid combination of 'flux' and 'mag_err'.")
+            brightness_type = "flux"
+            brightness_types.append("flux")
+        else:
+            raise ValueError("Invalid brightness type, expected 'mag' and 'mag_err' or 'flux' and 'flux_err'.")
+
+    if len(list(dict.fromkeys(brightness_types))) > 1:
+        raise ValueError(
+            "Inconsistent brightness types among bands. Expected consistent use of 'mag' and 'mag_err' or 'flux' and 'flux_err'."
+        )
+
+    return brightness_type

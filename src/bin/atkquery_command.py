@@ -48,7 +48,7 @@ def jobs_ui(data):
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
+                    if plot_kind in ["lightcurve", "phasefold", "powspec"]:
                         data.plot(kind=plot_kind).showplot(fname=fname)
                         break
                     else:
@@ -59,8 +59,8 @@ def jobs_ui(data):
             if data.kind == "lightcurve":
                 while True:
                     plot_kind = str(input("Plot Type? "))
-                    if plot_kind in ["lightcurve", "phasefold", "powspec", "phase", "fold"]:
-                        data.plot(kind=plot_kind).saveplot()
+                    if plot_kind in ["lightcurve", "phasefold", "powspec"]:
+                        data.plot(kind=plot_kind).saveplot(fname=fname)
                         break
                     else:
                         print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")

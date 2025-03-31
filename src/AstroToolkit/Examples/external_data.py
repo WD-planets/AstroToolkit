@@ -15,7 +15,7 @@ lightcurve = CustomLightcurveStruct(source=6050296829033196032).showdata()
 
 lightcurve.survey = "TNT"
 lightcurve.data = [
-    {"band": "g", "mjd": data["mjd"].tolist(), "mag": data["flux"].tolist(), "mag_err": data["error"].tolist()}
+    {"band": "g", "mjd": data["mjd"].tolist(), "flux": data["flux"].tolist(), "flux_err": data["error"].tolist()}
 ]
 
 go_to_static()

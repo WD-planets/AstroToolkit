@@ -65,18 +65,14 @@ def get_plot(struct, **kwargs):
             elif kwargs["kind"] == "phasefold":
                 from ..Timeseries.lomb_scargle import lomb_scargle
 
-                try:
-                    plot = lomb_scargle(
-                        struct.data,
-                        kwargs["freq"],
-                        kwargs["bins"],
-                        foverlay=kwargs["foverlay"],
-                        repeat=kwargs["repeat"],
-                        shift=kwargs["shift"],
-                    ).phasefold_plot
-                except:
-                    plot = None
-
+                plot = lomb_scargle(
+                    struct.data,
+                    kwargs["freq"],
+                    kwargs["bins"],
+                    foverlay=kwargs["foverlay"],
+                    repeat=kwargs["repeat"],
+                    shift=kwargs["shift"],
+                ).phasefold_plot
                 dimensions = Dimensions(height=1, width=1)
 
                 from ..FileHandling.file_naming import generate_plotname

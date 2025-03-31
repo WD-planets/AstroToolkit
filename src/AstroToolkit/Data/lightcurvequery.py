@@ -841,6 +841,7 @@ def query(survey, source, pos, radius, raw, username=None, password=None):
             trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction by ATLAS API -> {survey} query performed -> [2000,0] -> end"
             final_pos = correctpm(pos=pos, input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec)
     else:
+        final_pos = pos
         trace = None
 
     lightcurve = LightcurveStruct(survey=survey, source=source, pos=pos, data=get_lightcurve())
