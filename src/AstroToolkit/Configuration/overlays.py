@@ -23,9 +23,7 @@ class OverlayStruct(object):
     def __init__(self):
         from importlib_resources import files
 
-        self.overlay_file = files("AstroToolkit.Configuration").joinpath(
-            "ATKOverlays.yaml"
-        )
+        self.overlay_file = files("AstroToolkit.Configuration").joinpath("ATKOverlays.yaml")
         if not os.path.isfile(self.overlay_file):
             print("No ATKoverlays.yaml found. Generating one with default values...")
             self.default_setup()
@@ -119,16 +117,12 @@ class OverlayStruct(object):
             }
         else:
             section = "detection"
-            overlayData["detections"][survey] = {
-                "ra_name": ra_name,
-                "dec_name": dec_name,
-                "id_name": id_name,
-            }
+            overlayData["detections"][survey] = {"ra_name": ra_name, "dec_name": dec_name, "id_name": id_name}
 
         with open(self.overlay_file, "w") as file:
             yaml.dump(overlayData, file, sort_keys=False, indent=4, Dumper=customDumper)
 
-        print(f"Added {section} overlay defintion for survey '{survey}'.")
+        print(f"Added {section} overlay defintion for alias '{survey}'.")
 
     def del_overlay(self, section, survey):
         overlayData = self.read_overlays(raw=True)
@@ -136,9 +130,7 @@ class OverlayStruct(object):
         if survey in overlayData[f"{section}s"]:
             del overlayData[f"{section}s"][survey]
         else:
-            raise ValueError(
-                f"Could not find existing {section} overlay definition for survey '{survey}'."
-            )
+            raise ValueError(f"Could not find existing {section} overlay definition for alias '{survey}'.")
 
         with open(self.overlay_file, "w") as file:
             yaml.dump(overlayData, file, sort_keys=False, indent=4, Dumper=customDumper)

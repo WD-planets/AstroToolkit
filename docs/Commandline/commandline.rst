@@ -16,3 +16,4 @@ Here, the usage of the available command-line tools in ATK will be outlined. All
    atkconfig
    atkalias
    atkepoch
+   atkoverlay

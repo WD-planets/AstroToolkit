@@ -74,7 +74,10 @@ def plot_image(struct, simbad_search_radius=None):
         overlay_data = struct.data["overlay"]
         colour_indices = [x["colour_index"] for x in overlay_data]
         index_range = max(colour_indices) - min(colour_indices)
-        cmap_increment = (CMAP_MAX_VALUE - CMAP_MIN_VALUE) / index_range
+        if index_range > 0:
+            cmap_increment = (CMAP_MAX_VALUE - CMAP_MIN_VALUE) / index_range
+        else:
+            cmap_increment = 0
         for data_point in overlay_data:
             cmap = LinearColorMapper(palette="Turbo256", low=0, high=255)
             mapped_index = (data_point["colour_index"] - min(colour_indices)) * cmap_increment + CMAP_MIN_VALUE

@@ -221,9 +221,15 @@ def check_inputs(inputs, label, check_targeting=False):
         # check supported surveys
         survey = corrected_inputs["survey"]
         if corrected_inputs["kind"] not in ["data", "hrd", "bulkdata", "sed"]:
+            if kind == "lightcurve" and survey == "gaia":
+                survey = "gaia_lc"
+
             supported_surveys = getattr(surveyInfo, f"default{corrected_inputs['kind'].capitalize()}Surveys")
             if survey not in supported_surveys:
                 raise ValueError(f"Unsupported survey in {kind} query. Supported surveys are: {supported_surveys}")
+
+            if kind == "lightcurve" and survey == "gaia_lc":
+                corrected_inputs["survey"] = "gaia"
 
         if kind == "data" and survey == "gaia_lc" and corrected_inputs["level"] != "internal":
             raise ValueError(f"Unsupported survey in {kind} query. Use kind=lightcurve for gaia lightcurve queries.")

@@ -10,6 +10,7 @@ Modules
    Datapages
    Aliases
    Epochs
+   Overlays
    Config
    Models
    Gui
