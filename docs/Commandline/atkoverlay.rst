@@ -1,7 +1,7 @@
 ATKoverlay
 ==========
 
-This tool allows for the various :ref:`Overlays <Overlays>` tools to be utilised from the command line. The first argument sets the job to perform on the overlay definition list. See :ref:`tutorials <Defining New Overlays>` for examples. 
+This tool allows for the various :ref:`Overlays <Overlays>` tools to be utilised from the command line. The first argument sets the job to perform on the overlay definition list. See :ref:`tutorials <Defining New Image Overlays>` for examples. 
 
 .. rubric:: Usage 1
     :heading-level: 2

@@ -9,20 +9,13 @@ from .examples_utilities import format, go_to_static
 
 os.chdir(Path(__file__).parent.absolute())
 
-data = pd.read_csv(
-    os.path.join(Path(__file__).parent.absolute(), "AR_Sco_TNT.txt"), delimiter="\s+"
-)
+data = pd.read_csv(os.path.join(Path(__file__).parent.absolute(), "AR_Sco_TNT.txt"), delimiter="\s+")
 
 lightcurve = CustomLightcurveStruct(source=6050296829033196032).showdata()
 
 lightcurve.survey = "TNT"
 lightcurve.data = [
-    {
-        "band": "g",
-        "hjd": data["mjd"].tolist(),
-        "mag": data["flux"].tolist(),
-        "mag_err": data["error"].tolist(),
-    }
+    {"band": "g", "mjd": data["mjd"].tolist(), "mag": data["flux"].tolist(), "mag_err": data["error"].tolist()}
 ]
 
 go_to_static()

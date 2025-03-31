@@ -77,7 +77,7 @@ With a number of the structure's fields being filled out for us, we simply fill 
     lightcurve.data = [
         {
             "band": "g",
-            "hjd": data["mjd"].tolist(),
+            "mjd": data["mjd"].tolist(),
             "mag": data["flux"].tolist(),
             "mag_err": data["error"].tolist(),
         }

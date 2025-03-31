@@ -6,6 +6,7 @@ from ..PackageInfo import SurveyInfo
 from ..StructureMethods.method_definitions import (exportplot, plot, savedata,
                                                    saveplot, showdata,
                                                    showplot)
+from ..Utility import HJDtoMJD
 
 surveyInfo = SurveyInfo()
 epochs = EpochStruct().epoch_list
@@ -50,7 +51,7 @@ class LightcurveStruct(object):
             "band": <band>
             "ra": [right ascension (degrees)]
             "dec": [declination in (degrees)]
-            "hjd"/"mjd": [hjd]
+            "mjd": [mjd]
             "mag": [apparent magnitude]
             "mag_err": [error on the apparent magnitude]
 
@@ -319,7 +320,10 @@ class ZtfQuery(GeneralQuery):
                 current_band_data["dec"].tolist(),
                 current_band_data["hjd"].tolist(),
             )
-            data_arr.append({"band": filter_code[1:], "ra": ra, "dec": dec, "hjd": hjd, "mag": mag, "mag_err": mag_err})
+
+            data_arr.append(
+                {"band": filter_code[1:], "ra": ra, "dec": dec, "mjd": HJDtoMJD(hjd), "mag": mag, "mag_err": mag_err}
+            )
 
         return data_arr
 
@@ -664,17 +668,31 @@ class AsassnQuery(GeneralQuery):
         data_arr = []
         if len(v_mag) > 0:
             data_arr.append(
-                {"band": "v", "ra": v_ra_arr, "dec": v_dec_arr, "hjd": v_hjd, "mag": v_mag, "mag_err": v_mag_err}
+                {
+                    "band": "v",
+                    "ra": v_ra_arr,
+                    "dec": v_dec_arr,
+                    "mjd": HJDtoMJD(v_hjd),
+                    "mag": v_mag,
+                    "mag_err": v_mag_err,
+                }
             )
         else:
-            data_arr.append({"band": "v", "ra": None, "dec": None, "hjd": None, "mag": None, "mag_err": None})
+            data_arr.append({"band": "v", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 
         if len(g_mag) > 0:
             data_arr.append(
-                {"band": "g", "ra": g_ra_arr, "dec": g_dec_arr, "hjd": g_hjd, "mag": g_mag, "mag_err": g_mag_err}
+                {
+                    "band": "g",
+                    "ra": g_ra_arr,
+                    "dec": g_dec_arr,
+                    "mjd": HJDtoMJD(g_hjd),
+                    "mag": g_mag,
+                    "mag_err": g_mag_err,
+                }
             )
         else:
-            data_arr.append({"band": "g", "ra": None, "dec": None, "hjd": None, "mag": None, "mag_err": None})
+            data_arr.append({"band": "g", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 
         return data_arr
 

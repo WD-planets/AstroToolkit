@@ -14,12 +14,7 @@ def rolling_window_sigma_clip(array, clippingSigma, windowSize):
         return len(array) * [False]
     elif len(array) < windowSize:
         masked = sigma_clip(
-            array,
-            sigma_lower=clippingSigma,
-            sigma_upper=clippingSigma,
-            maxiters=7,
-            cenfunc="median",
-            stdfunc=mad_std,
+            array, sigma_lower=clippingSigma, sigma_upper=clippingSigma, maxiters=7, cenfunc="median", stdfunc=mad_std
         )
         return list(masked.mask)
 
@@ -59,12 +54,7 @@ def sigma_clip(data, sigma, window_size=11):
     from operator import itemgetter
 
     # sigma clip data with a rolling window
-    if "hjd" in list(data.keys()):
-        time_unit = "hjd"
-    elif "mjd" in list(data.keys()):
-        time_unit = "mjd"
-
-    time_arr = data[time_unit]
+    time_arr = data["mjd"]
     mag_arr = data["mag"]
     mag_err_arr = data["mag_err"]
     ra_arr = data["ra"]
@@ -74,26 +64,16 @@ def sigma_clip(data, sigma, window_size=11):
     sigma_clip_data = []
     for i in range(0, len(data["mag"])):
         sigma_clip_data.append(
-            {
-                time_unit: time_arr[i],
-                "mag": mag_arr[i],
-                "mag_err": mag_err_arr[i],
-                "ra": ra_arr[i],
-                "dec": dec_arr[i],
-            }
+            {"mjd": time_arr[i], "mag": mag_arr[i], "mag_err": mag_err_arr[i], "ra": ra_arr[i], "dec": dec_arr[i]}
         )
 
     # sort by time
-    sigma_clip_data = sorted(
-        sigma_clip_data, key=itemgetter(f"{time_unit}"), reverse=False
-    )
+    sigma_clip_data = sorted(sigma_clip_data, key=itemgetter(f"{'mjd'}"), reverse=False)
 
     sigma_clip_mag = []
     sigma_clip_mag[:] = [row["mag"] for row in sigma_clip_data]
 
-    fullMask = rolling_window_sigma_clip(
-        array=sigma_clip_mag, clippingSigma=sigma, windowSize=window_size
-    )
+    fullMask = rolling_window_sigma_clip(array=sigma_clip_mag, clippingSigma=sigma, windowSize=window_size)
 
     try:
         sigma_clip_data = [e for e, m in zip(sigma_clip_data, fullMask) if not m]
@@ -102,7 +82,7 @@ def sigma_clip(data, sigma, window_size=11):
 
     data["mag"] = [x["mag"] for x in sigma_clip_data]
     data["mag_err"] = [x["mag_err"] for x in sigma_clip_data]
-    data[time_unit] = [x[time_unit] for x in sigma_clip_data]
+    data["mjd"] = [x["mjd"] for x in sigma_clip_data]
     data["ra"] = [x["ra"] for x in sigma_clip_data]
     data["dec"] = [x["dec"] for x in sigma_clip_data]
 

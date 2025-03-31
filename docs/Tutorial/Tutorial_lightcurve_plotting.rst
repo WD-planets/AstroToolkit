@@ -28,25 +28,25 @@ The first step is to fetch some light curve data. For this, we introduce another
         band: g
             ra:      [245.447071  245.4470765 245.447069  ... 245.4471056 245.4470825 245.4470859]
             dec:     [-22.8864202 -22.8864231 -22.8864182 ... -22.8865103 -22.8865078 -22.8865203]
-            hjd:     [2458235.88088966 2458235.94319608 2458246.86172527 ... 2460524.68224955 2460527.69099994 2460529.69086604]
+            mjd:     [58235.38073661 58235.44304301 58246.36157061 ... 60524.18209167 60527.19084229 60529.19070857]
             mag:     [16.7012329 14.7080278 16.4311085 ... 15.7799644 14.800931  16.0791607]
             mag_err: [0.02124788 0.019023   0.02014201 ... 0.01882575 0.01893662 0.01923533]
 
         band: r
             ra:      [245.4470594 245.4470709 245.4470644 ... 245.4471027 245.4470833 245.4470933]
             dec:     [-22.8864405 -22.8864381 -22.8864126 ... -22.8865397 -22.8865631 -22.8865343]
-            hjd:     [2458218.90986354 2458218.97188203 2458246.9025947  ... 2460504.77009979 2460510.75659636 2460527.65778532]
+            mjd:     [58218.40971316 58218.47173164 58246.40244004 ... 60504.26994093 60510.25643771 60527.15762767]
             mag:     [15.6002302 15.0777416 14.619998  ... 15.7173185 14.579071  15.1474562]
             mag_err: [0.01373806 0.01352318 0.01368265 ... 0.01386647 0.01370837 0.01352345]
 
         band: i
             ra:      None
             dec:     None
-            hjd:     None
+            mjd:     None
             mag:     None
             mag_err: None
 
-    Available Methods: .bin(), .crop(), .exportplot(), .plot(), .savedata(), .saveplot(), .showdata(), .showplot(), .sigmaclip()
+        Available Methods: .bin(), .crop(), .exportplot(), .plot(), .savedata(), .saveplot(), .showdata(), .showplot(), .sigmaclip()
 
 The attributes of the resulting :class:`LightcurveStruct <AstroToolkit.Data.lightcurvequery.LightcurveStruct>` are all familiar. We do have some new methods (:func:`bin() <AstroToolkit.Data.lightcurvequery.LightcurveStruct.bin>`, :func:`crop() <AstroToolkit.Data.lightcurvequery.LightcurveStruct.crop>` and :func:`sigmaclip() <AstroToolkit.Data.lightcurvequery.LightcurveStruct.sigmaclip>`), but we won't look at those here.
 

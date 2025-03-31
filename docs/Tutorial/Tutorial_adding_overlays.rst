@@ -1,5 +1,5 @@
-Defining New Overlays
-=====================
+Defining New Image Overlays
+===========================
 In the :ref:`previous tutorial <Setting Survey and Alias Epochs>`, we managed to retreive some additional AllWISE data for Wolf 28 using proper motion correction. But how can we be sure that the returned data actually belongs to our target system? The best way to check this is to make use of ATK's image overlays. Since we are using a user-defined alias to AllWISE (see :ref:`previous tutorial <Adding Catalogue Aliases>`), we first need to tell ATK how to generate an AllWISE overlay. We do this using the :ref:`Overlays <Overlays>` module, which we can once again access from the command line via the :ref:`ATKoverlay` tool. 
 
 To generate an overlay definition for a user-defined catalogue alias, we need to provide ATK with the name of the survey's right ascension, declination, ID, and magnitude columns (if available) in Vizier:

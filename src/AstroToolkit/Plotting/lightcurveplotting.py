@@ -45,9 +45,9 @@ class SupportedColours(object):
 
 def plot_data(plot, band, colour, time_min, survey, timeformat):
     if timeformat == "reduced":
-        time = [x - time_min for x in band[time_unit]]
+        time = [x - time_min for x in band["mjd"]]
     else:
-        time = band[time_unit]
+        time = band["mjd"]
 
     palette, error_colour = SupportedColours(colour).get_cmap
     source = ColumnDataSource(data={"time": time, "mag": band["mag"]})
@@ -101,19 +101,12 @@ def plot_lightcurve(struct, colours, bands, timeformat):
         y_axis_label=f"{lightcurve_bands}",
     )
 
-    global time_unit
-
-    if "hjd" in band:
-        time_unit = "hjd"
-    elif "mjd" in band:
-        time_unit = "mjd"
-
     if timeformat == "original":
-        plot.xaxis.axis_label = time_unit.upper()
+        plot.xaxis.axis_label = "MJD"
 
     combined_times = []
     for band in data:
-        combined_times += band[time_unit]
+        combined_times += band["mjd"]
 
     time_min = min(combined_times)
 

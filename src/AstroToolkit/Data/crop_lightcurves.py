@@ -4,14 +4,9 @@ def crop_lightcurve(struct, start=None, stop=None, timeformat=None):
     def filter_data(band, mask):
         return [val for i, val in enumerate(band) if i not in mask]
 
-    combined_time, time_units = [], []
+    combined_time = []
     for band in data:
-        if "mjd" in band:
-            time_unit = "mjd"
-        elif "hjd" in band:
-            time_unit = "hjd"
-        time_units.append(time_unit)
-        combined_time += band[time_unit]
+        combined_time += band["mjd"]
     sync_time = min(combined_time)
     max_time = max(combined_time)
 
@@ -46,7 +41,7 @@ def crop_lightcurve(struct, start=None, stop=None, timeformat=None):
             return band
 
         # original time
-        time = band[time_unit]
+        time = band["mjd"]
 
         bad_indices = [i for i, val in enumerate(time) if val < start or val > stop]
 

@@ -136,19 +136,14 @@ class SurveyInfo(object):
             data[survey] = {}
 
         data["ztf"]["bands"] = ["g", "r", "i"]
-        data["ztf"]["time_unit"] = "hjd"
 
         data["gaia_lc"]["bands"] = ["g", "bp", "rp"]
-        data["gaia_lc"]["time_unit"] = "mjd"
 
         data["asassn"]["bands"] = ["g", "v"]
-        data["asassn"]["time_unit"] = "mjd"
 
         data["crts"]["bands"] = ["v"]
-        data["crts"]["time_unit"] = "mjd"
 
         data["tess"]["bands"] = ["TESS mag"]
-        data["tess"]["time_unit"] = "mjd"
 
         return data
 

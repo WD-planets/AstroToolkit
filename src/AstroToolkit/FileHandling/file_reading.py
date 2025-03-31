@@ -93,9 +93,7 @@ def ReadLocalLightcurve(hdul):
     pos = [pos_ra, pos_dec]
     source, pos = checkTargeting(source, pos)
 
-    time_type = SurveyInfo().lightcurveSurveyInfo[survey]["time_unit"]
-
-    empty_band = {"ra": None, "dec": None, time_type: None, "mag": None, "mag_err": None}
+    empty_band = {"ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None}
 
     data = []
     for hdu in hdul[1:]:

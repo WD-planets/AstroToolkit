@@ -6,12 +6,7 @@ def binning(data, bins=None, bin_size=None):
 
     mag = data["mag"]
     mag_err = data["mag_err"]
-    if "mjd" in data:
-        time = data["mjd"]
-        time_unit = "mjd"
-    else:
-        time = data["hjd"]
-        time_unit = "hjd"
+    time = data["mjd"]
 
     sync_time = min(time)
 
@@ -89,13 +84,10 @@ def binning(data, bins=None, bin_size=None):
         # error on the weighted mean
         final_errors.append(1 / np.sqrt(norm))
 
-    reduced_time_unit = time_unit[:-4]
-
     # set up final data dict
     data["mag"] = final_mags
-    data[time_unit] = final_times
+    data["mjd"] = final_times
     data["mag_err"] = final_errors
-    data[reduced_time_unit] = [t - sync_time for t in data[time_unit]]
     data["ra"] = final_ra
     data["dec"] = final_dec
 
