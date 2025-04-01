@@ -52,8 +52,8 @@ class LightcurveStruct(object):
             "ra": [right ascension (degrees)]
             "dec": [declination in (degrees)]
             "mjd": [mjd]
-            "mag": [apparent magnitude]
-            "mag_err": [error on the apparent magnitude]
+            "mag"/"flux": [apparent magnitude]/[flux]
+            "mag_err"/"flux_err": [error on the apparent magnitude]/[error on the flux]
 
     where <band> is the wavelength band of the data entry, and the bands for each supported light curve survey are:
 

@@ -98,16 +98,14 @@ def lomb_scargle(
 
             if not self.phase_freq:
                 best_frequency = self.frequency[np.nanargmax(self.power)]
-                freq_multiplier = 1.0
             else:
                 best_frequency = self.phase_freq / u.day
-                freq_multiplier = (self.frequency[np.nanargmax(self.power)].value / best_frequency) / u.day
 
             t_fit = np.linspace(0, 1 / best_frequency.value, 1000) * u.day
             ls = LombScargle(self.time, self.brightness, self.brightness_err)
 
             # this uses the frequency determined by L-S
-            y_fit = ls.model(t=t_fit, frequency=freq_multiplier * best_frequency)
+            y_fit = ls.model(t=t_fit, frequency=best_frequency)
 
             phase = (self.time % (1 / best_frequency)) * best_frequency
 

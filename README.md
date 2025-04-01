@@ -45,7 +45,7 @@ This project has received funding from the European Research Council (ERC) under
 
 <br>
 
-I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development, and particularly for his help in integrating the PyAOV time series analysis routines.
+I would like to give thanks to Dr. Keith Inight for his guidance at various stages of the package's development.
 
 I would also like to give thanks to Prof. Boris Gänsicke for his assistance and guidance, and for supporting the package's development.
 
