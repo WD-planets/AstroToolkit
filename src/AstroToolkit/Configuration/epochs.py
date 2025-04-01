@@ -18,7 +18,7 @@ class EpochStruct(object):
         surveyInfo = SurveyInfo()
 
         default_data_surveys = surveyInfo.defaultDataSurveys
-        del default_data_surveys["gaia_lc"]
+        default_data_surveys.remove("gaia_lc")
         lightcurve_surveys = surveyInfo.defaultLightcurveSurveys
         spectrum_surveys = surveyInfo.defaultSpectrumSurveys
 

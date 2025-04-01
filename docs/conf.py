@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "AstroToolkit"
 copyright = "2024, Ethan Moorfield"
 author = "Ethan Moorfield"
-release = "1.7.0"
+release = "1.7.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
