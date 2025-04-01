@@ -50,14 +50,14 @@ def query(
     - :ref:`sed <sed-query>`: returns spectral energy distribution data from all supported surveys
     - :ref:`spectrum <spectrum-query>`: returns spectrum data from a supported survey
 
+    |
+
     The type of query to be performed is chosen via the 'kind' parameter:
 
     :param kind: Type of query to perform, as listed above
     :type kind: str
 
-    |
-
-    :func:`query` requires additional parameters depending on query type, and returns different data structures in each case.
+    :func:`query()` requires additional parameters depending on the kind of query being performed, and returns different data structures in each case.
 
     |
 
@@ -75,6 +75,8 @@ def query(
     :type radius: float, optional
     :param check_exists: Path to check for existing data. If a file is found, data is generated without having to run a query. If a file is not found, query will go ahead and the resulting data will be saved to the requested Path for future executions. Defaults to None (i.e. this functionality is disabled)
     :type check_exists: bool, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
 
@@ -90,6 +92,8 @@ def query(
     :type pos: list<float>
     :param radius: Search radius in arcseconds, default given by :ref:`query_bulkdata_radius <cfg_query_bulkdata_radius>` config key
     :type radius: float, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
     :rtype: class
@@ -111,6 +115,8 @@ def query(
     :type pos: list<float>
     :param radius: Search radius in arcseconds, default given by :ref:`query_reddening_radius <cfg_query_reddening_radius>` config key
     :type radius: float, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
 
     :return: :class:`DataStruct <AstroToolkit.Data.dataquery.DataStruct>`
@@ -131,6 +137,8 @@ def query(
     :type usename: str, optional
     :param password: ATLAS password, only required in ATLAS queries. Default given by :ref:`query_lightcurve_atlas_password <cfg_query_lightcurve_atlas_password>` config key
     :type password: str, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`LightcurveStruct <AstroToolkit.Data.lightcurvequery.LightcurveStruct>`
 
@@ -149,6 +157,8 @@ def query(
     :type band: str, optional
     :param overlays: Required detection overlays. Accepts any :ref:`data survey <Data Surveys>` or :ref:`light curve survey <Light Curve Surveys>`
     :type overlays: list<str>, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     **Note:** use 'gaia_lc' for Gaia light curve overlays, and 'gaia' for gaia detection overlays
 
@@ -170,6 +180,8 @@ def query(
 
     :param sources: List of target Gaia DR3 sources
     :type sources: list<int>
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`HrdStruct <AstroToolkit.Data.hrdquery.HrdStruct>`
 
@@ -185,6 +197,8 @@ def query(
     :type pos: list<float>
     :param radius: Search radius in arcseconds, default given by :ref:`query_sed_radius <cfg_query_sed_radius>` config key
     :type radius: float, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`SedStruct <AstroToolkit.Data.sedquery.SedStruct>`
 
@@ -202,6 +216,8 @@ def query(
     :type survey: str
     :param radius: Search radius in arcseconds, default given by :ref:`query_spectrum_radius <cfg_query_spectrum_radius>` config key
     :type radius: float, optional
+    :param retry: Re-attempt query if no data is returned. This can help to ensure that no data is missed due to e.g. brief server interruptions when performing queries for a large number of targets. Defaults to 1 (i.e. only one attempt is made).
+    :type retry: int, optional
 
     :return: :class:`SpectrumStruct <AstroToolkit.Data.spectrumquery.SpectrumStruct>`
 

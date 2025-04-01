@@ -49,7 +49,7 @@ class Window(QMainWindow):
         self.pos = None
         self.username = None
         self.password = None
-        self.data_extension = ".csv"
+        self.data_extension = ".fits"
         self.data_ready = False
 
         self.setWindowTitle("ATK GUI")
@@ -226,11 +226,6 @@ class Window(QMainWindow):
             self.hrd_sources.show()
         else:
             self.setPosition(self.query_button, [3, 1])
-
-        if self.query_kind != "image":
-            self.data_extension = ".csv"
-        else:
-            self.data_extension = ".fits"
 
         self.query_button.setStyleSheet("background-color : white")
 

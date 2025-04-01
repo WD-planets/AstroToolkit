@@ -35,7 +35,5 @@ def generate_plotname(struct, subkind=None):
     if subkind:
         dataname = dataname.replace(f"ATK{struct.kind}", subkind)
 
-    if dataname.endswith(".csv"):
-        struct.plotname = dataname[:-4] + ".html"
-    elif dataname.endswith(".fits"):
+    if dataname.endswith(".fits"):
         struct.plotname = dataname[:-5] + ".html"
