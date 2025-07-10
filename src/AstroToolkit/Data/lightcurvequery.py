@@ -550,14 +550,14 @@ class GaiaQuery(GeneralQuery):
         data_arr = []
         for band in bands:
             if band == "g":
-                # time, flux, flux_err, mag
-                cols = ["_tab8_5", "_tab8_6", "_tab8_7", "_tab8_9", "RA_ICRS", "DE_ICRS"]
+                # time, flux, flux_err, mag, ra, dec
+                cols = ["t8_c5", "FG", "e_FG", "Gmag", "RA_ICRS", "DE_ICRS"]
             elif band == "bp":
-                # time, flux, flux_err, mag
-                cols = ["_tab8_11", "_tab8_12", "_tab8_13", "_tab8_15", "RA_ICRS", "DE_ICRS"]
+                # time, flux, flux_err, mag, ra, dec
+                cols = ["t8_c11", "FBP", "e_FBP", "BPmag", "RA_ICRS", "DE_ICRS"]
             elif band == "rp":
-                # time, flux, flux_err, mag
-                cols = ["_tab8_16", "_tab8_17", "_tab8_18", "_tab8_20", "RA_ICRS", "DE_ICRS"]
+                # time, flux, flux_err, mag, ra, dec
+                cols = ["t8_c16", "FRP", "e_FRP", "RPmag", "RA_ICRS", "DE_ICRS"]
 
             time, flux, flux_err, mag, ra, dec = (
                 data[cols[0]],

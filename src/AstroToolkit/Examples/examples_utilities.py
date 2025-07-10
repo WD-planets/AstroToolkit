@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-
 from bokeh.models import PanTool
 
 base_width = 700
@@ -20,7 +17,3 @@ def format(plot, width=None, height=None, change_size=True):
     for tool in plot.select(PanTool):
         plot.remove_tools(tool)
     return plot
-
-
-def go_to_static():
-    os.chdir(os.path.join(Path(__file__).parents[3], "docs", "_static"))

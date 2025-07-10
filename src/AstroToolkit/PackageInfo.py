@@ -67,7 +67,7 @@ class SurveyInfo(object):
         data["galex"]["mags"] = ["FUVmag", "NUVmag"]
         data["galex"]["errors"] = [f"e_{x}" for x in data["galex"]["mags"]]
         data["galex"]["filter_wavelengths"] = [2303.37, 1548.85]
-        data["galex"]["catalogue"] = "II/355/galex_ais"
+        data["galex"]["catalogue"] = "II/335/galex_ais"
 
         data["sdss"]["mags"] = ["uPmag", "gPmag", "rPmag", "iPmag", "zPmag"]
         data["sdss"]["errors"] = [f"e_{x}" for x in data["sdss"]["mags"]]

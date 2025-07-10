@@ -7,8 +7,6 @@ warnings.simplefilter("ignore", category=Warning)
 
 
 def identifier_query(identifier):
-    url = f"https://simbad.cds.unistra.fr/simbad/sim-id?output.format=ASCII&Ident={identifier}"
-
     table = Simbad.query_object(identifier)
     if not table:
         return None

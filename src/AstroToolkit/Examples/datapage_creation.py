@@ -4,8 +4,6 @@ from pathlib import Path
 from AstroToolkit.Datapages import buttons, datapage, datatable
 from AstroToolkit.Tools import query
 
-from .examples_utilities import go_to_static
-
 file_dir = Path(__file__).parent.absolute()
 os.chdir(Path(__file__).parent.absolute())
 
@@ -55,5 +53,4 @@ datapage = datapage(
     layout=[["image", "sed", "buttons"], ["hrd", "spectrum"], ["lightcurves", "powspec"], ["metadata_table"]],
 )
 
-go_to_static()
 datapage.showplot(f"{source}_datapage")

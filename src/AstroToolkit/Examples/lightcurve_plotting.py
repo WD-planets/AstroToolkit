@@ -3,18 +3,11 @@ from pathlib import Path
 
 from AstroToolkit.Tools import query
 
-from .examples_utilities import format, go_to_static
+from .examples_utilities import format
 
 os.chdir(Path(__file__).parent.absolute())
 
-lightcurve_data = query(
-    kind="lightcurve",
-    source=6050296829033196032,
-    survey="ztf",
-    check_exists="lightcurve.fits",
-)
-
-go_to_static()
+lightcurve_data = query(kind="lightcurve", source=6050296829033196032, survey="ztf", check_exists="lightcurve.fits")
 
 lightcurve_data.showdata()
 lightcurve_data.plot()

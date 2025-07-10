@@ -5,7 +5,7 @@ import pandas as pd
 
 from AstroToolkit.Models import CustomLightcurveStruct
 
-from .examples_utilities import format, go_to_static
+from .examples_utilities import format
 
 os.chdir(Path(__file__).parent.absolute())
 
@@ -17,8 +17,6 @@ lightcurve.survey = "TNT"
 lightcurve.data = [
     {"band": "g", "mjd": data["mjd"].tolist(), "flux": data["flux"].tolist(), "flux_err": data["error"].tolist()}
 ]
-
-go_to_static()
 
 lightcurve.plot(colours=["green"])
 lightcurve.plotname = "AR_Sco_TNT_Lightcurve.html"
