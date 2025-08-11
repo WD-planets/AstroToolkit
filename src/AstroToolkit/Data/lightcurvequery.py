@@ -317,7 +317,7 @@ class ZtfQuery(GeneralQuery):
                 current_band_data["hjd"].tolist(),
             )
 
-            data_arr.append({"band": filter_code[1:], "ra": ra, "dec": dec, "mjd": HJDtoMJD(hjd), "mag": mag, "mag_err": mag_err})
+            data_arr.append({"band": filter_code[1:], "ra": ra, "dec": dec, "mjd": HJDtoMJD(hjd, self.pos), "mag": mag, "mag_err": mag_err})
 
         return data_arr
 
@@ -648,12 +648,16 @@ class AsassnQuery(GeneralQuery):
 
         data_arr = []
         if len(v_mag) > 0:
-            data_arr.append({"band": "v", "ra": v_ra_arr, "dec": v_dec_arr, "mjd": HJDtoMJD(v_hjd), "mag": v_mag, "mag_err": v_mag_err})
+            data_arr.append(
+                {"band": "v", "ra": v_ra_arr, "dec": v_dec_arr, "mjd": HJDtoMJD(v_hjd, self.pos), "mag": v_mag, "mag_err": v_mag_err}
+            )
         else:
             data_arr.append({"band": "v", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 
         if len(g_mag) > 0:
-            data_arr.append({"band": "g", "ra": g_ra_arr, "dec": g_dec_arr, "mjd": HJDtoMJD(g_hjd), "mag": g_mag, "mag_err": g_mag_err})
+            data_arr.append(
+                {"band": "g", "ra": g_ra_arr, "dec": g_dec_arr, "mjd": HJDtoMJD(g_hjd, self.pos), "mag": g_mag, "mag_err": g_mag_err}
+            )
         else:
             data_arr.append({"band": "g", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 

@@ -9,26 +9,27 @@ def openFileDialogue():
     return fname
 
 
-def HJDtoMJD(hjd):
+def HJDtoMJD(hjd, pos):
     import astropy.units as u
-    from astropy.coordinates import get_sun
+    from astropy.coordinates import SkyCoord, get_sun
     from astropy.time import Time
 
-    def get_mjd(hjd):
-        hjd_time = Time(hjd, format="jd")
-        sun_position = get_sun(hjd_time)
-        heliocentric_correction = sun_position.distance.to(u.au).value / 1731.456
-        jd = hjd_time - heliocentric_correction * u.day
+    def get_mjd(hjd, pos):
+        t_hjd = Time(hjd, format="jd", scale="utc")
+        sun_position = get_sun(t_hjd)
+        target = SkyCoord(ra=pos[0] * u.deg, dec=pos[1] * u.deg, frame="icrs")
+        heliocentric_correction = sun_position.cartesian.dot(target.cartesian).to(u.au).value / 173.144632674240
+        jd = t_hjd.jd - heliocentric_correction
 
-        return (jd - 2400000.5).value
+        return Time(jd, format="jd", scale="utc").mjd
 
     if isinstance(hjd, list):
         calculated_mjds = []
         for entry in hjd:
-            calculated_mjds.append(get_mjd(entry))
+            calculated_mjds.append(get_mjd(entry, pos))
         return calculated_mjds
-    elif isinstance(hjd, float):
-        return get_mjd(hjd)
+    elif isinstance(hjd, (float, int)):
+        return get_mjd(hjd, pos)
 
 
 def getBrightnessType(data):
