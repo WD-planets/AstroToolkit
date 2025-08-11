@@ -60,7 +60,7 @@ def plot_image(struct, simbad_search_radius=None):
     )
 
     focus_ra, focus_dec = struct.data["image_focus"]
-    plot.scatter(x=focus_ra, y=focus_dec, marker="cross", color="black", size=10, line_width=2)
+    plot.scatter(x=focus_ra, y=focus_dec, marker="cross", color="lime", size=25, line_width=4)
 
     if struct.data["overlay"]:
         pass
@@ -82,9 +82,7 @@ def plot_image(struct, simbad_search_radius=None):
             cmap = LinearColorMapper(palette="Turbo256", low=0, high=255)
             mapped_index = (data_point["colour_index"] - min(colour_indices)) * cmap_increment + CMAP_MIN_VALUE
             colour = {"field": "colour_index", "transform": cmap}
-            source = ColumnDataSource(
-                {"ra": [data_point["ra"]], "dec": [data_point["dec"]], "colour_index": [mapped_index]}
-            )
+            source = ColumnDataSource({"ra": [data_point["ra"]], "dec": [data_point["dec"]], "colour_index": [mapped_index]})
             if data_point["overlay_type"] == "detection_mag":
                 legend_label = f"{data_point['survey']} {data_point['mag_name']}"
                 if data_point["marker_type"] == "circle":
@@ -100,26 +98,10 @@ def plot_image(struct, simbad_search_radius=None):
                     )
             elif data_point["overlay_type"] == "detection":
                 legend_label = f"{data_point['survey']}"
-                plot.scatter(
-                    source=source,
-                    x="ra",
-                    y="dec",
-                    marker="cross",
-                    color=colour,
-                    legend_label=legend_label,
-                    size=20,
-                    line_width=3,
-                )
+                plot.scatter(source=source, x="ra", y="dec", marker="cross", color=colour, legend_label=legend_label, size=20, line_width=3)
             elif data_point["overlay_type"] == "tracer":
                 legend_label = f"{data_point['survey']} tracer"
-                plot.scatter(
-                    x=data_point["ra"],
-                    y=data_point["dec"],
-                    marker="dot",
-                    color=colour,
-                    size=30,
-                    legend_label=legend_label,
-                )
+                plot.scatter(x=data_point["ra"], y=data_point["dec"], marker="dot", color=colour, size=30, legend_label=legend_label)
 
             if data_point["overlay_type"] in ["detection_mag", "detection"]:
                 from ..Tools import correctpm

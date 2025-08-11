@@ -6,26 +6,30 @@ from ..PackageInfo import SurveyInfo
 surveyInfo = SurveyInfo()
 
 
+def get_defaults():
+    Catalogues = configparser.ConfigParser()
+
+    default_catalogues = surveyInfo.getCatalogueDict
+    del default_catalogues["gaia_lc"]
+    Catalogues.add_section("default_catalogues")
+    Catalogues.add_section("additional_catalogues")
+    for key, val in default_catalogues.items():
+        Catalogues.set("default_catalogues", key, val)
+
+    return Catalogues
+
+
 class CatalogueStruct(object):
     def __init__(self):
         from importlib_resources import files
 
-        self.catalogue_file = files("AstroToolkit.Configuration").joinpath(
-            "ATKAliases.ini"
-        )
+        self.catalogue_file = files("AstroToolkit.Configuration").joinpath("ATKAliases.ini")
         if not os.path.isfile(self.catalogue_file):
             print("No ATKAliases.ini found. Generating one with default values...")
             self.default_setup()
 
     def default_setup(self):
-        Catalogues = configparser.ConfigParser()
-
-        default_catalogues = surveyInfo.getCatalogueDict
-        del default_catalogues["gaia_lc"]
-        Catalogues.add_section("default_catalogues")
-        Catalogues.add_section("additional_catalogues")
-        for key, val in default_catalogues.items():
-            Catalogues.set("default_catalogues", key, val)
+        Catalogues = get_defaults()
 
         with open(self.catalogue_file, "w") as file:
             Catalogues.write(file)
@@ -47,6 +51,14 @@ class CatalogueStruct(object):
                 self.structured_out[section_str].append({key: val})
                 setattr(self, key, val)
 
+        defaults = get_defaults()
+        for section in defaults._sections:
+            for survey in defaults[section]:
+                if not hasattr(self, survey):
+                    raise Exception(
+                        "Incomplete ATKAliases.ini detected. This may be due to a package update. A new one may be generated using 'ATKalias reset' from the command line."
+                    )
+
     def get_catalogue_list(self):
         self.get_catalogues()
         surveys = {}
@@ -56,9 +68,7 @@ class CatalogueStruct(object):
         return surveys
 
     def get_alias_list(self):
-        return [
-            x for x in self.get_catalogue_list() if x not in surveyInfo.dataSurveyInfo
-        ]
+        return [x for x in self.get_catalogue_list() if x not in surveyInfo.dataSurveyInfo]
 
     def write_catalogues(self):
         Catalogues = configparser.ConfigParser()
@@ -101,9 +111,7 @@ class CatalogueStruct(object):
         if key in default_catalogues:
             raise ValueError(f"Cannot override default alias '{key}'.")
         if hasattr(self, key):
-            print(
-                f"Note: {key} alias was already defined, and has hence been overwritten."
-            )
+            print(f"Note: {key} alias was already defined, and has hence been overwritten.")
         setattr(self, key, value)
         self.write_catalogues()
 

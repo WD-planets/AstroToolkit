@@ -16,8 +16,8 @@ def jobs_ui(data):
             accepted_jobs = ["showdata", "savedata", "exit"]
             accepted_jobs_str = "showdata, savedata <filename: str, optional>, exit"
         else:
-            accepted_jobs = ["showdata", "savedata", "showplot", "saveplot", "exit"]
-            accepted_jobs_str = "showdata, savedata <filename: str, optional> showplot <filename: str, optional>, saveplot <filename: str, optional>, exit"
+            accepted_jobs = ["showdata", "savedata", "showplot", "saveplot", "exportplot", "exit"]
+            accepted_jobs_str = "showdata, savedata <filename: str, optional> showplot <filename: str, optional>, saveplot <filename: str, optional>, exportplot <filename: str, optional>, exit"
 
         print(f"Available Jobs: {accepted_jobs_str}{newline}")
 
@@ -52,7 +52,7 @@ def jobs_ui(data):
                         data.plot(kind=plot_kind).showplot(fname=fname)
                         break
                     else:
-                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
+                        print("Invalid plot type. Accepted plot types: lightcurve, phasefold, powspec")
             else:
                 data.plot().showplot(fname=fname)
         elif job == "saveplot":
@@ -63,9 +63,19 @@ def jobs_ui(data):
                         data.plot(kind=plot_kind).saveplot(fname=fname)
                         break
                     else:
-                        print("Invalid plot type. Accepted plot types: lightcurve,phasefold,powspec")
+                        print("Invalid plot type. Accepted plot types: lightcurve, phasefold, powspec")
             else:
                 data.plot().saveplot(fname=fname)
+        elif job == "exportplot":
+            if data.kind == "lightcurve":
+                while True:
+                    plot_kind = str(input("Plot Type? "))
+                    if plot_kind in ["lightcurve", "phasefold", "powspec"]:
+                        data.plot(kind=plot_kind).exportplot(fname=fname)
+                        break
+                    else:
+                        print("Invalid plot type. Accepted plot types: lightcurve, phasefold, powspec")
+
         elif job == "exit":
             break
 

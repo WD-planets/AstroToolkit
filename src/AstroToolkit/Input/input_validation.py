@@ -126,9 +126,7 @@ def check_type(name, value, target_type):
                     try:
                         element[key] = [element[key]]
                     except:
-                        raise ValueError(
-                            f"Invalid value for key [{key}] in datatable selection. Expected list, got {type(element[key])}."
-                        )
+                        raise ValueError(f"Invalid value for key [{key}] in datatable selection. Expected list, got {type(element[key])}.")
 
             if element["kind"] in ["atk_defaults"]:
                 for survey in element["surveys"]:
@@ -147,12 +145,7 @@ def check_type(name, value, target_type):
 
     if name == "panels":
         for plot_info in value:
-            if (
-                "name" not in plot_info
-                or "width" not in plot_info
-                or "height" not in plot_info
-                or "figure" not in plot_info
-            ):
+            if "name" not in plot_info or "width" not in plot_info or "height" not in plot_info or "figure" not in plot_info:
                 raise ValueError("datapage panels missing required keys.")
         if not isinstance(plot_info["name"], str):
             try:
@@ -288,9 +281,7 @@ def check_inputs(inputs, label, check_targeting=False):
                 if colours:
                     for colour in colours:
                         if colour not in supported_colours:
-                            raise ValueError(
-                                f"Invalid light curve colour {colour}. Supported colours are: {supported_colours}"
-                            )
+                            raise ValueError(f"Invalid light curve colour {colour}. Supported colours are: {supported_colours}")
 
                 timeformat = corrected_inputs["timeformat"]
                 if timeformat and timeformat not in ["reduced", "original"]:
@@ -323,17 +314,23 @@ def check_inputs(inputs, label, check_targeting=False):
         input_time, target_time = (corrected_inputs["input_time"], corrected_inputs["target_time"])
         input_survey, target_survey = (corrected_inputs["input_survey"], corrected_inputs["target_survey"])
 
-        if pos and pmra and pmdec and input_time and target_time:
-            pass
-        elif pos and pmra and pmdec and input_survey and target_survey:
-            pass
-        elif source and input_time and target_time:
-            pass
-        elif source and target_time:
-            pass
-        elif source and target_survey:
-            pass
-        else:
+        input_combinations = [
+            [pos, pmra, pmdec, input_time, target_time],
+            [pos, pmra, pmdec, input_survey, target_survey],
+            [source, input_time, target_time],
+            [source, target_time],
+            [source, target_survey],
+        ]
+
+        found_valid_combination = False
+        for input_combination in input_combinations:
+            for index, parameter in enumerate(input_combination):
+                if parameter is None:
+                    break
+                if index == len(input_combination) - 1:
+                    found_valid_combination = True
+
+        if not found_valid_combination:
             raise ValueError("Invalid correctpm input combination.")
 
     return list(corrected_inputs.values())

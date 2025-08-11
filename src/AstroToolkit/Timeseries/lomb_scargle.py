@@ -23,7 +23,18 @@ def lomb_scargle(
     samples=150000,
 ):
     class timeseries_data(object):
-        def __init__(self, time, brightness, brightness_err, power, frequency, freq, foverlay, repeat, shift):
+        def __init__(
+            self,
+            time,
+            brightness,
+            brightness_err,
+            power,
+            frequency,
+            freq,
+            foverlay,
+            repeat,
+            shift,
+        ):
             self.time = time
             self.brightness = brightness
             self.brightness_err = brightness_err
@@ -55,7 +66,9 @@ def lomb_scargle(
             )
 
             plot.y_range = Range1d(0, np.nanmax(self.power.value) * 1.1)
-            plot.x_range = Range1d(np.nanmin(self.frequency.value), np.nanmax(self.frequency.value))
+            plot.x_range = Range1d(
+                np.nanmin(self.frequency.value), np.nanmax(self.frequency.value)
+            )
 
             plot.legend.click_policy = "hide"
             toggle_legend_js = CustomJS(
@@ -72,7 +85,7 @@ def lomb_scargle(
 
             plot.js_on_event(events.DoubleTap, toggle_legend_js)
 
-            return plot, max_freq
+            return plot, max_freq, self.frequency, self.power
 
         @property
         def phasefold_plot(self):
@@ -90,7 +103,9 @@ def lomb_scargle(
                     if len(brightness[mask]) > 0:
                         bin_phase += [bphase + 0.5 / bins]
                         weights = 1 / (brightness_err[mask] ** 2)
-                        baverage, norm = np.average(brightness[mask], weights=weights, returned=True)
+                        baverage, norm = np.average(
+                            brightness[mask], weights=weights, returned=True
+                        )
                         bin_y += [baverage]
                         bin_y_err += [1 / np.sqrt(norm)]
 
@@ -113,8 +128,12 @@ def lomb_scargle(
 
             cut_indices = [i for i, val in enumerate(t_fit) if val > 1]
 
-            t_fit_formatted = [val for i, val in enumerate(t_fit) if i not in cut_indices]
-            y_fit_formatted = [val for i, val in enumerate(y_fit) if i not in cut_indices]
+            t_fit_formatted = [
+                val for i, val in enumerate(t_fit) if i not in cut_indices
+            ]
+            y_fit_formatted = [
+                val for i, val in enumerate(y_fit) if i not in cut_indices
+            ]
 
             median_brightness = np.median(self.brightness).value
 
@@ -128,7 +147,9 @@ def lomb_scargle(
             brightness_err = self.brightness_err
 
             if self.phase_bins:
-                phase, brightness, brightness_err = do_binning(self.phase_bins, phase, brightness, brightness_err)
+                phase, brightness, brightness_err = do_binning(
+                    self.phase_bins, phase, brightness, brightness_err
+                )
 
             if self.repeat > 1:
                 base_brightness = brightness.copy()
@@ -151,7 +172,9 @@ def lomb_scargle(
                         (x + self.shift)
                         if (x + self.shift <= self.repeat and x + self.shift >= 0)
                         else (
-                            (x + self.shift + self.repeat) if (x + self.shift < 0) else (x + self.shift - self.repeat)
+                            (x + self.shift + self.repeat)
+                            if (x + self.shift < 0)
+                            else (x + self.shift - self.repeat)
                         )
                     )
                     for x in phase
@@ -161,16 +184,22 @@ def lomb_scargle(
                         (x + self.shift)
                         if (x + self.shift <= self.repeat and x + self.shift >= 0)
                         else (
-                            (x + self.shift + self.repeat) if (x + self.shift < 0) else (x + self.shift - self.repeat)
+                            (x + self.shift + self.repeat)
+                            if (x + self.shift < 0)
+                            else (x + self.shift - self.repeat)
                         )
                     )
                     for x in t_fit_formatted
                 ]
 
-                t_fit_formatted, y_fit_formatted = zip(*sorted(zip(t_fit_formatted, y_fit_formatted)))
+                t_fit_formatted, y_fit_formatted = zip(
+                    *sorted(zip(t_fit_formatted, y_fit_formatted))
+                )
 
             err_xs = [[x, x] for x in phase]
-            err_ys = [[y - y_err, y + y_err] for y, y_err in zip(brightness, brightness_err)]
+            err_ys = [
+                [y - y_err, y + y_err] for y, y_err in zip(brightness, brightness_err)
+            ]
 
             plot = figure(
                 width=400,
@@ -191,7 +220,9 @@ def lomb_scargle(
                     alpha=0.5,
                 )
 
-            plot.multi_line(xs=err_xs, ys=err_ys, line_width=0.5, level="glyph", line_cap="square")
+            plot.multi_line(
+                xs=err_xs, ys=err_ys, line_width=0.5, level="glyph", line_cap="square"
+            )
 
             plot.y_range.flipped = True
 
@@ -221,14 +252,25 @@ def lomb_scargle(
     try:
         time, brightness, brightness_err = format_data(data)
     except:
-        print("Note: No data passed to timeseries tool, suggests no light curve data was found.")
+        print(
+            "Note: No data passed to timeseries tool, suggests no light curve data was found."
+        )
         return None
 
-    time, brightness, brightness_err = (time * u.day, brightness * u.mag, brightness_err * u.mag)
+    time, brightness, brightness_err = (
+        time * u.day,
+        brightness * u.mag,
+        brightness_err * u.mag,
+    )
 
     freqs = np.linspace(start_freq, stop_freq, samples) / u.day
     power = LombScargle(time, brightness, brightness_err, fit_mean=False).power(freqs)
 
-    data_class = timeseries_data(time, brightness, brightness_err, power, freqs, freq, foverlay, repeat, shift)
+    if np.isnan(power).all():
+        return None
+
+    data_class = timeseries_data(
+        time, brightness, brightness_err, power, freqs, freq, foverlay, repeat, shift
+    )
 
     return data_class

@@ -22,40 +22,23 @@ def get_plot(struct, **kwargs):
                 plot = plot_lightcurve(struct, kwargs["colours"], kwargs["bands"], kwargs["timeformat"])
                 dimensions = Dimensions(height=1, width=2)
             elif kwargs["kind"] == "powspec":
-                # import os
-                # from pathlib import Path
-
                 from ..Timeseries.lomb_scargle import lomb_scargle
 
-                # from ..Timeseries.pyaov import pyaov
-                # from ..Timeseries.pyaov.pyaov_interface import get_analysis
-
                 if kwargs["method"] == "ls":
-                    plot, fpeak = lomb_scargle(
+                    ls = lomb_scargle(
                         struct.data,
                         survey=struct.survey,
                         start_freq=kwargs["start_freq"],
                         stop_freq=kwargs["stop_freq"],
                         samples=kwargs["samples"],
-                    ).powspec_plot
-                    struct.fpeak = fpeak.value
+                    )
+                    if not ls:
+                        struct.powspec_data = None
+                        return struct
+                    plot, fpeak, freq, power = ls.powspec_plot
+                    struct.powspec_data = {"freq": freq, "power": power, "fpeak": fpeak.value}
                 else:
                     raise Exception("Invalid timeseries analysis method. Accepted methods: [ls].")
-
-                    """
-                    path = Path(pyaov.__file__).parent.absolute()
-                    if str(path) not in os.environ["PATH"]:
-                        os.environ["PATH"] += str(path)
-                    plot, fpeak = get_analysis(
-                        struct=struct,
-                        method=kwargs["method"],
-                        gui=False,
-                        start_freq=kwargs["start_freq"],
-                        stop_freq=kwargs["stop_freq"],
-                        samples=kwargs["samples"],
-                    )
-                    struct.fpeak = fpeak
-                    """
 
                 dimensions = Dimensions(height=1, width=1)
 
@@ -66,12 +49,7 @@ def get_plot(struct, **kwargs):
                 from ..Timeseries.lomb_scargle import lomb_scargle
 
                 plot = lomb_scargle(
-                    struct.data,
-                    kwargs["freq"],
-                    kwargs["bins"],
-                    foverlay=kwargs["foverlay"],
-                    repeat=kwargs["repeat"],
-                    shift=kwargs["shift"],
+                    struct.data, kwargs["freq"], kwargs["bins"], foverlay=kwargs["foverlay"], repeat=kwargs["repeat"], shift=kwargs["shift"]
                 ).phasefold_plot
                 dimensions = Dimensions(height=1, width=1)
 

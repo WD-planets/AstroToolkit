@@ -68,7 +68,17 @@ class DataStruct(object):
 
     """
 
-    def __init__(self, survey, catalogue, source, pos, data, identifier=None, sub_kind="data", trace=None):
+    def __init__(
+        self,
+        survey,
+        catalogue,
+        source,
+        pos,
+        data,
+        identifier=None,
+        sub_kind="data",
+        trace=None,
+    ):
         self.kind = "data"
         self.subkind = sub_kind
         self.survey = survey
@@ -106,7 +116,11 @@ class VizierQuery(object):
         self.data = None
 
         self.f_return = DataStruct(
-            survey=self.survey, catalogue=self.catalogue, source=self.source, pos=self.pos, data=None
+            survey=self.survey,
+            catalogue=self.catalogue,
+            source=self.source,
+            pos=self.pos,
+            data=None,
         )
 
     # performs queries by coordinates
@@ -115,7 +129,9 @@ class VizierQuery(object):
         v = Vizier(columns=["**"], row_limit=row_limit)
         data.append(
             v.query_region(
-                coord.SkyCoord(ra=self.pos[0], dec=self.pos[1], unit=(u.deg, u.deg), frame="icrs"),
+                coord.SkyCoord(
+                    ra=self.pos[0], dec=self.pos[1], unit=(u.deg, u.deg), frame="icrs"
+                ),
                 width=self.radius * u.arcsec,
                 catalog=self.catalogue,
             )
@@ -128,8 +144,12 @@ class VizierQuery(object):
 
     # performs queries by Gaia source
     def source_query(self):
-        v = Vizier(columns=["**"], column_filters={"Source": "==" + str(self.source)}, row_limit=row_limit)
-        data = v.query_object(f"GAIA DR3 {self.source}", catalog=self.catalogue)
+        v = Vizier(
+            columns=["**"],
+            column_filters={"Source": "==" + str(self.source)},
+            row_limit=row_limit,
+        )
+        data = v.query_constraints(catalog=self.catalogue, Source=str(self.source))
         try:
             data = data[0].to_pandas().reset_index(drop=True)
             return self.check_data(data)
@@ -142,14 +162,28 @@ class VizierQuery(object):
             if not data.empty:
                 data = pd.DataFrame.to_dict(data, orient="list")
                 return DataStruct(
-                    survey=self.survey, catalogue=self.catalogue, source=self.source, pos=self.pos, data=data
+                    survey=self.survey,
+                    catalogue=self.catalogue,
+                    source=self.source,
+                    pos=self.pos,
+                    data=data,
                 )
             else:
                 return DataStruct(
-                    survey=self.survey, catalogue=self.catalogue, source=self.source, pos=self.pos, data=None
+                    survey=self.survey,
+                    catalogue=self.catalogue,
+                    source=self.source,
+                    pos=self.pos,
+                    data=None,
                 )
         except:
-            return DataStruct(survey=self.survey, catalogue=self.catalogue, source=self.source, pos=self.pos, data=None)
+            return DataStruct(
+                survey=self.survey,
+                catalogue=self.catalogue,
+                source=self.source,
+                pos=self.pos,
+                data=None,
+            )
 
 
 # maps coordinates to vizier surveys, performing proper motion correction for source queries.
@@ -172,14 +206,21 @@ def query(survey, radius, pos=None, source=None):
 
     # perform coordinate Vizier query
     if pos:
-        data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, pos=pos).pos_query()
+        data = VizierQuery(
+            survey=survey, catalogue=catalogue, radius=radius, pos=pos
+        ).pos_query()
         trace = None
         final_pos = pos
 
     # perform source Vizier query
     elif source:
         gaia_data = (
-            VizierQuery(survey=survey, catalogue=supported_catalogues["gaia"], radius=radius, source=source)
+            VizierQuery(
+                survey=survey,
+                catalogue=supported_catalogues["gaia"],
+                radius=radius,
+                source=source,
+            )
             .source_query()
             .data
         )
@@ -193,35 +234,70 @@ def query(survey, radius, pos=None, source=None):
         )
 
         if catalogue == "I/355/gaiadr3":
-            data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
+            data = VizierQuery(
+                survey=survey, catalogue=catalogue, radius=radius, source=source
+            ).source_query()
             trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> [2000,0] -> end"
             final_pos = correctpm(
-                input_time=epochs["gaia"], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
+                input_time=epochs["gaia"],
+                target_time=[2000, 0],
+                ra=ra,
+                dec=dec,
+                pmra=pmra,
+                pmdec=pmdec,
             )
         elif catalogue == "I/355/epphot":
-            data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, source=source).source_query()
+            data = VizierQuery(
+                survey=survey, catalogue=catalogue, radius=radius, source=source
+            ).source_query()
             trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> [2000,0] -> end"
             final_pos = correctpm(
-                input_time=epochs["gaia"], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
+                input_time=epochs["gaia"],
+                target_time=[2000, 0],
+                ra=ra,
+                dec=dec,
+                pmra=pmra,
+                pmdec=pmdec,
             )
         else:
             if survey in epochs and survey != "gaia":
-                pos, success = correctpm(epochs["gaia"], epochs[survey], ra, dec, pmra, pmdec, check_success=True)
+                pos, success = correctpm(
+                    epochs["gaia"],
+                    epochs[survey],
+                    ra,
+                    dec,
+                    pmra,
+                    pmdec,
+                    check_success=True,
+                )
                 if success:
                     trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> {survey}: {epochs[survey]} -> {survey} query performed -> [2000,0] -> end"
                     final_pos = correctpm(
-                        input_time=epochs[survey], target_time=[2000, 0], ra=ra, dec=dec, pmra=pmra, pmdec=pmdec
+                        input_time=epochs[survey],
+                        target_time=[2000, 0],
+                        ra=ra,
+                        dec=dec,
+                        pmra=pmra,
+                        pmdec=pmdec,
                     )
                 else:
                     trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> proper motion correction failed -> {survey} query performed -> end"
                     final_pos = pos
             else:
-                print(f"Note: {survey} has no epoch definition. Proper motion has therefore not been corrected.")
+                print(
+                    f"Note: {survey} has no epoch definition. Proper motion has therefore not been corrected."
+                )
                 trace = None
                 pos = [ra, dec]
                 final_pos = pos
 
-            data = VizierQuery(survey=survey, catalogue=catalogue, radius=radius, pos=pos, source=source).pos_query()
+            data = VizierQuery(
+                survey=survey,
+                catalogue=catalogue,
+                radius=radius,
+                pos=pos,
+                source=source,
+            ).pos_query()
     else:
         raise Exception("No source or coordinates provided.")
 

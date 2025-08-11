@@ -5,11 +5,11 @@ Most defaults in ATK can be changed via a config file. This module allows for th
 from .Configuration.baseconfig import ConfigStruct
 from .Input.input_validation import check_inputs
 
-config = ConfigStruct()
-config.read_config()
-
 
 def editConfig(key: str, value: str) -> None:
+    config = ConfigStruct()
+    config.read_config()
+
     """editConfig(key, value)
     Edits config values. See :ref:`Config Keys` for a list and description of available keys.
 
@@ -24,9 +24,7 @@ def editConfig(key: str, value: str) -> None:
 
     """
 
-    corrected_inputs = check_inputs(
-        {"key": [key, str], "value": [value, str]}, "editconfig"
-    )
+    corrected_inputs = check_inputs({"key": [key, str], "value": [value, str]}, "editconfig")
     key, value = corrected_inputs
 
     print("Written change to ATKConfig.ini. New Values:\n")
@@ -36,6 +34,9 @@ def editConfig(key: str, value: str) -> None:
 
 
 def openConfig() -> None:
+    config = ConfigStruct()
+    config.read_config()
+
     """openConfig()
     Opens the config in the default text editor. See :ref:`Config Keys` for a list and description of available keys.
 
@@ -62,6 +63,9 @@ def openConfig() -> None:
 
 
 def showConfig() -> None:
+    config = ConfigStruct()
+    config.read_config()
+
     """showConfig()
     Prints the current config file to stdout.
 
@@ -78,6 +82,8 @@ def showConfig() -> None:
 
 
 def resetConfig() -> None:
+    config = ConfigStruct()
+
     """resetConfig()
     Resets the config to default values. A list of available keys and their default values can be found in :ref:`Config Keys`.
 

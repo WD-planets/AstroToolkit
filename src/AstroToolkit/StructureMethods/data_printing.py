@@ -7,26 +7,22 @@ def print_data(struct, pprint, print_methods):
     headings = ["band", "survey"]
     newline = "\n"
     list_exceptions = ["pos", "sources", "identifiers", "positions"]
-    header_exceptions = {
-        "image_data": "<Image Data>",
-        "image_header": "<Image Header>",
-        "wcs": "<WCS Object>",
-        "overlay": "<Overlay Data>",
-    }
+    header_exceptions = {"image_data": "<Image Data>", "image_header": "<Image Header>", "wcs": "<WCS Object>", "overlay": "<Overlay Data>"}
     ignore_methods = ["__init__", "__str__"]
 
     np.set_printoptions(threshold=10, linewidth=1000)
-
-    var_len_list = []
-    var_len_group = []
 
     vars_list = [x for x in vars(struct) if x not in methods]
     if "data" in vars_list:
         vars_list.remove("data")
         vars_list.append("data")
+    if "powspec_data" in vars_list:
+        vars_list.remove("powspec_data")
+        vars_list.append("powspec_data")
 
+    var_len_list, var_len_group = [], []
     for var in vars_list:
-        if isinstance(getattr(struct, var), (list, dict)) and var not in list_exceptions:
+        if isinstance(getattr(struct, var), (list, dict)) and var not in list_exceptions and var_len_group:
             var_len_list.append(max(var_len_group))
             var_len_group = []
         else:
@@ -55,17 +51,11 @@ def print_data(struct, pprint, print_methods):
                     for key, item in dictionary.items():
                         if key not in header_exceptions:
                             if not pprint:
-                                print(
-                                    f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {item}"
-                                )
+                                print(f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {item}")
                             else:
-                                print(
-                                    f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {np.asarray(item)}"
-                                )
+                                print(f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {np.asarray(item)}")
                         else:
-                            print(
-                                f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {header_exceptions[key]}"
-                            )
+                            print(f"{' ' * indent_index * indent_width}{(key + ':').ljust(header_pad_length)} {header_exceptions[key]}")
                     if indent_index == 1:
                         print()
 
@@ -97,9 +87,7 @@ def print_data(struct, pprint, print_methods):
                                     if not pprint:
                                         print(f"{' ' * 2 * indent_width}{(key + ':').ljust(header_pad_length)} {item}")
                                     else:
-                                        print(
-                                            f"{' ' * 2 * indent_width}{(key + ':').ljust(header_pad_length)} {np.asarray(item)}"
-                                        )
+                                        print(f"{' ' * 2 * indent_width}{(key + ':').ljust(header_pad_length)} {np.asarray(item)}")
                         print()
                 else:
                     print(f".{(var + ':').ljust(pad_length)} {getattr(struct, var)}")
@@ -128,11 +116,7 @@ def print_data(struct, pprint, print_methods):
     if print_methods:
         import inspect
 
-        methods = [
-            method[0]
-            for method in inspect.getmembers(struct, predicate=inspect.ismethod)
-            if method[0] not in ignore_methods
-        ]
+        methods = [method[0] for method in inspect.getmembers(struct, predicate=inspect.ismethod) if method[0] not in ignore_methods]
         method_str = "Available Methods: "
         for method in methods:
             method_str += f".{method}(), "

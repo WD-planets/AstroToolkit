@@ -4,6 +4,31 @@ import os
 from ..PackageInfo import SurveyInfo
 
 
+def get_defaults():
+    Epochs = configparser.ConfigParser()
+    surveyInfo = SurveyInfo()
+
+    default_data_surveys = surveyInfo.defaultDataSurveys
+    default_data_surveys = [survey for survey in default_data_surveys if survey != "gaia_lc"]
+    lightcurve_surveys = surveyInfo.defaultLightcurveSurveys
+    spectrum_surveys = surveyInfo.defaultSpectrumSurveys
+
+    Epochs.add_section("default_data_surveys")
+    Epochs.add_section("additional_data_surveys")
+    Epochs.add_section("lightcurve_surveys")
+    Epochs.add_section("spectrum_surveys")
+
+    survey_epochs = surveyInfo.defaultSurveyTimes
+    for survey in default_data_surveys:
+        Epochs.set("default_data_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
+    for survey in lightcurve_surveys:
+        Epochs.set("lightcurve_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
+    for survey in spectrum_surveys:
+        Epochs.set("spectrum_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
+
+    return Epochs
+
+
 class EpochStruct(object):
     def __init__(self):
         from importlib_resources import files
@@ -14,26 +39,7 @@ class EpochStruct(object):
             self.default_setup()
 
     def default_setup(self):
-        Epochs = configparser.ConfigParser()
-        surveyInfo = SurveyInfo()
-
-        default_data_surveys = surveyInfo.defaultDataSurveys
-        del default_data_surveys["gaia_lc"]
-        lightcurve_surveys = surveyInfo.defaultLightcurveSurveys
-        spectrum_surveys = surveyInfo.defaultSpectrumSurveys
-
-        Epochs.add_section("default_data_surveys")
-        Epochs.add_section("additional_data_surveys")
-        Epochs.add_section("lightcurve_surveys")
-        Epochs.add_section("spectrum_surveys")
-
-        survey_epochs = surveyInfo.defaultSurveyTimes
-        for survey in default_data_surveys:
-            Epochs.set("default_data_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
-        for survey in lightcurve_surveys:
-            Epochs.set("lightcurve_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
-        for survey in spectrum_surveys:
-            Epochs.set("spectrum_surveys", survey, f"{survey_epochs[survey][0]},{survey_epochs[survey][1]}")
+        Epochs = get_defaults()
 
         with open(self.epoch_file, "w") as file:
             Epochs.write(file)
@@ -70,6 +76,14 @@ class EpochStruct(object):
                 self.structured_out[section_str].append({key: val})
                 epoch_list = val.split(",")
                 self.epochs[section_str][key] = epoch_list
+
+        defaults = get_defaults()
+        for section, surveys in defaults._sections.items():
+            for survey in surveys:
+                if survey not in self.epochs[section]:
+                    raise Exception(
+                        "Incomplete ATKEpochs.ini detected. This may be due to a package update. A new one may be generated using 'ATKepoch reset' from the command line."
+                    )
 
         return self.epochs
 

@@ -5,11 +5,11 @@ ATK supports the creation of aliases to any Vizier catalogue, which are set via 
 from .Configuration.catalogue_setup import CatalogueStruct
 from .Input.input_validation import check_inputs
 
-catalogues = CatalogueStruct()
-catalogues.get_catalogues()
-
 
 def addAlias(name: str, id: str) -> None:
+    catalogues = CatalogueStruct()
+    catalogues.get_catalogues()
+
     """addAlias(name,id)
     Adds a Vizier catalogue alias to ATK for use in data queries.
 
@@ -34,6 +34,9 @@ def addAlias(name: str, id: str) -> None:
 
 
 def delAlias(name: str) -> None:
+    catalogues = CatalogueStruct()
+    catalogues.get_catalogues()
+
     """delAlias(name)
     Deletes an existing catalogue alias.
 
@@ -54,6 +57,9 @@ def delAlias(name: str) -> None:
 
 
 def openAliases() -> None:
+    catalogues = CatalogueStruct()
+    catalogues.get_catalogues()
+
     """openAliases()
     Opens the catalogue alias list in the default text editor.
 
@@ -80,6 +86,8 @@ def openAliases() -> None:
 
 
 def resetAliases() -> None:
+    catalogues = CatalogueStruct()
+
     """resetAliases()
     Resets the catalogue alias list (i.e. only keeps default ATK data surveys).
 
@@ -95,6 +103,9 @@ def resetAliases() -> None:
 
 
 def showAliases() -> None:
+    catalogues = CatalogueStruct()
+    catalogues.get_catalogues()
+
     """showAliases()
     Prints the current catalogue alias list to stdout.
 

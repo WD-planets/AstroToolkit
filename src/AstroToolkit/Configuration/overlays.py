@@ -8,6 +8,24 @@ surveyInfo = SurveyInfo()
 overlayInfo = OverlayInfo()
 magInfo = {}
 
+defaults = {}
+
+scaled_detection_surveys = overlayInfo.detection_magSurveys
+for survey in scaled_detection_surveys:
+    del scaled_detection_surveys[survey]["overlay_type"]
+
+detection_surveys = overlayInfo.detectionSurveys
+for survey in detection_surveys:
+    del detection_surveys[survey]["overlay_type"]
+
+tracer_surveys = overlayInfo.tracerSurveys
+for survey in tracer_surveys:
+    del tracer_surveys[survey]["overlay_type"]
+
+defaults["scaled_detections"] = scaled_detection_surveys
+defaults["detections"] = detection_surveys
+defaults["tracers"] = tracer_surveys
+
 
 # overrides yaml dumper to print newlines between sections
 class customDumper(yaml.SafeDumper):
@@ -29,24 +47,6 @@ class OverlayStruct(object):
             self.default_setup()
 
     def default_setup(self):
-        defaults = {}
-
-        scaled_detection_surveys = overlayInfo.detection_magSurveys
-        for survey in scaled_detection_surveys:
-            del scaled_detection_surveys[survey]["overlay_type"]
-
-        detection_surveys = overlayInfo.detectionSurveys
-        for survey in detection_surveys:
-            del detection_surveys[survey]["overlay_type"]
-
-        tracer_surveys = overlayInfo.tracerSurveys
-        for survey in tracer_surveys:
-            del tracer_surveys[survey]["overlay_type"]
-
-        defaults["scaled_detections"] = scaled_detection_surveys
-        defaults["detections"] = detection_surveys
-        defaults["tracers"] = tracer_surveys
-
         # don't include tracers
         # del defaults["tracers"]
 
@@ -88,6 +88,17 @@ class OverlayStruct(object):
                 indexes.append(rolling_index)
                 rolling_index += 1
             overlay_dict[survey]["colour_index"] = indexes
+
+        supported_surveys = []
+        for survey_kind in defaults:
+            for survey in defaults[survey_kind]:
+                supported_surveys.append(survey)
+
+        for survey in supported_surveys:
+            if survey not in overlay_dict:
+                raise Exception(
+                    "Incomplete ATKOverlays.yaml detected. This may be due to a package update. A new one may be generated using 'ATKoverlay reset' from the command line."
+                )
 
         return overlay_dict
 

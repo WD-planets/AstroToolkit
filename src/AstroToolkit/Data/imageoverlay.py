@@ -20,6 +20,9 @@ config.read_config()
 
 piggyback_radius = int(config.overlay_piggyback_radius)
 
+# for testing
+DISABLE_CORRECTIONS = False
+
 
 class OverlayData(object):
     def __init__(self, returned_data, survey):
@@ -144,7 +147,7 @@ def get_overlay_data(data, survey):
             level="internal",
         ).data
 
-        # When generating a Gaia overlay, Gaia is considered a non_gaia survey. Correcting this using Gaia obviously does nothing
+        # When generating a Gaia overlay, Gaia is considered a non_gaia survey. Correcting this using Gaia does nothing
         returned_data = {
             "gaia": {
                 "sources": gaia_systems["source_id"],
@@ -183,8 +186,9 @@ def get_overlay_data(data, survey):
         half_image_size = data.data["size"] / 7200
 
         overlay_data = OverlayData(returned_data, survey)
-        overlay_data.correct_gaia_to_non_gaia()
-        overlay_data.do_piggyback_correction()
+        if not DISABLE_CORRECTIONS:
+            overlay_data.correct_gaia_to_non_gaia()
+            overlay_data.do_piggyback_correction()
         if params["overlay_type"] == "detection_mag":
             overlay_data.scale_magnitudes()
         formatted_data, corrected_systems = (
@@ -311,9 +315,6 @@ def overlay_query(data, overlays):
             if overlay_data:
                 overlays_data += overlay_data
 
-    if overlays_data == []:
-        overlays_data = None
-
     for index, data_point in enumerate(overlays_data):
         if data_point["overlay_type"] != "tracer":
             if data_point["corrected"]:
@@ -356,5 +357,8 @@ def overlay_query(data, overlays):
             continue
 
     overlays_data = [val for i, val in enumerate(overlays_data) if i not in bad_indices]
+
+    if overlays_data == []:
+        overlays_data = None
 
     return overlays_data

@@ -256,7 +256,9 @@ class DssQuery(GeneralQuery):
     def set_url(self):
         url_size = self.size / 60
 
-        url_main = f"http://archive.stsci.edu/cgi-bin/dss_search?ra={self.pos[0]}&d={self.pos[1]}&v=3&e=J2000&f=fits&h={url_size}&w={url_size}"
+        url_main = (
+            f"http://archive.stsci.edu/cgi-bin/dss_search?ra={self.pos[0]}&d={self.pos[1]}&v=3&e=J2000&f=fits&h={url_size}&w={url_size}"
+        )
         self.url = url_main
 
     @property
@@ -292,6 +294,8 @@ class DssQuery(GeneralQuery):
 
 
 def query(survey, size, band, pos=None, source=None, overlays=None):
+    f_return = ImageStruct(survey=survey, source=source, pos=pos, data=None)
+
     def getimage(position):
         query_object = globals()[f"{survey.capitalize()}Query"](pos=position, size=size, band=band, survey=survey)
 
@@ -336,7 +340,16 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
         if image:
             image_time = image.data["image_time"]
         else:
-            return ImageStruct(survey=survey, source=source, pos=pos, data=None)
+            f_return.pos, success = correctpm(
+                pos=gaia_pos, input_time=epochs["gaia"], target_time=[2000, 0], pmra=pmra, pmdec=pmdec, check_success=True
+            )
+            if success:
+                f_return.trace = (
+                    f"start -> extracted pos from source query, assumed {epochs['gaia']} -> initial query performed -> [2000,0] -> end"
+                )
+            else:
+                f_return.trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> initial query performed -> proper motion correction failed -> end"
+            return f_return
 
         # correct coords of source to image_time
         corrected_pos, success1 = correctpm(
@@ -351,20 +364,24 @@ def query(survey, size, band, pos=None, source=None, overlays=None):
         else:
             trace = f"start -> extracted pos from source query, assumed {epochs['gaia']} -> initial query performed -> proper motion correction failed -> final query performed -> proper motion correction failed -> end"
     else:
+        corrected_pos = pos
         final_pos = pos
         trace = None
 
     image = getimage(corrected_pos)
 
-    if overlays:
-        from ..Data.imageoverlay import overlay_query
+    if image:
+        if overlays:
+            from ..Data.imageoverlay import overlay_query
 
-        overlay_data = overlay_query(image, overlays)
-        image.data["overlay"] = overlay_data
+            overlay_data = overlay_query(image, overlays)
+            image.data["overlay"] = overlay_data
+        else:
+            image.data["overlay"] = None
+
+        image.trace = trace
+        image.pos = final_pos
     else:
-        image.data["overlay"] = None
-
-    image.trace = trace
-    image.pos = final_pos
+        return f_return
 
     return image

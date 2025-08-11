@@ -11,7 +11,7 @@ skip-magic-trailing-comma = true
 
 [project]
 name = "AstroToolkit"
-version = "1.7.0"
+version = "1.7.2"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]

@@ -241,9 +241,7 @@ class LightcurveStruct(object):
 
         from ..Input.input_validation import check_inputs
 
-        corrected_inputs = check_inputs(
-            {"start": [start, str], "stop": [stop, str], "timeformat": [timeformat, str]}, label="crop"
-        )
+        corrected_inputs = check_inputs({"start": [start, str], "stop": [stop, str], "timeformat": [timeformat, str]}, label="crop")
         start, stop, timeformat = corrected_inputs
 
         from .crop_lightcurves import crop_lightcurve
@@ -308,9 +306,7 @@ class ZtfQuery(GeneralQuery):
         for filter_code in ["zg", "zr", "zi"]:
             current_band_data = data.loc[data["filtercode"] == filter_code].reset_index(drop=True)
             if current_band_data.empty:
-                data_arr.append(
-                    {"band": filter_code[1:], "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None}
-                )
+                data_arr.append({"band": filter_code[1:], "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
                 continue
 
             mag, mag_err, ra, dec, hjd = (
@@ -321,9 +317,7 @@ class ZtfQuery(GeneralQuery):
                 current_band_data["hjd"].tolist(),
             )
 
-            data_arr.append(
-                {"band": filter_code[1:], "ra": ra, "dec": dec, "mjd": HJDtoMJD(hjd), "mag": mag, "mag_err": mag_err}
-            )
+            data_arr.append({"band": filter_code[1:], "ra": ra, "dec": dec, "mjd": HJDtoMJD(hjd), "mag": mag, "mag_err": mag_err})
 
         return data_arr
 
@@ -339,17 +333,13 @@ class AtlasQuery(GeneralQuery):
 
         import requests
 
-        r = requests.post(
-            url=f"{self.url}/api-token-auth/", data={"username": self.username, "password": self.password}
-        )
+        r = requests.post(url=f"{self.url}/api-token-auth/", data={"username": self.username, "password": self.password})
         if r.status_code == 200:
             token = r.json()["token"]
             headers = {"Authorization": f"Token {token}", "Accept": "application/json"}
             self.headers = headers
         else:
-            print(
-                f"Note: experiencing issues with {self.survey}. Please ensure that you have provided valid login credentials."
-            )
+            print(f"Note: experiencing issues with {self.survey}. Please ensure that you have provided valid login credentials.")
             return None
 
         do_correction = False
@@ -484,9 +474,7 @@ class AtlasQuery(GeneralQuery):
 
             bad_indices_mag_hard_lim = set([i for i, element in enumerate(mag_err) if element > 0.5])
 
-            bad_indices = list(
-                set(itertools.chain(*[bad_indices_flux, bad_indices_flux_err, bad_indices_mag_hard_lim]))
-            )
+            bad_indices = list(set(itertools.chain(*[bad_indices_flux, bad_indices_flux_err, bad_indices_mag_hard_lim])))
 
             # apply the above filters
             filtered_list = []
@@ -559,14 +547,7 @@ class GaiaQuery(GeneralQuery):
                 # time, flux, flux_err, mag, ra, dec
                 cols = ["t8_c16", "FRP", "e_FRP", "RPmag", "RA_ICRS", "DE_ICRS"]
 
-            time, flux, flux_err, mag, ra, dec = (
-                data[cols[0]],
-                data[cols[1]],
-                data[cols[2]],
-                data[cols[3]],
-                data[cols[4]],
-                data[cols[5]],
-            )
+            time, flux, flux_err, mag, ra, dec = (data[cols[0]], data[cols[1]], data[cols[2]], data[cols[3]], data[cols[4]], data[cols[5]])
 
             mag_err = [(2.5 / np.log(10)) * (f_e / f) for f, f_e in zip(flux, flux_err)]
 
@@ -578,7 +559,7 @@ class GaiaQuery(GeneralQuery):
                 filtered_list.append([element for i, element in enumerate(val) if i not in bad_indices])
             mag, mag_err, time, ra, dec = filtered_list
 
-            mjd = [Time(t + 2455197.5, format="jd").value for t in time]
+            mjd = [Time(t + 2455197.5 - 2400000.5, format="jd").value for t in time]
 
             if len(mag) > 0:
                 data_arr.append({"band": band, "ra": ra, "dec": dec, "mjd": mjd, "mag": mag, "mag_err": mag_err})
@@ -667,30 +648,12 @@ class AsassnQuery(GeneralQuery):
 
         data_arr = []
         if len(v_mag) > 0:
-            data_arr.append(
-                {
-                    "band": "v",
-                    "ra": v_ra_arr,
-                    "dec": v_dec_arr,
-                    "mjd": HJDtoMJD(v_hjd),
-                    "mag": v_mag,
-                    "mag_err": v_mag_err,
-                }
-            )
+            data_arr.append({"band": "v", "ra": v_ra_arr, "dec": v_dec_arr, "mjd": HJDtoMJD(v_hjd), "mag": v_mag, "mag_err": v_mag_err})
         else:
             data_arr.append({"band": "v", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 
         if len(g_mag) > 0:
-            data_arr.append(
-                {
-                    "band": "g",
-                    "ra": g_ra_arr,
-                    "dec": g_dec_arr,
-                    "mjd": HJDtoMJD(g_hjd),
-                    "mag": g_mag,
-                    "mag_err": g_mag_err,
-                }
-            )
+            data_arr.append({"band": "g", "ra": g_ra_arr, "dec": g_dec_arr, "mjd": HJDtoMJD(g_hjd), "mag": g_mag, "mag_err": g_mag_err})
         else:
             data_arr.append({"band": "g", "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
 
@@ -759,6 +722,9 @@ class TessQuery(GeneralQuery):
 def get_f_return(survey):
     f_return = []
 
+    if survey == "gaia":
+        survey = "gaia_lc"
+
     bands = surveyInfo.lightcurveSurveyInfo[survey]["bands"]
     for band in bands:
         f_return.append({"band": band, "ra": None, "dec": None, "mjd": None, "mag": None, "mag_err": None})
@@ -769,15 +735,7 @@ def get_f_return(survey):
 def query(survey, source, pos, radius, raw, username=None, password=None):
     def get_lightcurve():
         query_object = globals()[f"{survey.capitalize()}Query"](
-            source=source,
-            pos=pos,
-            radius=radius,
-            survey=survey,
-            username=username,
-            password=password,
-            pmra=pmra,
-            pmdec=pmdec,
-            raw=raw,
+            source=source, pos=pos, radius=radius, survey=survey, username=username, password=password, pmra=pmra, pmdec=pmdec, raw=raw
         )
 
         if survey == "gaia":
@@ -825,12 +783,7 @@ def query(survey, source, pos, radius, raw, username=None, password=None):
         gaia_data = query(kind="data", source=source, survey="gaia", level="internal")
         import math
 
-        ra, dec, pmra, pmdec = (
-            gaia_data.data["ra"][0],
-            gaia_data.data["dec"][0],
-            gaia_data.data["pmra"][0],
-            gaia_data.data["pmdec"][0],
-        )
+        ra, dec, pmra, pmdec = (gaia_data.data["ra"][0], gaia_data.data["dec"][0], gaia_data.data["pmra"][0], gaia_data.data["pmdec"][0])
         pos = [ra, dec]
         if math.isnan(pmra) or math.isnan(pmdec):
             print("Note: could not correct coordinates due to missing pmra/pmdec")

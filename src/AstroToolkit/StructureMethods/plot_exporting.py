@@ -9,9 +9,7 @@ def exportplot(struct, fname=None):
     config = ConfigStruct()
 
     if not struct.figure:
-        print(
-            "Note: No plot was found. One will be generated with a default configuration."
-        )
+        print("Note: No plot was found. One will be generated with a default configuration.")
         struct.plot()
 
     if fname:
@@ -29,7 +27,13 @@ def exportplot(struct, fname=None):
             if config.enable_notifications:
                 print(f"Exporting plot to PNG: {fname}{newline}")
 
-        export_png(struct.figure, filename=fname)
+        try:
+            export_png(struct.figure, filename=fname)
+        except RuntimeError:
+            raise Exception(
+                "Some additional setup is required for plot exporting. Platform-specific information can be found in the Bokeh documentation: https://docs.bokeh.org/en/latest/docs/user_guide/output/export.html. Note that Selenium should already be installed, as this is a dependency of AstroToolkit."
+            )
+
     else:
         print("Note: This data structure does not support plotting.")
 

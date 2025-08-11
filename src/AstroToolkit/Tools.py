@@ -162,7 +162,7 @@ def query(
 
     **Note:** use 'gaia_lc' for Gaia light curve overlays, and 'gaia' for gaia detection overlays
 
-    The default band in the detection overlay of a given survey is taken from the relevant :ref:`[survey]_overlay_mag <Image Overlay Settings>` config key. If you wish to use multiple bands from a single survey, detections can instead be requested using a dictionary.
+    The default band in the detection overlay of a given survey is the that which is listed first in ATKOverlays.yaml (see the tutorial on :ref:`defining image overlays <Defining New Image Overlays>` and the :ref:`ATKoverlay` command-line tool). If you wish to use multiple bands from a single survey, detections can instead be requested using a dictionary.
 
     E.g. to request an overlay that includes all Gaia magnitudes:
 

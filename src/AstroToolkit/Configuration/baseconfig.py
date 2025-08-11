@@ -10,6 +10,35 @@ keys_to_not_lower = ["query_lightcurve_atlas_username", "query_lightcurve_atlas_
 for survey in overlay_marker_surveys:
     keys_to_not_lower.append(f"{survey}_overlay_mag")
 
+defaults = {
+    "enable_notifications": "True",
+    "query_data_radius": "3",
+    "query_bulkdata_radius": "3",
+    "query_lightcurve_radius": "3",
+    "query_spectrum_radius": "3",
+    "query_sed_radius": "3",
+    "query_reddening_radius": "3",
+    "query_image_size": "30",
+    "query_image_overlays": "gaia",
+    "query_image_band": "g",
+    "query_lightcurve_atlas_username": "None",
+    "query_lightcurve_atlas_password": "None",
+    "unit_size": "500",
+    "search_radius": "3",
+    "datapage_search_button_radius": "3",
+    "overlay_simbad_search_radius": "3",
+    "datapage_datatable_radius": "3",
+    "datapage_grid_size": "250",
+    "datapage_font_size": "12",
+    "output_backend": "canvas",
+    "show_toolbars": "True",
+    "show_grids": "True",
+    "show_titles": "True",
+    "font_size": "14",
+    "font": "Helvetica",
+    "overlay_piggyback_radius": "5",
+}
+
 
 class ConfigStruct(object):
     def __init__(self):
@@ -30,32 +59,8 @@ class ConfigStruct(object):
         return keys
 
     def set_default_config(self):
-        self.enable_notifications = "True"
-        self.query_data_radius = "3"
-        self.query_bulkdata_radius = "3"
-        self.query_lightcurve_radius = "3"
-        self.query_spectrum_radius = "3"
-        self.query_sed_radius = "3"
-        self.query_reddening_radius = "3"
-        self.query_image_size = "30"
-        self.query_image_overlays = "gaia"
-        self.query_image_band = "g"
-        self.query_lightcurve_atlas_username = "None"
-        self.query_lightcurve_atlas_password = "None"
-        self.unit_size = "500"
-        self.search_radius = "3"
-        self.datapage_search_button_radius = "3"
-        self.overlay_simbad_search_radius = "3"
-        self.datapage_datatable_radius = "3"
-        self.datapage_grid_size = "250"
-        self.datapage_font_size = "12"
-        self.output_backend = "canvas"
-        self.show_toolbars = "True"
-        self.show_grids = "True"
-        self.show_titles = "True"
-        self.font_size = "14"
-        self.font = "Helvetica"
-        self.overlay_piggyback_radius = "5"
+        for attr, value in defaults.items():
+            setattr(self, attr, value)
 
     def read_config(self):
         Config = configparser.ConfigParser()
@@ -95,6 +100,12 @@ class ConfigStruct(object):
 
                 self.structured_out[section_str].append({key: val})
                 setattr(self, key, val)
+
+        for attr in defaults:
+            if not hasattr(self, attr):
+                raise Exception(
+                    "Incomplete ATKConfig.ini detected. This may be due to a package update. A new one may be generated using 'ATKconfig reset' from the command line."
+                )
 
     def write_config(self):
         config = configparser.ConfigParser()

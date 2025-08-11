@@ -15,7 +15,7 @@ def HJDtoMJD(hjd):
     from astropy.time import Time
 
     def get_mjd(hjd):
-        hjd_time = Time(entry, format="jd")
+        hjd_time = Time(hjd, format="jd")
         sun_position = get_sun(hjd_time)
         heliocentric_correction = sun_position.distance.to(u.au).value / 1731.456
         jd = hjd_time - heliocentric_correction * u.day
