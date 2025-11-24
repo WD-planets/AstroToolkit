@@ -9,9 +9,12 @@ include-package-data = true
 line-length=120
 skip-magic-trailing-comma = true
 
+[tool.ruff]
+line-length = 180
+
 [project]
 name = "AstroToolkit"
-version = "1.7.2"
+version = "1.8"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
@@ -23,21 +26,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "astropy==6.0.1",
-    "astroquery==0.4.7",
-    "bokeh==3.4.1",
-    "cmasher==1.8.0",
-    "matplotlib==3.8.4",
-    "importlib_resources==6.4.0",
-    "numpy==1.26.4",
-    "pandas==2.2.2",
-    "Requests==2.31.0",
-    "beautifulsoup4==4.12.3",
-    "scipy==1.13.0",
-    "selenium==4.21.0",
-    "lightkurve==2.4.2",
-    "PyQt5==5.15.10",
-    "numba==0.60.0",
 ]
 
 [project.urls]
@@ -45,12 +33,12 @@ Homepage = "https://github.com/WD-planets/AstroToolkit"
 Issues = "https://github.com/WD-planets/AstroToolkit/issues"
 
 [project.scripts]
-ATKgui = "bin.opengui_command:main"
-ATKquery = "bin.atkquery_command:main"
-ATKread = "bin.atkread_command:main"
-ATKsearch = "bin.atksearch_command:main"
-ATKconv = "bin.atkconv_command:main"
-ATKconfig = "bin.atkconfig_command:main"
-ATKalias = "bin.atkalias_command:main"
-ATKepoch = "bin.atkepoch_command:main"
-ATKoverlay = "bin.atkoverlay_command:main"
+# ATKgui = "bin.opengui_command:main"
+# ATKquery = "bin.atkquery_command:main"
+# ATKread = "bin.atkread_command:main"
+# ATKsearch = "bin.atksearch_command:main"
+# ATKconv = "bin.atkconv_command:main"
+# ATKconfig = "bin.atkconfig_command:main"
+# ATKalias = "bin.atkalias_command:main"
+# ATKepoch = "bin.atkepoch_command:main"
+# ATKoverlay = "bin.atkoverlay_command:main"
