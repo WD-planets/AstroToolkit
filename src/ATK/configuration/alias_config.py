@@ -1,16 +1,18 @@
-from astropy.time import Time
-
-from .defaults.epoch_defaults import DEFAULTS, PATH
+from .defaults.alias_defaults import DEFAULTS, PATH
 from .parser_config.ParserConfig import ParserConfig
-
-
-def translator(value):
-    return Time(value, format="iso")
 
 
 class AliasConfig(ParserConfig):
     def __init__(self):
-        super().__init__(PATH, DEFAULTS, translator)
+        super().__init__(PATH, DEFAULTS, None)
+
+    def as_flattened_dict(self) -> None:
+        data = {}
+        for key, sub_dict in self._config.items():
+            for key, val in sub_dict.items():
+                data[key] = val
+
+        return data
 
 
-EPOCH_CONFIG = AliasConfig()
+ALIAS_CONFIG = AliasConfig()

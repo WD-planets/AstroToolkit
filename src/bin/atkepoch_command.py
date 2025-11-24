@@ -1,7 +1,6 @@
 import argparse
 
-from AstroToolkit.Epochs import (delEpoch, openEpochs, resetEpochs, setEpoch,
-                                 showEpochs)
+from ATK.configuration.epoch_config import EPOCH_CONFIG
 
 
 def main():
@@ -13,26 +12,23 @@ def main():
     sub_parsers.add_parser("open", help="Opens the epoch list in the default text editor")
 
     set_parser = sub_parsers.add_parser("set", help="Sets the epoch of a survey or Vizier catalogue alias")
-    set_parser.add_argument(
-        "section", type=str, help="Section of the epochs file in which survey or Vizier catalogue alias is found"
-    )
+    set_parser.add_argument("section", type=str, help="Section of the epochs file in which the survey or Vizier catalogue alias is found")
     set_parser.add_argument("survey", type=str, help="Survey for which epoch should be set")
     set_parser.add_argument("epoch", type=str, help="Epoch to set (e.g. 2016,0] for Jan 2016)")
 
     del_parser = sub_parsers.add_parser("del", help="Deletes an existing epoch definition for a Vizier catalogue alias")
+    del_parser.add_argument("section", type=str, help="Section of the epochs file in which the survey or Vizier catalogue alias is found")
     del_parser.add_argument("alias", type=str, help="Name of alias for which an epoch definition should be deleted")
 
     args = parser.parse_args()
 
     if args.job == "reset":
-        resetEpochs()
+        EPOCH_CONFIG._reset()
     elif args.job == "show":
-        showEpochs()
+        EPOCH_CONFIG._show()
     elif args.job == "open":
-        openEpochs()
+        EPOCH_CONFIG._open()
     elif args.job == "set":
-        epoch = args.epoch.split(",")
-        epoch = [int(x) for x in epoch]
-        setEpoch(section=args.section, survey=args.survey, epoch=epoch)
+        EPOCH_CONFIG._set(args.section, args.survey, args.epoch)
     elif args.job == "del":
-        delEpoch(alias=args.alias)
+        EPOCH_CONFIG._del(args.section, args.alias)

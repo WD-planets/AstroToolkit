@@ -1,7 +1,6 @@
 import argparse
 
-from AstroToolkit.Aliases import (addAlias, delAlias, openAliases,
-                                  resetAliases, showAliases)
+from ATK.configuration.alias_config import ALIAS_CONFIG
 
 
 def main():
@@ -12,7 +11,7 @@ def main():
     sub_parsers.add_parser("show", help="Outputs the alias list to stdout")
     sub_parsers.add_parser("open", help="Opens the alias list in the default text editor")
 
-    add_parser = sub_parsers.add_parser("add", help="Adds an alias for a Vizier Catalogue ID")
+    add_parser = sub_parsers.add_parser("set", help="Sets an alias for a Vizier Catalogue ID")
     add_parser.add_argument("alias", type=str, help="Alias name")
     add_parser.add_argument("id", type=str, help="Vizier Catalogue ID")
 
@@ -22,12 +21,12 @@ def main():
     args = parser.parse_args()
 
     if args.job == "reset":
-        resetAliases()
+        ALIAS_CONFIG._reset()
     elif args.job == "show":
-        showAliases()
+        ALIAS_CONFIG._show()
     elif args.job == "open":
-        openAliases()
-    elif args.job == "add":
-        addAlias(name=args.alias, id=args.id)
+        ALIAS_CONFIG._open()
+    elif args.job == "set":
+        ALIAS_CONFIG._set("aliases", args.alias, args.id)
     elif args.job == "del":
-        delAlias(name=args.alias)
+        ALIAS_CONFIG._del("aliases", args.alias)

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-PATH = Path.home() / ".ATK" / "ATK_config.ini"
+PATH = Path.home() / ".AstroToolkit" / "ATK_config.ini"
 
 DEFAULTS = {
     "global_settings": {"notifications": True},

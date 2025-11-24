@@ -28,5 +28,8 @@ class BaseConfig(ParserConfig):
     def __init__(self):
         super().__init__(PATH, DEFAULTS, translator)
 
+    def _set(self, section, key, value):
+        super()._set(section, key, value, True)
+
 
 BASE_CONFIG = BaseConfig()

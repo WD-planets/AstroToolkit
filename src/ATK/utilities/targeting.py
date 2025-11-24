@@ -6,9 +6,9 @@ from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.utils.exceptions import ErfaWarning
 
-from ..configuration.epoch.epoch_manager import epoch_config
-from ..queries.vizier_query.vizier_core import gaia_query_by_source
-from ..utilities.mapping import get_structure_map
+from ..configuration.epoch_config import EPOCH_CONFIG
+from ..queries.vizier.vizier_query import gaia_query_by_source
+from ..utilities.mapping import build_structure_map
 
 # ignore bad distance warning
 warnings.filterwarnings("ignore", category=ErfaWarning)
@@ -63,8 +63,8 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     Converts Gaia data into a SkyCoord containing all necessary astrometry
     """
 
-    epochs = epoch_config.get_all()
-    gaia_epoch = epochs[epoch_config.get_section("vizier")]["gaia"]
+    epochs = EPOCH_CONFIG.get_all()
+    gaia_epoch = epochs[EPOCH_CONFIG.get_section("vizier")]["gaia"]
 
     gaia_data = gaia_query_by_source(source)
 
@@ -103,7 +103,7 @@ def correct_skycoord(position: SkyCoord, query_kind: str = None, survey: str = N
     correction_degree = "full"
 
     if survey:
-        epochs = epoch_config.get_all()[epoch_config.get_section(query_kind)]
+        epochs = EPOCH_CONFIG.get_all()[EPOCH_CONFIG.get_section(query_kind)]
 
         # If no epoch definition, can't correct
         if survey not in epochs:
@@ -153,7 +153,7 @@ def prepare_search(target: int | SkyCoord, radius: float, query_kind: str, surve
         correction_degree = "none"
         search_pos = position
 
-    structure_map = get_structure_map()
+    structure_map = build_structure_map()
     structure = structure_map[query_kind](
         kind=query_kind,
         survey=survey,

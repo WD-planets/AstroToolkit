@@ -1,20 +1,18 @@
 from pathlib import Path
 
-PATH = Path.home() / ".ATK" / "ATK_aliases.ini"
+PATH = Path.home() / ".AstroToolkit" / "ATK_aliases.ini"
 
 DEFAULTS = {
-    "global_settings": {"notifications": True},
-    "plot_settings": {
-        "unit_size": 500,
-        "backend": "canvas",
-        "toolbars": True,
-        "grids": True,
-        "titles": True,
-        "font_size": 14,
-        "font": "Helvetica",
+    "default_catalogues": {
+        "gaia": "I/355/gaiadr3",
+        "panstarrs": "II/349/ps1",
+        "skymapper": "II/379/smssdr4",
+        "galex": "II/335/galex_ais",
+        "rosat": "IX/11/rosatsrc",
+        "sdss": "V/154/sdss16",
+        "wise": "II/311/wise",
+        "2mass": "II/246/out",
+        "erosita": "J/A+A/682/A34/erass1-m",
     },
-    "query_settings": {"query_radius": 3, "image_size": 30, "image_overlays": "gaia", "image_band": "g"},
-    "overlay_settings": {"piggyback_radius": 5, "search_radius": 3},
-    "search_settings": {"search_radius": 3},
-    "datapage_settings": {"search_button_radius": 3, "datatable_radius": 3, "font_size": 12, "grid_size": 250},
+    "aliases": {},
 }
