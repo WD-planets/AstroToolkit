@@ -25,7 +25,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+
 dependencies = [
+	"astropy",
+	"astroquery",
+	"pandas",
+	"bokeh",
+	"numpy",
+	"pandas",
+	"PyYAML",
 ]
 
 [project.urls]

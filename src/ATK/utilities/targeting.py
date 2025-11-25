@@ -4,7 +4,7 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
-from astropy.utils.exceptions import ErfaWarning
+from erfa import ErfaWarning
 
 from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
@@ -87,12 +87,26 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
+    coord = SkyCoord(
+        ra=ra * u.deg,
+        dec=dec * u.deg,
+        pm_ra_cosdec=pmra,
+        pm_dec=pmdec,
+        distance=distance,
+        obstime=gaia_epoch,
+        frame="icrs",
+    )
 
     return coord
 
 
-def correct_skycoord(position: SkyCoord, query_kind: str = None, survey: str = None, epoch: Time = None, get_correction_degree: bool = False) -> SkyCoord:
+def correct_skycoord(
+    position: SkyCoord,
+    query_kind: str = None,
+    survey: str = None,
+    epoch: Time = None,
+    get_correction_degree: bool = False,
+) -> SkyCoord:
     """
     Corrects a SkyCoord to a given epoch definition from a given section or a given epoch, returns corrected SkyCoord object and optionally returns the success level of the correction. If correction isn't possible, just returns the original SkyCoord
     """
@@ -133,7 +147,9 @@ def correct_skycoord(position: SkyCoord, query_kind: str = None, survey: str = N
         return corrected_position
 
 
-def prepare_search(target: int | SkyCoord, radius: float, query_kind: str, survey: str = None, epoch: Time = None) -> tuple[SkyCoord, any]:
+def prepare_search(
+    target: int | SkyCoord, radius: float, query_kind: str, survey: str = None, epoch: Time = None
+) -> tuple[SkyCoord, any]:
     """
     Prepares a search with an input position or source. Returns the position of the search, the degree of correction which is possible, and a partially completed data structure
     """
@@ -144,7 +160,9 @@ def prepare_search(target: int | SkyCoord, radius: float, query_kind: str, surve
         # translate Gaia position to epoch of survey if an epoch definition exists
         gaia_pos = get_gaia_skycoord(source)
         if survey != "gaia":
-            search_pos, correction_degree = correct_skycoord(gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True)
+            search_pos, correction_degree = correct_skycoord(
+                gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True
+            )
         else:
             search_pos = gaia_pos
             correction_degree = "n/a"

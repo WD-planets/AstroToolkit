@@ -50,8 +50,3 @@ def query(target: SkyCoord | int, **kwargs) -> pd.DataFrame | None | int:
         return query_by_position(target, kwargs.get("radius"), kwargs.get("catalogue"))
     else:
         raise ValueError("query() received no targeting information.")
-
-
-if __name__ == "__main__":
-    target = SkyCoord(ra=141.1853 * u.deg, dec=8.0308 * u.deg, frame="icrs")
-    data = query_by_position(target, 300, "I/355/gaiadr3")

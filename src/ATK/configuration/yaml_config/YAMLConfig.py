@@ -1,10 +1,13 @@
-import platform
+import os
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 from types import FunctionType
 
 import yaml
 
+from ...utilities.file_io import open_file
 from .yaml_io import CustomDumper, default_printer
 
 
@@ -83,7 +86,7 @@ class YAMLConfig:
             yaml.dump(self._defaults, f, sort_keys=False, indent=4, Dumper=CustomDumper)
         self._load()
 
-    def _set(self, section: str, key: str, value):
+    def _set(self, section: str, key: str, **kwargs):
         """
         Set the value of a given config key in a given section
         """
@@ -91,8 +94,16 @@ class YAMLConfig:
         self._load()
         if section not in self._raw:
             raise ValueError(f"Section '{section}' not found in config.")
-        self._raw[section][key] = value
-        self._config[section][key] = value
+
+        self._raw[section][key] = {}
+        self._config[section][key] = {}
+
+        for kwarg, val in kwargs.items():
+            if val:
+                self._raw[section][key][kwarg] = val
+                self._config[section][key][kwarg] = val
+
+        self._save()
 
     def _del(self, section: str, key: str) -> None:
         """
@@ -100,9 +111,9 @@ class YAMLConfig:
         """
 
         self._load()
-        if section not in self._parser:
+        if section not in self._raw:
             raise ValueError(f"Section '{section}' not found in config.")
-        if key not in self._parser[section]:
+        if key not in self._raw[section]:
             raise ValueError(f"Key '{key}' not found in section '{section}'.")
         del self._config[section][key]
         del self._raw[section][key]
@@ -140,10 +151,4 @@ class YAMLConfig:
         print(self._printer(self._config))
 
     def _open(self) -> None:
-        if platform.system().lower() in ["posix", "linux"]:
-            subprocess.run(["chmod", "+x", str(self._path)])
-            subprocess.run(["xdg-open", str(self._path)])
-        else:
-            import webbrowser
-
-            webbrowser.open(self._path)
+        open_file(self._path)

@@ -1,47 +1,133 @@
 import argparse
 
+from ATK.configuration.alias_config import ALIAS_CONFIG
 from ATK.configuration.overlay_config import OVERLAY_CONFIG
+
+sections = ["photometric", "positional"]
+aliases = list(ALIAS_CONFIG.as_dict()["vizier_aliases"].keys())
+
+
+def validate_common_args(parser, section, args):
+    """
+    Ensure lat/lon/ID/frame args existfor all overlay sections
+    """
+
+    missing = [f"--{name}" for name in ("lat", "lon", "id", "frame") if getattr(args, name) is None]
+
+    if missing:
+        parser.error(f"For section '{section}', the following arguments are required: {', '.join(missing)}")
+
+
+def validate_specific_args(parser, section, args):
+    if section == "photometric":
+        if args.mags is None or args.errors is None:
+            parser.error("Photometric overlays require both --mags and --errors.")
+    elif section == "positional":
+        if args.mags or args.errors:
+            parser.error("Positional overlays do not use --mags or --errors.")
+    else:
+        parser.error(f"Unexpected section '{section}'. Section should be one of 'photometric', 'positional'.")
+
+
+def handle_set(parser, args):
+    section = args.type.lower()
+
+    validate_common_args(parser, section, args)
+    validate_specific_args(parser, section, args)
+
+    OVERLAY_CONFIG._set(
+        section,
+        args.alias,
+        lon_column=args.lon,
+        lat_column=args.lat,
+        frame=args.frame,
+        id_column=args.id,
+        mags=args.mags,
+        errors=args.errors,
+    )
+
+
+def handle_del(args):
+    section = args.type.lower()
+
+    OVERLAY_CONFIG._del(section, args.alias)
+
+
+def handle_reset(args):
+    OVERLAY_CONFIG._reset()
+
+
+def handle_open(args):
+    OVERLAY_CONFIG._open()
+
+
+def handle_show(args):
+    OVERLAY_CONFIG._show()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Facilitates the viewing and editing of the ATK overlays file.")
+    parser = argparse.ArgumentParser(description="Facilitates viewing and editing of the ATK overlays file.")
+    subparsers = parser.add_subparsers(dest="job", required=True)
 
-    sub_parsers = parser.add_subparsers(dest="job")
+    # show()
+    p_show = subparsers.add_parser("show", help="Prints the ATK overlays file to stdout.")
+    p_show.set_defaults(func=handle_show)
 
-    sub_parsers.add_parser("show", help="Outputs the overlay list to stdout")
+    # reset()
+    p_reset = subparsers.add_parser("reset", help="Reset the ATK overlays file to its default state.")
+    p_reset.set_defaults(func=handle_reset)
 
-    add_parser = sub_parsers.add_parser("set", help="Sets an overlay definition for a given survey.")
-    add_parser.add_argument("alias", type=str, nargs=1, help="Overlay alias")
-    add_parser.add_argument("--ra", type=str, nargs=1, required=True, metavar=("RA_NAME"), help="Name of right ascension column in Vizier")
-    add_parser.add_argument("--dec", type=str, nargs=1, required=True, metavar=("DEC_NAME"), help="Name of declination column in Vizier")
-    add_parser.add_argument("--id", type=str, nargs=1, required=True, metavar=("ID_NAME"), help="Name of ID column in Vizier")
-    add_parser.add_argument(
-        "--mags",
+    # open()
+    p_open = subparsers.add_parser("open", help="Opens the ATK overlays file in the default editor.")
+    p_open.set_defaults(func=handle_open)
+
+    # set()
+    p_set = subparsers.add_parser("set", help="Sets an overlay definition in the ATK overlays file.")
+    p_set.add_argument(
+        "type",
+        metavar="<TYPE>",
+        help=f"Overlay type, from: {', '.join(sections)}. Photometric overlays use magnitudes to scale markers.",
+        choices=sections,
+    )
+    p_set.add_argument(
+        "alias",
         type=str,
-        nargs="+",
-        required=False,
-        metavar=("MAG_NAMES"),
-        help="Names of magnitude columns in Vizier. If provided, a scaled_detection overlay defintion is generated. Otherwise, a detection overlay is generated.",
+        metavar="<ALIAS>",
+        help=f"Corresponding alias in the ATK alias file, from: {', '.join(aliases)}.",
+        choices=aliases,
     )
 
-    del_parser = sub_parsers.add_parser("del", help="Deletes an existing overlay definition of a given kind for a given survey.")
-    del_parser.add_argument("kind", type=str, nargs=1, choices=["scaled_detection", "detection"], help="Kind of overlay definition to delete")
-    del_parser.add_argument("alias", type=str, nargs=1, help="Overlay alias")
+    # common args
+    p_set.add_argument("--lon", help="Name of longitudinal column in Vizier table (e.g. RA, GLON).", required=True)
+    p_set.add_argument("--lat", help="Name of latitudinal column in Vizier table (e.g. DEC, GLAT).", required=True)
+    p_set.add_argument("--id", help="Survey-specific ID column in Vizier table.", required=True)
+    p_set.add_argument("--frame", help="Frame of coordinates (e.g. icrs, galactic).", required=True)
 
-    sub_parsers.add_parser("reset", help="Resets the list of overlay definitions to its default state")
-    sub_parsers.add_parser("open", help="Opens the list of overlay definitions in the default text editor")
+    # photometric only
+    list_group = p_set.add_argument_group("Only required for photometric overlays")
+    list_group.add_argument("--mags", nargs="+", metavar="MAGS", help="Names of magnitude columns in Vizier table.")
+    list_group.add_argument(
+        "--errors", nargs="+", metavar="ERRORS", help="Names of magnitude error columns in Vizier table."
+    )
 
+    p_set.set_defaults(func=lambda args: handle_set(p_set, args))
+
+    # del()
+    p_del = subparsers.add_parser("del", help="Delete an existing overlay definition in the ATK overlays file.")
+    p_del.add_argument(
+        "type",
+        metavar="<TYPE>",
+        help=f"Overlay type, from: {', '.join(sections)}. Photometric overlays use magnitudes to scale markers.",
+        choices=sections,
+    )
+    p_del.add_argument(
+        "alias",
+        type=str,
+        metavar="<ALIAS>",
+        help="Name of survey or alias for which an overlay definition should be deleted.",
+    )
+    p_del.set_defaults(func=handle_del)
+
+    # parse and dispatch
     args = parser.parse_args()
-
-    if args.job == "set":
-        ...
-        # addOverlay(args.alias[0], args.ra[0], args.dec[0], args.id[0], args.mags)
-    elif args.job == "del":
-        ...
-        # delOverlay(args.kind[0], args.alias[0])
-    elif args.job == "reset":
-        OVERLAY_CONFIG._reset()
-    elif args.job == "open":
-        OVERLAY_CONFIG._open()
-    elif args.job == "show":
-        OVERLAY_CONFIG._show()
+    args.func(args)

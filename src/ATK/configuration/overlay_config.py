@@ -6,7 +6,7 @@ from .yaml_config.YAMLConfig import YAMLConfig
 BASE_INDENT = 4
 
 ALL_ALIASES = ALIAS_CONFIG.as_flattened_dict()
-EPOCHS = EPOCH_CONFIG.as_dict()["vizier_catalogues"]
+EPOCHS = EPOCH_CONFIG.as_dict()["vizier_aliases"]
 
 
 def pprint_overlays(data, indent=0):

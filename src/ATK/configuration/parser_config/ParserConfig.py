@@ -4,6 +4,8 @@ from configparser import ConfigParser
 from pathlib import Path
 from types import FunctionType
 
+from ...utilities.file_io import open_file
+
 
 def parser_to_dict(parser: ConfigParser, translator: FunctionType) -> dict:
     """
@@ -133,10 +135,4 @@ class ParserConfig:
             print()
 
     def _open(self) -> None:
-        if platform.system().lower() in ["posix", "linux"]:
-            subprocess.run(["chmod", "+x", str(self._path)])
-            subprocess.run(["xdg-open", str(self._path)])
-        else:
-            import webbrowser
-
-            webbrowser.open(self._path)
+        open_file(self._path)

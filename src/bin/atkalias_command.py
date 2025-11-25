@@ -3,30 +3,52 @@ import argparse
 from ATK.configuration.alias_config import ALIAS_CONFIG
 
 
+def handle_set(args):
+    ALIAS_CONFIG._set("vizier_aliases", args.alias.lower(), args.table_id)
+
+
+def handle_del(args):
+    ALIAS_CONFIG._del("vizier_aliases", args.alias.lower())
+
+
+def handle_reset(args):
+    ALIAS_CONFIG._reset()
+
+
+def handle_open(args):
+    ALIAS_CONFIG._open()
+
+
+def handle_show(args):
+    ALIAS_CONFIG._show()
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Facilitates the viewing and editing of the ATK aliases file.")
-    sub_parsers = parser.add_subparsers(dest="job")
+    parser = argparse.ArgumentParser(description="Facilitates viewing and editing of the ATK aliases file.")
+    subparsers = parser.add_subparsers(dest="job", required=True)
 
-    sub_parsers.add_parser("reset", help="Resets the alias list to its default state")
-    sub_parsers.add_parser("show", help="Outputs the alias list to stdout")
-    sub_parsers.add_parser("open", help="Opens the alias list in the default text editor")
+    # show()
+    p_show = subparsers.add_parser("show", help="Prints the ATK alias file to stdout.")
+    p_show.set_defaults(func=handle_show)
 
-    add_parser = sub_parsers.add_parser("set", help="Sets an alias for a Vizier Catalogue ID")
-    add_parser.add_argument("alias", type=str, help="Alias name")
-    add_parser.add_argument("id", type=str, help="Vizier Catalogue ID")
+    # reset()
+    p_reset = subparsers.add_parser("reset", help="Reset the ATK alias file to its default state.")
+    p_reset.set_defaults(func=handle_reset)
 
-    del_parser = sub_parsers.add_parser("del", help="Deletes an existing alias")
-    del_parser.add_argument("alias", type=str, help="Alias name")
+    # open()
+    p_open = subparsers.add_parser("open", help="Opens the ATK alias file in the default editor.")
+    p_open.set_defaults(func=handle_open)
 
+    # set()
+    p_set = subparsers.add_parser("set", help="Sets an alias to a Vizier table in the ATK alias file.")
+    p_set.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of alias to a Vizier table.")
+    p_set.add_argument("table_id", type=str, metavar="<TABLE_ID>", help="Vizier table ID (e.g. I/355/gaiadr3).")
+    p_set.set_defaults(func=handle_set)
+
+    # del()
+    del_parser = subparsers.add_parser("del", help="Deletes an existing alias in the ATK alias file.")
+    del_parser.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of alias to delete.")
+
+    # parse and dispatch
     args = parser.parse_args()
-
-    if args.job == "reset":
-        ALIAS_CONFIG._reset()
-    elif args.job == "show":
-        ALIAS_CONFIG._show()
-    elif args.job == "open":
-        ALIAS_CONFIG._open()
-    elif args.job == "set":
-        ALIAS_CONFIG._set("aliases", args.alias, args.id)
-    elif args.job == "del":
-        ALIAS_CONFIG._del("aliases", args.alias)
+    args.func(args)
