@@ -3,7 +3,7 @@ import inspect
 import pkgutil
 
 
-def build_map(module: str, function_name: str, **kwargs):
+def build_map(root_module: str, function_name: str, **kwargs):
     """
     Builds a map {str:function} by searching through a given folder for modules that include a given prefix or suffix and contain a known, shared function name
     """
@@ -14,25 +14,27 @@ def build_map(module: str, function_name: str, **kwargs):
 
     map = {}
 
-    for module_info in pkgutil.iter_modules(module.__path__):
-        name = module_info.name
+    modules = pkgutil.iter_modules(root_module.__path__)
+
+    for module in modules:
+        name = module.name
 
         if prefix and not name.startswith(prefix):
             continue
         if suffix and not name.endswith(suffix):
             continue
 
-        module = importlib.import_module(f"{module.__name__}.{name}")
+        imported_module = importlib.import_module(f"{root_module.__name__}.{name}")
 
         if prefix:
             name = name[len(prefix) :]
         elif suffix:
             name = name[: -len(suffix)]
 
-        if hasattr(module, function_name):
-            map[name] = getattr(module, function_name)
+        if hasattr(imported_module, function_name):
+            map[name] = getattr(imported_module, function_name)
         else:
-            raise ImportError(f"Module {name} lacks required function '{name}'.")
+            raise ImportError(f"Module {module.name}.py lacks required function '{function_name}'.")
 
     return map
 

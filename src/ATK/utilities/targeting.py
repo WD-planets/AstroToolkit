@@ -63,8 +63,7 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     Converts Gaia data into a SkyCoord containing all necessary astrometry
     """
 
-    epochs = EPOCH_CONFIG.get_all()
-    gaia_epoch = epochs[EPOCH_CONFIG.get_section("vizier")]["gaia"]
+    gaia_epoch = EPOCH_CONFIG.as_dict()["vizier_aliases"]["gaia"]
 
     gaia_data = gaia_query_by_source(source)
 
@@ -117,7 +116,7 @@ def correct_skycoord(
     correction_degree = "full"
 
     if survey:
-        epochs = EPOCH_CONFIG.get_all()[EPOCH_CONFIG.get_section(query_kind)]
+        epochs = EPOCH_CONFIG.get_section_by_query_kind(query_kind)
 
         # If no epoch definition, can't correct
         if survey not in epochs:
@@ -148,10 +147,10 @@ def correct_skycoord(
 
 
 def prepare_search(
-    target: int | SkyCoord, radius: float, query_kind: str, survey: str = None, epoch: Time = None
+    target: int | SkyCoord, query_kind: str, survey: str = None, epoch: Time = None, **kwargs
 ) -> tuple[SkyCoord, any]:
     """
-    Prepares a search with an input position or source. Returns the position of the search, the degree of correction which is possible, and a partially completed data structure
+    Prepares a search with an input position or source. Returns the position of the search and a partially completed data structure
     """
 
     source, position = check_targeting(target)
@@ -177,7 +176,7 @@ def prepare_search(
         survey=survey,
         position=search_pos,
         source=source,
-        radius=radius,
+        radius=kwargs.get("radius", None),
         frame=search_pos.frame.name,
         epoch=search_pos.obstime,
         correction=correction_degree,

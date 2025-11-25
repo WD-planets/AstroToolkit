@@ -14,14 +14,14 @@ def translator(value):
             pass
 
     try:
-        return int(value)
-    except ValueError:
-        pass
-
-    try:
         return float(value)
     except ValueError:
         return value
+
+    try:
+        return int(value)
+    except ValueError:
+        pass
 
 
 class BaseConfig(ParserConfig):

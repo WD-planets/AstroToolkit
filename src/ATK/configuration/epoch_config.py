@@ -23,5 +23,14 @@ class EpochConfig(ParserConfig):
     def __init__(self):
         super().__init__(PATH, DEFAULTS, translator)
 
+    def get_section_by_query_kind(self, query_kind: str):
+        match query_kind:
+            case "vizier":
+                section = "vizier_aliases"
+            case "lightcurve" | "spectrum":
+                section = f"{query_kind}_surveys"
+
+        return self.as_dict()[section]
+
 
 EPOCH_CONFIG = EpochConfig()
