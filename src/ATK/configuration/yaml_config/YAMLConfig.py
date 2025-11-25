@@ -5,25 +5,7 @@ from types import FunctionType
 
 import yaml
 
-
-def default_printer(data: dict):
-    for section, values in data.items():
-        print(f"[{section}]")
-        if isinstance(values, dict):
-            for key, value in values.items():
-                print(f"{key} = {value}")
-        else:
-            print(values)
-        print()
-
-
-class CustomDumper(yaml.SafeDumper):
-    def write_line_break(self, data=None):
-        super().write_line_break(data)
-
-        if len(self.indents) == 1:
-            super().write_line_break()
-            super().write_line_break()
+from .yaml_io import CustomDumper, default_printer
 
 
 def translate_dict(raw: dict, translator: FunctionType) -> dict:
