@@ -3,7 +3,8 @@ Changes
 - Rewrote entire package, should be a lot easier to develop in the future
 - Configuration setup now far more robust
     - Added ATKoverlay show
-    - Improved cross-platform file openining
+    - Improved cross-platform file opening
+- Improved .show() (previously .showdata()), now recursively handles the printing of arbitrarily complex structures
 
 To-Do 
 -----

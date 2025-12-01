@@ -2,7 +2,6 @@ import importlib
 
 from astropy.coordinates import SkyCoord
 
-from .configuration.base_config import BASE_CONFIG
 from .queries.arguments import get_query_arguments
 from .utilities.defaults import RETURNS
 from .utilities.mapping import build_map

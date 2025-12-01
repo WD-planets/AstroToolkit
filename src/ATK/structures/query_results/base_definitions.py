@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
 
+from ..methods.show import pprint_structure
+
 
 @dataclass
 class QueryResult:
@@ -15,3 +17,6 @@ class QueryResult:
     frame: str | None = None
     correction: str | None = None
     exception: bool | None = False
+
+    def show(self, show_all_types=False):
+        pprint_structure(self, show_all_types)
