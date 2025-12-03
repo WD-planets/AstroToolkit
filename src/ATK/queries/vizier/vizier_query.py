@@ -34,7 +34,7 @@ def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
 
     try:
         data = v.query_constraints(catalog="I/355/gaiadr3", Source=source)
-    except TimeoutError:
+    except (TimeoutError, ConnectionError, ConnectTimeout):
         return RETURNS.EXCEPTION
 
     if not data:

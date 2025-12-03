@@ -20,6 +20,8 @@ def query(kind: str, target: int | SkyCoord, **kwargs):
 
     # get search position and structure
     search_pos, structure = prepare_search(target=target, query_kind=kind, **additional_arguments)
+    if not search_pos:
+        return structure
 
     # add source to kwargs (needed e.g. in Vizier queries to Gaia by source)
     if isinstance(target, int):

@@ -2,12 +2,14 @@ import warnings
 
 import astropy.units as u
 import numpy as np
+import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from erfa import ErfaWarning
 
 from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
+from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_structure_map
 
 # ignore bad distance warning
@@ -66,6 +68,8 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     gaia_epoch = EPOCH_CONFIG.as_dict()["vizier_aliases"]["gaia"]
 
     gaia_data = gaia_query_by_source(source)
+    if gaia_data is RETURNS.EXCEPTION or gaia_data is RETURNS.NULL:
+        return gaia_data
 
     ra, dec = gaia_data["RA_ICRS"].tolist()[0], gaia_data["DE_ICRS"].tolist()[0]
     pmra, pmdec = gaia_data["pmRA"].tolist()[0], gaia_data["pmDE"].tolist()[0]
@@ -86,25 +90,13 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(
-        ra=ra * u.deg,
-        dec=dec * u.deg,
-        pm_ra_cosdec=pmra,
-        pm_dec=pmdec,
-        distance=distance,
-        obstime=gaia_epoch,
-        frame="icrs",
-    )
+    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
 
     return coord
 
 
 def correct_skycoord(
-    position: SkyCoord,
-    query_kind: str = None,
-    survey: str = None,
-    epoch: Time = None,
-    get_correction_degree: bool = False,
+    position: SkyCoord, query_kind: str = None, survey: str = None, epoch: Time = None, get_correction_degree: bool = False
 ) -> SkyCoord:
     """
     Corrects a SkyCoord to a given epoch definition from a given section or a given epoch, returns corrected SkyCoord object and optionally returns the success level of the correction. If correction isn't possible, just returns the original SkyCoord
@@ -146,9 +138,7 @@ def correct_skycoord(
         return corrected_position
 
 
-def prepare_search(
-    target: int | SkyCoord, query_kind: str, survey: str = None, epoch: Time = None, **kwargs
-) -> tuple[SkyCoord, any]:
+def prepare_search(target: int | SkyCoord, query_kind: str, survey: str = None, epoch: Time = None, **kwargs) -> tuple[SkyCoord, any]:
     """
     Prepares a search with an input position or source. Returns the position of the search and a partially completed data structure
     """
@@ -158,15 +148,19 @@ def prepare_search(
     if source:
         # translate Gaia position to epoch of survey if an epoch definition exists
         gaia_pos = get_gaia_skycoord(source)
-        if survey != "gaia":
-            search_pos, correction_degree = correct_skycoord(
-                gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True
-            )
+        if gaia_pos in [RETURNS.NULL, RETURNS.EXCEPTION]:
+            search_pos = None
+            correction_degree = "none"
+        elif survey != "gaia":
+            search_pos, correction_degree = correct_skycoord(gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True)
         else:
             search_pos = gaia_pos
             correction_degree = "n/a"
 
     elif position:
+        # needed below when checking if an exception occured at this point
+        gaia_pos = None
+
         correction_degree = "none"
         search_pos = position
 
@@ -177,9 +171,10 @@ def prepare_search(
         position=search_pos,
         source=source,
         radius=kwargs.get("radius", None),
-        frame=search_pos.frame.name,
-        epoch=search_pos.obstime,
+        frame=getattr(getattr(search_pos, "frame", None), "name", None),
+        epoch=getattr(search_pos, "obstime", None),
         correction=correction_degree,
+        exception=True if gaia_pos == RETURNS.EXCEPTION else False,
     )
 
     return search_pos, structure

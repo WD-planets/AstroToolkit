@@ -8,7 +8,7 @@ from astropy.io.fits.hdu import PrimaryHDU
 from astropy.time import Time
 from astropy.wcs import WCS
 
-from ...structures.data_containers.definitions import Image
+from ..structures.data_containers.definitions import Image
 
 # GLOBALS for tracking state
 CURRENT_DEPTH = 0
@@ -21,11 +21,7 @@ MAX_DISPLAY = 10  # max entries in an array before truncation occurs
 METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__"]
 
 # Headers are printed for containers that need to be expanded
-CONTAINER_HEADERS = {
-    pd.DataFrame: lambda x: "<pandas.DataFrame>",
-    dict: lambda x: "<dict>",
-    Image: lambda x: f"<{x.__repr__()}>",
-}
+CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>", Image: lambda x: f"<{x.__repr__()}>"}
 
 # ------------------
 # SPECIAL FORMATTERS

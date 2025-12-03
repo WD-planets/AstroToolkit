@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
 
-from ..methods.show import pprint_structure
+from ...io.files.writing import write_structure
+from ...io.struct_stdout import pprint_structure
 
 
 @dataclass
@@ -20,3 +22,6 @@ class QueryResult:
 
     def show(self, show_all_types=False):
         pprint_structure(self, show_all_types)
+
+    def save(self, fname: str | Path = None):
+        write_structure(self, fname)
