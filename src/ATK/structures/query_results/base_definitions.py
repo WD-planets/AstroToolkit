@@ -23,5 +23,11 @@ class QueryResult:
     def show(self, show_all_types=False):
         pprint_structure(self, show_all_types)
 
-    def save(self, fname: str | Path = None):
-        write_structure(self, fname)
+    def save(self, path: str | Path = None):
+        write_structure(self, path)
+
+    def __repr__(self):
+        return f"{self.survey} {self.kind} data"
+
+    def __str__(self):
+        return self.__repr__()

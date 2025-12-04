@@ -1,33 +1,17 @@
+import warnings
 from pathlib import Path
 
-import astropy.units as u
 import pandas as pd
-from astropy.coordinates import SkyCoord
 from astropy.io.fits import HDUList, Header
 from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
+from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
-from astropy.time import Time
+
+from ...structures.structure_io import struct_to_hdu
+
+warnings.simplefilter("ignore", category=VerifyWarning)
 
 WRITE_MAP = {}
-
-
-# ---------------
-# WRITE FUNCTIONS
-# ---------------
-
-
-# -------
-# MAPPING
-# -------
-
-
-WRITE_MAP.update(
-    {
-        pd.DataFrame: write_dataframe,
-        SkyCoord: lambda data, name, hdr, hdul: write_skycoord(data, hdr, hdul),
-        dict: lambda data, name, hdul, hdr: write_dataframe(data.to_dict(orient="list"), name, hdul, hdr),
-    }
-)
 
 
 # ----
@@ -35,13 +19,22 @@ WRITE_MAP.update(
 # ----
 
 
-def write_structure(structure: any, fname: str | Path):
-    hdr = Header()
+def write_structure(structure: any, path: str | Path):
     hdul = HDUList()
 
-    for attr, val in structure.__dict__.items():
-        write_function = WRITE_MAP.get(type(val), None)
-        if not write_function:
-            raise Exception(f"No write function found for dtype '{type(val)}'.")
+    query_hdu = struct_to_hdu(structure, ignore_attrs=("data", "frame", "epoch"), kind=PrimaryHDU)
+    hdul.append(query_hdu)
 
-        hdr, hdul = write_function()
+    for attr, val in structure.__dict__.items():
+        if attr == "data":
+            if isinstance(val, pd.DataFrame):
+                tbl = Table.from_pandas(val)
+                hdu = BinTableHDU(tbl, header=Header(), name=structure.__repr__())
+                hdul.append(hdu)
+            elif isinstance(val, list):
+                for ctr in val:
+                    hdul.append(ctr.to_hdu())
+            else:
+                raise ValueError(f"Unexpected type of .data attribute in structure '{type(structure)}'.")
+
+    hdul.writeto(path, overwrite=True)

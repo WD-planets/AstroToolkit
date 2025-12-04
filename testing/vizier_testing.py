@@ -12,7 +12,7 @@ GAL_POSITION = SkyCoord(l=121.880, b=-57.478, unit=u.deg, frame="galactic")
 
 data = query(kind="vizier", target=SOURCE, survey="galex")
 data.show()
-data.save()
+data.save("test.fits")
 
 """
 data = query(kind="vizier", target=POSITION, survey="gaia")

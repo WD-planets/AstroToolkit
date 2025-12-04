@@ -1,9 +1,3 @@
-src/AstroToolkit/Configuration/ATKConfig.ini
-src/AstroToolkit/Configuration/ATKAliases.ini
-src/AstroToolkit/Configuration/ATKEpochs.ini
-src/AstroToolkit/Configuration/ATKoverlays.yaml
-
-notes/
 test_scripts/
 
 dist/
@@ -12,7 +6,6 @@ docs/_build/
 *.pyc
 *.html
 !docs/_static/*.html
+*.fits
 
-src/AstroToolkit/CRTS_TIMER.txt
 src/AstroToolkit.egg-info
-src/AstroToolkit/Timeseries/pyaov/path.dat

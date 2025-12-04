@@ -3,11 +3,10 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
-from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.wcs import WCS
 
-from .container_io import container_to_dataframe, container_to_hdu
+from ..structure_io import struct_to_dataframe, struct_to_hdu
 
 
 @dataclass
@@ -26,10 +25,10 @@ class Image:
         return self.__repr__()
 
     def to_dataframe(self) -> pd.DataFrame:
-        return container_to_dataframe(self)
+        return struct_to_dataframe(self)
 
     def to_hdu(self) -> BinTableHDU:
-        return container_to_hdu(self)
+        return struct_to_hdu(self)
 
 
 @dataclass
@@ -45,7 +44,7 @@ class Spectrum:
         return self.__repr__()
 
     def to_dataframe(self) -> pd.DataFrame:
-        return container_to_dataframe(self)
+        return struct_to_dataframe(self)
 
     def to_hdu(self) -> BinTableHDU:
-        return container_to_hdu(self)
+        return struct_to_hdu(self)

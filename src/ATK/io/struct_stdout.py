@@ -18,7 +18,7 @@ OUTPUT = ""
 # OPTIONS
 SIG_FIGS = 3  # significant figures of array elements
 MAX_DISPLAY = 10  # max entries in an array before truncation occurs
-METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__"]
+METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__", "__str__"]
 
 # Headers are printed for containers that need to be expanded
 CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>", Image: lambda x: f"<{x.__repr__()}>"}

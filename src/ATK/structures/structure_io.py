@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
-from astropy.io.fits.hdu import BinTableHDU
+from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.table import Table
+from astropy.wcs import WCS
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series, list)
@@ -19,7 +20,7 @@ COLUMN_TYPES = (np.ndarray, pd.Series, list)
 
 def write_fallback(hdr: Header, key: str, value: any):
     try:
-        hdr[key] = value
+        hdr.append((f"ATK_{key.upper()}", value))
     except Exception:
         raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' to FITS header key '{key}'.")
 
@@ -27,25 +28,33 @@ def write_fallback(hdr: Header, key: str, value: any):
 
 
 def write_skycoord(hdr: Header, coord: SkyCoord):
-    print(hdr.__dict__)
+    hdr.append(("ATK_RA", coord.ra.value, "Source RA (deg)"))
+    hdr.append(("ATK_DEC", coord.dec.value, "Source DEC (deg)"))
+    hdr.append(("ATK_FRAME", coord.frame.name, "Coordinate frame of ATK_RA and ATK_DEC"))
 
-    hdr["ATK_RA"] = coord.ra
-    hdr["ATK_DEC"] = coord.dec
+    if coord.obstime:
+        hdr.append(("ATK_EPOCH", coord.obstime.fits, "Epoch of ATK_RA and ATK_DEC"))
 
     # proper motion data
     if coord.data.differentials:
-        hdr["ATK_PMRA"] = coord.pm_ra_cosdec
-        hdr["ATK_PMDEC"] = coord.pm_dec
+        hdr.append(("ATK_PMRA", coord.pm_ra_cosdec.value, "Source Proper Motion in RA (mas/yr)"))
+        hdr.append(("ATK_PMDEC", coord.pm_dec.value, "Source Proper Motion in DEC (mas/yr)"))
     else:
-        hdr["ATK_PMRA"] = None
-        hdr["ATK_PMDEC"] = None
+        hdr.append(("ATK_PMRA", None))
+        hdr.append(("ATK_PMDEC", None))
 
     # distance
     if coord.distance != u.one:
-        hdr["ATK_DISTANCE"] = coord.distance
+        hdr.append(("ATK_DISTANCE", coord.distance.value, "Source distance (1/p) (pc)"))
 
     return hdr
 
+
+def write_wcs(hdr: Header):
+    return hdr
+
+
+WRITE_MAP = {SkyCoord: lambda hdr, key, val: write_skycoord(hdr, val), WCS: lambda hdr, key, val: write_wcs(hdr)}
 
 # ---------
 # UTILITIES
@@ -73,12 +82,16 @@ def get_cols(structure: any):
 # -----------------------
 
 
-def container_to_dataframe(structure: any):
+def struct_to_dataframe(structure: any):
     cols = get_cols(structure)
 
     data = {}
     for col in cols:
         val = getattr(structure, col)
+        if not val:
+            data[col] = np.empty(0)
+            continue
+
         if not isinstance(val, COLUMN_TYPES):
             val = [val]
         data[col] = val
@@ -86,17 +99,26 @@ def container_to_dataframe(structure: any):
     return pd.DataFrame.from_dict(data)
 
 
-def container_to_hdu(structure: any) -> BinTableHDU:
+def struct_to_hdu(structure: any, ignore_attrs: tuple = (), kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:
     hdr = Header()
 
     cols = get_cols(structure)
-    df = container_to_dataframe(structure)
+    df = struct_to_dataframe(structure)
     tbl = Table.from_pandas(df)
 
     for attr, val in structure.__dict__.items():
+        if attr in ignore_attrs:
+            continue
         if attr in cols:
             continue
 
-    hdu = BinTableHDU(tbl, header=hdr, name=structure.__str__())
+        hdr = WRITE_MAP.get(type(val), write_fallback)(hdr, attr, val)
+
+    if kind == PrimaryHDU:
+        hdu = PrimaryHDU(tbl, header=hdr)
+    elif kind == BinTableHDU:
+        hdu = BinTableHDU(tbl, header=hdr, name=structure.__str__())
+    else:
+        raise ValueError("Invalid table type '{kind}' passed to struct_to_hdu.")
 
     return hdu
