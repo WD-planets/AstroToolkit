@@ -20,6 +20,8 @@ WRITE_MAP = {}
 
 
 def write_structure(structure: any, path: str | Path):
+    path = path or structure._fname
+
     hdul = HDUList()
 
     query_hdu = struct_to_hdu(structure, ignore_attrs=("data", "frame", "epoch"), kind=PrimaryHDU)

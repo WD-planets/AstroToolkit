@@ -9,8 +9,8 @@ from erfa import ErfaWarning
 
 from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
+from ..structures.definitions import QueryResult
 from ..utilities.defaults import RETURNS
-from ..utilities.mapping import build_structure_map
 
 # ignore bad distance warning
 warnings.filterwarnings("ignore", category=ErfaWarning)
@@ -164,8 +164,7 @@ def prepare_search(target: int | SkyCoord, query_kind: str, survey: str = None, 
         correction_degree = "none"
         search_pos = position
 
-    structure_map = build_structure_map()
-    structure = structure_map[query_kind](
+    structure = QueryResult(
         kind=query_kind,
         survey=survey,
         position=search_pos,

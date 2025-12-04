@@ -37,16 +37,3 @@ def build_map(root_module: str, function_name: str, **kwargs):
             raise ImportError(f"Module {module.name}.py lacks required function '{function_name}'.")
 
     return map
-
-
-def build_structure_map():
-    module = importlib.import_module("ATK.structures.query_results.definitions")
-    suffix = "Struct"
-
-    map = {}
-    for name, obj in inspect.getmembers(module, inspect.isclass):
-        if obj.__module__ == module.__name__ and name.endswith(suffix):
-            key = name[: -len(suffix)]
-            map[key.lower()] = obj
-
-    return map

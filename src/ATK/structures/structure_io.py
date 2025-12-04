@@ -1,5 +1,7 @@
 import typing
 from dataclasses import fields
+from types import UnionType
+from typing import get_args, get_origin
 
 import astropy.units as u
 import numpy as np
@@ -11,7 +13,7 @@ from astropy.table import Table
 from astropy.wcs import WCS
 
 # types (in typehints) that should be considered as being columns of a dataframe
-COLUMN_TYPES = (np.ndarray, pd.Series, list)
+COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
 
 # ----------------------
 # HEADER WRITE FUNCTIONS
@@ -61,17 +63,38 @@ WRITE_MAP = {SkyCoord: lambda hdr, key, val: write_skycoord(hdr, val), WCS: lamb
 # ---------
 
 
-def get_cols(structure: any):
+def is_strict_column_type(typ):
+    """
+    Returns True if all non-None types in a typehint are array-like
+    """
+
+    # Unions (i.e. x | y | z)
+    if isinstance(typ, UnionType):
+        args = [a for a in get_args(typ) if a is not type(None)]
+        if not args:
+            return False
+        return all(is_strict_column_type(a) for a in args)
+
+    # Generic nested types (i.e. list[float])
+    origin = get_origin(typ)
+    if origin in COLUMN_TYPES:
+        return True
+
+    # Basic non-nested type (i.e. np.ndarray)
+    return typ in COLUMN_TYPES
+
+
+def get_cols(structure):
     cols = []
 
     hints = typing.get_type_hints(structure.__class__)
+
     for field in fields(structure):
-        field_type = hints.get(field.name, None)
-        if not field_type:
+        field_type = hints.get(field.name)
+        if field_type is None:
             continue
 
-        args = typing.get_args(field_type)
-        if field_type in COLUMN_TYPES or any(COL in args for COL in COLUMN_TYPES):
+        if is_strict_column_type(field_type):
             cols.append(field.name)
 
     return cols
@@ -88,7 +111,7 @@ def struct_to_dataframe(structure: any):
     data = {}
     for col in cols:
         val = getattr(structure, col)
-        if not val:
+        if val is None:
             data[col] = np.empty(0)
             continue
 
@@ -119,6 +142,6 @@ def struct_to_hdu(structure: any, ignore_attrs: tuple = (), kind: BinTableHDU | 
     elif kind == BinTableHDU:
         hdu = BinTableHDU(tbl, header=hdr, name=structure.__str__())
     else:
-        raise ValueError("Invalid table type '{kind}' passed to struct_to_hdu.")
+        raise ValueError(f"Invalid table type '{kind}' passed to struct_to_hdu.")
 
     return hdu
