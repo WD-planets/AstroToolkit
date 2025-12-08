@@ -7,6 +7,7 @@ from pathlib import Path
 # possible ways of opening files across linux distributions, in order of priority
 LINUX_OPENERS = {
     "xdg-open": ["xdg-open"],
+    "nvim": ["nvim"],
     "vim": ["vim"],
     "vi": ["vi"],
     "nano": ["nano"],
@@ -37,7 +38,6 @@ def open_file(path: Path):
                 break
 
         if opener:
-            print([opener, path])
             subprocess.run([*opener, path], check=False)
         else:
             print(f"No system opener found; file is located at {path}")

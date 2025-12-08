@@ -149,4 +149,8 @@ class YAMLConfig:
         print(self._printer(self._config))
 
     def _open(self) -> None:
+        """
+        Opens the config file in the default text editor
+        """
+
         open_file(self._path)

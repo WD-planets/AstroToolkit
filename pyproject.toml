@@ -10,7 +10,7 @@ line-length=120
 skip-magic-trailing-comma = true
 
 [tool.ruff]
-line-length = 180
+line-length = 240 
 
 [project]
 name = "AstroToolkit"

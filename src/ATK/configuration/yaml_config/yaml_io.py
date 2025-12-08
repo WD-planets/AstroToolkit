@@ -51,6 +51,10 @@ def default_printer(data: dict):
 
 
 def seq_representer(dumper, seq):
+    """
+    Overrides CustomDumper to print only lists of values in flow style (i.e. [one,two,three])
+    """
+
     return dumper.represent_sequence("tag:yaml.org,2002:seq", seq, flow_style=True)
 
 

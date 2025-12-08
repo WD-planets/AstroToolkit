@@ -135,4 +135,8 @@ class ParserConfig:
             print()
 
     def _open(self) -> None:
+        """
+        Opens the config file in the default text editor
+        """
+
         open_file(self._path)

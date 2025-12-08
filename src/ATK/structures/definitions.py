@@ -50,13 +50,52 @@ class QueryResult:
 
 
 @dataclass
+class Lightcurve:
+    survey: str
+    band: str
+    mjd: numpy.ndarray
+    flux: numpy.ndarray | None = None
+    flux_err: numpy.ndarray | None = None
+    mag: numpy.ndarray | None = None
+    mag_err: numpy.ndarray | None = None
+
+    def __post_init__(self):
+        # check for a valid input combination
+        if (self.flux is None) == (self.mag is None):
+            raise ValueError("Lightcurve container cannot hold both 'mag' and 'flux'.")
+        if self.flux is not None and self.mag_err is not None:
+            raise ValueError("Lightcurve cannot hold invalid combination of 'flux' and 'mag_err'.")
+        if self.mag is not None and self.flux_err is not None:
+            raise ValueError("Lightcurve cannot hold invalid combination of 'mag' and 'flux_err'.")
+
+        # delete unneeded attributes
+        if self.flux is None:
+            del self.flux
+            del self.flux_err
+        if self.mag is None:
+            del self.mag
+            del self.mag_err
+
+    def __repr__(self):
+        return f"<{self.survey} {self.band}-band Lightcurve>"
+
+    def __str__(self):
+        return self.__repr__()
+
+    def to_dataframe(self) -> pandas.DataFrame:
+        return struct_to_dataframe(self)
+
+    def to_hdu(self) -> BinTableHDU:
+        return struct_to_hdu(self)
+
+
+@dataclass
 class Image:
-    survey: str | None = "panstarrs"
-    band: str | None = "g"
+    survey: str | None = None
+    band: str | None = None
     hdu: PrimaryHDU | None = None
     wcs: WCS | None = None
     focus: SkyCoord | None = None
-    test_arr: numpy.ndarray | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band Image>"
