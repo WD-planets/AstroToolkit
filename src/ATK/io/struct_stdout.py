@@ -21,7 +21,11 @@ MAX_DISPLAY = 10  # max entries in an array before truncation occurs
 METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__", "__str__"]
 
 # Headers are printed for containers that need to be expanded
-CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>", "Image": lambda x: f"<{x.__repr__()}>"}
+CONTAINER_HEADERS = {
+    pd.DataFrame: lambda x: "<pandas.DataFrame>",
+    dict: lambda x: "<dict>",
+    "Image": lambda x: f"{x.__repr__()}",
+}
 
 # ------------------
 # SPECIAL FORMATTERS
@@ -312,7 +316,11 @@ def print_methods(cls: any) -> str:
     Prints available methods of an object, excluding
     """
 
-    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)]
+    methods = [
+        name
+        for name, f in inspect.getmembers(cls, inspect.ismethod)
+        if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)
+    ]
 
     return "Available Methods: " + ", ".join(f".{m}()" for m in methods)
 

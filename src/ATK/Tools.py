@@ -1,7 +1,9 @@
 import importlib
+from pathlib import Path
 
 from astropy.coordinates import SkyCoord
 
+from .io.files.read import read_local
 from .queries.arguments import get_query_arguments
 from .utilities.defaults import RETURNS
 from .utilities.mapping import build_map
@@ -39,3 +41,7 @@ def query(kind: str, target: int | SkyCoord, **kwargs):
         structure.data = query_result
 
     return structure
+
+
+def read(path: str | Path):
+    data = read_local(path)

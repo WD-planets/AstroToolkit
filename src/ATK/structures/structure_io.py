@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
-from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.wcs import WCS
 
@@ -20,7 +20,7 @@ COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
 # ----------------------
 
 
-def write_fallback(hdr: Header, key: str, value: any):
+def write_fallback(hdr: Header, key: str, value: any) -> Header:
     try:
         hdr.append((f"ATK_{key.upper()}", value))
     except Exception:
@@ -29,7 +29,8 @@ def write_fallback(hdr: Header, key: str, value: any):
     return hdr
 
 
-def write_skycoord(hdr: Header, coord: SkyCoord):
+def write_skycoord(hdr: Header, coord: SkyCoord) -> Header:
+    hdr.append(("ATK_SKYCOORD", True, "If True, a SkyCoord is present in header"))
     hdr.append(("ATK_RA", coord.ra.value, "Source RA (deg)"))
     hdr.append(("ATK_DEC", coord.dec.value, "Source DEC (deg)"))
     hdr.append(("ATK_FRAME", coord.frame.name, "Coordinate frame of ATK_RA and ATK_DEC"))
@@ -52,18 +53,17 @@ def write_skycoord(hdr: Header, coord: SkyCoord):
     return hdr
 
 
-def write_wcs(hdr: Header):
-    return hdr
-
-
-WRITE_MAP = {SkyCoord: lambda hdr, key, val: write_skycoord(hdr, val), WCS: lambda hdr, key, val: write_wcs(hdr)}
+WRITE_MAP = {
+    SkyCoord: lambda **kwargs: write_skycoord(kwargs["hdr"], kwargs["value"]),
+    WCS: lambda **kwargs: kwargs["hdr"],
+}
 
 # ---------
 # UTILITIES
 # ---------
 
 
-def is_strict_column_type(typ):
+def is_strict_column_type(typ: UnionType | type) -> bool:
     """
     Returns True if all non-None types in a typehint are array-like
     """
@@ -84,7 +84,7 @@ def is_strict_column_type(typ):
     return typ in COLUMN_TYPES
 
 
-def get_cols(structure):
+def get_cols(structure: any) -> tuple[str]:
     cols = []
 
     hints = typing.get_type_hints(structure.__class__)
@@ -105,7 +105,7 @@ def get_cols(structure):
 # -----------------------
 
 
-def struct_to_dataframe(structure: any):
+def struct_to_dataframe(structure: any) -> pd.DataFrame:
     cols = get_cols(structure)
 
     data = {}
@@ -122,12 +122,21 @@ def struct_to_dataframe(structure: any):
     return pd.DataFrame.from_dict(data)
 
 
-def struct_to_hdu(structure: any, ignore_attrs: tuple = (), kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:
+def struct_to_hdu(
+    structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | ImageHDU = BinTableHDU
+) -> BinTableHDU:
+    ignore_attrs.append("kind")
+
     hdr = Header()
+    hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
 
     cols = get_cols(structure)
     df = struct_to_dataframe(structure)
     tbl = Table.from_pandas(df)
+
+    kind_str = "ATK query kind" if hdu_kind is ImageHDU else "ATK container kind"
+    kind = structure.__dict__.get("kind", type(structure).__name__)
+    hdr.append(("ATK_KIND", kind, kind_str))
 
     for attr, val in structure.__dict__.items():
         if attr in ignore_attrs:
@@ -135,11 +144,13 @@ def struct_to_hdu(structure: any, ignore_attrs: tuple = (), kind: BinTableHDU | 
         if attr in cols:
             continue
 
-        hdr = WRITE_MAP.get(type(val), write_fallback)(hdr, attr, val)
+        hdr = WRITE_MAP.get(type(val), write_fallback)(hdr=hdr, key=attr, value=val)
 
-    if kind == PrimaryHDU:
-        hdu = PrimaryHDU(tbl, header=hdr)
-    elif kind == BinTableHDU:
+    if hdu_kind == PrimaryHDU:
+        hdu = PrimaryHDU(None, header=hdr)
+    elif hdu_kind == ImageHDU:
+        hdu = ImageHDU(tbl, header=hdr, name=structure.__str__())
+    elif hdu_kind == BinTableHDU:
         hdu = BinTableHDU(tbl, header=hdr, name=structure.__str__())
     else:
         raise ValueError(f"Invalid table type '{kind}' passed to struct_to_hdu.")

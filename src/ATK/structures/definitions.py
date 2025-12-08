@@ -3,13 +3,12 @@ from pathlib import Path
 
 import numpy
 import pandas
-import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.time import Time
 from astropy.wcs import WCS
 
-from ..io.files.writing import write_structure
+from ..io.files.writing import write_local
 from ..io.struct_stdout import pprint_structure
 from .structure_io import struct_to_dataframe, struct_to_hdu
 
@@ -28,14 +27,14 @@ class QueryResult:
 
     data: pandas.DataFrame | list | None = None
 
-    def show(self, show_all_types=False):
+    def show(self, show_all_types=False) -> None:
         pprint_structure(self, show_all_types)
 
-    def save(self, path: str | Path = None):
-        write_structure(self, path)
+    def save(self, path: str | Path = None) -> Path:
+        return write_local(self, path)
 
     def __repr__(self):
-        return f"{self.survey} {self.kind} data"
+        return f"<{self.survey} {self.kind} data>"
 
     def __str__(self):
         return self.__repr__()
@@ -43,9 +42,11 @@ class QueryResult:
     @property
     def _fname(self):
         if self.source:
-            return f"{self.source}_{self.survey}_data.fits"
+            return Path(f"{self.source}_{self.survey}_ATKdata.fits")
         elif self.position:
-            return f"{self.position.ra:.3f}_{self.position.dec:.3f}_{self.kind}.fits"
+            return Path(f"{self.position.ra:.3f}_{self.position.dec:.3f}_ATKdata.fits")
+        else:
+            raise ValueError("No source or position data to be used in generating a file name.")
 
 
 @dataclass
@@ -58,12 +59,12 @@ class Image:
     test_arr: numpy.ndarray | None = None
 
     def __repr__(self):
-        return f"{self.survey} {self.band}-band Image"
+        return f"<{self.survey} {self.band}-band Image>"
 
     def __str__(self):
         return self.__repr__()
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self) -> pandas.DataFrame:
         return struct_to_dataframe(self)
 
     def to_hdu(self) -> BinTableHDU:
@@ -77,12 +78,12 @@ class Spectrum:
     flux: numpy.ndarray | None = None
 
     def __repr__(self):
-        return f"{self.survey} Spectrum"
+        return f"<{self.survey} Spectrum>"
 
     def __str__(self):
         return self.__repr__()
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self) -> pandas.DataFrame:
         return struct_to_dataframe(self)
 
     def to_hdu(self) -> BinTableHDU:
