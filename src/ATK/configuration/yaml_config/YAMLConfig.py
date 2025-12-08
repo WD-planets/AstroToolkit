@@ -1,7 +1,3 @@
-import os
-import shutil
-import subprocess
-import sys
 from pathlib import Path
 from types import FunctionType
 
@@ -9,6 +5,8 @@ import yaml
 
 from ...utilities.file_io import open_file
 from .yaml_io import CustomDumper, default_printer
+
+YAML_INDENT = 4
 
 
 def translate_dict(raw: dict, translator: FunctionType) -> dict:
@@ -75,7 +73,7 @@ class YAMLConfig:
 
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._path, "w") as f:
-            yaml.dump(self._raw, f, sort_keys=False, indent=4, Dumper=CustomDumper)
+            yaml.dump(self._raw, f, sort_keys=False, indent=YAML_INDENT, Dumper=CustomDumper)
 
     def _reset(self):
         """
@@ -83,7 +81,7 @@ class YAMLConfig:
         """
 
         with open(self._path, "w") as f:
-            yaml.dump(self._defaults, f, sort_keys=False, indent=4, Dumper=CustomDumper)
+            yaml.dump(self._defaults, f, sort_keys=False, indent=YAML_INDENT, Dumper=CustomDumper)
         self._load()
 
     def _set(self, section: str, key: str, **kwargs):

@@ -90,13 +90,25 @@ def get_gaia_skycoord(source: int) -> SkyCoord:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
+    coord = SkyCoord(
+        ra=ra * u.deg,
+        dec=dec * u.deg,
+        pm_ra_cosdec=pmra,
+        pm_dec=pmdec,
+        distance=distance,
+        obstime=gaia_epoch,
+        frame="icrs",
+    )
 
     return coord
 
 
 def correct_skycoord(
-    position: SkyCoord, query_kind: str = None, survey: str = None, epoch: Time = None, get_correction_degree: bool = False
+    position: SkyCoord,
+    query_kind: str = None,
+    survey: str = None,
+    epoch: Time = None,
+    get_correction_degree: bool = False,
 ) -> SkyCoord:
     """
     Corrects a SkyCoord to a given epoch definition from a given section or a given epoch, returns corrected SkyCoord object and optionally returns the success level of the correction. If correction isn't possible, just returns the original SkyCoord
@@ -138,7 +150,9 @@ def correct_skycoord(
         return corrected_position
 
 
-def prepare_search(target: int | SkyCoord, query_kind: str, survey: str = None, epoch: Time = None, **kwargs) -> tuple[SkyCoord, any]:
+def prepare_search(
+    target: int | SkyCoord, query_kind: str, survey: str = None, epoch: Time = None, **kwargs
+) -> tuple[SkyCoord, any]:
     """
     Prepares a search with an input position or source. Returns the position of the search and a partially completed data structure
     """
@@ -152,7 +166,9 @@ def prepare_search(target: int | SkyCoord, query_kind: str, survey: str = None, 
             search_pos = None
             correction_degree = "none"
         elif survey != "gaia":
-            search_pos, correction_degree = correct_skycoord(gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True)
+            search_pos, correction_degree = correct_skycoord(
+                gaia_pos, query_kind, survey=survey, epoch=epoch, get_correction_degree=True
+            )
         else:
             search_pos = gaia_pos
             correction_degree = "n/a"
@@ -180,6 +196,10 @@ def prepare_search(target: int | SkyCoord, query_kind: str, survey: str = None, 
 
 
 def correct_radius(target: int | SkyCoord, radius: float, epoch: Time = None):
+    """
+    Expands a search radius for proper motion
+    """
+
     source, position = check_targeting(target)
 
     # return uncorrected radius

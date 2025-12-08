@@ -21,6 +21,10 @@ COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
 
 
 def write_fallback(hdr: Header, key: str, value: any) -> Header:
+    """
+    Writes generic data types to the header (e.g. str, int, float)
+    """
+
     try:
         hdr.append((f"ATK_{key.upper()}", value))
     except Exception:
@@ -30,6 +34,10 @@ def write_fallback(hdr: Header, key: str, value: any) -> Header:
 
 
 def write_skycoord(hdr: Header, coord: SkyCoord) -> Header:
+    """
+    Splits a SkyCoord into its components and writes this as a set of header keys
+    """
+
     hdr.append(("ATK_SKYCOORD", True, "If True, a SkyCoord is present in header"))
     hdr.append(("ATK_RA", coord.ra.value, "Source RA (deg)"))
     hdr.append(("ATK_DEC", coord.dec.value, "Source DEC (deg)"))
@@ -53,6 +61,7 @@ def write_skycoord(hdr: Header, coord: SkyCoord) -> Header:
     return hdr
 
 
+# Map to special header writing functions
 WRITE_MAP = {
     SkyCoord: lambda **kwargs: write_skycoord(kwargs["hdr"], kwargs["value"]),
     WCS: lambda **kwargs: kwargs["hdr"],
@@ -85,6 +94,10 @@ def is_strict_column_type(typ: UnionType | type) -> bool:
 
 
 def get_cols(structure: any) -> tuple[str]:
+    """
+    Returns a list of array-like attributes of a data structure using typehinting
+    """
+
     cols = []
 
     hints = typing.get_type_hints(structure.__class__)
@@ -106,6 +119,10 @@ def get_cols(structure: any) -> tuple[str]:
 
 
 def struct_to_dataframe(structure: any) -> pd.DataFrame:
+    """
+    Combines the array-like attributes of a data structure into a single pandas DataFrame
+    """
+
     cols = get_cols(structure)
 
     data = {}
@@ -125,19 +142,28 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
 def struct_to_hdu(
     structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | ImageHDU = BinTableHDU
 ) -> BinTableHDU:
+    """
+    Convert a data structure into a fits HDU.
+    """
+
+    # make sure kind is always ignored by dispatcher, this is handled separately below
     ignore_attrs.append("kind")
 
     hdr = Header()
+    # tag all HDUs as coming from ATK
     hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
 
+    # combine array-like attributes into a dataframe
     cols = get_cols(structure)
     df = struct_to_dataframe(structure)
     tbl = Table.from_pandas(df)
 
-    kind_str = "ATK query kind" if hdu_kind is ImageHDU else "ATK container kind"
+    # PrimaryHDU stores query kind, extensions store data container kind
+    kind_str = "ATK query kind" if hdu_kind is PrimaryHDU else "ATK container kind"
     kind = structure.__dict__.get("kind", type(structure).__name__)
     hdr.append(("ATK_KIND", kind, kind_str))
 
+    # iterate through remaining structure attributes and write them to the header
     for attr, val in structure.__dict__.items():
         if attr in ignore_attrs:
             continue
@@ -146,6 +172,7 @@ def struct_to_hdu(
 
         hdr = WRITE_MAP.get(type(val), write_fallback)(hdr=hdr, key=attr, value=val)
 
+    # generate HDU
     if hdu_kind == PrimaryHDU:
         hdu = PrimaryHDU(None, header=hdr)
     elif hdu_kind == ImageHDU:

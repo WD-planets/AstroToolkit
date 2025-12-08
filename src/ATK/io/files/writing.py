@@ -19,6 +19,10 @@ WRITE_MAP = {}
 
 
 def dataframe_to_hdu(structure, data: pd.DataFrame) -> BinTableHDU:
+    """
+    Convert a pandas dataframe to an astropy BinTableHDU
+    """
+
     hdr = Header()
     hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
     tbl = Table.from_pandas(data)
@@ -33,6 +37,10 @@ def dataframe_to_hdu(structure, data: pd.DataFrame) -> BinTableHDU:
 
 
 def write_local(structure: any, path: str | Path) -> Path:
+    """
+    Write an ATK data structure to a local fits file
+    """
+
     path = path or structure._fname
 
     hdul = HDUList()
@@ -40,13 +48,18 @@ def write_local(structure: any, path: str | Path) -> Path:
     query_hdu = struct_to_hdu(structure, ignore_attrs=["data", "frame", "epoch"], hdu_kind=PrimaryHDU)
     hdul.append(query_hdu)
 
+    # iterate through structure attributes
     for attr, val in structure.__dict__.items():
         if attr == "data":
+            # vizier queries
             if isinstance(val, pd.DataFrame):
                 hdul.append(dataframe_to_hdu(structure, val))
+
+            # all other queries (i.e. list of data containers)
             elif isinstance(val, list):
                 for ctr in val:
                     hdul.append(ctr.to_hdu())
+
             else:
                 raise ValueError(f"Unexpected type of .data attribute in structure '{type(structure)}'.")
 

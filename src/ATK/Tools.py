@@ -11,6 +11,10 @@ from .utilities.targeting import prepare_search
 
 
 def query(kind: str, target: int | SkyCoord, **kwargs):
+    """
+    Central query function
+    """
+
     module = importlib.import_module(f"ATK.queries.{kind}")
     query_map = build_map(module, "query", suffix="_query")
 
@@ -44,4 +48,4 @@ def query(kind: str, target: int | SkyCoord, **kwargs):
 
 
 def read(path: str | Path):
-    data = read_local(path)
+    return read_local(path)

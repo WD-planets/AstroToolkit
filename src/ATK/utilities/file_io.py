@@ -16,6 +16,10 @@ LINUX_OPENERS = {
 
 
 def open_file(path: Path):
+    """
+    Attempts to open a file in the default text editor, should be cross-platform compatible for Windows/Mac/Linux
+    """
+
     # Windows
     if sys.platform.startswith("win"):
         os.startfile(path)

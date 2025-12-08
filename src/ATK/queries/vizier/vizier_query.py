@@ -30,6 +30,10 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
 
 
 def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
+    """
+    Perform a vizier query to Gaia DR3 by source_id
+    """
+
     v = Vizier(columns=["**"], column_filters={"Source": f"=={source}"}, row_limit=ROW_LIMIT)
 
     try:
@@ -44,20 +48,28 @@ def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
 
 
 def query(search_pos: SkyCoord, **kwargs) -> pd.DataFrame | None | int:
+    """
+    Perform a Vizier query by source or position (source will be present in kwargs) in the latter case
+    """
+
     aliases = ALIAS_CONFIG.as_dict()["vizier_aliases"]
 
+    # survey = catalogue alias (here for parity with other query commands), catalogue = actual vizier catalogue ID
     survey, catalogue = kwargs.get("survey"), kwargs.get("catalogue")
 
     # ensure exactly one of 'survey', 'catalogue' provided
     if survey is None == catalogue is None:
         raise ValueError("Either 'survey' or 'catalogue' required for Vizier queries.")
 
+    # try to get catalogue from alias file
     if survey and survey not in aliases:
         raise ValueError(f"Survey '{survey}' not found in ATK alias file.")
     elif survey:
         catalogue = aliases[survey]
 
+    # perform source query if a source was provided
     if "source" in kwargs and catalogue == "I/355/gaiadr3":
         return gaia_query_by_source(kwargs["source"])
 
+    # otherwise perform query by position
     return query_by_position(search_pos, kwargs["radius"], catalogue)
