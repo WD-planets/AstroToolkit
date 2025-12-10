@@ -1,9 +1,20 @@
 import importlib
 import inspect
 import pkgutil
+from types import ModuleType
+
+from .defaults import QUERY_KINDS
 
 
-def build_map(root_module: str, function_name: str, **kwargs):
+def get_query_result_map():
+    from ..structures.definitions import PlottableQueryResult, QueryResult
+
+    NON_PLOTTABLE = ["vizier"]
+
+    return {kind: QueryResult if kind in NON_PLOTTABLE else PlottableQueryResult for kind in QUERY_KINDS}
+
+
+def build_map(root_module: ModuleType, function_name: str, **kwargs):
     """
     Builds a map {str:function} by searching through a given folder for modules that include a given prefix or suffix and contain a known, shared function name
     """
@@ -12,7 +23,7 @@ def build_map(root_module: str, function_name: str, **kwargs):
     if prefix is None == suffix is None:
         raise ValueError("build_map() requires exactly one of 'prefix', 'suffix'.")
 
-    map = {}
+    func_map = {}
 
     modules = pkgutil.iter_modules(root_module.__path__)
 
@@ -32,20 +43,20 @@ def build_map(root_module: str, function_name: str, **kwargs):
             name = name[: -len(suffix)]
 
         if hasattr(imported_module, function_name):
-            map[name] = getattr(imported_module, function_name)
+            func_map[name] = getattr(imported_module, function_name)
         else:
             raise ImportError(f"Module {module.name}.py lacks required function '{function_name}'.")
 
-    return map
+    return func_map
 
 
 def build_structure_map():
     module = importlib.import_module("ATK.structures.definitions")
 
-    map = {}
+    struct_map = {}
 
     for name, obj in inspect.getmembers(module, inspect.isclass):
         if obj.__module__ == module.__name__:
-            map[name] = obj
+            struct_map[name] = obj
 
-    return map
+    return struct_map

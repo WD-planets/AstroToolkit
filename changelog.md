@@ -10,3 +10,4 @@ To-Do
 -----
 - Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
 - use astropy units to define axes
+- move most globals to one place + include global prefix to make sure that these aren't edited

@@ -12,6 +12,8 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.wcs import WCS
 
+from .definitions import Image
+
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
 
@@ -20,7 +22,7 @@ COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
 # ----------------------
 
 
-def write_fallback(hdr: Header, key: str, value: any) -> Header:
+def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
     """
     Writes generic data types to the header (e.g. str, int, float)
     """
@@ -28,17 +30,17 @@ def write_fallback(hdr: Header, key: str, value: any) -> Header:
     try:
         hdr.append((f"ATK_{key.upper()}", value))
     except Exception:
-        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' to FITS header key '{key}'.")
+        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key '{key}'.")
 
     return hdr
 
 
-def write_skycoord(hdr: Header, coord: SkyCoord) -> Header:
+def write_skycoord(attr: str, hdr: Header, coord: SkyCoord) -> Header:
     """
     Splits a SkyCoord into its components and writes this as a set of header keys
     """
 
-    hdr.append(("ATK_SKYCOORD", True, "If True, a SkyCoord is present in header"))
+    hdr.append(("ATK_SC", attr, "Origin attribute of decomposed SkyCoord"))
     hdr.append(("ATK_RA", coord.ra.value, "Source RA (deg)"))
     hdr.append(("ATK_DEC", coord.dec.value, "Source DEC (deg)"))
     hdr.append(("ATK_FRAME", coord.frame.name, "Coordinate frame of ATK_RA and ATK_DEC"))
@@ -57,14 +59,17 @@ def write_skycoord(hdr: Header, coord: SkyCoord) -> Header:
     # distance
     if coord.distance != u.one:
         hdr.append(("ATK_DISTANCE", coord.distance.value, "Source distance (1/p) (pc)"))
+    else:
+        hdr.append(("ATK_DISTANCE", None))
 
     return hdr
 
 
 # Map to special header writing functions
 WRITE_MAP = {
-    SkyCoord: lambda **kwargs: write_skycoord(kwargs["hdr"], kwargs["value"]),
-    WCS: lambda **kwargs: kwargs["hdr"],
+    SkyCoord: lambda **kwargs: write_skycoord(kwargs["attr"], kwargs["hdr"], kwargs["value"]),
+    WCS: lambda **kwargs: kwargs["hdr"],  # do nothing
+    ImageHDU: lambda **kwargs: kwargs["hdr"],  # do nothing
 }
 
 # ---------
@@ -139,9 +144,7 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     return pd.DataFrame.from_dict(data)
 
 
-def struct_to_hdu(
-    structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | ImageHDU = BinTableHDU
-) -> BinTableHDU:
+def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU | BinTableHDU | ImageHDU = BinTableHDU) -> BinTableHDU:
     """
     Convert a data structure into a fits HDU.
     """
@@ -150,6 +153,7 @@ def struct_to_hdu(
     ignore_attrs.append("kind")
 
     hdr = Header()
+
     # tag all HDUs as coming from ATK
     hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
 
@@ -170,7 +174,7 @@ def struct_to_hdu(
         if attr in cols:
             continue
 
-        hdr = WRITE_MAP.get(type(val), write_fallback)(hdr=hdr, key=attr, value=val)
+        hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
 
     # generate HDU
     if hdu_kind == PrimaryHDU:
@@ -183,3 +187,20 @@ def struct_to_hdu(
         raise ValueError(f"Invalid table type '{kind}' passed to struct_to_hdu.")
 
     return hdu
+
+
+# -----------------------
+# SPECIAL TRANSFORMATIONS
+# -----------------------
+
+
+def image_to_hdu(image: Image):
+    hdu = image.hdu
+    hdr = hdu.header
+
+    hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
+    hdr.append(("ATK_KIND", "Image", "ATK container kind"))
+    for attr, val in image.__dict__.items():
+        hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
+
+    return ImageHDU(data=hdu.data, header=hdr, name=image.__str__())

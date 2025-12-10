@@ -1,20 +1,20 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy
 import pandas
 from astropy.coordinates import SkyCoord
-from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.time import Time
 from astropy.wcs import WCS
 
-from ..io.files.writing import write_local
-from ..io.struct_stdout import pprint_structure
-from .structure_io import struct_to_dataframe, struct_to_hdu
+# -------------
+# QUERY RESULTS
+# -------------
 
 
 @dataclass
-class QueryResult:
+class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
     radius: float | None = None
@@ -25,12 +25,14 @@ class QueryResult:
     correction: str | None = None
     exception: bool | None = False
 
-    data: pandas.DataFrame | list | None = None
-
     def show(self, show_all_types=False) -> None:
+        from ..io.struct_stdout import pprint_structure
+
         pprint_structure(self, show_all_types)
 
     def save(self, path: str | Path = None) -> Path:
+        from ..io.files.writing import write_local
+
         return write_local(self, path)
 
     def __repr__(self):
@@ -44,13 +46,57 @@ class QueryResult:
         if self.source:
             return Path(f"{self.source}_{self.survey}_ATKdata.fits")
         elif self.position:
-            return Path(f"{self.position.ra:.3f}_{self.position.dec:.3f}_ATKdata.fits")
+            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_{self.survey}_ATKdata.fits")
         else:
             raise ValueError("No source or position data to be used in generating a file name.")
 
 
+@dataclass(repr=False)
+class QueryResult(BaseQueryResult):
+    data: list = field(default_factory=list)
+
+
+@dataclass(repr=False)
+class PlottableQueryResult(BaseQueryResult):
+    data: list = field(default_factory=list)
+
+    def plot(self, kind: str | None = None, **kwargs: any):
+        from .plot_io import plot_data
+
+        self.figure = plot_data(kind, self, **kwargs)
+
+    def open(self, fname: Path | str | None = None):
+        from .plot_io import open
+
+        open(self, fname=fname)
+
+
+# ---------------
+# DATA CONTAINERS
+# ---------------
+
+
 @dataclass
-class Lightcurve:
+class BaseContainer:
+    def __repr__(self):
+        return f"<{self.survey} {type(self).__name__}>"
+
+    def __str__(self):
+        return self.__repr__()
+
+    def to_dataframe(self) -> pandas.DataFrame:
+        from .structure_io import struct_to_dataframe
+
+        return struct_to_dataframe(self)
+
+    def to_hdu(self) -> BinTableHDU:
+        from .structure_io import struct_to_hdu
+
+        return struct_to_hdu(self)
+
+
+@dataclass(repr=False)
+class Lightcurve(BaseContainer):
     survey: str
     band: str
     mjd: numpy.ndarray
@@ -58,6 +104,9 @@ class Lightcurve:
     flux_err: numpy.ndarray | None = None
     mag: numpy.ndarray | None = None
     mag_err: numpy.ndarray | None = None
+
+    def __repr__(self):
+        return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 
     def __post_init__(self):
         # check for a valid input combination
@@ -76,54 +125,27 @@ class Lightcurve:
             del self.mag
             del self.mag_err
 
-    def __repr__(self):
-        return f"<{self.survey} {self.band}-band Lightcurve>"
 
-    def __str__(self):
-        return self.__repr__()
-
-    def to_dataframe(self) -> pandas.DataFrame:
-        return struct_to_dataframe(self)
-
-    def to_hdu(self) -> BinTableHDU:
-        return struct_to_hdu(self)
-
-
-@dataclass
-class Image:
+@dataclass(repr=False)
+class Image(BaseContainer):
     survey: str | None = None
     band: str | None = None
-    hdu: PrimaryHDU | None = None
+    size: int | None = None
+    hdu: ImageHDU | None = None
     wcs: WCS | None = None
     focus: SkyCoord | None = None
 
     def __repr__(self):
-        return f"<{self.survey} {self.band}-band Image>"
+        return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 
-    def __str__(self):
-        return self.__repr__()
+    def to_hdu(self):
+        from .structure_io import image_to_hdu
 
-    def to_dataframe(self) -> pandas.DataFrame:
-        return struct_to_dataframe(self)
-
-    def to_hdu(self) -> BinTableHDU:
-        return struct_to_hdu(self)
+        return image_to_hdu(self)
 
 
-@dataclass
+@dataclass(repr=False)
 class Spectrum:
     survey: str | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
-
-    def __repr__(self):
-        return f"<{self.survey} Spectrum>"
-
-    def __str__(self):
-        return self.__repr__()
-
-    def to_dataframe(self) -> pandas.DataFrame:
-        return struct_to_dataframe(self)
-
-    def to_hdu(self) -> BinTableHDU:
-        return struct_to_hdu(self)

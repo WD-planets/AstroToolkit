@@ -27,7 +27,7 @@ class EpochConfig(ParserConfig):
         match query_kind:
             case "vizier":
                 section = "vizier_aliases"
-            case "lightcurve" | "spectrum":
+            case _:
                 section = f"{query_kind}_surveys"
 
         return self.as_dict()[section]

@@ -11,6 +11,7 @@ from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
 from ..structures.definitions import QueryResult
 from ..utilities.defaults import RETURNS
+from ..utilities.mapping import get_query_result_map
 
 # ignore bad distance warning
 warnings.filterwarnings("ignore", category=ErfaWarning)
@@ -180,7 +181,8 @@ def prepare_search(
         correction_degree = "none"
         search_pos = position
 
-    structure = QueryResult(
+    structure_map = get_query_result_map()
+    structure = structure_map[query_kind](
         kind=query_kind,
         survey=survey,
         position=search_pos,

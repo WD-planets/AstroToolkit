@@ -23,4 +23,5 @@ DEFAULTS = {
         "tess": "2020-01-01T00:00:00.000",
     },
     "spectrum_surveys": {"sdss": "2017-01-01T00:00:00.000"},
+    "image_surveys": {"panstarrs": "2012-01-01T00:00:00.000", "skymapper": "2016-01-01T00:00:00.000"},
 }

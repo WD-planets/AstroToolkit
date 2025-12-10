@@ -46,8 +46,9 @@ def main():
     p_set.set_defaults(func=handle_set)
 
     # del()
-    del_parser = subparsers.add_parser("del", help="Deletes an existing alias in the ATK alias file.")
-    del_parser.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of alias to delete.")
+    p_del = subparsers.add_parser("del", help="Deletes an existing alias in the ATK alias file.")
+    p_del.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of alias to delete.")
+    p_del.set_defaults(func=handle_del)
 
     # parse and dispatch
     args = parser.parse_args()

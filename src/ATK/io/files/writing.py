@@ -1,5 +1,6 @@
 import warnings
 from pathlib import Path
+from types import NoneType
 
 import pandas as pd
 from astropy.io.fits import HDUList, Header
@@ -59,6 +60,10 @@ def write_local(structure: any, path: str | Path) -> Path:
             elif isinstance(val, list):
                 for ctr in val:
                     hdul.append(ctr.to_hdu())
+
+            # empty (i.e. no data returned)
+            elif isinstance(val, NoneType):
+                hdul.append(dataframe_to_hdu(structure, pd.DataFrame()))
 
             else:
                 raise ValueError(f"Unexpected type of .data attribute in structure '{type(structure)}'.")

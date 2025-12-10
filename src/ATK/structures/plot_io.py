@@ -1,0 +1,54 @@
+import glob
+import importlib
+import os
+import tempfile
+import time
+from pathlib import Path
+
+from bokeh.io import output_file
+from bokeh.models import Column, Row
+from bokeh.plotting import figure, show
+
+from ..configuration.base_config import BASE_CONFIG
+from ..utilities.mapping import build_map
+from .definitions import PlottableQueryResult
+
+FIGS_PER_COLUMN = 3
+
+
+def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figure:
+    module = importlib.import_module(f"ATK.plotting.{structure.kind}")
+    plot_map = build_map(module, "plot", prefix="plot_")
+    kind = kind or structure.kind
+    plotting_func = plot_map[kind]
+
+    figures = []
+    for ctnr in structure.data:
+        figures.append(plotting_func(ctnr, **kwargs))
+
+    figures = [figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(figures), FIGS_PER_COLUMN)]
+
+    rows = [Column(*col) for col in figures]
+
+    return Row(*rows)
+
+
+def open(structure: PlottableQueryResult, fname=Path | str | None):
+    if not fname:
+        tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(
+            suffix=".html", prefix=f"{structure.survey}_{structure.kind}_", dir=tmp_dir, delete=False
+        ) as tmpfile:
+            tmp_html = tmpfile.name
+
+        output_file(tmp_html)
+    else:
+        output_file(fname)
+
+    for f in glob.glob(os.path.join(tmp_dir, "*.html")):
+        if time.time() - os.path.getmtime(f) > BASE_CONFIG.get("plot_settings", "cache_time"):
+            os.remove(f)
+
+    show(structure.figure)

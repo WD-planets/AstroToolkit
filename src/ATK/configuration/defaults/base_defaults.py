@@ -5,7 +5,8 @@ PATH = Path.home() / ".AstroToolkit" / "ATK_config.ini"
 DEFAULTS = {
     "global_settings": {"notifications": True},
     "plot_settings": {
-        "unit_size": 500,
+        "cache_time": 3600,
+        "size": 500,
         "backend": "canvas",
         "toolbars": True,
         "grids": True,

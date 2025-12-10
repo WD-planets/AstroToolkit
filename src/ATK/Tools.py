@@ -5,12 +5,13 @@ from astropy.coordinates import SkyCoord
 
 from .io.files.read import read_local
 from .queries.arguments import get_query_arguments
+from .structures.definitions import PlottableQueryResult, QueryResult
 from .utilities.defaults import RETURNS
 from .utilities.mapping import build_map
 from .utilities.targeting import prepare_search
 
 
-def query(kind: str, target: int | SkyCoord, **kwargs):
+def query(kind: str, target: int | SkyCoord, **kwargs) -> QueryResult | PlottableQueryResult:
     """
     Central query function
     """

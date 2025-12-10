@@ -1,14 +1,20 @@
-from __future__ import annotations
-
 import inspect
 import re
 
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
-from astropy.io.fits.hdu import PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.time import Time
 from astropy.wcs import WCS
+from bokeh.models import Column, Row
+from bokeh.plotting import figure
+
+from ..utilities.mapping import build_structure_map
+
+DEBUG = False
+
+STRUCTURE_MAP = build_structure_map()
 
 # GLOBALS for tracking state
 CURRENT_DEPTH = 0
@@ -20,12 +26,8 @@ SIG_FIGS = 3  # significant figures of array elements
 MAX_DISPLAY = 10  # max entries in an array before truncation occurs
 METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__", "__str__"]
 
-# Headers are printed for containers that need to be expanded
-CONTAINER_HEADERS = {
-    pd.DataFrame: lambda x: "<pandas.DataFrame>",
-    dict: lambda x: "<dict>",
-    "Image": lambda x: f"{x.__repr__()}",
-}
+# Headers are printed for containers that need to be expanded (ATK containers are handled separately using MAP
+CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>"}
 
 # ------------------
 # SPECIAL FORMATTERS
@@ -119,8 +121,13 @@ SPECIAL_FORMATTERS = {
     pd.Series: format_array,
     SkyCoord: format_skycoord,
     Time: lambda t: f"{t}",
-    PrimaryHDU: lambda h: "<PrimaryHDU>",
-    WCS: lambda w: "<WCS>",
+    PrimaryHDU: lambda x: "<PrimaryHDU>",
+    ImageHDU: lambda x: "<ImageHDU>",
+    BinTableHDU: lambda x: "<BinTableHDU>",
+    WCS: lambda x: "<WCS>",
+    figure: lambda x: "<Bokeh Figure>",
+    Row: lambda x: "<Bokeh Figure>",
+    Column: lambda x: "<Bokeh Figure>",
 }
 
 # -------
@@ -213,7 +220,7 @@ def dataframe_to_np_dict(df: pd.DataFrame) -> dict:
 
 def safe_representation(obj: any) -> str:
     """
-    Return a one-line representation of an object from __str__ > __repr__ > __name__
+    Return a one-line representation of an object. Unless overriden, this is (type) for builtins and (package.type) for others
     """
 
     try:
@@ -221,13 +228,13 @@ def safe_representation(obj: any) -> str:
     except Exception:
         pass
 
-    for getter in (str, repr):
-        try:
-            return getter(obj).splitlines()[0]
-        except Exception:
-            pass
+    module_base = type(obj).__module__.split(".")[0]
+    typ_name = type(obj).__name__
 
-    return f"<{obj.__class__.__name__}>"
+    if module_base == "builtins":
+        return f"({typ_name})"
+
+    return f"({module_base}.{typ_name})"
 
 
 def add_types_to_keys(dct: dict):
@@ -258,8 +265,15 @@ def format_value(value: any) -> str:
 
     global CURRENT_DEPTH, OUTPUT
 
+    # print(value, type(value))
+
+    # 3rd party expandable objects
     if type(value) in CONTAINER_HEADERS:
         line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{safe_representation(value)}\n"
+    # ATK objects
+    elif type(value) in STRUCTURE_MAP.values():
+        line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{value.__repr__()}\n"
+    # everything else
     else:
         line = ""
 
@@ -352,6 +366,9 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
             line = f".{attr}: ".ljust(pad)
 
             update_col_widths(len(line), CURRENT_DEPTH)
+
+            if DEBUG:
+                print(attr, val)
 
             OUTPUT += line
             OUTPUT += format_value(val) + "\n"

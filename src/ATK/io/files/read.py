@@ -3,15 +3,17 @@ from pathlib import Path
 
 import astropy.units as u
 import numpy as np
+import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.table import Table
 from astropy.units import Quantity, UnitBase
+from astropy.wcs import WCS
 
-from ...structures.definitions import QueryResult
-from ...utilities.mapping import build_structure_map
+from ...structures.definitions import Image, PlottableQueryResult, QueryResult
+from ...utilities.mapping import build_structure_map, get_query_result_map
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
 
@@ -64,10 +66,10 @@ def parse_primary_header(path: str | Path, hdr: Header) -> QueryResult:
     Parse the primary HDU header, which contains all query information
     """
 
-    structure = QueryResult()
+    structure = get_query_result_map()[hdr.get("ATK_KIND")]()
 
     # a position should always be generated, so this should not trigger
-    if "ATK_SKYCOORD" not in hdr:
+    if "ATK_SC" not in hdr:
         raise ValueError(f"No targeting information found in primary header of {path}.")
 
     structure.position = parse_header_skycoord(path, hdr)
@@ -82,6 +84,10 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
     Parse fits header keys into their corresponding object attributes
     """
 
+    sc_attr = hdr.get("ATK_SC", None)
+    if sc_attr:
+        setattr(obj, sc_attr, parse_header_skycoord(path, hdr))
+
     ATK_keys = {key: val for key, val in hdr.items() if key.startswith("ATK_")}
     for key, val in ATK_keys.items():
         # get rid of ATK_ prefix and lower key to match attribute
@@ -93,20 +99,18 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
     return obj
 
 
-def parse_generic_bintable(structure: QueryResult, path: str | Path, hdr: Header, data: any) -> QueryResult:
+def parse_generic_bintable(structure: QueryResult, path: str | Path, hdr: Header, data: any) -> any:
     """
     Parse a bintable extension into either a data container or dataframe (for vizier queries)
     """
 
     structure_map = build_structure_map()
-
     df = Table(data).to_pandas()
-
     ctnr = structure_map.get(hdr.get("ATK_KIND"), lambda: None)()
+
     # if no container exists (i.e. in vizier queries), just set .data = dataframe
     if not ctnr:
-        structure.data = df
-        return structure
+        return df
 
     # otherwise, parse header keys into container
     ctnr = parse_header(path, hdr, ctnr)
@@ -116,9 +120,26 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdr: Header
         if hasattr(ctnr, col):
             setattr(ctnr, col, np.asarray(df[col]))
 
-    structure.data = [ctnr]
+    return ctnr
 
-    return structure
+
+def parse_generic_imagehdu(structure: QueryResult, path: str | Path, hdu: ImageHDU) -> any:
+    """
+    Parse an imageHDU into a data container (i.e. an Image)
+    """
+
+    structure_map = build_structure_map()
+    ctnr = structure_map.get(hdu.header.get("ATK_KIND"), lambda: None)()
+
+    if not ctnr or not isinstance(ctnr, Image):
+        raise Exception(f"Could not parse ImageHDU in {path} into Image.")
+
+    ctnr = parse_header(path, hdu.header, ctnr)
+
+    ctnr.hdu = hdu
+    ctnr.wcs = WCS(hdu.header)
+
+    return ctnr
 
 
 # ----
@@ -126,7 +147,7 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdr: Header
 # ----
 
 
-def read_local(path: str | Path):
+def read_local(path: str | Path) -> QueryResult:
     """
     Read a local ATK fits file back into the original data structure that was used to generate it
     """
@@ -144,6 +165,11 @@ def read_local(path: str | Path):
             warnings.warn(f"ATK: Unexpected table type '{type(hdu)}' in target file {path} has been ignored.")
             continue
 
-        structure = parse_generic_bintable(structure, path, hdu.header, hdu.data)
+        if isinstance(hdu, BinTableHDU):
+            data = parse_generic_bintable(structure, path, hdu.header, hdu.data)
+        elif isinstance(hdu, ImageHDU):
+            data = parse_generic_imagehdu(structure, path, hdu)
 
-    hdul.close()
+        structure.data.append(data)
+
+    return structure
