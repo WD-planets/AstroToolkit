@@ -35,6 +35,7 @@ dependencies = [
 	"pandas",
 	"PyYAML",
 	"matplotlib",
+	"reproject",
 ]
 
 [project.urls]

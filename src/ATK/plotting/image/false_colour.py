@@ -2,6 +2,18 @@ import matplotlib as mpl
 
 N_COLOURS = 256
 
+# this will need updating, also haven't checked
+EFFECTIVE_WAVELENGTHS = {
+    "panstarrs": {"g": 481.0, "r": 615.5, "i": 750.3, "z": 866.8, "y": 961.4},
+    "galex": {"fuv": 154.9, "nuv": 230.3},
+    "sdss": {"u": 355.1, "g": 468.6, "r": 616.6, "i": 748.0, "z": 893.2},
+    "2mass": {"j": 1069.1, "h": 1446.5, "ks": 2155.8},
+    "wise": {"w1": 3400.0, "w2": 4600.0, "w3": 12000.0, "w4": 22000.0},
+    "dss1": {"blue": 405.0, "red": 645.0},
+    "dss2": {"blue": 480.0, "red": 670.0, "ir": 875.0},
+    "skymapper": {"u": 350.0, "v": 450.0, "g": 480.0, "r": 625.0, "i": 775.0, "z": 870.0},
+}
+
 
 def wavelength_to_rgb(wavelength_nm):
     """
@@ -54,7 +66,9 @@ def wavelength_to_rgb(wavelength_nm):
     return (R, G, B)
 
 
-def wavelength_to_cmap(wavelength_nm):
+def get_false_cmap(survey: str, band: str):
+    wavelength_nm = EFFECTIVE_WAVELENGTHS[survey][band]
+
     colour = wavelength_to_rgb(wavelength_nm)
     cmap = mpl.colors.LinearSegmentedColormap.from_list(f"{int(wavelength_nm)}nm", [(0, "black"), (1, colour)])
     colours = [mpl.colors.rgb2hex(cmap(i / (N_COLOURS - 1))) for i in range(N_COLOURS)]

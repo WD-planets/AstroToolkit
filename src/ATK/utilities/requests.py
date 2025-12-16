@@ -5,7 +5,7 @@ from requests.models import Response
 from ..utilities.defaults import RETURNS
 
 
-def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Response | None:
+def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Response | RETURNS:
     """
     Fetches data from a given URL with retry logic.
     Supports GET and POST (or other HTTP verbs via `method`).

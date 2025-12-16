@@ -134,6 +134,7 @@ class Image(BaseContainer):
     hdu: ImageHDU | None = None
     wcs: WCS | None = None
     focus: SkyCoord | None = None
+    epoch: Time | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"

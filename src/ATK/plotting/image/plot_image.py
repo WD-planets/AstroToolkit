@@ -5,9 +5,8 @@ from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
 from ...structures.definitions import Image
-from ...utilities.defaults import EFFECTIVE_WAVELENGTHS
 from ..formatting import format_plot
-from .false_colour import wavelength_to_cmap
+from .false_colour import get_false_cmap
 
 
 def get_relative_axes(image: Image):
@@ -42,33 +41,17 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         y_axis_label="Declination / deg",
         tools=("pan,wheel_zoom,reset,tap"),
     )
-
     plot.grid.grid_line_color = None
 
-    xlim, ylim = image.hdu.header["NAXIS1"], image.hdu.header["NAXIS2"]
+    n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
+    image_focus = (image.focus.ra.value, image.focus.dec.value)
+    pixel_scales = proj_plane_pixel_scales(image.wcs)
 
-    if xlim != ylim:
-        xlim = ylim
-
-    x_points, y_points = (np.arange(start=0, stop=xlim + 1, step=1), np.arange(start=0, stop=ylim + 1, step=1))
-
-    coords = image.wcs.all_pix2world(x_points, y_points, 1)
-    x_points, y_points = coords[0], coords[1]
-
-    x_range, y_range = max(x_points) - min(x_points), max(y_points) - min(y_points)
-
-    plot.x_range = Range1d(max(x_points), min(x_points))
-    plot.y_range = Range1d(min(y_points), max(y_points))
-
-    """
-    # true-colour colourmap
-    cmap = wavelength_to_cmap(490.012)
-    cmap = wavelength_to_cmap(624.127)
-
-    plot.image(image=[image_data], x=x_points[0], y=y_points[0], dw=x_range, dh=y_range, palette=cmap, level="image", origin="bottom_right", anchor="bottom_right")
-    """
-
+    # get raw data array
     image_data = image.hdu.data
+
+    # horizontally flip image
+    image_data = np.fliplr(image_data)
 
     # subtract min, asin stretch + percentile squash
     nan_mask = np.isnan(image_data)
@@ -83,31 +66,60 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     elif cmap == "grey":
         colour_mapper = LinearColorMapper(palette=Greys256, low=vmin, high=vmax)
     elif cmap == "false_colour":
-        wavelength = EFFECTIVE_WAVELENGTHS[image.survey][image.band]
-        colour_mapper = LinearColorMapper(palette=wavelength_to_cmap(wavelength), low=vmin, high=vmax)
+        colour_mapper = LinearColorMapper(palette=get_false_cmap(image.survey, image.band), low=vmin, high=vmax)
 
     if kwargs.get("relative_axes", True):
-        x_arcsec_edges, y_arcsec_edges = get_relative_axes(image)
-        x_range = x_arcsec_edges.max() - x_arcsec_edges.min()
-        y_range = y_arcsec_edges.max() - y_arcsec_edges.min()
-        focus_ra, focus_dec = 0, 0
+        x_bounds = (-n_pixels[0] / 2 * pixel_scales[0] * 3600, n_pixels[0] / 2 * pixel_scales[0] * 3600)
+        y_bounds = (-n_pixels[1] / 2 * pixel_scales[1] * 3600, n_pixels[1] / 2 * pixel_scales[1] * 3600)
 
-        plot.x_range = Range1d(np.min(x_arcsec_edges), np.max(x_arcsec_edges))
-        plot.y_range = Range1d(np.min(y_arcsec_edges), np.max(y_arcsec_edges))
+        x_range = x_bounds[1] - x_bounds[0]
+        y_range = y_bounds[1] - y_bounds[0]
 
-        plot.xaxis.axis_label = "Right Ascensions / arcsec"
-        plot.yaxis.axis_label = "Declination / arcsec"
+        if x_range < image.size:
+            plot.x_range = Range1d(x_bounds[1], x_bounds[0])
+        else:
+            plot.x_range = Range1d(image.size / 2, -image.size / 2)
+
+        if y_range < image.size:
+            plot.y_range = Range1d(y_bounds[0], y_bounds[1])
+        else:
+            plot.y_range = Range1d(-image.size / 2, image.size / 2)
 
         focus_ra, focus_dec = 0.0, 0.0
     else:
-        focus_ra, focus_dec = image.focus.ra.value, image.focus.dec.value
+        x_bounds = (
+            image_focus[0] - n_pixels[0] / 2 * pixel_scales[0],
+            image_focus[0] + n_pixels[0] / 2 * pixel_scales[0],
+        )
+        y_bounds = (
+            image_focus[1] - n_pixels[1] / 2 * pixel_scales[1],
+            image_focus[1] + n_pixels[1] / 2 * pixel_scales[1],
+        )
+
+        x_range = x_bounds[1] - x_bounds[0]
+        y_range = y_bounds[1] - y_bounds[0]
+
+        if x_range < image.size:
+            plot.x_range = Range1d(x_bounds[1], x_bounds[0])
+        else:
+            plot.x_range = Range1d(image_focus[0] + image.size / 2, image_focus[0] - image.size / 2)
+
+        if y_range < image.size:
+            plot.y_range = Range1d(y_bounds[0], y_bounds[1])
+        else:
+            plot.x_range = Range1d(image_focus[1] - image.size / 2, image_focus[1] + image.size / 2)
+
+        focus_ra, focus_dec = image_focus[0], image_focus[1]
+
+    plot.x_range.bounds = "auto"
+    plot.y_range.bounds = "auto"
 
     plot.image(
         image=[image_data],
-        x=-x_range / 2,
-        y=-y_range / 2,
-        dw=x_range,
-        dh=y_range,
+        x=x_bounds[0],
+        y=y_bounds[0],
+        dw=x_bounds[1] - x_bounds[0],
+        dh=y_bounds[1] - y_bounds[0],
         level="image",
         origin="bottom_left",
         anchor="bottom_left",

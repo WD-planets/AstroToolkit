@@ -2,13 +2,28 @@ import importlib
 from pathlib import Path
 
 from astropy.coordinates import SkyCoord
+from astropy.time import Time
 
 from .io.files.read import read_local
 from .queries.arguments import get_query_arguments
 from .structures.definitions import PlottableQueryResult, QueryResult
 from .utilities.defaults import RETURNS
 from .utilities.mapping import build_map
-from .utilities.targeting import prepare_search
+from .utilities.targeting import correct_skycoord, prepare_search
+
+
+def _set_results(
+    structure: QueryResult | PlottableQueryResult, query_result: any
+) -> QueryResult | PlottableQueryResult:
+    if query_result is RETURNS.EXCEPTION:
+        structure.data = None
+        structure.exception = True
+    elif query_result is RETURNS.NULL:
+        structure.data = None
+    else:
+        structure.data = query_result
+
+    return structure
 
 
 def query(kind: str, target: int | SkyCoord, **kwargs) -> QueryResult | PlottableQueryResult:
@@ -37,13 +52,17 @@ def query(kind: str, target: int | SkyCoord, **kwargs) -> QueryResult | Plottabl
     # perform query
     query_result = query_function(search_pos, **additional_arguments)
 
-    if query_result is RETURNS.EXCEPTION:
-        structure.data = None
-        structure.exception = True
-    elif query_result is RETURNS.NULL:
-        structure.data = None
-    else:
-        structure.data = query_result
+    # set data and exception attributes
+    structure = _set_results(structure, query_result)
+
+    # perform second query in image queries (at image-corrected position)
+    if kind == "image" and structure.data:
+        image_time = query_result[0].focus.obstime
+        corrected_pos = correct_skycoord(search_pos, epoch=image_time)
+
+        query_result = query_function(corrected_pos, **additional_arguments)
+
+        structure = _set_results(structure, query_result)
 
     return structure
 

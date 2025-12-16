@@ -6,7 +6,7 @@ from astropy.table import Table
 from ...utilities.defaults import RETURNS
 from ...utilities.misc import suppress_stdout
 from ...utilities.requests import send_request
-from .image_core import get_image, get_image_data
+from .image_core import get_image_data, mjd_to_epoch
 
 
 def check_inputs(band: str, size: int):
@@ -29,8 +29,9 @@ def query(search_pos: SkyCoord, **kwargs: any):
     url = f"https://ps1images.stsci.edu/cgi-bin/ps1filenames.py?ra={search_pos.ra.value}&dec={search_pos.dec.value}&band={band}"
     with suppress_stdout():
         response = send_request("panstarrs", url)
-    if not response:
-        return RETURNS.EXCEPTION
+    if response is RETURNS.EXCEPTION:
+        return response
+
     table = Table.read(BytesIO(response.content), format="ascii")
     if not len(table):
         return RETURNS.NULL
@@ -45,8 +46,6 @@ def query(search_pos: SkyCoord, **kwargs: any):
     fname = table["filename"][0]
     main_url = f"{sub_url}{fname}"
 
-    image_hdu = get_image_data("panstarrs", main_url)
-    if not image_hdu:
-        return RETURNS.EXCEPTION
+    image_hdu = get_image_data(search_pos, main_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
 
-    return get_image(survey="panstarrs", hdu=image_hdu, band=band, size=size, focus=search_pos)
+    return image_hdu
