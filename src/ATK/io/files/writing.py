@@ -52,19 +52,12 @@ def write_local(structure: any, path: str | Path) -> Path:
     # iterate through structure attributes
     for attr, val in structure.__dict__.items():
         if attr == "data":
-            # vizier queries
-            if isinstance(val, pd.DataFrame):
-                hdul.append(dataframe_to_hdu(structure, val))
-
-            # all other queries (i.e. list of data containers)
-            elif isinstance(val, list):
+            if isinstance(val, list):
                 for ctr in val:
-                    hdul.append(ctr.to_hdu())
-
-            # empty (i.e. no data returned)
-            elif isinstance(val, NoneType):
-                hdul.append(dataframe_to_hdu(structure, pd.DataFrame()))
-
+                    if isinstance(ctr, pd.DataFrame):
+                        hdul.append(dataframe_to_hdu(structure, ctr))
+                    else:
+                        hdul.append(ctr.to_hdu())
             else:
                 raise ValueError(f"Unexpected type of .data attribute in structure '{type(structure)}'.")
 

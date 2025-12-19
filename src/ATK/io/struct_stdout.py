@@ -1,5 +1,6 @@
 import inspect
 import re
+from enum import Enum
 
 import numpy as np
 import pandas as pd
@@ -23,7 +24,7 @@ OUTPUT = ""
 
 # OPTIONS
 SIG_FIGS = 3  # significant figures of array elements
-MAX_DISPLAY = 10  # max entries in an array before truncation occurs
+MAX_DISPLAY = 4  # max entries in an array before truncation occurs
 METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__", "__str__"]
 
 # Headers are printed for containers that need to be expanded (ATK containers are handled separately using MAP
@@ -73,7 +74,7 @@ def format_list(lst: list) -> str:
     str_rep = ""
 
     if not lst:
-        return "[]"
+        return "<empty list>\n"
 
     # recursively format each item
     for item in lst:
@@ -137,10 +138,13 @@ SPECIAL_FORMATTERS = {
 
 def is_special_type(value: any) -> bool:
     """
-    Check if value has a special formatter function
+    Check if value has a special formatter function, or if it is an enum
     """
 
     if type(value) in SPECIAL_FORMATTERS:
+        return True
+
+    if isinstance(value, Enum):
         return True
 
 
@@ -152,6 +156,10 @@ def apply_special_formatter(value: any) -> str:
     formatter = SPECIAL_FORMATTERS.get(type(value))
     if formatter:
         return formatter(value)
+
+    # Enum fallback
+    if isinstance(value, Enum):
+        return value.name
 
 
 def get_dict_pad(dictionary: dict, key_example: str) -> int:
@@ -265,14 +273,12 @@ def format_value(value: any) -> str:
 
     global CURRENT_DEPTH, OUTPUT
 
-    # print(value, type(value))
-
     # 3rd party expandable objects
     if type(value) in CONTAINER_HEADERS:
-        line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{safe_representation(value)}\n"
+        line = f"\n{pad_placeholder(max(CURRENT_DEPTH * 2, 1), True)}{safe_representation(value)}\n"
     # ATK objects
     elif type(value) in STRUCTURE_MAP.values():
-        line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{value.__repr__()}\n"
+        line = f"\n{pad_placeholder(max(CURRENT_DEPTH * 2, 1), True)}{value.__repr__()}\n"
     # everything else
     else:
         line = ""
@@ -344,7 +350,7 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
     Prints a structure's attributes and methods in a human-readable format. Optionally also prints the types of attributes.
     """
 
-    global CURRENT_DEPTH, OUTPUT
+    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS
 
     # get structure attrs
     attrs = structure.__dict__
@@ -380,5 +386,10 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
 
     re_exp = re.compile(r"<\|LPAD_DEPTH_(\d+)(H?)\|>")
     formatted = re_exp.sub(replace_pad_placeholder, OUTPUT)
+
+    # reset global variables
+    OUTPUT = ""
+    CURRENT_DEPTH = 0
+    COL_WIDTHS = {0: 0}
 
     print(formatted)

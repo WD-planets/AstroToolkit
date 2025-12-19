@@ -1,3 +1,5 @@
+from bokeh import events
+from bokeh.models import CustomJS
 from bokeh.plotting import figure
 
 from ..configuration.base_config import BASE_CONFIG
@@ -38,5 +40,22 @@ def format_plot(kind: str, plot: figure):
         plot.grid.grid_line_color = None
     if not BASE_CONFIG.get("plot_settings", "titles"):
         plot.title = None
+
+    if plot.legend:
+        plot.legend.click_policy = "hide"
+
+        toggle_legend_js = CustomJS(
+            args=dict(leg=plot.legend[0]),
+            code="""
+                if (leg.visible) {
+                    leg.visible = false
+                    }
+                else {
+                    leg.visible = true
+                }
+        """,
+        )
+
+        plot.js_on_event(events.DoubleTap, toggle_legend_js)
 
     return plot

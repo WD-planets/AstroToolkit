@@ -29,8 +29,8 @@ QUERY_ARGUMENTS = {
     "image": {
         "survey": REQUIRED.NOW,
         "size": BASE_CONFIG.get("query_settings", "image_size"),
-        "overlays": BASE_CONFIG.get("query_settings", "image_overlays"),
-        "band": BASE_CONFIG.get("query_settings", "image_band"),
+        "overlays": REQUIRED.LATER,
+        "band": REQUIRED.NOW,
     },
     "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
     "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius")},

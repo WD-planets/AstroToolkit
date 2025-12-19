@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import pkgutil
+from enum import EnumType
 from types import ModuleType
 
 from .defaults import QUERY_KINDS
@@ -51,12 +52,16 @@ def build_map(root_module: ModuleType, function_name: str, **kwargs):
 
 
 def build_structure_map():
+    """
+    Creates a map of ATK structure definitions, exluding enums
+    """
+
     module = importlib.import_module("ATK.structures.definitions")
 
     struct_map = {}
 
     for name, obj in inspect.getmembers(module, inspect.isclass):
-        if obj.__module__ == module.__name__:
+        if obj.__module__ == module.__name__ and not isinstance(obj, EnumType):
             struct_map[name] = obj
 
     return struct_map

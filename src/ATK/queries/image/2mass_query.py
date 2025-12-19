@@ -1,7 +1,7 @@
-from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
 from astropy.time import Time
 
+from ...structures.definitions import Target
 from .irsa_queries import irsa_query
 
 
@@ -25,7 +25,7 @@ def parse_2mass_epoch(hdr: Header) -> Time:
     return Time(iso, scale="utc")
 
 
-def query(search_pos: SkyCoord, **kwargs: any):
+def query(target: Target, **kwargs: dict):
     band, size = kwargs["band"], kwargs["size"]
 
-    return irsa_query("2mass", search_pos, size, band, epoch_fetcher=parse_2mass_epoch, epoch_key=None)
+    return irsa_query("2mass", target, size, band, epoch_fetcher=parse_2mass_epoch, epoch_key=None)

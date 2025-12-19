@@ -30,6 +30,11 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
     try:
         hdr.append((f"ATK_{key.upper()}", value))
     except Exception:
+        pass
+
+    try:
+        hdr.append((f"ATK_{key.upper()}", str(value)))
+    except Exception:
         raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key '{key}'.")
 
     return hdr
@@ -201,6 +206,9 @@ def image_to_hdu(image: Image):
     hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
     hdr.append(("ATK_KIND", "Image", "ATK container kind"))
     for attr, val in image.__dict__.items():
-        hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
+        try:
+            hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
+        except RecursionError:
+            pass
 
     return ImageHDU(data=hdu.data, header=hdr, name=image.__str__())

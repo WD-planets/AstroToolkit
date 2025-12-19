@@ -1,3 +1,5 @@
+from urllib.error import HTTPError
+
 import astropy.units as u
 import pandas as pd
 from astropy.coordinates import SkyCoord
@@ -5,6 +7,7 @@ from astroquery.vizier import Vizier
 from requests.exceptions import ConnectionError, ConnectTimeout
 
 from ...configuration.alias_config import ALIAS_CONFIG
+from ...structures.definitions import Target
 from ...utilities.defaults import RETURNS
 
 # ensure all rows are returned
@@ -20,7 +23,7 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
     v = Vizier(columns=["**"], row_limit=ROW_LIMIT)
     try:
         data = v.query_region(position, width=radius * u.arcsec, catalog=catalogue)
-    except (TimeoutError, ConnectionError, ConnectTimeout):
+    except (TimeoutError, ConnectionError, ConnectTimeout, HTTPError):
         return RETURNS.EXCEPTION
 
     if not data:
@@ -47,7 +50,7 @@ def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
     return data[0].to_pandas().reset_index(drop=True)
 
 
-def query(search_pos: SkyCoord, **kwargs) -> pd.DataFrame | None | int:
+def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     """
     Perform a Vizier query by source or position (source will be present in kwargs) in the latter case
     """
@@ -68,8 +71,8 @@ def query(search_pos: SkyCoord, **kwargs) -> pd.DataFrame | None | int:
         catalogue = aliases[survey]
 
     # perform source query if a source was provided
-    if "source" in kwargs and catalogue == "I/355/gaiadr3":
-        return gaia_query_by_source(kwargs["source"])
+    if target.identifier and catalogue == "I/355/gaiadr3":
+        return gaia_query_by_source(target.identifier)
 
     # otherwise perform query by position
-    return query_by_position(search_pos, kwargs["radius"], catalogue)
+    return query_by_position(target.coords, kwargs["radius"], catalogue)

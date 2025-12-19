@@ -1,8 +1,8 @@
 import xml.etree.ElementTree as ET
 
-from astropy.coordinates import SkyCoord
 from requests import Response
 
+from ...structures.definitions import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 from .image_core import get_image_data
@@ -49,7 +49,7 @@ def check_inputs(survey: str, band: str, size: int):
         raise ValueError(f"Size too large. Size of {survey} images must be between 6 and 3600 arcsec.")
 
 
-def irsa_query(survey: str, search_pos: SkyCoord, size: int, band: str, **kwargs: any):
+def irsa_query(survey: str, target: Target, size: int, band: str, **kwargs: dict):
     check_inputs(survey, band, size)
 
     # get rid of dss generation
@@ -61,7 +61,7 @@ def irsa_query(survey: str, search_pos: SkyCoord, size: int, band: str, **kwargs
 
     # get size in arcmin
     url_size = size / 60
-    url = f"https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?locstr={search_pos.ra.value}%20{search_pos.dec.value}&subsetsize={url_size}&survey={query_survey.capitalize()}&mode=prog&"
+    url = f"https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?locstr={target.coords.ra.value}%20{target.coords.dec.value}&subsetsize={url_size}&survey={query_survey.capitalize()}&mode=prog&"
 
     # get response from url
     response = send_request(survey, url)
@@ -72,8 +72,6 @@ def irsa_query(survey: str, search_pos: SkyCoord, size: int, band: str, **kwargs
     if main_url in (RETURNS.NULL, RETURNS.EXCEPTION):
         return main_url
 
-    image_hdu = get_image_data(
-        search_pos, main_url, survey, band, size, kwargs.get("epoch_fetcher"), kwargs.get("epoch_key")
-    )
+    image_hdu = get_image_data(main_url, survey, band, size, kwargs.get("epoch_fetcher"), kwargs.get("epoch_key"))
 
     return image_hdu

@@ -72,9 +72,7 @@ def fits_to_epoch(hdr: Header, key: str) -> Time:
     return Time(fixed_time).fits
 
 
-def get_image_skycoord(
-    hdu: ImageHDU, epoch_fetcher: FunctionType | None = None, epoch_key: str | None = None
-) -> SkyCoord:
+def get_image_skycoord(hdu: ImageHDU, epoch_fetcher: FunctionType | None = None, epoch_key: str | None = None) -> SkyCoord:
     """
     Returns the central SkyCoord of an ImageHDU, optionally fetching the epoch using a function epoch_fetcher.
     This function may take a key 'epoch_key', e.g. MJD-OBS, in which case this will be fetched from the header before transformation.
@@ -131,9 +129,7 @@ def get_image_size(hdu: ImageHDU) -> tuple[float]:
     return size
 
 
-def get_image_data(
-    search_pos: SkyCoord, url: str, survey: str, band: str, size: int, epoch_fetcher: FunctionType, epoch_key: str
-) -> list[ImageHDU]:
+def get_image_data(url: str, survey: str, band: str, size: int, epoch_fetcher: FunctionType, epoch_key: str) -> list[ImageHDU]:
     """
     Returns a list (for parity) containing an ATK image with all returned data. May also return one of RETURNS
     """
@@ -153,11 +149,6 @@ def get_image_data(
         data = response.content
 
     img = fits.open(BytesIO(data))[0]
-
-    """
-    for key, val in img.header.items():
-        print(key, val)
-    """
 
     hdu = ImageHDU(data=img.data, header=img.header)
     img_centre = get_image_skycoord(img, epoch_fetcher, epoch_key)

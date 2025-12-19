@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from pathlib import Path
 
 import numpy
@@ -14,12 +15,44 @@ from astropy.wcs import WCS
 
 
 @dataclass
+class Target:
+    coords: SkyCoord
+    identifier: int | None = None
+    survey: str | None = None
+    correction: str = "none"
+
+    def show(self, show_all_types=False) -> None:
+        from ..io.struct_stdout import pprint_structure
+
+        pprint_structure(self, show_all_types)
+
+    @classmethod
+    def from_id(cls, id: int, survey="gaia"):
+        if survey == "gaia":
+            from ..utilities.coordinates import get_gaia_target
+
+            return get_gaia_target(id)
+        else:
+            raise NotImplementedError("Other astronometric surveys will be added at a later date.")
+
+    @classmethod
+    def from_pos(cls, position: SkyCoord):
+        # if no epoch was set, assume J2000
+        if not position.obstime:
+            j2000 = Time("2000-01-01T00:00:00.000", format="fits")
+
+            position = SkyCoord(position.data, frame=position.frame, obstime=j2000)
+
+        return cls(position, None, None, "none")
+
+
+@dataclass
 class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
     radius: float | None = None
-    source: int | None = None
     position: SkyCoord | None = None
+    identifier: int | None = None
     epoch: Time | None = None
     frame: str | None = None
     correction: str | None = None
@@ -43,8 +76,8 @@ class BaseQueryResult:
 
     @property
     def _fname(self):
-        if self.source:
-            return Path(f"{self.source}_{self.survey}_ATKdata.fits")
+        if self.identifier:
+            return Path(f"{self.identifier}_{self.survey}_ATKdata.fits")
         elif self.position:
             return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_{self.survey}_ATKdata.fits")
         else:
@@ -78,6 +111,11 @@ class PlottableQueryResult(BaseQueryResult):
 
 @dataclass
 class BaseContainer:
+    def show(self, show_all_types=False) -> None:
+        from ..io.struct_stdout import pprint_structure
+
+        pprint_structure(self, show_all_types)
+
     def __repr__(self):
         return f"<{self.survey} {type(self).__name__}>"
 
@@ -135,6 +173,7 @@ class Image(BaseContainer):
     wcs: WCS | None = None
     focus: SkyCoord | None = None
     epoch: Time | None = None
+    overlay: pandas.DataFrame | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"

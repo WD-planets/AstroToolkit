@@ -2,16 +2,18 @@ import ATK.Tools as ATK
 
 SOURCE = 2552928187080872832
 
-# data = ATK.query("image", survey="panstarrs", target=SOURCE, size=120, band="r")
+target = ATK.Target.from_id(SOURCE)
 
-data = ATK.query("image", survey="sdss", target=SOURCE, size=120, band="g")
+data = ATK.query("image", survey="sdss", target=target, size=120, band="y", overlays=["galex"])
 
-# data.save("test_image.fits")
-# data.show()
+# data = ATK.query("image", survey="dss1", target=SOURCE, size=300, band="blue", overlays=["galex"])
 
-# data = ATK.read("test_image.fits")
-# data.show()
+if data.data:
+    img = data.data[0]
+    img.show()
 
-data.show()
-data.plot(relative_axes=False)
-data.open()
+    print("\n\n---------------------------------\n\n")
+
+    data.show()
+    data.plot(relative_axes=True)
+    data.open()

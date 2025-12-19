@@ -1,8 +1,8 @@
 from io import BytesIO
 
-from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
+from ...structures.definitions import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.misc import suppress_stdout
 from ...utilities.requests import send_request
@@ -17,7 +17,7 @@ def check_inputs(band: str, size: int):
 
 
 # size: int, band: str, overlays: list | dict, search_pos: SkyCoord = None, **kwargs: any
-def query(search_pos: SkyCoord, **kwargs: any):
+def query(target: Target, **kwargs: any):
     band, size = kwargs["band"], kwargs["size"]
 
     check_inputs(band, size)
@@ -26,7 +26,7 @@ def query(search_pos: SkyCoord, **kwargs: any):
     url_size = size * 4
 
     # fetch table
-    url = f"https://ps1images.stsci.edu/cgi-bin/ps1filenames.py?ra={search_pos.ra.value}&dec={search_pos.dec.value}&band={band}"
+    url = f"https://ps1images.stsci.edu/cgi-bin/ps1filenames.py?ra={target.coords.ra.value}&dec={target.coords.dec.value}&band={band}"
     with suppress_stdout():
         response = send_request("panstarrs", url)
     if response is RETURNS.EXCEPTION:
@@ -42,10 +42,10 @@ def query(search_pos: SkyCoord, **kwargs: any):
         return RETURNS.NULL
 
     # get url from table
-    sub_url = f"https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra={search_pos.ra.value}&dec={search_pos.dec.value}&size={url_size}&format=fits&red="
+    sub_url = f"https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra={target.coords.ra.value}&dec={target.coords.dec.value}&size={url_size}&format=fits&red="
     fname = table["filename"][0]
     main_url = f"{sub_url}{fname}"
 
-    image_hdu = get_image_data(search_pos, main_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
+    image_hdu = get_image_data(main_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
 
     return image_hdu
