@@ -15,10 +15,8 @@ from ...utilities.coordinates import (correct_radius, correct_skycoord,
 from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids
 
-DISABLE_CORRECTIONS = True
 
-
-def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict):
+def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, disable_corrections=False):
     # correct search radius (i.e. size of image) for maximum possible proper motion of object
     # between image epoch and non-gaia survey epoch. Padded by 25% to account for error
     radius = correct_radius(target, image.size, "vizier", survey) * 1.25
@@ -45,7 +43,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     lat_col = survey_info["lat_column"]
     lon_col = survey_info["lon_column"]
 
-    if DISABLE_CORRECTIONS:
+    if disable_corrections:
         gaia_data = pd.DataFrame()
 
     non_gaia_coords = SkyCoord(
@@ -167,6 +165,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
 
 def get_overlay(target: Target, image: Image, **kwargs: dict):
     overlay_dict = OVERLAY_CONFIG.as_dict()
+    disable_corrections = kwargs.get("disable_corrections", False)
 
     overlays = kwargs.get("overlays")
     if not overlays:
@@ -210,7 +209,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
 
     overlay_data = []
     for survey, info in overlay_info.items():
-        data = get_overlay_data(image, target, survey, info)
+        data = get_overlay_data(image, target, survey, info, disable_corrections)
         # if an exception is encountered, return EXCEPTION and set overlay=None, exception=True in structure
         if data is RETURNS.EXCEPTION:
             return data

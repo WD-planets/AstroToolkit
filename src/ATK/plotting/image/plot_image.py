@@ -106,8 +106,11 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
     overlay = get_simbad_urls(image, overlay)
 
     if relative_axes:
-        overlay["ra"] = (overlay["ra"] - image.focus.ra.value) * 3600
-        overlay["dec"] = (overlay["dec"] - image.focus.dec.value) * 3600
+        overlay["marker_ra"] = (overlay["ra"] - image.focus.ra.value) * 3600
+        overlay["marker_dec"] = (overlay["dec"] - image.focus.dec.value) * 3600
+    else:
+        overlay["marker_ra"] = overlay["ra"]
+        overlay["marker_dec"] = overlay["dec"]
 
     magnitudes = sorted(overlay["mag_name"].unique())
     colours = get_palette(len(magnitudes), shift=1)
@@ -123,8 +126,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
     for (survey, label), group in non_nan_mag.groupby(["survey", "label"]):
         plot.circle(
             source=ColumnDataSource(group),
-            x="ra",
-            y="dec",
+            x="marker_ra",
+            y="marker_dec",
             radius="marker_radius",
             line_color="colour",
             line_width=2,
@@ -134,8 +137,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
 
         clickable_marker = plot.circle(
             source=ColumnDataSource(group),
-            x="ra",
-            y="dec",
+            x="marker_ra",
+            y="marker_dec",
             radius="pointer_radius",
             line_color="colour",
             line_width=2,
@@ -149,8 +152,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
     for (survey, label), group in nan_mag.groupby(["survey", "label"]):
         scatter = plot.scatter(
             source=ColumnDataSource(group),
-            x="ra",
-            y="dec",
+            x="marker_ra",
+            y="marker_dec",
             size=20,
             line_width=4,
             color="colour",
@@ -167,12 +170,7 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
 
 
 def plot(image: Image, *args: any, **kwargs: any) -> figure:
-    plot = figure(
-        width=400,
-        height=400,
-        title=f'{image.survey} {image.band}-band Image ({image.size}")',
-        tools=("pan,wheel_zoom,reset"),
-    )
+    plot = figure(width=400, height=400, title=f'{image.survey} {image.band}-band Image ({image.size}")', tools=("pan,wheel_zoom,reset"))
     plot.grid.grid_line_color = None
 
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
@@ -227,14 +225,8 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         plot.xaxis.axis_label = "Right Ascension / deg"
         plot.yaxis.axis_label = "Declination / deg"
 
-        x_bounds = (
-            image_focus[0] - n_pixels[0] / 2 * pixel_scales[0],
-            image_focus[0] + n_pixels[0] / 2 * pixel_scales[0],
-        )
-        y_bounds = (
-            image_focus[1] - n_pixels[1] / 2 * pixel_scales[1],
-            image_focus[1] + n_pixels[1] / 2 * pixel_scales[1],
-        )
+        x_bounds = (image_focus[0] - n_pixels[0] / 2 * pixel_scales[0], image_focus[0] + n_pixels[0] / 2 * pixel_scales[0])
+        y_bounds = (image_focus[1] - n_pixels[1] / 2 * pixel_scales[1], image_focus[1] + n_pixels[1] / 2 * pixel_scales[1])
 
         x_range = x_bounds[1] - x_bounds[0]
         y_range = y_bounds[1] - y_bounds[0]
@@ -251,8 +243,8 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
 
         focus_ra, focus_dec = image_focus[0], image_focus[1]
 
-    plot.x_range.bounds = "auto"
-    plot.y_range.bounds = "auto"
+    # plot.x_range.bounds = "auto"
+    # plot.y_range.bounds = "auto"
 
     plot.image(
         image=[image_data],

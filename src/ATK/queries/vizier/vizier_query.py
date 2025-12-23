@@ -1,14 +1,18 @@
+import warnings
 from urllib.error import HTTPError
 
 import astropy.units as u
 import pandas as pd
 from astropy.coordinates import SkyCoord
+from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
 from requests.exceptions import ConnectionError, ConnectTimeout
 
 from ...configuration.alias_config import ALIAS_CONFIG
 from ...structures.definitions import Target
 from ...utilities.defaults import RETURNS
+
+warnings.simplefilter("ignore", category=NoResultsWarning)
 
 # ensure all rows are returned
 ROW_LIMIT = -1

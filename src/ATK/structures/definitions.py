@@ -43,7 +43,7 @@ class Target:
 
             position = SkyCoord(position.data, frame=position.frame, obstime=j2000)
 
-        return cls(position, None, None, "none")
+        return cls(position.transform_to("icrs"), None, None, "none")
 
 
 @dataclass

@@ -51,6 +51,6 @@ def query(target: Target, **kwargs: any):
     # get url from table
     image_url = table["get_fits"][0]
 
-    image_hdu = get_image_data(image_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
+    image_hdu = get_image_data(image_url, "skymapper", band, size, mjd_to_epoch, "MJD-OBS")
 
     return image_hdu

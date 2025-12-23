@@ -1,6 +1,5 @@
 import warnings
 from pathlib import Path
-from types import NoneType
 
 import pandas as pd
 from astropy.io.fits import HDUList, Header

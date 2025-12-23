@@ -5,6 +5,8 @@ Changes
 - All coordinate/source handling now done via a central Target class
     - A Target is automatically generated if a source_id or SkyCoord is entered, or one can be manually created via Target.from_pos() or Target.from_id()
     - Reduces explicit dependency on Gaia, so future astrometric surveys like LSST will be a lot easier to implement, just need to provide an equivalent to get_gaia_target (i.e. converts LSST id -> ATK Target with LSST astrometry)
+    - Added an "astrometric_backend" config key, which will (in future) select the default astrometry survey (currently only Gaia)
+    - Coordinates can be provided in any frame, automatically transformed to ICRS
 - Configuration setup now far more robust
     - Added ATKoverlay show
     - Improved cross-platform file opening
@@ -22,6 +24,7 @@ Changes
 - Image queries to DSS1/DSS2 now properly implemented
 - Added support for WISE, 2MASS and SDSS image queries 
 - Improved image plotting
+- Added an optional parameter "disable_corrections" to query(), which disable all astrometric corrections if True (defaults to False)
 
 To-Do 
 -----

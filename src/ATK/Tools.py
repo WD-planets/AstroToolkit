@@ -12,9 +12,7 @@ from .utilities.defaults import RETURNS
 from .utilities.mapping import build_map
 
 
-def _set_results(
-    structure: QueryResult | PlottableQueryResult, query_result: any
-) -> QueryResult | PlottableQueryResult:
+def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
     if query_result is RETURNS.EXCEPTION:
         structure.data = []
         structure.exception = True
@@ -38,6 +36,15 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
     """
 
     target = check_target(target)
+
+    # disables any proper motion correction by creating a simplified target with no proper motion information
+    if kwargs.get("disable_corrections", False):
+        coords = target.coords
+        reduced_coords = SkyCoord(ra=coords.ra, dec=coords.dec, frame=coords.frame, obstime=coords.obstime)
+        target.coords = reduced_coords
+        target.identifier = None
+        target.survey = None
+        target.correction = "none"
 
     module = importlib.import_module(f"ATK.queries.{kind}")
     query_map = build_map(module, "query", suffix="_query")
@@ -70,6 +77,7 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
 
         # delete initial image
         structure.data = []
+        # structure.epoch = image_time
         structure = _set_results(structure, query_result)
 
         overlay = get_overlay(target, structure.data[0], **arguments)
