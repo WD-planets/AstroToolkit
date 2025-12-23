@@ -15,6 +15,8 @@ from ...utilities.coordinates import (correct_radius, correct_skycoord,
 from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids
 
+DISABLE_CORRECTIONS = True
+
 
 def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict):
     # correct search radius (i.e. size of image) for maximum possible proper motion of object
@@ -36,9 +38,6 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     else:
         gaia_data = gaia_data[0]
 
-    # keep only necessary gaia columns
-    gaia_data = gaia_data[["RA_ICRS", "DE_ICRS", "pmRA", "pmDE"]]
-
     # extract basic info
     vizier_epochs = EPOCH_CONFIG.get_section_by_query_kind("vizier")
     gaia_epoch = vizier_epochs["gaia"]
@@ -46,74 +45,86 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     lat_col = survey_info["lat_column"]
     lon_col = survey_info["lon_column"]
 
-    # discard any gaia sources that have nan positions/proper motions
-    gaia_data = gaia_data.dropna()
+    if DISABLE_CORRECTIONS:
+        gaia_data = pd.DataFrame()
 
-    # combine non_gaia Vizier parameters into a single array
-    params = []
-    for key, val in survey_info.items():
-        if key == "frame":
-            continue
-        if not isinstance(val, list):
-            val = [val]
-        params += val
-
-    # keep only necessary columns
-    non_gaia_data = non_gaia_data[params]
-
-    # set up gaia and non-gaia arrays of SkyCoords
-    gaia_coords = SkyCoord(
-        ra=gaia_data["RA_ICRS"].to_numpy() * u.deg,
-        dec=gaia_data["DE_ICRS"].to_numpy() * u.deg,
-        pm_ra_cosdec=gaia_data["pmRA"].to_numpy() * (u.mas / u.yr),
-        pm_dec=gaia_data["pmDE"].to_numpy() * (u.mas / u.yr),
-        frame="icrs",
-        obstime=gaia_epoch,
-    )
     non_gaia_coords = SkyCoord(
         ra=non_gaia_data[lon_col].to_numpy() * u.deg,
         dec=non_gaia_data[lat_col].to_numpy() * u.deg,
         frame=survey_info["frame"],
         obstime=non_gaia_epoch,
+        pm_ra_cosdec=np.zeros(len(non_gaia_data)) * u.mas / u.yr,
+        pm_dec=np.zeros(len(non_gaia_data)) * u.mas / u.yr,
     )
 
-    # match frames and correct gaia detections to non-gaia epoch
-    non_gaia_coords = non_gaia_coords.transform_to(gaia_coords.frame)
-    gaia_coords = gaia_coords.apply_space_motion(non_gaia_epoch)
+    if not gaia_data.empty:
+        # keep only necessary gaia columns
+        gaia_data = gaia_data[["RA_ICRS", "DE_ICRS", "pmRA", "pmDE"]]
 
-    # nearest-neighbour cross match + check for those within radius of gaia sources
-    index, separation, _ = match_coordinates_sky(non_gaia_coords, gaia_coords)
+        # discard any gaia sources that have nan positions/proper motions
+        gaia_data = gaia_data.dropna()
 
-    # mask contains rows
-    mask = separation < piggyback_radius * u.arcsec
-    matched_index = np.where(mask)[0]
+        # combine non_gaia Vizier parameters into a single array
+        params = []
+        for key, val in survey_info.items():
+            if key == "frame":
+                continue
+            if not isinstance(val, list):
+                val = [val]
+            params += val
 
-    # Prepare arrays
-    pm_ra = np.zeros(len(non_gaia_coords)) * u.mas / u.yr
-    pm_dec = np.zeros(len(non_gaia_coords)) * u.mas / u.yr
+        # keep only necessary columns
+        non_gaia_data = non_gaia_data[params]
 
-    # Fill matched entries
-    pm_ra[matched_index] = gaia_coords.pm_ra_cosdec[index[matched_index]]
-    pm_dec[matched_index] = gaia_coords.pm_dec[index[matched_index]]
+        # set up gaia and non-gaia arrays of SkyCoords
+        gaia_coords = SkyCoord(
+            ra=gaia_data["RA_ICRS"].to_numpy() * u.deg,
+            dec=gaia_data["DE_ICRS"].to_numpy() * u.deg,
+            pm_ra_cosdec=gaia_data["pmRA"].to_numpy() * (u.mas / u.yr),
+            pm_dec=gaia_data["pmDE"].to_numpy() * (u.mas / u.yr),
+            frame="icrs",
+            obstime=gaia_epoch,
+        )
 
-    # Create a new SkyCoord in Gaia frame
-    non_gaia = SkyCoord(
-        ra=non_gaia_coords.ra,
-        dec=non_gaia_coords.dec,
-        frame=gaia_coords.frame,
-        obstime=non_gaia_coords.obstime,
-        pm_ra_cosdec=pm_ra,
-        pm_dec=pm_dec,
-    )
+        # match frames and correct gaia detections to non-gaia epoch
+        non_gaia_coords = non_gaia_coords.transform_to(gaia_coords.frame)
+        gaia_coords = gaia_coords.apply_space_motion(non_gaia_epoch)
 
-    non_gaia = non_gaia.apply_space_motion(image.epoch)
+        # nearest-neighbour cross match + check for those within radius of gaia sources
+        index, separation, _ = match_coordinates_sky(non_gaia_coords, gaia_coords)
+
+        # mask contains rows
+        mask = separation < piggyback_radius * u.arcsec
+        matched_index = np.where(mask)[0]
+
+        # Prepare arrays
+        pm_ra = np.zeros(len(non_gaia_coords)) * u.mas / u.yr
+        pm_dec = np.zeros(len(non_gaia_coords)) * u.mas / u.yr
+
+        # Fill matched entries
+        pm_ra[matched_index] = gaia_coords.pm_ra_cosdec[index[matched_index]]
+        pm_dec[matched_index] = gaia_coords.pm_dec[index[matched_index]]
+
+        # Create a new SkyCoord in Gaia frame
+        non_gaia_coords = SkyCoord(
+            ra=non_gaia_coords.ra,
+            dec=non_gaia_coords.dec,
+            frame=gaia_coords.frame,
+            obstime=non_gaia_coords.obstime,
+            pm_ra_cosdec=pm_ra,
+            pm_dec=pm_dec,
+        )
+
+        non_gaia_coords = non_gaia_coords.apply_space_motion(image.epoch)
+    else:
+        mask = [False] * len(non_gaia_data)
 
     df = pd.DataFrame()
-    df["survey"] = [survey] * len(non_gaia)
-    df["ra"] = non_gaia.ra.deg
-    df["dec"] = non_gaia.dec.deg
-    df["pm_ra_cosdec"] = non_gaia.pm_ra_cosdec.to(u.mas / u.yr).value
-    df["pm_dec"] = non_gaia.pm_dec.to(u.mas / u.yr).value
+    df["survey"] = [survey] * len(non_gaia_coords)
+    df["ra"] = non_gaia_coords.ra.deg
+    df["dec"] = non_gaia_coords.dec.deg
+    df["pm_ra_cosdec"] = non_gaia_coords.pm_ra_cosdec.to(u.mas / u.yr).value
+    df["pm_dec"] = non_gaia_coords.pm_dec.to(u.mas / u.yr).value
     df["gaia_match"] = mask
 
     per_mag_dfs = []
@@ -130,14 +141,8 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
 
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
     pixel_scales = proj_plane_pixel_scales(image.wcs)
-    x_bounds = (
-        image.focus.ra.value - n_pixels[0] / 2 * pixel_scales[0],
-        image.focus.ra.value + n_pixels[0] / 2 * pixel_scales[0],
-    )
-    y_bounds = (
-        image.focus.dec.value - n_pixels[1] / 2 * pixel_scales[1],
-        image.focus.dec.value + n_pixels[1] / 2 * pixel_scales[1],
-    )
+    x_bounds = (image.focus.ra.value - n_pixels[0] / 2 * pixel_scales[0], image.focus.ra.value + n_pixels[0] / 2 * pixel_scales[0])
+    y_bounds = (image.focus.dec.value - n_pixels[1] / 2 * pixel_scales[1], image.focus.dec.value + n_pixels[1] / 2 * pixel_scales[1])
 
     ra_mask = (final_df["ra"] < x_bounds[0]) | (final_df["ra"] > x_bounds[1])
     dec_mask = (final_df["dec"] < y_bounds[0]) | (final_df["dec"] > y_bounds[1])
@@ -147,11 +152,8 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     if final_df.empty:
         return final_df
 
-    # print(final_df)
     coord = dataframe_to_skycoord(final_df, image.epoch)
-    # print(coord)
     coord = correct_skycoord(coord, image.epoch, Time("2000-01-01", format="iso"))
-    # print(coord)
     ids = get_ids(coord, BASE_CONFIG.get("overlay_settings", "simbad_radius"))
     if ids is RETURNS.EXCEPTION:
         return ids

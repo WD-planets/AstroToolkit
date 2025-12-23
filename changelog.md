@@ -18,6 +18,7 @@ Changes
 - Image plotting can now use relatives axes (i.e. +- arcsec from the centre)
 - Unified all structures into a single class BaseQueryResult, from which QueryResult and PlottableQueryResult inherit
 - Unified .data attribute - all query types now stored data as a list of pandas DataFrames (vizier queries) or new ATK data objects (basically everything else).
+- SkyMapper image queries updated to SkyMapper DR4, and now sorted by exposure time (desc) and air mass (asc) to return best image
 - Image queries to DSS1/DSS2 now properly implemented
 - Added support for WISE, 2MASS and SDSS image queries 
 - Improved image plotting
@@ -34,3 +35,4 @@ To-Do
 - test file saving on vizier and image data
 - add colours to image plots
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally)
+- use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert

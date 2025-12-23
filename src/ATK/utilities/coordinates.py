@@ -81,15 +81,7 @@ def get_gaia_target(source: int) -> Target:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(
-        ra=ra * u.deg,
-        dec=dec * u.deg,
-        pm_ra_cosdec=pmra,
-        pm_dec=pmdec,
-        distance=distance,
-        obstime=gaia_epoch,
-        frame="icrs",
-    )
+    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
 
     correction = check_correction(coord)
 
@@ -212,14 +204,6 @@ def correct_dataframe_coords(data: pd.DataFrame, input_epoch: Time, target_epoch
     # get mask of values with invalid PM information
     bad_pm_mask = data["pm_ra_cosdec"].isna() & data["pm_dec"].isna()
 
-    good_pm_data = data.loc[~bad_pm_mask]
-
-    # convert dataframe coordinates to skycoord
-    coord = dataframe_to_skycoord(good_pm_data, input_epoch)
-
-    # apply correction
-    coord = coord.apply_space_motion(target_epoch)
-
     # create output ra and dec columns if needed
     if output_cols:
         data[output_cols[0]] = data["ra"]
@@ -227,8 +211,16 @@ def correct_dataframe_coords(data: pd.DataFrame, input_epoch: Time, target_epoch
     else:
         output_cols = ["ra", "dec"]
 
-    # update output ra and dec columns (only in rows where a correction occurred)
-    data.loc[good_pm_data.index, output_cols[0]] = coord.ra.deg
-    data.loc[good_pm_data.index, output_cols[1]] = coord.dec.deg
+    good_pm_data = data.loc[~bad_pm_mask]
+    if not good_pm_data.empty:
+        # convert dataframe coordinates to skycoord
+        coord = dataframe_to_skycoord(good_pm_data, input_epoch)
+
+        # apply correction
+        coord = coord.apply_space_motion(target_epoch)
+
+        # update output ra and dec columns (only in rows where a correction occurred)
+        data.loc[good_pm_data.index, output_cols[0]] = coord.ra.deg
+        data.loc[good_pm_data.index, output_cols[1]] = coord.dec.deg
 
     return data
