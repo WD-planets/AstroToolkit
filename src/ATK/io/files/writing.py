@@ -7,7 +7,7 @@ from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
 
-from ...structures.structure_io import struct_to_hdu
+from ...structures.structure_io import BASIC_TYPES, struct_to_hdu
 
 warnings.simplefilter("ignore", category=VerifyWarning)
 
@@ -50,15 +50,24 @@ def write_local(structure: any, path: str | Path) -> Path:
 
     # iterate through structure attributes
     for attr, val in structure.__dict__.items():
-        if attr == "data":
-            if isinstance(val, list):
-                for ctr in val:
-                    if isinstance(ctr, pd.DataFrame):
-                        hdul.append(dataframe_to_hdu(structure, ctr))
-                    else:
-                        hdul.append(ctr.to_hdu())
-            else:
-                raise ValueError(f"Unexpected type of .data attribute in structure '{type(structure)}'.")
+        if isinstance(val, BASIC_TYPES):
+            continue
+
+        if not isinstance(val, list):
+            continue
+
+        for ctr in val:
+            if isinstance(ctr, pd.DataFrame):
+                hdul.append(dataframe_to_hdu(structure, ctr))
+                continue
+
+            hdus = ctr.to_hdu()
+            if not isinstance(hdus, (tuple, list)):
+                hdul.append(hdus)
+                continue
+
+            for hdu in hdus:
+                hdul.append(hdu)
 
     hdul.writeto(path, overwrite=True)
 

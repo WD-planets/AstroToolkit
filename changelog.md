@@ -33,7 +33,6 @@ To-Do
 - move most globals to one place + include global prefix to make sure that these aren't edited
 - try to remove unnecessary dependencies
     - reproject
-- ensure ICRS frame on Targets
 - Make an actual_bounds() function for Image
 - test file saving on vizier and image data
 - add colours to image plots

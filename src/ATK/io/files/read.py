@@ -12,7 +12,8 @@ from astropy.table import Table
 from astropy.units import Quantity, UnitBase
 from astropy.wcs import WCS
 
-from ...structures.definitions import Image, PlottableQueryResult, QueryResult
+from ...configuration.base_config import translator
+from ...structures.definitions import Image, QueryResult
 from ...utilities.mapping import build_structure_map, get_query_result_map
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
@@ -90,6 +91,9 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
 
     ATK_keys = {key: val for key, val in hdr.items() if key.startswith("ATK_")}
     for key, val in ATK_keys.items():
+        # use same translator as base config to get correct data types from ATK header keys
+        val = translator(val)
+
         # get rid of ATK_ prefix and lower key to match attribute
         attr = key[4:].lower()
 
@@ -157,7 +161,12 @@ def read_local(path: str | Path) -> QueryResult:
     structure = parse_primary_header(path, hdul[0].header)
 
     # iterate through extensions
-    for hdu in hdul[1:]:
+    completed = []
+    hdul_no_primary = hdul[1:]
+    for index, hdu in enumerate(hdul_no_primary):
+        if hdu in completed:
+            continue
+
         if not hdu.header.get("ATK_EXT", None):
             warnings.warn(f"ATK: Non-ATK extension found in target file {path} has been ignored.")
             continue
@@ -165,10 +174,19 @@ def read_local(path: str | Path) -> QueryResult:
             warnings.warn(f"ATK: Unexpected table type '{type(hdu)}' in target file {path} has been ignored.")
             continue
 
+        # everything except images
         if isinstance(hdu, BinTableHDU):
             data = parse_generic_bintable(structure, path, hdu.header, hdu.data)
+            completed.append(hdu)
+
+        # images
         elif isinstance(hdu, ImageHDU):
+            # get image hdu
             data = parse_generic_imagehdu(structure, path, hdu)
+            completed.append(hdu)
+            # get overlay from next extension
+            data.overlay = parse_generic_bintable(structure, path, hdul_no_primary[index + 1].header, hdul_no_primary[index + 1].data)
+            completed.append(hdul_no_primary[index + 1])
 
         structure.data.append(data)
 

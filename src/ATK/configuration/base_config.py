@@ -3,25 +3,21 @@ from .parser_config.ParserConfig import ParserConfig
 
 
 def translator(value):
-    match value:
-        case "true":
-            return True
-        case "false":
-            return False
-        case "none":
-            return None
-        case _:
-            pass
+    if value == "true":
+        return True
+    elif value == "false":
+        return False
+    elif value == "none":
+        return None
 
     try:
-        return float(value)
-    except ValueError:
+        val = float(value)
+        if val.is_integer():
+            return int(val)
+        else:
+            return float(value)
+    except (ValueError, TypeError):
         return value
-
-    try:
-        return int(value)
-    except ValueError:
-        pass
 
 
 class BaseConfig(ParserConfig):

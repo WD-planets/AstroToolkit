@@ -1,6 +1,6 @@
 import typing
 from dataclasses import fields
-from types import UnionType
+from types import NoneType, UnionType
 from typing import get_args, get_origin
 
 import astropy.units as u
@@ -16,6 +16,8 @@ from .definitions import Image
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
+
+BASIC_TYPES = (int, float, str, bool, NoneType)
 
 # ----------------------
 # HEADER WRITE FUNCTIONS
@@ -71,11 +73,7 @@ def write_skycoord(attr: str, hdr: Header, coord: SkyCoord) -> Header:
 
 
 # Map to special header writing functions
-WRITE_MAP = {
-    SkyCoord: lambda **kwargs: write_skycoord(kwargs["attr"], kwargs["hdr"], kwargs["value"]),
-    WCS: lambda **kwargs: kwargs["hdr"],  # do nothing
-    ImageHDU: lambda **kwargs: kwargs["hdr"],  # do nothing
-}
+WRITE_MAP = {SkyCoord: lambda **kwargs: write_skycoord(kwargs["attr"], kwargs["hdr"], kwargs["value"])}
 
 # ---------
 # UTILITIES
@@ -206,9 +204,18 @@ def image_to_hdu(image: Image):
     hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
     hdr.append(("ATK_KIND", "Image", "ATK container kind"))
     for attr, val in image.__dict__.items():
-        try:
+        # basic types and those with special writing functions (e.g. SkyCoord decomposition)
+        if type(val) in WRITE_MAP or type(val) in BASIC_TYPES:
             hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
-        except RecursionError:
-            pass
 
-    return ImageHDU(data=hdu.data, header=hdr, name=image.__str__())
+    image_hdu = ImageHDU(data=hdu.data, header=hdr, name=image.__str__())
+
+    overlay_hdr = Header()
+    overlay_hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
+    overlay = image.overlay
+    if overlay is None:
+        overlay = pd.DataFrame()
+    table = Table.from_pandas(overlay)
+    overlay_hdu = BinTableHDU(data=table, header=overlay_hdr, name="<Overlay Data>")
+
+    return (image_hdu, overlay_hdu)
