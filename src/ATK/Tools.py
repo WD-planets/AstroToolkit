@@ -13,15 +13,22 @@ from .utilities.mapping import build_map
 
 
 def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
+    """
+    Sets the .data and .exception attributes of an ATK structure based on what was returned from a query
+    """
+
+    # an exception was encountered
     if query_result is RETURNS.EXCEPTION:
         structure.data = []
         structure.exception = True
         return structure
 
+    # no data was returned
     if query_result is RETURNS.NULL:
         structure.data = []
         return structure
 
+    # data was returned correctly
     if isinstance(query_result, list):
         structure.data += query_result
     else:
@@ -97,4 +104,8 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
 
 
 def read(path: str | Path):
+    """
+    Reads a local ATK fits file to recreate the original data structure
+    """
+
     return read_local(path)

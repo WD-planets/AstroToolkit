@@ -17,6 +17,10 @@ def check_inputs(band: str, size: int):
 
 # size: int, band: str, overlays: list | dict, search_pos: SkyCoord = None, **kwargs: any
 def query(target: Target, **kwargs: any):
+    """
+    Performs a SkyMapper image query
+    """
+
     band, size = kwargs["band"], kwargs["size"]
 
     check_inputs(band, size)
@@ -32,6 +36,7 @@ def query(target: Target, **kwargs: any):
     if response is RETURNS.EXCEPTION:
         return response
 
+    # SkyMapper still returns a VOTable if no image is available
     if "text/csv" not in response.headers.get("Content-Type"):
         return RETURNS.NULL
 

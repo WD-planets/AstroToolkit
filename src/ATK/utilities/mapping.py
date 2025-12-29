@@ -8,6 +8,10 @@ from .defaults import QUERY_KINDS
 
 
 def get_query_result_map():
+    """
+    Responds a map {str:class} from query kinds -> query result objects (QueryResult or PlottableQueryResult)
+    """
+
     from ..structures.definitions import PlottableQueryResult, QueryResult
 
     NON_PLOTTABLE = ["vizier"]

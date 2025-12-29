@@ -11,11 +11,16 @@ warnings.filterwarnings("ignore", category=ErfaWarning)
 
 
 def translator(value):
+    """
+    Translates strings to astropy ISOT Time objects
+    """
+
     try:
         return Time(value, format="isot")
     except ValueError:
         print(value)
         warnings.warn("ATK: Invalid epoch found in config file. Use 'ATKepoch show' to see the invalid entry.")
+
         return "<Invalid ISOT Time Format>"
 
 
@@ -24,11 +29,14 @@ class EpochConfig(ParserConfig):
         super().__init__(PATH, DEFAULTS, translator)
 
     def get_section_by_query_kind(self, query_kind: str):
-        match query_kind:
-            case "vizier":
-                section = "vizier_aliases"
-            case _:
-                section = f"{query_kind}_surveys"
+        """
+        Returns a requested epoch config section (i.e. the section for a specified query kind) as a dict
+        """
+
+        if query_kind == "vizier":
+            section = f"{query_kind}_aliases"
+        else:
+            section = f"{query_kind}_surveys"
 
         return self.as_dict()[section]
 

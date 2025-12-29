@@ -4,6 +4,10 @@ from .irsa_queries import irsa_query
 
 
 def query(target: Target, **kwargs: any):
+    """
+    Perform a DSS2 image query
+    """
+
     band, size = kwargs["band"], kwargs["size"]
 
     return irsa_query("dss2", target, size, band, epoch_fetcher=fits_to_epoch, epoch_key="DATE-OBS")

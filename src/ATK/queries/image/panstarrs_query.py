@@ -18,6 +18,10 @@ def check_inputs(band: str, size: int):
 
 # size: int, band: str, overlays: list | dict, search_pos: SkyCoord = None, **kwargs: any
 def query(target: Target, **kwargs: any):
+    """
+    Performs a PanStarrs image query
+    """
+
     band, size = kwargs["band"], kwargs["size"]
 
     check_inputs(band, size)

@@ -30,6 +30,10 @@ def check_finite(val: any) -> bool:
 
 
 def check_correction(coord: SkyCoord) -> str:
+    """
+    Gets the maximum possible correction degree for an ATK target based on its astrometry
+    """
+
     if not coord.data.differentials:
         return "none"
     if coord.distance == u.one:
@@ -39,6 +43,10 @@ def check_correction(coord: SkyCoord) -> str:
 
 
 def check_target(target: Target | SkyCoord | int):
+    """
+    Convers a given targeting input (e.g. Gaia SOURCE_ID or an astropy SkyCoord) to an ATK target
+    """
+
     if isinstance(target, Target):
         pass
     elif isinstance(target, SkyCoord):
@@ -165,6 +173,10 @@ def correct_radius(target: Target, radius: float, query_kind: str, survey: str):
 
 
 def dataframe_to_skycoord(data: pd.DataFrame, epoch: Time):
+    """
+    Converts a DataFrame containing any 'ra', 'dec', 'pm_ra_cosdec', and 'pm_dec' columns to a single SkyCoord
+    """
+
     coords = SkyCoord(
         ra=data["ra"].to_numpy() * u.deg,
         dec=data["dec"].to_numpy() * u.deg,
@@ -178,6 +190,10 @@ def dataframe_to_skycoord(data: pd.DataFrame, epoch: Time):
 
 
 def skycoord_to_dataframe(coord: SkyCoord):
+    """
+    Converts a SkyCoord containing any number of positions to a DataFrame with 'ra', 'dec', 'pm_ra_cosdec' and 'pm_dec' columns
+    """
+
     df = pd.DataFrame()
 
     df["ra"] = coord.ra.deg
@@ -189,6 +205,10 @@ def skycoord_to_dataframe(coord: SkyCoord):
 
 
 def correct_skycoord(coord: SkyCoord, input_epoch: Time, target_epoch: Time):
+    """
+    Corrects the positions in a SkyCoord for proprer motion
+    """
+
     df = skycoord_to_dataframe(coord)
     df = correct_dataframe_coords(df, input_epoch, target_epoch)
     corrected_coord = dataframe_to_skycoord(df, input_epoch)
@@ -197,6 +217,11 @@ def correct_skycoord(coord: SkyCoord, input_epoch: Time, target_epoch: Time):
 
 
 def correct_dataframe_coords(data: pd.DataFrame, input_epoch: Time, target_epoch: Time, output_cols: list = []):
+    """
+    Corrects the coordinates in the 'ra' and 'dec' columns of a dataframe for proper motion in corresponding 'pm_ra_cosdec' and 'pm_dec' columns.
+    Optionally saves the resulting coordinates to two new output columns (output_cols)
+    """
+
     for col in REQUIRED_COLS:
         if col not in data:
             raise ValueError(f"DataFrame missing required column '{col}'.")

@@ -150,14 +150,14 @@ def is_special_type(value: any) -> bool:
 
 def apply_special_formatter(value: any) -> str:
     """
-    Applies a special formatter function to value
+    Applies a special-case formatter function to value
     """
 
     formatter = SPECIAL_FORMATTERS.get(type(value))
     if formatter:
         return formatter(value)
 
-    # Enum fallback
+    # Enum fallback to avoid recursion error + print name of enum value
     if isinstance(value, Enum):
         return value.name
 
@@ -191,7 +191,7 @@ def pad_placeholder(depth: int, half: bool = False) -> str:
 
 def replace_pad_placeholder(match: re.Match) -> str:
     """
-    Replaces placeholder columns in the output str using regex. Placeholders ending in 'H' are placed at half the justification for type hints
+    Replaces placeholder columns in the output str using regex. Placeholders ending in 'H' are placed at half the justification (for container types)
     """
 
     depth = int(match.group(1))
@@ -336,11 +336,7 @@ def print_methods(cls: any) -> str:
     Prints available methods of an object, excluding
     """
 
-    methods = [
-        name
-        for name, f in inspect.getmembers(cls, inspect.ismethod)
-        if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)
-    ]
+    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)]
 
     return "Available Methods: " + ", ".join(f".{m}()" for m in methods)
 
@@ -362,17 +358,21 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
     # calculate base pad
     pad = get_dict_pad(attrs, ".attr: ")
 
+    # split attributes into inherited + uninherited
     inherited_attrs, own_attrs = split_instance_attributes(structure)
 
     for index, attr_group in enumerate([inherited_attrs, own_attrs]):
+        # add type strings
         if show_all_types:
             attr_group = add_types_to_keys(attr_group)
 
+        # iterate through attributes in group if requested
         for attr, val in attr_group.items():
             line = f".{attr}: ".ljust(pad)
 
             update_col_widths(len(line), CURRENT_DEPTH)
 
+            # useful for debugging, e.g. showing where a recursion depth error was encountered
             if DEBUG:
                 print(attr, val)
 
@@ -384,6 +384,7 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
 
     OUTPUT += print_methods(structure)
 
+    # replace placeholder strings with whitespace
     re_exp = re.compile(r"<\|LPAD_DEPTH_(\d+)(H?)\|>")
     formatted = re_exp.sub(replace_pad_placeholder, OUTPUT)
 

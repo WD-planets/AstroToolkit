@@ -16,7 +16,11 @@ from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids
 
 
-def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, disable_corrections=False):
+def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, disable_corrections=False) -> pd.DataFrame:
+    """
+    Searches an image for any survey detections, and performs proper motion correction via piggybacking with astrometry from the chosen astrometric backend
+    """
+
     # correct search radius (i.e. size of image) for maximum possible proper motion of object
     # between image epoch and non-gaia survey epoch. Padded by 25% to account for error
     radius = correct_radius(target, image.size, "vizier", survey) * 1.25
@@ -43,6 +47,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     lat_col = survey_info["lat_column"]
     lon_col = survey_info["lon_column"]
 
+    # return uncorrected detections
     if disable_corrections:
         gaia_data = pd.DataFrame()
 
@@ -113,10 +118,12 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
             pm_dec=pm_dec,
         )
 
+        # correct all detections with proper motion information to the epoch of the image
         non_gaia_coords = non_gaia_coords.apply_space_motion(image.epoch)
     else:
         mask = [False] * len(non_gaia_data)
 
+    # set up overlay DataFrame
     df = pd.DataFrame()
     df["survey"] = [survey] * len(non_gaia_coords)
     df["ra"] = non_gaia_coords.ra.deg
@@ -125,6 +132,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     df["pm_dec"] = non_gaia_coords.pm_dec.to(u.mas / u.yr).value
     df["gaia_match"] = mask
 
+    # duplicate above DataFrame for each requested magnitude + fill in these columns
     per_mag_dfs = []
     for mag, err in zip(survey_info["mags"], survey_info["errors"]):
         df["mag_name"] = mag
@@ -135,13 +143,14 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
         per_mag_dfs.append(df.copy())
     final_df = pd.concat(per_mag_dfs).reset_index(drop=True)
 
+    # replace zero proper motion back to nan
     final_df[["pm_ra_cosdec", "pm_dec"]] = final_df[["pm_ra_cosdec", "pm_dec"]].replace(0, np.nan)
 
+    # cull detections that are outside the final image bounds
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
     pixel_scales = proj_plane_pixel_scales(image.wcs)
     x_bounds = (image.focus.ra.value - n_pixels[0] / 2 * pixel_scales[0], image.focus.ra.value + n_pixels[0] / 2 * pixel_scales[0])
     y_bounds = (image.focus.dec.value - n_pixels[1] / 2 * pixel_scales[1], image.focus.dec.value + n_pixels[1] / 2 * pixel_scales[1])
-
     ra_mask = (final_df["ra"] < x_bounds[0]) | (final_df["ra"] > x_bounds[1])
     dec_mask = (final_df["dec"] < y_bounds[0]) | (final_df["dec"] > y_bounds[1])
     cull_mask = ra_mask | dec_mask
@@ -150,9 +159,12 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     if final_df.empty:
         return final_df
 
+    # correct all detections with proper motion information to J2000 and search for SIMBAD IDs
     coord = dataframe_to_skycoord(final_df, image.epoch)
     coord = correct_skycoord(coord, image.epoch, Time("2000-01-01", format="iso"))
+
     ids = get_ids(coord, BASE_CONFIG.get("overlay_settings", "simbad_radius"))
+
     if ids is RETURNS.EXCEPTION:
         return ids
     elif ids is RETURNS.NULL:
@@ -164,6 +176,10 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
 
 
 def get_overlay(target: Target, image: Image, **kwargs: dict):
+    """
+    Fetches detection overlay information within a given image for a list of Vizier catalogue aliases or a dict of survey:band keys
+    """
+
     overlay_dict = OVERLAY_CONFIG.as_dict()
     disable_corrections = kwargs.get("disable_corrections", False)
 
@@ -171,7 +187,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     if not overlays:
         return None
 
-    # extract overlay info for requested surveys (photometric > positional)
+    # extract overlay info for requested surveys
     overlay_info = {}
     for survey in overlays:
         for section in overlay_dict.values():
@@ -215,6 +231,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
             return data
         overlay_data.append(data)
 
+    # combine overlay data from all requested surveys
     final_overlay = pd.concat(overlay_data).reset_index(drop=True)
     if final_overlay.empty:
         return None

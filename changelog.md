@@ -38,3 +38,5 @@ To-Do
 - add colours to image plots
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally)
 - use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert
+- decouple from Gaia with a properly implemented astrometric backend system
+- include distances in overlay corrections

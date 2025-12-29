@@ -15,36 +15,36 @@ EFFECTIVE_WAVELENGTHS = {
 }
 
 
-def wavelength_to_rgb(wavelength_nm):
+def wavelength_to_rgb(wavelength) -> tuple:
     """
-    Approximate conversion from wavelength to sRGB tuple.
+    Performs an approximate conversion from wavelength in nm to sRGB
     """
 
-    if wavelength_nm < 380:
-        wavelength_nm = 380
-    if wavelength_nm > 750:
-        wavelength_nm = 750
+    if wavelength < 380:
+        wavelength = 380
+    if wavelength > 750:
+        wavelength = 750
     gamma = 0.8
 
-    if 380 <= wavelength_nm <= 440:
-        R = -(wavelength_nm - 440.0) / (440.0 - 380.0)
+    if 380 <= wavelength <= 440:
+        R = -(wavelength - 440.0) / (440.0 - 380.0)
         G = 0.0
         B = 1.0
-    elif 440 < wavelength_nm <= 490:
+    elif 440 < wavelength <= 490:
         R = 0.0
-        G = (wavelength_nm - 440.0) / (490.0 - 440.0)
+        G = (wavelength - 440.0) / (490.0 - 440.0)
         B = 1.0
-    elif 490 < wavelength_nm <= 510:
+    elif 490 < wavelength <= 510:
         R = 0.0
         G = 1.0
-        B = -(wavelength_nm - 510.0) / (510.0 - 490.0)
-    elif 510 < wavelength_nm <= 580:
-        R = (wavelength_nm - 510.0) / (580.0 - 510.0)
+        B = -(wavelength - 510.0) / (510.0 - 490.0)
+    elif 510 < wavelength <= 580:
+        R = (wavelength - 510.0) / (580.0 - 510.0)
         G = 1.0
         B = 0.0
-    elif 580 < wavelength_nm <= 645:
+    elif 580 < wavelength <= 645:
         R = 1.0
-        G = -(wavelength_nm - 645.0) / (645.0 - 580.0)
+        G = -(wavelength - 645.0) / (645.0 - 580.0)
         B = 0.0
     else:
         R = 1.0
@@ -52,10 +52,10 @@ def wavelength_to_rgb(wavelength_nm):
         B = 0.0
 
     # intensity correction near vision limits
-    if wavelength_nm < 420:
-        factor = 0.3 + 0.7 * (wavelength_nm - 380) / (420 - 380)
-    elif wavelength_nm > 645:
-        factor = 0.3 + 0.7 * (750 - wavelength_nm) / (750 - 645)
+    if wavelength < 420:
+        factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380)
+    elif wavelength > 645:
+        factor = 0.3 + 0.7 * (750 - wavelength) / (750 - 645)
     else:
         factor = 1.0
 
@@ -66,11 +66,18 @@ def wavelength_to_rgb(wavelength_nm):
     return (R, G, B)
 
 
-def get_false_cmap(survey: str, band: str):
-    wavelength_nm = EFFECTIVE_WAVELENGTHS[survey][band]
+def get_false_cmap(survey: str, band: str) -> list:
+    """
+    Converts the effective wavelength of a given band of an imaging survey to a colour palette
+    """
 
-    colour = wavelength_to_rgb(wavelength_nm)
-    cmap = mpl.colors.LinearSegmentedColormap.from_list(f"{int(wavelength_nm)}nm", [(0, "black"), (1, colour)])
+    wavelength = EFFECTIVE_WAVELENGTHS[survey][band]
+
+    # convert wavelength to srgb
+    colour = wavelength_to_rgb(wavelength)
+
+    # convert to palette
+    cmap = mpl.colors.LinearSegmentedColormap.from_list(f"{int(wavelength)}nm", [(0, "black"), (1, colour)])
     colours = [mpl.colors.rgb2hex(cmap(i / (N_COLOURS - 1))) for i in range(N_COLOURS)]
 
     return colours

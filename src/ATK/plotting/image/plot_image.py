@@ -15,36 +15,19 @@ from ..formatting import format_plot
 from .false_colour import get_false_cmap
 
 
-def get_relative_axes(image: Image):
-    wcs = image.wcs
-    image_data = image.hdu.data
-    n_pix_y, n_pix_x = image_data.shape
+def get_simbad_urls(image: Image, overlay_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds simbad_url (+ simbad_ra/simbad_dec) columns to overlay dataframe
+    """
 
-    # center pixel
-    x_centre = (n_pix_x) / 2
-    y_centre = (n_pix_y) / 2
-
-    # pixel offsets from center
-    x_pix = np.arange(n_pix_x + 1) - x_centre
-    y_pix = np.arange(n_pix_y + 1) - y_centre
-
-    # pixel scales
-    pixscale_x, pixscale_y = proj_plane_pixel_scales(wcs)
-
-    # Convert to arcsec
-    x_arcsec_edges = x_pix * pixscale_x * 3600.0
-    y_arcsec_edges = y_pix * pixscale_y * 3600.0
-
-    return x_arcsec_edges, y_arcsec_edges
-
-
-def get_simbad_urls(image: Image, overlay_data: pd.DataFrame):
+    # get j2000 coords of detections + add to "simbad_ra" / "simbad_dec" columns
     overlay_data = correct_dataframe_coords(
         overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"]
     )
 
     simbad_radius = BASE_CONFIG.get("overlay_settings", "simbad_radius")
 
+    # add url column
     overlay_data["simbad_url"] = (
         "https://simbad.cds.unistra.fr/simbad/sim-coo?Coord="
         + overlay_data["simbad_ra"].astype(str)
@@ -58,10 +41,16 @@ def get_simbad_urls(image: Image, overlay_data: pd.DataFrame):
     return overlay_data
 
 
-def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: bool):
+def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: bool) -> float:
+    """
+    Adds marker_size (for scaling detection circles) and pointer_size (central detection pointer) columns to the overlay dataframe
+    """
+
+    # basic constants determined by-eye
     BASE_RADIUS = 5e-4
     SCALE_FACTOR = 5e-3
     HALF_IMAGE = image.size / 3600
+    POINTER_SIZE_RATIO = 1 / 7.5
 
     # somewhat physically-based scaling relation (compare to magnitude 20, logarithmic scaling with flux)
     flux_multiplier = 10 ** (-0.4 * (overlay_data["mag"] - 20))
@@ -69,18 +58,20 @@ def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: boo
     # np.log10() dampens the effect on brighter sources so that marker sizes don't explode
     marker_sizes = BASE_RADIUS + np.log10(1 + flux_multiplier) * HALF_IMAGE * SCALE_FACTOR
 
+    # conversion to arcsecond-based marker sizes
     if relative_axes:
         marker_sizes *= 3600
 
     overlay_data["marker_radius"] = marker_sizes
-    overlay_data["pointer_radius"] = marker_sizes / 7.5
+    overlay_data["pointer_radius"] = marker_sizes * POINTER_SIZE_RATIO
 
     return overlay_data
 
 
-def plot_overlay(plot: figure, image: Image, relative_axes: bool):
+def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
     overlay = image.overlay
 
+    # set up hovertool
     hvr = HoverTool(
         tooltips=[
             ("survey", "@survey"),
@@ -95,16 +86,20 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
     )
     hvr.renderers = []
 
+    # set up taptool
     taptool = TapTool(renderers=hvr.renderers, callback=OpenURL(url="@simbad_url"))
     taptool.renderers = []
 
+    # set up label column for legend entries
     overlay["label"] = overlay["survey"].astype(str)
     overlay.loc[overlay["mag"].isna(), "label"] += " detection"
     overlay.loc[overlay["mag"].notna(), "label"] += " " + overlay.loc[overlay["mag"].notna(), "mag_name"]
     overlay["gaia_match"] = overlay["gaia_match"].astype(str)
 
+    # get simbad URLs for taptool
     overlay = get_simbad_urls(image, overlay)
 
+    # set marker locations
     if relative_axes:
         overlay["marker_ra"] = (overlay["ra"] - image.focus.ra.value) * 3600
         overlay["marker_dec"] = (overlay["dec"] - image.focus.dec.value) * 3600
@@ -113,16 +108,21 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
         overlay["marker_dec"] = overlay["dec"]
 
     magnitudes = sorted(overlay["mag_name"].unique())
+    # get unique colours for markers, shift = 1 avoids blue markers for viridis
     colours = get_palette(len(magnitudes), shift=1)
+    # get dict of mag_name: colour and map to overlay dataframe
     colour_map = dict(zip(magnitudes, colours))
     overlay["colour"] = overlay["mag_name"].map(colour_map)
 
+    # split into detections and magnitude-scaled detections
     mask = overlay["mag"].isna()
     non_nan_mag = overlay.loc[~mask].copy()
     nan_mag = overlay.loc[mask].copy()
 
+    # get marker sizes
     non_nan_mag = get_marker_size(image, non_nan_mag, relative_axes)
 
+    # magnitude-scaled detections
     for (survey, label), group in non_nan_mag.groupby(["survey", "label"]):
         plot.circle(
             source=ColumnDataSource(group),
@@ -149,6 +149,7 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
         hvr.renderers.append(clickable_marker)
         taptool.renderers.append(clickable_marker)
 
+    # non-scaled detections
     for (survey, label), group in nan_mag.groupby(["survey", "label"]):
         scatter = plot.scatter(
             source=ColumnDataSource(group),
@@ -170,11 +171,12 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool):
 
 
 def plot(image: Image, *args: any, **kwargs: any) -> figure:
+    # create figure
     plot = figure(width=400, height=400, title=f'{image.survey} {image.band}-band Image ({image.size}")', tools=("pan,wheel_zoom,reset"))
     plot.grid.grid_line_color = None
 
+    # get image centre and deg/pixel
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
-    image_focus = (image.focus.ra.value, image.focus.dec.value)
     pixel_scales = proj_plane_pixel_scales(image.wcs)
 
     # get raw data array
@@ -183,13 +185,14 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     # horizontally flip image for Bokeh plotting
     image_data = np.fliplr(image_data)
 
-    # subtract min, asin stretch + percentile squash
+    # subtract min, asin stretch + percentile squash image
     nan_mask = np.isnan(image_data)
     image_data[nan_mask] = 0.0
     image_data = np.arcsinh(image_data - np.min(image_data))
     vmin, vmax = np.percentile(image_data, [5.0, 99.9])
     image_data[nan_mask] = np.nan
 
+    # get colour map
     cmap = kwargs.get("cmap", "viridis")
     if cmap == "viridis":
         colour_mapper = LinearColorMapper(palette=Viridis256, low=vmin, high=vmax)
@@ -200,6 +203,7 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
 
     relative_axes = kwargs.get("relative_axes", True)
 
+    # relative (+- arcsec from centre) axes
     if relative_axes:
         plot.xaxis.axis_label = "Relative Right Ascension / arcsec"
         plot.yaxis.axis_label = "Relative Declination / arcsec"
@@ -210,6 +214,7 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         x_range = x_bounds[1] - x_bounds[0]
         y_range = y_bounds[1] - y_bounds[0]
 
+        # cap axes to image extent
         if x_range < image.size:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
@@ -221,7 +226,11 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
             plot.y_range = Range1d(-image.size / 2, image.size / 2)
 
         focus_ra, focus_dec = 0.0, 0.0
+
+    # coordinates axes
     else:
+        image_focus = (image.focus.ra.value, image.focus.dec.value)
+
         plot.xaxis.axis_label = "Right Ascension / deg"
         plot.yaxis.axis_label = "Declination / deg"
 
@@ -231,6 +240,7 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         x_range = x_bounds[1] - x_bounds[0]
         y_range = y_bounds[1] - y_bounds[0]
 
+        # cap axes to image extent
         if x_range < image.size:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
@@ -243,9 +253,11 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
 
         focus_ra, focus_dec = image_focus[0], image_focus[1]
 
-    # plot.x_range.bounds = "auto"
-    # plot.y_range.bounds = "auto"
+    # don't allow panning outside of image bounds
+    plot.x_range.bounds = "auto"
+    plot.y_range.bounds = "auto"
 
+    # plot image
     plot.image(
         image=[image_data],
         x=x_bounds[0],
@@ -258,8 +270,10 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         color_mapper=colour_mapper,
     )
 
+    # plot focus marker
     plot.scatter(x=focus_ra, y=focus_dec, marker="cross", color="lime", size=25, line_width=4)
 
+    # plot overlay
     if image.overlay is not None:
         plot = plot_overlay(plot, image, relative_axes)
 

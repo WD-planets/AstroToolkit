@@ -198,6 +198,10 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU 
 
 
 def image_to_hdu(image: Image):
+    """
+    Converts an ATK image to a HDU, needed as an Image is itself a hdu
+    """
+
     hdu = image.hdu
     hdr = hdu.header
 

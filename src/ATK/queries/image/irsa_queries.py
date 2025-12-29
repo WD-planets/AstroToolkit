@@ -7,6 +7,7 @@ from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 from .image_core import get_image_data
 
+# maps of ATK band names to actual IRSA band names
 BAND_MAP = {
     "dss1": {"blue": "DSS1 Blue", "red": "DSS1 Red"},
     "dss2": {"blue": "DSS2 Blue", "red": "DSS2 Red", "ir": "DSS2 IR"},
@@ -16,6 +17,10 @@ BAND_MAP = {
 
 
 def parse_xml(survey: str, band: str, xml_string: str) -> Response | RETURNS:
+    """
+    Parses an IRSA XML tree to get a url to a fits image
+    """
+
     root = ET.fromstring(xml_string)
 
     # Check status
@@ -43,6 +48,10 @@ def parse_xml(survey: str, band: str, xml_string: str) -> Response | RETURNS:
 
 
 def check_inputs(survey: str, band: str, size: int):
+    """
+    Check if requested band and size are acceptable
+    """
+
     if band not in BAND_MAP[survey]:
         raise ValueError(f"Invalid {survey} band. Supported bands are {list(BAND_MAP[survey].keys())}.")
     if not 6 < size < 3600:
@@ -50,6 +59,10 @@ def check_inputs(survey: str, band: str, size: int):
 
 
 def irsa_query(survey: str, target: Target, size: int, band: str, **kwargs: dict):
+    """
+    Perform an IRSA image query (DSS1/2, WISE, 2MASS)
+    """
+
     check_inputs(survey, band, size)
 
     # get rid of dss generation

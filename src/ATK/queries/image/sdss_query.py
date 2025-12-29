@@ -11,6 +11,10 @@ from .image_core import get_image_skycoord, iso_to_epoch, reproject_hdu
 
 
 def query(target: Target, **kwargs) -> Image:
+    """
+    Performs an SDSS image query
+    """
+
     band, size = kwargs["band"], kwargs["size"]
 
     # get image list

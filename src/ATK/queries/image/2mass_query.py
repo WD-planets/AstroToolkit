@@ -6,6 +6,10 @@ from .irsa_queries import irsa_query
 
 
 def parse_2mass_epoch(hdr: Header) -> Time:
+    """
+    Parses 2MASS header keys into an astropy Time
+    """
+
     # Take UT_DATE and UT
     date_str = hdr.get("UT_DATE")
     time_str = hdr.get("UT")
@@ -26,6 +30,10 @@ def parse_2mass_epoch(hdr: Header) -> Time:
 
 
 def query(target: Target, **kwargs: dict):
+    """
+    Perform a 2MASS image query
+    """
+
     band, size = kwargs["band"], kwargs["size"]
 
     return irsa_query("2mass", target, size, band, epoch_fetcher=parse_2mass_epoch, epoch_key=None)

@@ -10,9 +10,14 @@ from ...utilities.defaults import RETURNS
 
 
 def get_ids(targets: SkyCoord, radius: float):
+    """
+    Fetches a list of SIMBAD IDs or None for an astropy SkyCoord (which may contain multiple sets of coordinates)
+    """
+
     simbad = Simbad()
     simbad.ROW_LIMIT = -1
 
+    # send simbad query
     try:
         response = simbad.query_region(targets, radius=radius * u.arcsec)
     except (TimeoutError, ConnectionError, ConnectTimeout):

@@ -167,9 +167,12 @@ def read_local(path: str | Path) -> QueryResult:
         if hdu in completed:
             continue
 
+        # all extensions must contain this key
         if not hdu.header.get("ATK_EXT", None):
             warnings.warn(f"ATK: Non-ATK extension found in target file {path} has been ignored.")
             continue
+
+        # images use ImageHDU + BinTableHDU (for overlay), everything else uses BinTableHDU
         if not isinstance(hdu, (BinTableHDU, ImageHDU)):
             warnings.warn(f"ATK: Unexpected table type '{type(hdu)}' in target file {path} has been ignored.")
             continue

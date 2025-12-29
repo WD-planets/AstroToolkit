@@ -1,5 +1,3 @@
-import platform
-import subprocess
 from configparser import ConfigParser
 from pathlib import Path
 from types import FunctionType
