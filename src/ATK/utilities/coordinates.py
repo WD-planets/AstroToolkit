@@ -137,7 +137,10 @@ def prepare_search(target: Target, query_kind: str, survey: str = None, epoch: T
     """
 
     # correct target to given survey/epoch
-    corrected_target = correct_target(target, survey, epoch, query_kind)
+    if not kwargs.get("defer_correction", False):
+        corrected_target = correct_target(target, survey, epoch, query_kind)
+    else:
+        corrected_target = target
 
     # create requested structure
     structure_map = get_query_result_map()

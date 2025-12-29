@@ -9,7 +9,7 @@ from .queries.arguments import get_query_arguments
 from .structures.definitions import PlottableQueryResult, QueryResult, Target
 from .utilities.coordinates import check_target, correct_target, prepare_search
 from .utilities.defaults import RETURNS
-from .utilities.mapping import build_map
+from .utilities.mapping import build_map, get_query_result_map
 
 
 def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
@@ -43,6 +43,23 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
     """
 
     target = check_target(target)
+
+    # if no target was made (e.g. because Vizier is down when using Target.from_id)
+    if target is RETURNS.EXCEPTION:
+        structure_map = get_query_result_map()
+        structure = structure_map[kind](
+            kind=kind,
+            survey=kwargs.get("survey", None),
+            position=None,
+            identifier=None,
+            radius=kwargs.get("radius", None),
+            frame=None,
+            epoch=None,
+            correction=None,
+            exception=True,
+        )
+
+        return structure
 
     # disables any proper motion correction by creating a simplified target with no proper motion information
     if kwargs.get("disable_corrections", False):
@@ -95,7 +112,8 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
         else:
             structure.data[0].overlay = overlay
 
-    if kwargs["survey"] not in EPOCH_CONFIG.get_section_by_query_kind(kind):
+    survey = kwargs.get("survey", None)
+    if survey and survey not in EPOCH_CONFIG.get_section_by_query_kind(kind):
         structure.correction = "none"
     else:
         structure.correction = target.correction

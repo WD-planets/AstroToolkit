@@ -25,6 +25,7 @@ Changes
 - Added support for WISE, 2MASS and SDSS image queries 
 - Improved image plotting
 - Added an optional parameter "disable_corrections" to query(), which disable all astrometric corrections if True (defaults to False)
+- SEDs now retain all detections in specified radius
 
 To-Do 
 -----
@@ -40,3 +41,4 @@ To-Do
 - use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert
 - decouple from Gaia with a properly implemented astrometric backend system
 - include distances in overlay corrections
+- add survey ID to SED hovertool

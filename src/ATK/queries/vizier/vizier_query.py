@@ -33,7 +33,9 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
     if not data:
         return RETURNS.NULL
 
-    return data[0].to_pandas().sort_values(by=["_r"]).reset_index(drop=True)
+    df = data[0].to_pandas().sort_values(by=["_r"]).reset_index(drop=True)
+
+    return df
 
 
 def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:

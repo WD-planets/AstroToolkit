@@ -29,7 +29,7 @@ QUERY_ARGUMENTS = {
         "band": REQUIRED.NOW,
     },
     "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
-    "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius")},
+    "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
 }
 
 

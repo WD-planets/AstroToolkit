@@ -11,4 +11,4 @@ GAIA_CATALOGUE = "I/355/gaiadr3"
 
 QUERY_KINDS = ["vizier", "image", "lightcurve", "spectrum", "sed", "hrd"]
 
-PLOT_DIMENSIONS = {"image": [2, 2]}
+PLOT_DIMENSIONS = {"image": [2, 2], "sed": [3, 2]}

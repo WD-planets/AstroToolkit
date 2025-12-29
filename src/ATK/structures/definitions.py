@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from enum import Enum, auto
 from pathlib import Path
 
 import numpy
@@ -8,6 +7,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.time import Time
 from astropy.wcs import WCS
+from bokeh.plotting import figure as Figure
 
 # -------------
 # QUERY RESULTS
@@ -92,6 +92,7 @@ class QueryResult(BaseQueryResult):
 @dataclass(repr=False)
 class PlottableQueryResult(BaseQueryResult):
     data: list = field(default_factory=list)
+    figure: Figure | None = None
 
     def plot(self, kind: str | None = None, **kwargs: any):
         from .plot_io import plot_data
@@ -189,3 +190,16 @@ class Spectrum:
     survey: str | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
+
+
+@dataclass(repr=False)
+class SED(BaseContainer):
+    survey: numpy.ndarray | None = None
+    band: numpy.ndarray | None = None
+    wavelength: numpy.ndarray | None = None
+    flux: numpy.ndarray | None = None
+    flux_err: numpy.ndarray | None = None
+    separation: numpy.ndarray | None = None
+
+    def __repr__(self):
+        return "<Spectral Energy Distribution>"
