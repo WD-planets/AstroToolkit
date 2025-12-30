@@ -1,16 +1,14 @@
 import warnings
-from urllib.error import HTTPError
 
 import astropy.units as u
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
-from requests.exceptions import ConnectionError, ConnectTimeout
 
 from ...configuration.alias_config import ALIAS_CONFIG
 from ...structures.definitions import Target
-from ...utilities.defaults import RETURNS
+from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 warnings.simplefilter("ignore", category=NoResultsWarning)
 
@@ -27,7 +25,7 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
     v = Vizier(columns=["**"], row_limit=ROW_LIMIT)
     try:
         data = v.query_region(position, width=radius * u.arcsec, catalog=catalogue)
-    except (TimeoutError, ConnectionError, ConnectTimeout, HTTPError):
+    except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
     if not data:
@@ -47,7 +45,7 @@ def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
 
     try:
         data = v.query_constraints(catalog="I/355/gaiadr3", Source=source)
-    except (TimeoutError, ConnectionError, ConnectTimeout):
+    except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
     if not data:

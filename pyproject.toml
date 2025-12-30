@@ -36,6 +36,7 @@ dependencies = [
 	"PyYAML",
 	"matplotlib",
 	"reproject",
+	"sparclclient",
 ]
 
 [project.urls]

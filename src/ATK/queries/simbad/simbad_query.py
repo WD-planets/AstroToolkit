@@ -4,9 +4,8 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astroquery.simbad import Simbad
-from requests.exceptions import ConnectionError, ConnectTimeout
 
-from ...utilities.defaults import RETURNS
+from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 
 def get_ids(targets: SkyCoord, radius: float):
@@ -20,7 +19,7 @@ def get_ids(targets: SkyCoord, radius: float):
     # send simbad query
     try:
         response = simbad.query_region(targets, radius=radius * u.arcsec)
-    except (TimeoutError, ConnectionError, ConnectTimeout):
+    except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
     if not response:

@@ -190,6 +190,10 @@ class Spectrum:
     survey: str | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
+    exposure: float | None = None
+
+    def __repr__(self):
+        return f"<{self.survey} Spectrum>"
 
 
 @dataclass(repr=False)

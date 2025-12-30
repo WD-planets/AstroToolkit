@@ -1,4 +1,8 @@
 from enum import Enum, auto
+from urllib.error import HTTPError
+
+from requests.exceptions import ConnectionError, ConnectTimeout
+from requests.exceptions import HTTPError as requests_HTTPError
 
 
 class RETURNS(Enum):
@@ -11,4 +15,6 @@ GAIA_CATALOGUE = "I/355/gaiadr3"
 
 QUERY_KINDS = ["vizier", "image", "lightcurve", "spectrum", "sed", "hrd"]
 
-PLOT_DIMENSIONS = {"image": [2, 2], "sed": [3, 2]}
+PLOT_DIMENSIONS = {"image": [2, 2], "sed": [3, 2], "spectrum": [2, 1]}
+
+CONNECTION_ERRORS = (TimeoutError, ConnectionError, ConnectTimeout, HTTPError, requests_HTTPError)

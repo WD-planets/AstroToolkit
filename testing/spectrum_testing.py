@@ -1,15 +1,12 @@
-import numpy as np
+import astropy.units as u
+from astropy.coordinates import SkyCoord
 
-from ATK.structures.data_containers.definitions import Spectrum
+import ATK.Tools as ATK
 
-spec = Spectrum()
+POS = SkyCoord(ra=250.423475, dec=36.461319, unit=(u.deg, u.deg))
 
-spec.survey = "sdss"
-spec.flux = np.array([1, 2, 3])
-spec.wavelength = np.array([1, 2, 3])
+SOURCE = 587316166180416640
 
-df = spec.to_dataframe()
-hdu = spec.to_hdu()
-
-print(df)
-print(hdu.data)
+data = ATK.query("spectrum", survey="desi", target=SOURCE, radius=100)
+data.show()
+data.open()

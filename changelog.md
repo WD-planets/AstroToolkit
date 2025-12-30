@@ -26,6 +26,7 @@ Changes
 - Improved image plotting
 - Added an optional parameter "disable_corrections" to query(), which disable all astrometric corrections if True (defaults to False)
 - SEDs now retain all detections in specified radius
+- Added support for DESI DR1 spectral queries
 
 To-Do 
 -----

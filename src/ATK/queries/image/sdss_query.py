@@ -1,12 +1,9 @@
-from urllib.error import HTTPError
-
 import astropy.units as u
 from astropy.wcs import WCS
 from astroquery.sdss import SDSS
-from requests.exceptions import ConnectionError, ConnectTimeout
 
 from ...structures.definitions import Image, Target
-from ...utilities.defaults import RETURNS
+from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from .image_core import get_image_skycoord, iso_to_epoch, reproject_hdu
 
 
@@ -20,7 +17,7 @@ def query(target: Target, **kwargs) -> Image:
     # get image list
     try:
         imgs = SDSS.get_images(coordinates=target.coords, band=band, radius=size * u.arcsec)
-    except (TimeoutError, ConnectionError, ConnectTimeout, HTTPError):
+    except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
     if not imgs:

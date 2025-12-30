@@ -2,7 +2,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter, Retry
 from requests.models import Response
 
-from ..utilities.defaults import RETURNS
+from ..utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 
 def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Response | RETURNS:
@@ -18,7 +18,7 @@ def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Respon
 
     try:
         response = s.request(method.upper(), url, timeout=180, **kwargs)
-    except TimeoutError:
+    except CONNECTION_ERRORS:
         print(f"Note: experiencing issues with {survey} (timeout)")
         return RETURNS.EXCEPTION
 
