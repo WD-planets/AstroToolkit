@@ -188,6 +188,8 @@ class Image(BaseContainer):
 @dataclass(repr=False)
 class Spectrum:
     survey: str | None = None
+    position: SkyCoord | None = None
+    separation: SkyCoord | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
     exposure: float | None = None

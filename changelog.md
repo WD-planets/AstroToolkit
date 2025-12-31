@@ -43,3 +43,4 @@ To-Do
 - decouple from Gaia with a properly implemented astrometric backend system
 - include distances in overlay corrections
 - add survey ID to SED hovertool
+- add spectral line fitting tool

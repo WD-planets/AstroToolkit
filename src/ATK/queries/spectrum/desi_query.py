@@ -83,7 +83,10 @@ def query(target: Target, **kwargs: dict):
     spectra = []
     for record in records.data[1:]:
         if record["specprimary"]:
-            spec = Spectrum("desi", record["wavelength"], record["flux"], record["exptime"])
+            spec = Spectrum("desi", wavelength=record["wavelength"], flux=record["flux"], exposure=record["exptime"])
+            spec_pos = SkyCoord(ra=record["ra"] * u.deg, dec=record["dec"] * u.deg, frame="icrs")
+            spec.position = spec_pos
+            spec.separation = spec_pos.separation(target.coords).to(u.arcsec).value
             spec.program = record["program"]
             spectra.append(spec)
 
