@@ -163,6 +163,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     coord = dataframe_to_skycoord(final_df, image.epoch)
     coord = correct_skycoord(coord, image.epoch, Time("2000-01-01", format="iso"))
 
+    # get SIMBAD object IDs
     ids = get_ids(coord, BASE_CONFIG.get("overlay_settings", "simbad_radius"))
 
     if ids is RETURNS.EXCEPTION:

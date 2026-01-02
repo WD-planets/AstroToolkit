@@ -31,11 +31,13 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
 
     try:
         hdr.append((f"ATK_{key.upper()}", value))
+        return hdr
     except Exception:
         pass
 
     try:
         hdr.append((f"ATK_{key.upper()}", str(value)))
+        return hdr
     except Exception:
         raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key '{key}'.")
 
@@ -54,6 +56,8 @@ def write_skycoord(attr: str, hdr: Header, coord: SkyCoord) -> Header:
 
     if coord.obstime:
         hdr.append(("ATK_EPOCH", coord.obstime.fits, "Epoch of ATK_RA and ATK_DEC"))
+    else:
+        hdr.append(("ATK_EPOCH", None))
 
     # proper motion data
     if coord.data.differentials:
@@ -147,7 +151,9 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     return pd.DataFrame.from_dict(data)
 
 
-def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU | BinTableHDU | ImageHDU = BinTableHDU) -> BinTableHDU:
+def struct_to_hdu(
+    structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU | BinTableHDU | ImageHDU = BinTableHDU
+) -> PrimaryHDU | BinTableHDU | ImageHDU:
     """
     Convert a data structure into a fits HDU.
     """
@@ -180,12 +186,13 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU 
         hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
 
     # generate HDU
+    extname = structure.__str__().lstrip("<").rstrip(">")
     if hdu_kind == PrimaryHDU:
         hdu = PrimaryHDU(None, header=hdr)
     elif hdu_kind == ImageHDU:
-        hdu = ImageHDU(tbl, header=hdr, name=structure.__str__())
+        hdu = ImageHDU(tbl, header=hdr, name=extname)
     elif hdu_kind == BinTableHDU:
-        hdu = BinTableHDU(tbl, header=hdr, name=structure.__str__())
+        hdu = BinTableHDU(tbl, header=hdr, name=extname)
     else:
         raise ValueError(f"Invalid table type '{kind}' passed to struct_to_hdu.")
 
@@ -212,7 +219,8 @@ def image_to_hdu(image: Image):
         if type(val) in WRITE_MAP or type(val) in BASIC_TYPES:
             hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
 
-    image_hdu = ImageHDU(data=hdu.data, header=hdr, name=image.__str__())
+    extname = image.__str__().lstrip("<").rstrip(">")
+    image_hdu = ImageHDU(data=hdu.data, header=hdr, name=extname)
 
     overlay_hdr = Header()
     overlay_hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))

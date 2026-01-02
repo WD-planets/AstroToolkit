@@ -5,7 +5,7 @@ SOURCE = 587316166180416640
 
 target = ATK.Target.from_id(SOURCE)
 
-data = ATK.query("image", survey="panstarrs", target=SOURCE, size=120, band="g", overlays=["sdss"], disable_corrections=True)
+data = ATK.query("image", survey="panstarrs", target=SOURCE, size=120, band="g", overlays=["sdss"], disable_corrections=False)
 
 # data = ATK.query("image", survey="dss1", target=SOURCE, size=120, band="blue", overlays=["galex"])
 

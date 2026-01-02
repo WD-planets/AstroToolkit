@@ -3,11 +3,11 @@ from .parser_config.ParserConfig import ParserConfig
 
 
 def translator(value):
-    if value == "true":
+    if isinstance(value, str) and value.lower() == "true":
         return True
-    elif value == "false":
+    elif isinstance(value, str) and value.lower() == "false":
         return False
-    elif value == "none":
+    elif isinstance(value, str) and value.lower() == "none":
         return None
 
     try:

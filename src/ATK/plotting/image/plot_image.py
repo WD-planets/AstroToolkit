@@ -69,6 +69,10 @@ def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: boo
 
 
 def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
+    """
+    Adds an overlay of nearby detections to the image
+    """
+
     overlay = image.overlay
 
     # set up hovertool
@@ -171,6 +175,10 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
 
 
 def plot(image: Image, *args: any, **kwargs: any) -> figure:
+    """
+    Plots an ATK Image object
+    """
+
     # create figure
     plot = figure(width=400, height=400, title=f'{image.survey} {image.band}-band Image ({image.size}")', tools=("pan,wheel_zoom,reset"))
     plot.grid.grid_line_color = None

@@ -180,32 +180,33 @@ class Image(BaseContainer):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 
     def to_hdu(self):
+        # overwrites the default to_hdu method due to complexity
         from .structure_io import image_to_hdu
 
         return image_to_hdu(self)
 
 
 @dataclass(repr=False)
-class Spectrum:
+class Spectrum(BaseContainer):
     survey: str | None = None
     position: SkyCoord | None = None
-    separation: SkyCoord | None = None
+    separation: float | None = None
+    exposure: float | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
-    exposure: float | None = None
 
     def __repr__(self):
-        return f"<{self.survey} Spectrum>"
+        return f"<{self.survey} {type(self).__name__}>"
 
 
 @dataclass(repr=False)
 class SED(BaseContainer):
     survey: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
+    separation: numpy.ndarray | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
     flux_err: numpy.ndarray | None = None
-    separation: numpy.ndarray | None = None
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"

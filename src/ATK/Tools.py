@@ -55,7 +55,7 @@ def query(kind: str, target: Target | SkyCoord | int, **kwargs) -> QueryResult |
             radius=kwargs.get("radius", None),
             frame=None,
             epoch=None,
-            correction=None,
+            correction="none",
             exception=True,
         )
 

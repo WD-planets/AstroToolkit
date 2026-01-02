@@ -7,6 +7,10 @@ from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 
 def query(target: Target, **kwargs: dict):
+    """
+    Performs an SDSS spectrum query
+    """
+
     radius = kwargs["radius"] * u.arcsec
 
     # get any SDSS spectra in radius
@@ -20,15 +24,19 @@ def query(target: Target, **kwargs: dict):
 
     spectra = []
     for entry in data:
+        # primary header has ancillary information
         primary_hdr = entry[0].header
         exposure = primary_hdr["EXPTIME"]
         spec_pos = SkyCoord(ra=primary_hdr["PLUG_RA"] * u.deg, dec=primary_hdr["PLUG_DEC"] * u.deg, frame=primary_hdr["RADECSYS"].lower())
 
+        # hdu 1 has spectrum
         data = entry[1].data
         wavelength = 10 ** data["loglam"]
+
         # fluxes are already in e-17 erg/cm^2/s/Ang
         flux = data["flux"]
 
+        # create Spectrum object for each returned spectrum
         spec = Spectrum(
             "sdss",
             wavelength=wavelength,

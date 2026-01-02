@@ -2,7 +2,7 @@ import re
 
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, search_around_sky
 from astroquery.simbad import Simbad
 
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
@@ -10,43 +10,53 @@ from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 def get_ids(targets: SkyCoord, radius: float):
     """
-    Fetches a list of SIMBAD IDs or None for an astropy SkyCoord (which may contain multiple sets of coordinates)
+    Fetch SIMBAD IDs for each detection in `targets`.
+
+    Returns
+    -------
+    np.ndarray of str or None
+        One element per target. Each element is a human-readable, list-like
+        string of all SIMBAD IDs within `radius`, e.g.
+        '["HD 12345", "Gaia DR3 123456789"]', or None if no match.
     """
 
     simbad = Simbad()
     simbad.ROW_LIMIT = -1
 
-    # send simbad query
+    # query SIMBAD
     try:
         response = simbad.query_region(targets, radius=radius * u.arcsec)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
-    if not response:
+    if not len(response):
         return RETURNS.NULL
 
-    # convert output to pandas dataframe and extract IDs
+    # convert to DataFrame
     df = response.to_pandas()
-    ids = [str(id) for id in df["main_id"].tolist()]
 
-    # remove additional whitespace in IDs
-    ids = np.asarray([re.sub(r"\s+", " ", s) for s in ids])
+    # remove extra whitespace from SIMBAD IDs
+    ids = np.asarray([re.sub(r"\s+", " ", str(x)) for x in df["main_id"]])
 
-    # create SkyCoord from returned SIMBAD positions
+    # SIMBAD sky positions
     simbad_coords = SkyCoord(ra=df["ra"].to_numpy() * u.deg, dec=df["dec"].to_numpy() * u.deg, frame="icrs")
 
-    # match positions of returned SIMBAD IDs to original targets
-    index, separation, _ = simbad_coords.match_to_catalog_sky(targets)
+    # many-to-many sky match
+    target_idx, simbad_idx, sep, _ = search_around_sky(targets, simbad_coords, radius * u.arcsec)
 
-    # keep only matches within requested radius (array of Bools)
-    valid = separation <= radius * u.arcsec
+    # get all matches per target
+    matches = [[] for _ in range(len(targets))]
+    for t_idx, s_idx in zip(target_idx, simbad_idx):
+        matches[t_idx].append(ids[s_idx])
 
-    # set up results array
-    results = ["None"] * len(targets)
+    # remove duplicates while preserving order
+    matches = [list(dict.fromkeys(m)) for m in matches]
 
-    # iterate through valid IDs, get index of target in original SkyCoord and set this index in results to the returned ID
-    for simbad_index in np.where(valid)[0]:
-        target_index = index[simbad_index]
-        results[target_index] = ids[simbad_index]
+    # format as strings
+    string_results = [", ".join(f"{x}" for x in m) if m else "None" for m in matches]
+
+    # force one data type for fits saving
+    max_len = max(len(s) for s in string_results if s)
+    results = np.asarray(string_results, dtype=f"<U{max_len}")
 
     return results

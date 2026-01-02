@@ -7,6 +7,10 @@ from ..formatting import format_plot
 
 
 def plot(sed: SED, *args: any, **kwargs: any):
+    """
+    Plots an ATK SED object
+    """
+
     plot = figure(
         width=400,
         height=400,
@@ -15,15 +19,16 @@ def plot(sed: SED, *args: any, **kwargs: any):
         y_axis_label=r"\[\text{flux / mJy}\]",
         x_axis_type="log",
         y_axis_type="log",
-        tools=("pan,wheel_zoom,reset"),
+        tools=("pan,wheel_zoom,box_zoom,reset"),
     )
 
+    # make ticks more readable
     plot.yaxis.formatter = BasicTickFormatter(use_scientific=False)
     plot.xaxis.major_label_overrides = {100000: r"\[10^5\]", 200000: r"\[2\times10^5\]"}
-
     plot.yaxis.ticker.desired_num_ticks = 5
     plot.xaxis.ticker.desired_num_ticks = 3
 
+    # set up HoverTool
     hvr = HoverTool(
         tooltips=[
             ("survey", "@survey"),
@@ -38,19 +43,23 @@ def plot(sed: SED, *args: any, **kwargs: any):
 
     data = sed.to_dataframe()
 
+    # set up legend label column with upper limits where relevant
     data["label"] = data["survey"].astype(str)
     data.loc[data["flux_err"].isna(), "label"] += " (upper limit)"
 
+    # get colour map (one colour for each survey)
     surveys = sorted(data["survey"].unique())
     colours = get_palette(len(surveys), shift=1)
     # get dict of mag_name: colour and map to data dataframe
     colour_map = dict(zip(surveys, colours))
     data["colour"] = data["survey"].map(colour_map)
 
+    # split into full detections and upper limits (i.e. flux_err is nan)
     mask = data["flux_err"].isna()
     non_nan_err = data.loc[~mask].copy()
     nan_err = data.loc[mask].copy()
 
+    # plot full detections
     for (survey, label, colour), group in non_nan_err.groupby(["survey", "label", "colour"]):
         scatter = plot.scatter(
             source=ColumnDataSource(group),
@@ -64,10 +73,12 @@ def plot(sed: SED, *args: any, **kwargs: any):
         )
         hvr.renderers.append(scatter)
 
+        # plot errors
         err_xs = [[x, x] for x in group["wavelength"]]
         err_ys = [[y - y_err, y + y_err] for y, y_err in zip(group["flux"], group["flux_err"])]
         plot.multi_line(err_xs, err_ys, color=colour, legend_label=label, line_width=0.5, line_cap="square")
 
+    # plot upper limits
     for (survey, label), group in nan_err.groupby(["survey", "label"]):
         scatter = plot.scatter(
             source=ColumnDataSource(group),

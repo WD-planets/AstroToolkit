@@ -6,6 +6,7 @@ SOURCE = 587316166180416640
 target = ATK.Target.from_id(SOURCE)
 
 data = ATK.query("sed", target=SOURCE)
-
-data.show()
-data.open()
+data.save("test_sed.fits")
+rec_data = ATK.read("test_sed.fits")
+rec_data.show()
+rec_data.open()

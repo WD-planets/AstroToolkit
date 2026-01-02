@@ -32,7 +32,7 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
             band_df = survey_data[["_r", mag_col, err_col]].copy()
         else:
             band_df = survey_data[[mag_col, err_col]].copy()
-            band_df["_r"] = "n/a"
+            band_df["_r"] = np.nan
 
         band_df = band_df.rename(columns={mag_col: "mag", err_col: "mag_err"})
 
@@ -86,12 +86,12 @@ def query(target: Target, radius: float, **kwargs):
     df = pd.concat(sed_tables, ignore_index=True)
 
     sed = SED(
-        df["survey"].to_numpy(),
-        df["band"].to_numpy(),
-        df["wavelength"].to_numpy(),
-        df["flux_mjy"].to_numpy(),
-        df["flux_err_mjy"].to_numpy(),
-        df["_r"].to_numpy(),
+        survey=df["survey"].to_numpy(),
+        band=df["band"].to_numpy(),
+        wavelength=df["wavelength"].to_numpy(),
+        flux=df["flux_mjy"].to_numpy(),
+        flux_err=df["flux_err_mjy"].to_numpy(),
+        separation=df["_r"].to_numpy(),
     )
 
     return sed

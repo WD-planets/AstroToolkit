@@ -338,7 +338,7 @@ def print_methods(cls: any) -> str:
 
     methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)]
 
-    return "Available Methods: " + ", ".join(f".{m}()" for m in methods)
+    return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 
 
 def pprint_structure(structure: any, show_all_types: bool) -> None:
