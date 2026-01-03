@@ -1,5 +1,5 @@
 import typing
-from dataclasses import fields
+from dataclasses import fields, is_dataclass
 from types import NoneType, UnionType
 from typing import get_args, get_origin
 
@@ -10,7 +10,6 @@ from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
-from astropy.wcs import WCS
 
 from .definitions import Image
 
@@ -110,9 +109,13 @@ def get_cols(structure: any) -> tuple[str]:
     Returns a list of array-like attributes of a data structure using typehinting
     """
 
-    cols = []
+    # ensure we have the class type, not an instance
+    cls = structure if isinstance(structure, type) else structure.__class__
+    if not is_dataclass(cls):
+        raise TypeError("get_cols expects a dataclass.")
 
-    hints = typing.get_type_hints(structure.__class__)
+    cols = []
+    hints = typing.get_type_hints(cls)
 
     for field in fields(structure):
         field_type = hints.get(field.name)
@@ -149,6 +152,26 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
         data[col] = val
 
     return pd.DataFrame.from_dict(data)
+
+
+def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs) -> any:
+    ctnr_cols = get_cols(ctnr)
+
+    print(ctnr_cols)
+    print(kwargs)
+
+    relevant_data = {}
+    for col in data.columns.values.tolist():
+        if hasattr(ctnr, col) and col in ctnr_cols:
+            relevant_data[col] = data[col].to_numpy()
+
+    for arg, val in kwargs.items():
+        if hasattr(ctnr, arg) and col not in ctnr_cols:
+            relevant_data[arg] = val
+
+    print(relevant_data)
+
+    return ctnr(**relevant_data)
 
 
 def struct_to_hdu(

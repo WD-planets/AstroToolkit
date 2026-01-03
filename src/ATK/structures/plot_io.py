@@ -26,9 +26,15 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
     kind = kind or structure.kind
     plotting_func = plot_map[kind]
 
-    figures = []
-    for ctnr in structure.data:
-        figures.append(plotting_func(ctnr, **kwargs))
+    # plot .data containers individually (e.g. images)
+    if structure._plot_method == "individual":
+        figures = []
+        for ctnr in structure.data:
+            figures.append(plotting_func(ctnr, **kwargs))
+
+    # combine multiple .data containers into single plots (e.g. light curves)
+    elif structure._plot_method == "combined":
+        figures = plotting_func(structure.data, **kwargs)
 
     # combines multiple plots into a grid layout of FIGS_PER_COLUMN rows and any number of columns
     figures = [figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(figures), FIGS_PER_COLUMN)]

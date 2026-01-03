@@ -13,6 +13,8 @@ from bokeh.plotting import figure as Figure
 # QUERY RESULTS
 # -------------
 
+PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual"}
+
 
 @dataclass
 class Target:
@@ -94,6 +96,10 @@ class PlottableQueryResult(BaseQueryResult):
     data: list = field(default_factory=list)
     figure: Figure | None = None
 
+    @property
+    def _plot_method(self):
+        return PLOT_METHODS[self.kind]
+
     def plot(self, kind: str | None = None, **kwargs: any):
         from .plot_io import plot_data
 
@@ -128,6 +134,14 @@ class BaseContainer:
 
         return struct_to_dataframe(self)
 
+    @classmethod
+    def from_dataframe(cls, data: pandas.DataFrame, **kwargs: any):
+        from .structure_io import struct_from_dataframe
+
+        print(kwargs)
+
+        return struct_from_dataframe(cls, data, **kwargs)
+
     def to_hdu(self) -> BinTableHDU:
         from .structure_io import struct_to_hdu
 
@@ -143,6 +157,8 @@ class Lightcurve(BaseContainer):
     flux_err: numpy.ndarray | None = None
     mag: numpy.ndarray | None = None
     mag_err: numpy.ndarray | None = None
+    ra: numpy.ndarray | None = None
+    dec: numpy.ndarray | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
@@ -150,7 +166,7 @@ class Lightcurve(BaseContainer):
     def __post_init__(self):
         # check for a valid input combination
         if (self.flux is None) == (self.mag is None):
-            raise ValueError("Lightcurve container cannot hold both 'mag' and 'flux'.")
+            raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
         if self.flux is not None and self.mag_err is not None:
             raise ValueError("Lightcurve cannot hold invalid combination of 'flux' and 'mag_err'.")
         if self.mag is not None and self.flux_err is not None:
@@ -163,6 +179,16 @@ class Lightcurve(BaseContainer):
         if self.mag is None:
             del self.mag
             del self.mag_err
+
+    @property
+    def brightness_type(self):
+        if hasattr(self, "flux"):
+            return "flux"
+        elif hasattr(self, "mag"):
+            return "mag"
+        else:
+            # shouldn't happen due to __post_init__
+            raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
 
 
 @dataclass(repr=False)
@@ -194,9 +220,6 @@ class Spectrum(BaseContainer):
     exposure: float | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
-
-    def __repr__(self):
-        return f"<{self.survey} {type(self).__name__}>"
 
 
 @dataclass(repr=False)

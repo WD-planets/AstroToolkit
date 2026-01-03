@@ -44,3 +44,5 @@ To-Do
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - add spectral line fitting tool
+
+- calibrating + combining multiple light curves to make one massive light curve

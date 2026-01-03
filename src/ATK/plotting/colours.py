@@ -1,6 +1,16 @@
+import matplotlib.colors as mcolors
 import numpy as np
 from bokeh.palettes import Category10, Category20
 from matplotlib.colors import hsv_to_rgb
+
+GRADIENT_MAPS = {
+    "green": ("greenyellow", "forestgreen"),
+    "red": ("yellow", "red"),
+    "blue": ("aqua", "royalblue"),
+    "black": ("lightgray", "black"),
+    "orange": ("gold", "orange"),
+    "purple": ("orchid", "darkviolet"),
+}
 
 
 def generate_palette(n: int):
@@ -32,3 +42,10 @@ def get_palette(n: int, shift: int = 0):
         colours = colours[shift:] + colours[:shift]
 
     return colours[:n]
+
+
+def get_gradient(colour, n=256):
+    low, high = GRADIENT_MAPS[colour]
+    cmap = mcolors.LinearSegmentedColormap.from_list("", [low, high, low])
+    palette = [mcolors.rgb2hex(c) for c in cmap(np.linspace(0, 1, n))]
+    return palette, high
