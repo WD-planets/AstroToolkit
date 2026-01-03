@@ -154,11 +154,8 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     return pd.DataFrame.from_dict(data)
 
 
-def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs) -> any:
+def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
     ctnr_cols = get_cols(ctnr)
-
-    print(ctnr_cols)
-    print(kwargs)
 
     relevant_data = {}
     for col in data.columns.values.tolist():
@@ -166,10 +163,8 @@ def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs) -> any:
             relevant_data[col] = data[col].to_numpy()
 
     for arg, val in kwargs.items():
-        if hasattr(ctnr, arg) and col not in ctnr_cols:
+        if hasattr(ctnr, arg) and arg not in ctnr_cols:
             relevant_data[arg] = val
-
-    print(relevant_data)
 
     return ctnr(**relevant_data)
 

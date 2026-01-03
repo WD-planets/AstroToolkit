@@ -44,5 +44,8 @@ To-Do
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - add spectral line fitting tool
+- possibly store metadata, e.g. object IDs from light curve surveys in a .meta attribute
+- what happens if plotting no data
+
 
 - calibrating + combining multiple light curves to make one massive light curve

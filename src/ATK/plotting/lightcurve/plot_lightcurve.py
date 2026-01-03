@@ -5,10 +5,12 @@ from bokeh.plotting import figure
 from bokeh.transform import linear_cmap
 
 from ...structures.definitions import Lightcurve
-from ..colours import GRADIENT_MAPS, get_gradient
+from ...utilities.defaults import RETURNS
+from ..colours import assign_gradient_palettes
+from ..formatting import format_plot
 
 
-def plot_band(plot: figure, lc: Lightcurve, colour, survey, brightness_type, time_min, time_format):
+def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float, time_format: str):
     # time handling
     time = lc.mjd
     if time_format == "reduced":
@@ -16,20 +18,23 @@ def plot_band(plot: figure, lc: Lightcurve, colour, survey, brightness_type, tim
 
     # get brightness and error columns
     y = getattr(lc, lc.brightness_type)
-    y_err = getattr(lc, f"{brightness_type}_err")
+    y_err = getattr(lc, f"{lc.brightness_type}_err")
 
-    source = ColumnDataSource(data=dict(time=time, y=y, yerr=y_err))
+    source = ColumnDataSource(data={"time": time, "y": y})
 
     # colour handling
-    palette, error_colour = get_gradient(colour)
     cmap = linear_cmap("y", palette=palette, low=np.nanmin(y), high=np.nanmax(y))
 
-    plot.scatter(x="time", y="y", source=source, color=cmap, marker="circle", legend_label=f"{survey} {lc.band}")
+    plot.scatter(x="time", y="y", source=source, color=cmap, marker="circle", legend_label=f"{lc.survey} {lc.band}")
 
     # plot errors
     err_xs = [[t, t] for t in time]
     err_ys = [[v - e, v + e] for v, e in zip(y, y_err)]
-    plot.multi_line(err_xs, err_ys, color=error_colour, line_width=0.5, level="underlay")
+    err_source = ColumnDataSource(data=dict(xs=err_xs, ys=err_ys, y_val=y))
+    err_cmap = linear_cmap("y_val", palette=palette, low=np.nanmin(y), high=np.nanmax(y))
+    plot.multi_line(
+        xs="xs", ys="ys", source=err_source, color=err_cmap, line_width=0.5, level="underlay", legend_label=f"{lc.survey} {lc.band}"
+    )
 
     # don't show MJD in scientific notation
     plot.xaxis.formatter = BasicTickFormatter(use_scientific=False)
@@ -37,7 +42,7 @@ def plot_band(plot: figure, lc: Lightcurve, colour, survey, brightness_type, tim
     return plot
 
 
-def plot_lightcurve(lightcurves: list[Lightcurve], *args, **kwargs):
+def plot(lightcurves: list[Lightcurve], *args, **kwargs):
     """
     Plots any number of light curves into combined per-survey plots
     """
@@ -47,7 +52,7 @@ def plot_lightcurve(lightcurves: list[Lightcurve], *args, **kwargs):
     time_format = kwargs.get("time_format", "reduced")
 
     plots = []
-    surveys = [lc.survey for lc in lightcurves]
+    surveys = list(set([lc.survey for lc in lightcurves]))
 
     # loop through surveys + combine light curve containers into single plot for each survey
     for survey in surveys:
@@ -63,19 +68,13 @@ def plot_lightcurve(lightcurves: list[Lightcurve], *args, **kwargs):
         lightcurves = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (bands is None or lc.band in bands)]
 
         if not lightcurves:
-            print("Note: No data to plot.")
-            return None
+            return RETURNS.EXCEPTION
 
         # colour handling
-        available_colours = [c for c in GRADIENT_MAPS if c != "black"]
-        if not colours:
-            colours = ["black"] * len(lightcurves)
-        elif len(colours) < len(lightcurves):
-            fill = available_colours
-            colours = colours + [fill[i % len(fill)] for i in range(len(lightcurves) - len(colours))]
+        palettes = assign_gradient_palettes(len(lightcurves), colours)
 
         # set up title
-        band_names = ", ".join(d["band"] for d in lightcurves)
+        band_names = ", ".join(d.band for d in lightcurves)
 
         # create per-survey plot
         plot = figure(
@@ -84,6 +83,7 @@ def plot_lightcurve(lightcurves: list[Lightcurve], *args, **kwargs):
             title=f"{survey} {band_names} lightcurve(s)",
             x_axis_label="MJD" if time_format == "original" else "Time (days)",
             y_axis_label=brightness_type,
+            tools=("pan,wheel_zoom,box_zoom,reset"),
         )
 
         # get MJD at start of data
@@ -91,14 +91,12 @@ def plot_lightcurve(lightcurves: list[Lightcurve], *args, **kwargs):
         time_min = min(all_times)
 
         # Plot each band independently
-        for lc, colour in zip(lightcurves, colours):
-            plot = plot_band(
-                plot=plot, lc=lc, colour=colour, survey=survey, brightness_type=brightness_type, time_min=time_min, time_format=time_format
-            )
+        for lc, palette in zip(lightcurves, palettes):
+            plot = plot_band(plot=plot, lc=lc, palette=palette, time_min=time_min, time_format=time_format)
 
         if brightness_type == "flux":
             plot.y_range.flipped = True
 
         plots.append(plot)
 
-    return plots
+    return [format_plot("lightcurve", p) for p in plots]

@@ -5,6 +5,7 @@ import pandas as pd
 from ...structures.definitions import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
+from .lightcurve_core import get_lightcurves
 
 
 def query(target: Target, **kwargs: dict):
@@ -19,5 +20,17 @@ def query(target: Target, **kwargs: dict):
     if not len(data):
         return RETURNS.NULL
 
-    for oid in set(data["oid"].tolist()):
-        obj_data = data[data["oid"] == oid]
+    df = pd.DataFrame(
+        {
+            "mjd": data["mjd"],
+            "mag": data["mag"],
+            "mag_err": data["magerr"],
+            "ra": data["ra"],
+            "dec": data["dec"],
+            "band": data["filtercode"].str[1:],
+        }
+    )
+
+    lcs = get_lightcurves("ztf", df)
+
+    return lcs

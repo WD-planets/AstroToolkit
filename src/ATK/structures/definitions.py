@@ -138,8 +138,6 @@ class BaseContainer:
     def from_dataframe(cls, data: pandas.DataFrame, **kwargs: any):
         from .structure_io import struct_from_dataframe
 
-        print(kwargs)
-
         return struct_from_dataframe(cls, data, **kwargs)
 
     def to_hdu(self) -> BinTableHDU:
@@ -150,9 +148,9 @@ class BaseContainer:
 
 @dataclass(repr=False)
 class Lightcurve(BaseContainer):
-    survey: str
-    band: str
-    mjd: numpy.ndarray
+    survey: str | None = None
+    band: str | None = None
+    mjd: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
     flux_err: numpy.ndarray | None = None
     mag: numpy.ndarray | None = None
@@ -167,25 +165,22 @@ class Lightcurve(BaseContainer):
         # check for a valid input combination
         if (self.flux is None) == (self.mag is None):
             raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
-        if self.flux is not None and self.mag_err is not None:
-            raise ValueError("Lightcurve cannot hold invalid combination of 'flux' and 'mag_err'.")
-        if self.mag is not None and self.flux_err is not None:
-            raise ValueError("Lightcurve cannot hold invalid combination of 'mag' and 'flux_err'.")
 
-        # delete unneeded attributes
+        # ensure valid combination of flux/flux_err/mag/mag_err
         if self.flux is None:
-            del self.flux
-            del self.flux_err
+            for f in ("flux", "flux_err"):
+                self.__dict__.pop(f, None)
         if self.mag is None:
-            del self.mag
-            del self.mag_err
+            for f in ("mag", "mag_err"):
+                self.__dict__.pop(f, None)
 
     @property
     def brightness_type(self):
-        if hasattr(self, "flux"):
-            return "flux"
-        elif hasattr(self, "mag"):
+        # prioritise brightness_type = 'mag'
+        if self.mag is not None:
             return "mag"
+        elif self.flux is not None:
+            return "flux"
         else:
             # shouldn't happen due to __post_init__
             raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
