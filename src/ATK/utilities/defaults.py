@@ -6,7 +6,6 @@ from requests.exceptions import HTTPError as requests_HTTPError
 
 
 class RETURNS(Enum):
-    SUCCESS = auto()
     NULL = auto()
     EXCEPTION = auto()
 

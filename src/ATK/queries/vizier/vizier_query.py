@@ -36,15 +36,22 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
     return df
 
 
-def gaia_query_by_source(source: int) -> pd.DataFrame | None | int:
+def gaia_query_by_source(source: int, kind="data") -> pd.DataFrame | RETURNS:
     """
     Perform a vizier query to Gaia DR3 by source_id
     """
 
+    if kind == "data":
+        catalogue = "I/355/gaiadr3"
+    elif kind == "lightcurve":
+        catalogue = "I/355/epphot"
+    else:
+        raise ValueError(f"Unexpected Gaia query by source kind '{kind}'.")
+
     v = Vizier(columns=["**"], column_filters={"Source": f"=={source}"}, row_limit=ROW_LIMIT)
 
     try:
-        data = v.query_constraints(catalog="I/355/gaiadr3", Source=source)
+        data = v.query_constraints(catalog=catalogue, Source=source)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 

@@ -28,13 +28,18 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
 
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
-        figures = []
-        for ctnr in structure.data:
-            figures.append(plotting_func(ctnr, **kwargs))
+        figures = [plotting_func(ctnr, **kwargs) for ctnr in structure.data]
 
     # combine multiple .data containers into single plots (e.g. light curves)
     elif structure._plot_method == "combined":
         figures = plotting_func(structure.data, **kwargs)
+
+    # e.g. if no data was returned and plotting was attempted
+    if not figures:
+        return None
+
+    # get rid of any None figures (shouldn't ever happen)
+    figures = [f for f in figures if f is not None]
 
     # combines multiple plots into a grid layout of FIGS_PER_COLUMN rows and any number of columns
     figures = [figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(figures), FIGS_PER_COLUMN)]

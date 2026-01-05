@@ -5,7 +5,6 @@ from bokeh.plotting import figure
 from bokeh.transform import linear_cmap
 
 from ...structures.definitions import Lightcurve
-from ...utilities.defaults import RETURNS
 from ..colours import assign_gradient_palettes
 from ..formatting import format_plot
 
@@ -53,6 +52,7 @@ def plot(lightcurves: list[Lightcurve], *args, **kwargs):
 
     plots = []
     surveys = list(set([lc.survey for lc in lightcurves]))
+    print(surveys)
 
     # loop through surveys + combine light curve containers into single plot for each survey
     for survey in surveys:
@@ -65,16 +65,16 @@ def plot(lightcurves: list[Lightcurve], *args, **kwargs):
         brightness_type = brightness_types[0]
 
         # filter data to only keep requested (and valid) light curves
-        lightcurves = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (bands is None or lc.band in bands)]
+        lcs = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (bands is None or lc.band in bands)]
 
-        if not lightcurves:
-            return RETURNS.EXCEPTION
+        if not lcs:
+            return None
 
         # colour handling
-        palettes = assign_gradient_palettes(len(lightcurves), colours)
+        palettes = assign_gradient_palettes(len(lcs), colours)
 
         # set up title
-        band_names = ", ".join(d.band for d in lightcurves)
+        band_names = ", ".join(d.band for d in lcs)
 
         # create per-survey plot
         plot = figure(
@@ -87,11 +87,11 @@ def plot(lightcurves: list[Lightcurve], *args, **kwargs):
         )
 
         # get MJD at start of data
-        all_times = [t for lc in lightcurves for t in lc.mjd]
+        all_times = [t for lc in lcs for t in lc.mjd]
         time_min = min(all_times)
 
         # Plot each band independently
-        for lc, palette in zip(lightcurves, palettes):
+        for lc, palette in zip(lcs, palettes):
             plot = plot_band(plot=plot, lc=lc, palette=palette, time_min=time_min, time_format=time_format)
 
         if brightness_type == "flux":

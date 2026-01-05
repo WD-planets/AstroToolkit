@@ -98,15 +98,13 @@ def get_gaia_target(source: int) -> Target:
 
 def correct_target(target: Target, survey: str = None, epoch: Time = None, query_kind: str = None, make_copy=False) -> Target:
     """
-    Corrects a SkyCoord to a given epoch definition from a given section or a given epoch, returns corrected SkyCoord object and optionally returns the success level of the correction.
-    If correction isn't possible, just returns the original SkyCoord.
+    Corrects the SkyCoord of an ATK Target to a given epoch definition from a given section or a given epoch, returns corrected Target (if correction was possible)
     If make_copy is True, corrected Target is returned as a new instance (leaving the original unchanged)
     """
 
     if (survey is None) == (epoch is None):
         raise ValueError("Specify exactly one of 'survey', 'epoch'.")
 
-    # if correction for target not possible
     if target.correction == "none":
         return target
 
@@ -135,6 +133,10 @@ def prepare_search(target: Target, query_kind: str, survey: str = None, epoch: T
     """
     Prepares a search with an input skycoord. Returns the position of the search and a partially completed ATK QueryResult
     """
+
+    # if a catalogue is provided for Vizier queries, treat this as a survey for correction
+    if kwargs.get("catalogue"):
+        survey = kwargs["catalogue"]
 
     # correct target to given survey/epoch
     if not kwargs.get("defer_correction", False):

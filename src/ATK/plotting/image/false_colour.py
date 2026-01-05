@@ -6,8 +6,8 @@ N_COLOURS = 256
 LAMBDA_MIN = 380
 LAMBDA_MAX = 750
 GAMMA = 0.8
-OFFSET = 0.3
-MULTIPLIER = 0.7
+NEAR_LIMIT_OFFSET = 0.3
+NEAR_LIMIT_MULTIPLIER = 0.7
 
 # this will need updating, also haven't checked
 EFFECTIVE_WAVELENGTHS = {
@@ -58,9 +58,9 @@ def wavelength_to_rgb(wavelength) -> tuple:
 
     # intensity correction near vision limits
     if wavelength < 420:
-        factor = OFFSET + MULTIPLIER * (wavelength - 380) / (420 - 380)
+        factor = NEAR_LIMIT_OFFSET + NEAR_LIMIT_MULTIPLIER * (wavelength - 380) / (420 - 380)
     elif wavelength > 645:
-        factor = OFFSET + MULTIPLIER * (750 - wavelength) / (750 - 645)
+        factor = NEAR_LIMIT_OFFSET + NEAR_LIMIT_MULTIPLIER * (750 - wavelength) / (750 - 645)
     else:
         factor = 1.0
 
