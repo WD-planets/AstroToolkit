@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
-from astropy.coordinates import SkyCoord
 
-# --- Constants ---
-AB_ZP_JY = 3631.0  # AB zero point in Jy
+# AB zero point in Jy
+AB_ZP_JY = 3631.0
 
 # lambda_ref in Å, zp_vega in Jy (only for Vega-based surveys)
 SED_INFO = {
@@ -46,21 +44,15 @@ SED_INFO = {
 
 def ab_mag_to_flux_mjy(mag: float) -> float:
     """
-    Convert AB magnitude to flux density in mJy.
+    Convert AB magnitude to flux density in mJy
     """
+
     return AB_ZP_JY * 10.0 ** (-0.4 * mag) * 1e3
-
-
-def magerr_to_fluxerr(flux_mjy: float, mag_err: float) -> float:
-    """
-    Convert magnitude uncertainty to flux uncertainty (mJy).
-    """
-    return flux_mjy * (np.log(10.0) / 2.5) * mag_err
 
 
 def get_ab_mag_offset(vega_zero_point_jy: float) -> float:
     """
-    Vega → AB magnitude offset given Vega zero point in Jy.
-    Returns: m_AB - m_Vega
+    converts Vega mangitude to AB magnitude offset given Vega zero point in Jy
     """
+
     return -2.5 * np.log10(vega_zero_point_jy / AB_ZP_JY)

@@ -15,6 +15,7 @@ def get_lightcurves(survey: str, data: pd.DataFrame) -> Lightcurve:
     # keep only required columns + sort
     data = data[REQUIRED_COLS]
 
+    # split dataframe into light curves per-band
     lcs = []
     for band in data["band"].unique():
         band_data = data[data.band == band]

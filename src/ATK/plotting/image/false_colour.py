@@ -1,6 +1,13 @@
 import matplotlib as mpl
+import numpy as np
 
 N_COLOURS = 256
+
+LAMBDA_MIN = 380
+LAMBDA_MAX = 750
+GAMMA = 0.8
+OFFSET = 0.3
+MULTIPLIER = 0.7
 
 # this will need updating, also haven't checked
 EFFECTIVE_WAVELENGTHS = {
@@ -20,12 +27,10 @@ def wavelength_to_rgb(wavelength) -> tuple:
     Performs an approximate conversion from wavelength in nm to sRGB
     """
 
-    if wavelength < 380:
-        wavelength = 380
-    if wavelength > 750:
-        wavelength = 750
-    gamma = 0.8
+    # clip extreme wavelengths
+    wavelength = np.clip(wavelength, LAMBDA_MIN, LAMBDA_MAX)
 
+    # (very roughly) convert wavelengths to RGB values
     if 380 <= wavelength <= 440:
         R = -(wavelength - 440.0) / (440.0 - 380.0)
         G = 0.0
@@ -53,15 +58,16 @@ def wavelength_to_rgb(wavelength) -> tuple:
 
     # intensity correction near vision limits
     if wavelength < 420:
-        factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380)
+        factor = OFFSET + MULTIPLIER * (wavelength - 380) / (420 - 380)
     elif wavelength > 645:
-        factor = 0.3 + 0.7 * (750 - wavelength) / (750 - 645)
+        factor = OFFSET + MULTIPLIER * (750 - wavelength) / (750 - 645)
     else:
         factor = 1.0
 
-    R = (R * factor) ** gamma
-    G = (G * factor) ** gamma
-    B = (B * factor) ** gamma
+    # set gamma
+    R = (R * factor) ** GAMMA
+    G = (G * factor) ** GAMMA
+    B = (B * factor) ** GAMMA
 
     return (R, G, B)
 

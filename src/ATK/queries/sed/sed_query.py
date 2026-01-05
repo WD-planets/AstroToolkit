@@ -4,26 +4,22 @@ import pandas as pd
 from ...structures.definitions import SED, Target
 from ...Tools import query as general_query
 from ...utilities.defaults import RETURNS
-from .sed_core import (SED_INFO, ab_mag_to_flux_mjy, get_ab_mag_offset,
-                       magerr_to_fluxerr)
+from .sed_core import SED_INFO, ab_mag_to_flux_mjy, get_ab_mag_offset
 
 
 def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
     """
-    Return SED photometry for ALL VizieR detections of a survey.
-    One row per (detection × band).
+    Return SED photometry for ALL VizieR detections of a survey, converts Vega -> AB magnitude (if needed) -> flux
     """
 
     info = SED_INFO[survey]
 
-    # Identify bands
+    # identify bands
     mag_cols = info["mag_names"]
     err_cols = info["err_names"]
     wavelengths = info["lambda_ref"]
 
-    # Build a long-form table: one row per band per detection
     sed_rows = []
-
     for i, (mag_col, err_col, wl) in enumerate(zip(mag_cols, err_cols, wavelengths)):
         if mag_col not in survey_data.columns:
             continue
@@ -31,6 +27,7 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
         if "_r" in survey_data:
             band_df = survey_data[["_r", mag_col, err_col]].copy()
         else:
+            # Gaia source queries don't have _r since not using a cone search
             band_df = survey_data[[mag_col, err_col]].copy()
             band_df["_r"] = np.nan
 
@@ -43,17 +40,17 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
         # Drop missing magnitudes
         band_df = band_df[np.isfinite(band_df["mag"])]
 
-        # Vega → AB if needed
+        # Vega -> AB if needed
         if "zp_vega" in info:
             ab_offset = get_ab_mag_offset(info["zp_vega"][i])
             band_df["mag_ab"] = band_df["mag"] + ab_offset
         else:
             band_df["mag_ab"] = band_df["mag"]
 
-        # AB mag → flux (mJy)
+        # AB mag -> flux (mJy)
         band_df["flux_mjy"] = ab_mag_to_flux_mjy(band_df["mag_ab"])
 
-        # Flux uncertainty
+        # flux err
         band_df["flux_err_mjy"] = band_df["flux_mjy"] * (np.log(10.0) / 2.5) * band_df["mag_err"]
 
         sed_rows.append(band_df)
@@ -67,15 +64,20 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def query(target: Target, radius: float, **kwargs):
+    """
+    Constructs an SED by combining photometry from Vizier catalogues
+    """
+
     sed_tables = []
 
+    # perform queries
     for survey in SED_INFO:
         data = general_query(kind="vizier", survey=survey, target=target, radius=radius)
 
         if data.exception or not data.data:
-            exception_encountered = True
-            continue
+            return data
 
+        # get SED dataframe for each survey
         phot = get_survey_phot(survey, data.data[0])
         if not phot.empty:
             sed_tables.append(phot)
@@ -83,6 +85,7 @@ def query(target: Target, radius: float, **kwargs):
     if not sed_tables:
         return RETURNS.NULL
 
+    # combine surveys
     df = pd.concat(sed_tables, ignore_index=True)
 
     sed = SED(

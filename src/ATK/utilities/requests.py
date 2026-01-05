@@ -7,8 +7,7 @@ from ..utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Response | RETURNS:
     """
-    Fetches data from a given URL with retry logic.
-    Supports GET and POST (or other HTTP verbs via `method`).
+    fetches data from a given URL. Supports HTTP verbs via method
     """
 
     s = Session()
@@ -16,6 +15,7 @@ def send_request(survey: str, url: str, method: str = "GET", **kwargs) -> Respon
     # s.mount("http://", HTTPAdapter(max_retries=retries))
     s.mount("https://", HTTPAdapter(max_retries=retries))
 
+    # send request
     try:
         response = s.request(method.upper(), url, timeout=180, **kwargs)
     except CONNECTION_ERRORS:

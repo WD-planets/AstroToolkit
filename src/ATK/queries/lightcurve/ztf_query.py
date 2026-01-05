@@ -9,9 +9,15 @@ from .lightcurve_core import get_lightcurves
 
 
 def query(target: Target, **kwargs: dict):
+    """
+    Performs ZTF light curve queries
+    """
+
+    # set up URL
     radius = kwargs.get("radius") / 3600
     url = f"https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE {target.coords.ra.value} {target.coords.dec.value} {radius}&BANDNAME=g,r,i&FORMAT=CSV"
 
+    # get data
     response = send_request("ztf", url)
     if response is RETURNS.EXCEPTION:
         return response
