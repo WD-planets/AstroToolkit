@@ -3,6 +3,7 @@ import importlib
 import os
 import tempfile
 import time
+import warnings
 from pathlib import Path
 
 from bokeh.io import output_file
@@ -26,6 +27,10 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
     kind = kind or structure.kind
     plotting_func = plot_map[kind]
 
+    if not structure.data:
+        warnings.warn("Structure contains no data to for plotting.")
+        return None
+
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in structure.data]
@@ -48,14 +53,18 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
     return Row(*rows)
 
 
-def open(structure: PlottableQueryResult, fname=Path | str | None):
+def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dict):
     """
     Opens the Bokeh plot in the .figure attribute of a PlottableQueryResult in the default browser
     """
 
     # plot data if it hasn't been plotted
     if not structure.figure:
-        structure.plot()
+        structure.plot(**kwargs)
+
+    # if no data for plotting
+    if not structure.figure:
+        return
 
     # unless a file name was provided, save to the cached_figures directory
     if not fname:

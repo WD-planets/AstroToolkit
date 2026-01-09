@@ -18,7 +18,6 @@ def translator(value):
     try:
         return Time(value, format="isot")
     except ValueError:
-        print(value)
         warnings.warn("ATK: Invalid epoch found in config file. Use 'ATKepoch show' to see the invalid entry.")
 
         return "<Invalid ISOT Time Format>"

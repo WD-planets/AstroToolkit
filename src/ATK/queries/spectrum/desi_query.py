@@ -1,15 +1,16 @@
 import astropy.units as u
 import pandas as pd
 from astropy.coordinates import SkyCoord
+from astropy.units import Quantity
 from astroquery.utils.tap.core import TapPlus
 from sparcl.client import SparclClient
 
 from ...structures.definitions import Spectrum, Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
-from ...utilities.misc import suppress_stdout
+from ...utilities.misc import angle_to_quantity, suppress_stdout
 
 
-def desi_cone_search(position: SkyCoord, radius: float, table="desi_dr1.zpix", columns="glon, glat, targetid"):
+def desi_cone_search(position: SkyCoord, radius: Quantity, table="desi_dr1.zpix", columns="glon, glat, targetid"):
     """
     Performs a Tap query to DESI, returning any objects with spectra within a cone
     """
@@ -17,7 +18,7 @@ def desi_cone_search(position: SkyCoord, radius: float, table="desi_dr1.zpix", c
     tap = TapPlus(url="https://datalab.noirlab.edu/tap")
     tap.TIMEOUT = 180
 
-    radius_deg = radius / 3600.0
+    radius_deg = radius.to(u.deg).value
 
     # DESI table only has galactic coords
     position = position.galactic
@@ -98,10 +99,10 @@ def query(target: Target, **kwargs: dict):
     spectra = []
     for record in records.data[1:]:
         if record["specprimary"]:
-            spec = Spectrum("desi", wavelength=record["wavelength"], flux=record["flux"], exposure=record["exptime"])
+            spec = Spectrum("desi", wavelength=record["wavelength"], flux=record["flux"], exposure=record["exptime"] * u.s)
             spec_pos = SkyCoord(ra=record["ra"] * u.deg, dec=record["dec"] * u.deg, frame="icrs")
             spec.position = spec_pos
-            spec.separation = spec_pos.separation(target.coords).to(u.arcsec).value
+            spec.separation = angle_to_quantity(spec_pos.separation(target.coords), kwargs["radius"].unit)
             spec.program = record["program"]
             spectra.append(spec)
 

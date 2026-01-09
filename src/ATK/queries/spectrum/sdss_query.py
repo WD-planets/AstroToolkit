@@ -4,6 +4,7 @@ from astroquery.sdss import SDSS
 
 from ...structures.definitions import Spectrum, Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
+from ...utilities.misc import angle_to_quantity
 
 
 def query(target: Target, **kwargs: dict):
@@ -11,7 +12,7 @@ def query(target: Target, **kwargs: dict):
     Performs an SDSS spectrum query
     """
 
-    radius = kwargs["radius"] * u.arcsec
+    radius = kwargs["radius"]
 
     # get any SDSS spectra in radius
     try:
@@ -41,9 +42,10 @@ def query(target: Target, **kwargs: dict):
             "sdss",
             wavelength=wavelength,
             flux=flux,
-            exposure=exposure,
+            exposure=exposure * u.s,
             position=spec_pos,
-            separation=spec_pos.separation(target.coords).to(u.arcsec).value,
+            # this would normally be an angle
+            separation=angle_to_quantity(spec_pos.separation(target.coords), kwargs["radius"].unit),
         )
         spectra.append(spec)
 

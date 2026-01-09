@@ -1,5 +1,3 @@
-test_scripts/
-
 dist/
 __pycache__/
 docs/_build/
@@ -9,3 +7,4 @@ docs/_build/
 *.fits
 
 src/AstroToolkit.egg-info
+testing/

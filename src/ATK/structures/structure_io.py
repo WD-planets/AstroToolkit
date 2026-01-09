@@ -10,6 +10,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
+from astropy.units import Quantity
 
 from .definitions import Image
 
@@ -43,14 +44,24 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
     return hdr
 
 
+def write_quantity(attr: str, hdr: Header, key: str, value: Quantity) -> Header:
+    """
+    Writes an astropy quantity to a fits header as two keys, ATK_... with unit ATK_..._U
+    """
+
+    write_fallback(attr, hdr, key, value.value)
+
+    hdr.append((f"ATK_{key.upper()}_U", value.unit.to_string("fits")))
+
+    return hdr
+
+
 def write_skycoord(attr: str, hdr: Header, coord: SkyCoord) -> Header:
     """
     Splits a SkyCoord into its components and writes this as a set of header keys
     """
 
     hdr.append(("ATK_SC", attr, "Origin attribute of decomposed SkyCoord"))
-    hdr.append(("ATK_RA", coord.ra.value, "Source RA (deg)"))
-    hdr.append(("ATK_DEC", coord.dec.value, "Source DEC (deg)"))
     hdr.append(("ATK_FRAME", coord.frame.name, "Coordinate frame of ATK_RA and ATK_DEC"))
 
     if coord.obstime:
@@ -60,23 +71,29 @@ def write_skycoord(attr: str, hdr: Header, coord: SkyCoord) -> Header:
 
     # proper motion data
     if coord.data.differentials:
-        hdr.append(("ATK_PMRA", coord.pm_ra_cosdec.value, "Source Proper Motion in RA (mas/yr)"))
-        hdr.append(("ATK_PMDEC", coord.pm_dec.value, "Source Proper Motion in DEC (mas/yr)"))
+        hdr = write_quantity(attr, hdr, "pmra", coord.pm_ra_cosdec)
+        hdr = write_quantity(attr, hdr, "pmdec", coord.pm_dec)
     else:
         hdr.append(("ATK_PMRA", None))
         hdr.append(("ATK_PMDEC", None))
 
     # distance
     if coord.distance != u.one:
-        hdr.append(("ATK_DISTANCE", coord.distance.value, "Source distance (1/p) (pc)"))
+        hdr = write_quantity(attr, hdr, "distance", coord.distance)
     else:
         hdr.append(("ATK_DISTANCE", None))
+
+    hdr = write_quantity(attr, hdr, "ra", coord.ra)
+    hdr = write_quantity(attr, hdr, "dec", coord.dec)
 
     return hdr
 
 
 # Map to special header writing functions
-WRITE_MAP = {SkyCoord: lambda **kwargs: write_skycoord(kwargs["attr"], kwargs["hdr"], kwargs["value"])}
+WRITE_MAP = {
+    SkyCoord: lambda **kwargs: write_skycoord(kwargs["attr"], kwargs["hdr"], kwargs["value"]),
+    Quantity: lambda **kwargs: write_quantity(kwargs["attr"], kwargs["hdr"], kwargs["key"], kwargs["value"]),
+}
 
 # ---------
 # UTILITIES
@@ -144,7 +161,6 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     for col in cols:
         val = getattr(structure, col)
         if val is None:
-            data[col] = np.empty(0)
             continue
 
         if not isinstance(val, COLUMN_TYPES):

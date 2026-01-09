@@ -2,15 +2,18 @@ import inspect
 import re
 from enum import Enum
 
+import astropy.units as u
 import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.time import Time
+from astropy.units import Quantity
 from astropy.wcs import WCS
 from bokeh.models import Column, Row
 from bokeh.plotting import figure
 
+from ..configuration.base_config import BASE_CONFIG
 from ..utilities.mapping import build_structure_map
 
 DEBUG = False
@@ -21,6 +24,7 @@ STRUCTURE_MAP = build_structure_map()
 CURRENT_DEPTH = 0
 COL_WIDTHS = {0: 0}
 OUTPUT = ""
+SEEN_IDS = set()
 
 # OPTIONS
 SIG_FIGS = 3  # significant figures of array elements
@@ -34,9 +38,18 @@ CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda 
 # SPECIAL FORMATTERS
 # ------------------
 
+UNITS = {u.arcsec: "″", u.arcmin: "′", u.deg: ["°", " deg"]}
+unit_format = BASE_CONFIG.get("global_settings", "unit_format")
+if unit_format == "symbol":
+    UNITS = {key: val if not isinstance(val, list) else val[0] for key, val in UNITS.items()}
+elif unit_format == "text":
+    UNITS = {key: val[1] for key, val in UNITS.items() if isinstance(val, list)}
+else:
+    raise ValueError(f"Unexpected config entry for unit_format '{unit_format}'.")
+
 
 def format_skycoord(coord: SkyCoord) -> str:
-    return f"{round(coord.ra.deg, 3)}°, {round(coord.dec.deg, 3)}°"
+    return f"{round(coord.ra.deg, 3)}{UNITS[u.deg]}, {round(coord.dec.deg, 3)}{UNITS[u.deg]}"
 
 
 def format_dict(dct: dict) -> str:
@@ -110,6 +123,17 @@ def format_array(array: np.ndarray | pd.Series) -> str:
     return str_rep
 
 
+def format_quantity(val: Quantity) -> str:
+    if val.unit in UNITS:
+        str_rep = f"{val.value}{UNITS[val.unit]}"
+    elif unit_format == "text":
+        str_rep = f"{val.value} {val.unit.to_string()}"
+    elif unit_format == "symbol":
+        str_rep = f"{val.value} {val.unit.to_string('unicode')}"
+
+    return str_rep
+
+
 # ----------------
 # SPECIAL TYPE MAP
 # ----------------
@@ -129,6 +153,7 @@ SPECIAL_FORMATTERS = {
     figure: lambda x: "<Bokeh Figure>",
     Row: lambda x: "<Bokeh Figure>",
     Column: lambda x: "<Bokeh Figure>",
+    Quantity: format_quantity,
 }
 
 # -------
@@ -268,10 +293,16 @@ def add_types_to_keys(dct: dict):
 
 def format_value(value: any) -> str:
     """
-    Dispatches values to formatters to
+    Dispatches values to formatters
     """
 
-    global CURRENT_DEPTH, OUTPUT
+    global CURRENT_DEPTH, OUTPUT, SEEN_IDS
+
+    # recursion guard
+    obj_id = id(value)
+    if obj_id in SEEN_IDS:
+        return f"<recursion:{type(value).__name__}>"
+    SEEN_IDS.add(obj_id)
 
     # 3rd party expandable objects
     if type(value) in CONTAINER_HEADERS:
@@ -297,6 +328,7 @@ def format_value(value: any) -> str:
         return line
 
     finally:
+        SEEN_IDS.discard(obj_id)
         CURRENT_DEPTH -= 1
 
 

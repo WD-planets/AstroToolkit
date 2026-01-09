@@ -6,6 +6,7 @@ import pandas
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.time import Time
+from astropy.units import Quantity
 from astropy.wcs import WCS
 from bokeh.plotting import figure as Figure
 
@@ -52,7 +53,7 @@ class Target:
 class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
-    radius: float | None = None
+    radius: Quantity | None = None
     position: SkyCoord | None = None
     identifier: int | None = None
     epoch: Time | None = None
@@ -105,10 +106,10 @@ class PlottableQueryResult(BaseQueryResult):
 
         self.figure = plot_data(kind, self, **kwargs)
 
-    def open(self, fname: Path | str | None = None):
+    def open(self, fname: Path | str | None = None, **kwargs: any):
         from .plot_io import open
 
-        open(self, fname=fname)
+        open(self, fname=fname, **kwargs)
 
 
 # ---------------
@@ -150,6 +151,7 @@ class BaseContainer:
 class Lightcurve(BaseContainer):
     survey: str | None = None
     band: str | None = None
+    obj_id: str | None = None
     mjd: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
     flux_err: numpy.ndarray | None = None
@@ -190,7 +192,7 @@ class Lightcurve(BaseContainer):
 class Image(BaseContainer):
     survey: str | None = None
     band: str | None = None
-    size: int | None = None
+    size: Quantity | None = None
     hdu: ImageHDU | None = None
     wcs: WCS | None = None
     focus: SkyCoord | None = None
@@ -211,8 +213,8 @@ class Image(BaseContainer):
 class Spectrum(BaseContainer):
     survey: str | None = None
     position: SkyCoord | None = None
-    separation: float | None = None
-    exposure: float | None = None
+    separation: Quantity | None = None
+    exposure: Quantity | None = None
     wavelength: numpy.ndarray | None = None
     flux: numpy.ndarray | None = None
 

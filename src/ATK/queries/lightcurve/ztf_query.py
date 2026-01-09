@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import astropy.units as u
 import pandas as pd
 
 from ...structures.definitions import Target
@@ -10,11 +11,12 @@ from .lightcurve_core import get_lightcurves
 
 def query(target: Target, **kwargs: dict):
     """
-    Performs ZTF light curve queries
+    Performs a ZTF light curve query
     """
 
     # set up URL
-    radius = kwargs.get("radius") / 3600
+    radius = kwargs["radius"].to(u.deg).value
+
     url = f"https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE {target.coords.ra.value} {target.coords.dec.value} {radius}&BANDNAME=g,r,i&FORMAT=CSV"
 
     # get data
@@ -34,9 +36,10 @@ def query(target: Target, **kwargs: dict):
             "ra": data["ra"],
             "dec": data["dec"],
             "band": data["filtercode"].str[1:],
+            "id": data["oid"],
         }
     )
 
-    lcs = get_lightcurves("ztf", df)
+    lcs = get_lightcurves(target, "ztf", df, kwargs.get("split", False))
 
     return lcs

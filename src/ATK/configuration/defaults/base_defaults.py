@@ -3,7 +3,7 @@ from pathlib import Path
 PATH = Path.home() / ".AstroToolkit" / "ATK_config.ini"
 
 DEFAULTS = {
-    "global_settings": {"astrometric_backend": "gaia", "notifications": True},
+    "global_settings": {"astrometric_backend": "gaia", "notifications": True, "unit_format": "symbol"},
     "plot_settings": {
         "cache_time": 3600,
         "size": 500,
@@ -14,7 +14,7 @@ DEFAULTS = {
         "font_size": 14,
         "font": "Helvetica",
     },
-    "query_settings": {"query_radius": 3, "image_size": 30},
+    "query_settings": {"query_radius": 3, "image_size": 30, "default_unit": "arcsec"},
     "overlay_settings": {"piggyback_radius": 5, "simbad_radius": 3},
     "search_settings": {"search_radius": 3},
     "datapage_settings": {"search_button_radius": 3, "datatable_radius": 3, "font_size": 12, "grid_size": 250},

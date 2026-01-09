@@ -3,12 +3,13 @@ import re
 import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord, search_around_sky
+from astropy.units import Quantity
 from astroquery.simbad import Simbad
 
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 
-def get_ids(targets: SkyCoord, radius: float):
+def get_ids(targets: SkyCoord, radius: Quantity):
     """
     Fetch SIMBAD IDs for each detection in `targets`.
 
@@ -25,7 +26,7 @@ def get_ids(targets: SkyCoord, radius: float):
 
     # query SIMBAD
     try:
-        response = simbad.query_region(targets, radius=radius * u.arcsec)
+        response = simbad.query_region(targets, radius=radius)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
@@ -42,7 +43,7 @@ def get_ids(targets: SkyCoord, radius: float):
     simbad_coords = SkyCoord(ra=df["ra"].to_numpy() * u.deg, dec=df["dec"].to_numpy() * u.deg, frame="icrs")
 
     # many-to-many sky match
-    target_idx, simbad_idx, sep, _ = search_around_sky(targets, simbad_coords, radius * u.arcsec)
+    target_idx, simbad_idx, sep, _ = search_around_sky(targets, simbad_coords, radius)
 
     # get all matches per target
     matches = [[] for _ in range(len(targets))]

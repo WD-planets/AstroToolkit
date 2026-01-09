@@ -1,3 +1,4 @@
+import astropy.units as u
 import numpy as np
 import pandas as pd
 from astropy.time import Time
@@ -210,60 +211,66 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         colour_mapper = LinearColorMapper(palette=get_false_cmap(image.survey, image.band), low=vmin, high=vmax)
 
     relative_axes = kwargs.get("relative_axes", True)
+    image_size_as = image.size.to(u.arcsec)
 
     # relative (+- arcsec from centre) axes
     if relative_axes:
         plot.xaxis.axis_label = "Relative Right Ascension / arcsec"
         plot.yaxis.axis_label = "Relative Declination / arcsec"
 
+        # image bounds in arcseconds
         x_bounds = (-n_pixels[0] / 2 * pixel_scales[0] * 3600, n_pixels[0] / 2 * pixel_scales[0] * 3600)
         y_bounds = (-n_pixels[1] / 2 * pixel_scales[1] * 3600, n_pixels[1] / 2 * pixel_scales[1] * 3600)
 
-        x_range = x_bounds[1] - x_bounds[0]
-        y_range = y_bounds[1] - y_bounds[0]
+        # image size in arcseconds
+        x_range = (x_bounds[1] - x_bounds[0]) * u.arcsec
+        y_range = (y_bounds[1] - y_bounds[0]) * u.arcsec
 
         # cap axes to image extent
-        if x_range < image.size:
+        if x_range < image_size_as:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
-            plot.x_range = Range1d(image.size / 2, -image.size / 2)
+            plot.x_range = Range1d(image_size_as.value / 2, -image_size_as.value / 2)
 
         if y_range < image.size:
             plot.y_range = Range1d(y_bounds[0], y_bounds[1])
         else:
-            plot.y_range = Range1d(-image.size / 2, image.size / 2)
+            plot.y_range = Range1d(-image_size_as.value / 2, image_size_as.value / 2)
 
         focus_ra, focus_dec = 0.0, 0.0
 
     # coordinates axes
     else:
         image_focus = (image.focus.ra.value, image.focus.dec.value)
+        image_size_deg = image_size_as.to(u.deg)
 
         plot.xaxis.axis_label = "Right Ascension / deg"
         plot.yaxis.axis_label = "Declination / deg"
 
+        # image bounds in deg
         x_bounds = (image_focus[0] - n_pixels[0] / 2 * pixel_scales[0], image_focus[0] + n_pixels[0] / 2 * pixel_scales[0])
         y_bounds = (image_focus[1] - n_pixels[1] / 2 * pixel_scales[1], image_focus[1] + n_pixels[1] / 2 * pixel_scales[1])
 
-        x_range = x_bounds[1] - x_bounds[0]
-        y_range = y_bounds[1] - y_bounds[0]
+        # image range in deg
+        x_range = (x_bounds[1] - x_bounds[0]) * u.deg
+        y_range = (y_bounds[1] - y_bounds[0]) * u.deg
 
         # cap axes to image extent
-        if x_range < image.size:
+        if x_range < image_size_deg:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
-            plot.x_range = Range1d(image_focus[0] + image.size / 2, image_focus[0] - image.size / 2)
+            plot.x_range = Range1d(image_focus[0] + image_size_deg.value / 2, image_focus[0] - image_size_deg.value / 2)
 
-        if y_range < image.size:
+        if y_range < image_size_deg:
             plot.y_range = Range1d(y_bounds[0], y_bounds[1])
         else:
-            plot.x_range = Range1d(image_focus[1] - image.size / 2, image_focus[1] + image.size / 2)
+            plot.y_range = Range1d(image_focus[1] - image_size_deg.value / 2, image_focus[1] + image_size_deg.value / 2)
 
         focus_ra, focus_dec = image_focus[0], image_focus[1]
 
     # don't allow panning outside of image bounds
-    plot.x_range.bounds = "auto"
-    plot.y_range.bounds = "auto"
+    # plot.x_range.bounds = "auto"
+    # plot.y_range.bounds = "auto"
 
     # plot image
     plot.image(

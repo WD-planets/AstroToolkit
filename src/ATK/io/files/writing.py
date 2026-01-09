@@ -8,6 +8,7 @@ from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
 
 from ...structures.structure_io import BASIC_TYPES, struct_to_hdu
+from ...utilities.misc import get_package_version
 
 warnings.simplefilter("ignore", category=VerifyWarning)
 
@@ -74,6 +75,11 @@ def write_local(structure: any, path: str | Path) -> Path:
             # if multiple hdus returned (e.g. images)
             for hdu in hdus:
                 hdul.append(hdu)
+
+    # store ATK version used to generate file
+    for hdu in hdul:
+        hdr = hdu.header
+        hdr.append(("ATK_VER", get_package_version(), "ATK version at time of file creation"))
 
     hdul.writeto(path, overwrite=True)
 

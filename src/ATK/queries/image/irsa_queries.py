@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 
+import astropy.units as u
 from requests import Response
 
 from ...structures.definitions import Target
@@ -54,7 +55,7 @@ def check_inputs(survey: str, band: str, size: int):
 
     if band not in BAND_MAP[survey]:
         raise ValueError(f"Invalid {survey} band. Supported bands are {list(BAND_MAP[survey].keys())}.")
-    if not 6 < size < 3600:
+    if not 6 * u.arcsec < size < 3600 * u.arcsec:
         raise ValueError(f"Size too large. Size of {survey} images must be between 6 and 3600 arcsec.")
 
 
@@ -73,7 +74,7 @@ def irsa_query(survey: str, target: Target, size: int, band: str, **kwargs: dict
         query_survey = survey
 
     # get size in arcmin
-    url_size = size / 60
+    url_size = size.to(u.arcmin).value
     url = f"https://irsa.ipac.caltech.edu/applications/finderchart/servlet/api?locstr={target.coords.ra.value}%20{target.coords.dec.value}&subsetsize={url_size}&survey={query_survey.capitalize()}&mode=prog&"
 
     # get response from url

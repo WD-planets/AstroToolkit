@@ -11,7 +11,7 @@ from .lightcurve_core import get_lightcurves
 
 def query(target: Target, **kwargs: dict):
     """
-    Performs Gaia light curve queries
+    Performs a Gaia light curve query
     """
 
     if target.identifier and target.survey == "gaia":
@@ -31,6 +31,7 @@ def query(target: Target, **kwargs: dict):
             return RETURNS.NULL
 
     all_bands = []
+
     for band in ["G", "BP", "RP"]:
         band_data = pd.DataFrame(
             {
@@ -39,6 +40,7 @@ def query(target: Target, **kwargs: dict):
                 "dec": lc_data["DE_ICRS"],
                 "mag": lc_data[f"{band}mag"],
                 "time": lc_data[f"Time{band}"],
+                "id": lc_data["Source"],
             }
         )
 
@@ -50,7 +52,7 @@ def query(target: Target, **kwargs: dict):
         mag_err[mask] = (2.5 / np.log(10)) * (flux_err[mask] / flux[mask])
         band_data["mag_err"] = mag_err
 
-        # calculate MJD from per-band time
+        # calculate MJD from per-band time (need to remove nan times first)
         band_data = band_data.dropna(subset=["time"])
         band_data["mjd"] = Time(band_data["time"] + 2455197.5, format="jd").mjd
 
@@ -59,6 +61,6 @@ def query(target: Target, **kwargs: dict):
     # combine bands into single DataFrame
     combined_data = pd.concat(all_bands)
 
-    lcs = get_lightcurves("gaia", combined_data)
+    lcs = get_lightcurves(target, "gaia", combined_data, kwargs.get("split", False))
 
     return lcs

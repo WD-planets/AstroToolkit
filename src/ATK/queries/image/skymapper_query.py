@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import astropy.units as u
 import pandas as pd
 
 from ...structures.definitions import Target
@@ -9,7 +10,7 @@ from .image_core import get_image_data, mjd_to_epoch
 
 
 def check_inputs(band: str, size: int):
-    if size > 600:
+    if size > 600 * u.arcsec:
         raise ValueError("Size too large. Maximum supported by panstarrs is 1500 arcsec.")
     if band not in ["g", "r", "i", "z", "u", "v"]:
         raise ValueError("Invalid panstarrs bands. Supported bands are ['g', 'r', 'i', 'z', 'u', 'v'].")
@@ -26,7 +27,7 @@ def query(target: Target, **kwargs: any):
     check_inputs(band, size)
 
     # needed in degrees
-    url_size = size / 3600
+    url_size = size.to(u.deg).value
 
     # fetch table
     url = f"https://api.skymapper.nci.org.au/public/siap/dr4/query?POS={target.coords.ra.value},{target.coords.dec.value}&SIZE={url_size}&BAND={band}&FORMAT=image/fits&VERB=3&INTERSECT=covers&RESPONSEFORMAT=CSV"

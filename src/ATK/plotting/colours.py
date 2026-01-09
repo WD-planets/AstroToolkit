@@ -4,12 +4,12 @@ from bokeh.palettes import Category10, Category20
 from matplotlib.colors import hsv_to_rgb
 
 GRADIENT_MAPS = {
-    "green": ("greenyellow", "forestgreen"),
-    "red": ("yellow", "red"),
-    "blue": ("aqua", "royalblue"),
-    "black": ("lightgray", "black"),
-    "orange": ("gold", "orange"),
-    "purple": ("orchid", "darkviolet"),
+    "green": ("forestgreen", "greenyellow"),
+    "red": ("red", "yellow"),
+    "blue": ("royalblue", "aqua"),
+    "black": ("black", "lightgray"),
+    "orange": ("orange", "gold"),
+    "purple": ("darkviolet", "orchid"),
 }
 
 
@@ -44,18 +44,29 @@ def get_palette(n: int, shift: int = 0):
     return colours[:n]
 
 
-def get_gradient(colour: str, n: int) -> list[str]:
+def get_gradient(colour: str, n: int, cycles: int = 1, reverse: bool = False) -> list[str] | str:
     low, high = GRADIENT_MAPS[colour]
-    cmap = mcolors.LinearSegmentedColormap.from_list("", [low, high, low])
+    if cycles == 0:
+        return mcolors.to_hex(low)
+
+    if reverse:
+        low, high = high, low
+
+    points = [low, high]
+    for i in range(cycles - 1):
+        points.append(low if i % 2 == 0 else high)
+
+    cmap = mcolors.LinearSegmentedColormap.from_list("", points)
     palette = [mcolors.rgb2hex(c) for c in cmap(np.linspace(0, 1, n))]
 
     return palette
 
 
-def assign_gradient_palettes(n: int, colours: list[str] | None = None, gradient_size: int = 256) -> list[list[str]]:
+def assign_gradient_palettes(
+    n: int, colours: list[str] | None = None, gradient_size: int = 256, cycles: int = 1, reverse: bool = False
+) -> list[list[str]]:
     cycle = [c for c in GRADIENT_MAPS if c != "black"]
 
-    # determine colour names for each subset
     if not colours:
         colour_names = [cycle[i % len(cycle)] for i in range(n)]
     else:
@@ -76,7 +87,6 @@ def assign_gradient_palettes(n: int, colours: list[str] | None = None, gradient_
                 i += 1
             colour_names = result
 
-    # generate a full gradient for each lightcurve
-    palettes = [get_gradient(c, n=gradient_size) for c in colour_names]
+    palettes = [get_gradient(c, gradient_size, cycles=cycles, reverse=reverse) for c in colour_names]
 
     return palettes

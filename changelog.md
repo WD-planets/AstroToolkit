@@ -27,25 +27,41 @@ Changes
 - Added an optional parameter "disable_corrections" to query(), which disable all astrometric corrections if True (defaults to False)
 - SEDs now retain all detections in specified radius
 - Added support for DESI DR1 spectral queries
+- Improved filtering of ATLAS photometry
+- Light curve queries now accept a kwarg "split", which will assign each returned light curve a per-survey object ID (where possible)
+    - This defaults to True. Disabling it essentially makes every light curve survey a forced photometry (e.g. ATLAS) query
+    - Light curve plotting now automatically splits light curves into per-survey and per-id figures
+- Added kwarg 'cmap' to light curve plotting, which may be "mean" or "flat". The former uses a gradient colour map with a band of darker colour at the mean magnitude, while the latter uses a single flat colour per band. Defaults to "mean"
+- User is now warned if ATK version does not match at time of fits file reading/writing
+- Added integration with astropy units. Where relevant, parameters are treated and stored as astropy Quantities.
+    - Input parameters may also use astropy quantities, e.g. a radius of 2 * u.arcmin may be requested for a 2 arcmin search
+    - Added global config option 'unit_format' = 'text'/'symbol' to print units as text or symbol representations (defaults to 'symbol')
+    - Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
 
-To-Do 
------
+To-Do Now
+---------
 - Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
 - use astropy units to define axes
-- move most globals to one place + include global prefix to make sure that these aren't edited
+- move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
 - try to remove unnecessary dependencies
     - reproject
-- Make an actual_bounds() function for Image
-- test file saving on vizier and image data
-- add colours to image plots
-- add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally)
+- add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally) these should also save and read a file to test this
 - use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert
-- decouple from Gaia with a properly implemented astrometric backend system
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - add spectral line fitting tool
 - possibly store metadata, e.g. object IDs from light curve surveys in a .meta attribute
-- what happens if plotting no data
+- properly sort warnings/logging (no print statements?)
+- add filter kwarg to light curve queries to disable all unrequired filtering
+- add annotation to ATK keywords in fits headers
+- sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get())
+- check type hints, especially for astropy quantities after change was made
+- add separation to light curves (split and unsplit by obj ID) by calculating distance to mean coordinate of photometry (in unit of requested radius)
+- consider turning off split = True for ZTF lightcurves as default, too many "objects"
+- add units to array attributes somehow (some sort of annotation or something)?
 
-
+To-Do Later
+-----------
 - calibrating + combining multiple light curves to make one massive light curve
+- decouple from Gaia with a properly implemented astrometric backend system
+- allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...

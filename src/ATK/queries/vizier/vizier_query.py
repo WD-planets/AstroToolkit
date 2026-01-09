@@ -24,7 +24,7 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
 
     v = Vizier(columns=["**"], row_limit=ROW_LIMIT)
     try:
-        data = v.query_region(position, width=radius * u.arcsec, catalog=catalogue)
+        data = v.query_region(position, width=radius, catalog=catalogue)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
@@ -68,7 +68,7 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
 
     aliases = ALIAS_CONFIG.as_dict()["vizier_aliases"]
 
-    # survey = catalogue alias (here for parity with other query commands), catalogue = actual vizier catalogue ID
+    # survey = catalogue alias (here for parity with other query commands), catalogue = actual vizier catalogue
     survey, catalogue = kwargs.get("survey"), kwargs.get("catalogue")
 
     # ensure exactly one of 'survey', 'catalogue' provided

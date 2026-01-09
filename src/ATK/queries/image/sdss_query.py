@@ -16,7 +16,7 @@ def query(target: Target, **kwargs) -> Image:
 
     # get image list
     try:
-        imgs = SDSS.get_images(coordinates=target.coords, band=band, radius=size * u.arcsec)
+        imgs = SDSS.get_images(coordinates=target.coords, band=band, radius=size)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 

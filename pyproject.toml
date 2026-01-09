@@ -37,6 +37,7 @@ dependencies = [
 	"matplotlib",
 	"reproject",
 	"sparclclient",
+	"skypatrol",
 ]
 
 [project.urls]

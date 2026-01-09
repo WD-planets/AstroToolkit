@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+from astropy.units import Quantity
 from erfa import ErfaWarning
 
 from ..configuration.base_config import BASE_CONFIG
@@ -161,7 +162,7 @@ def prepare_search(target: Target, query_kind: str, survey: str = None, epoch: T
     return corrected_target, structure
 
 
-def correct_radius(target: Target, radius: float, query_kind: str, survey: str):
+def correct_radius(target: Target, radius: Quantity, query_kind: str, survey: str):
     """
     Expands a search radius for proper motion
     """
@@ -172,7 +173,7 @@ def correct_radius(target: Target, radius: float, query_kind: str, survey: str):
 
     corrected_target = correct_target(target, survey=survey, query_kind=query_kind, make_copy=True)
     separation = corrected_target.coords.separation(target.coords)
-    expanded_radius = (radius * u.arcsec + separation.to(u.arcsec)).value
+    expanded_radius = radius + separation.to(radius.unit)
 
     return expanded_radius
 
