@@ -130,26 +130,34 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
     return obj
 
 
-def parse_generic_bintable(structure: QueryResult, path: str | Path, hdr: Header, data: any) -> any:
+def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTableHDU) -> any:
     """
     Parse a bintable extension into either a data container or dataframe (for vizier queries)
     """
 
+    hdr = hdu.header
+
     structure_map = build_structure_map()
-    df = Table(data).to_pandas()
+
+    # read table from hdu data + header
+    tbl = Table.read(hdu)
 
     # get container constructor
     ctnr_constr = structure_map.get(hdr.get("ATK_KIND"))
 
     # if no container exists (i.e. in vizier queries), just set .data = dataframe
     if not ctnr_constr:
-        return df
+        return tbl.to_pandas()
 
-    # populate dict with dataframe columns as np arrays
+    # populate dict with dataframe columns as arrays
     ctnr_data = {}
-    for col in df:
-        if hasattr(ctnr_constr, col):
-            ctnr_data[col] = np.asarray(df[col])
+    for col_name in tbl.colnames:
+        if hasattr(ctnr_constr, col_name):
+            col = tbl[col_name]
+            if getattr(col, "unit", None):
+                ctnr_data[col_name] = Quantity(col, unit=col.unit)
+            else:
+                ctnr_data[col_name] = np.asarray(col[:])
 
     # construct container with data
     ctnr = ctnr_constr(**ctnr_data)
@@ -212,7 +220,7 @@ def read_local(path: str | Path) -> QueryResult:
 
         # everything except images
         if isinstance(hdu, BinTableHDU):
-            data = parse_generic_bintable(structure, path, hdu.header, hdu.data)
+            data = parse_generic_bintable(structure, path, hdu)
             completed.append(hdu)
 
         # images

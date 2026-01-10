@@ -39,6 +39,6 @@ def query(target: Target, **kwargs: dict):
         all_lcs.append(df)
     combined_lcs = pd.concat(all_lcs)
 
-    lcs = get_lightcurves(target, "asassn", combined_lcs, kwargs.get("split", False))
+    lcs = get_lightcurves("asassn", target, kwargs["radius"], combined_lcs, kwargs.get("split", False))
 
     return lcs

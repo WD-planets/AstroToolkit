@@ -40,8 +40,8 @@ def query(target: Target, **kwargs: dict):
         # create Spectrum object for each returned spectrum
         spec = Spectrum(
             "sdss",
-            wavelength=wavelength,
-            flux=flux,
+            wavelength=wavelength * u.Unit("Angstrom"),
+            flux=flux * u.Unit("1e-17 erg cm-2 s-1 Angstrom-1"),
             exposure=exposure * u.s,
             position=spec_pos,
             # this would normally be an angle

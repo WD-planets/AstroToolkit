@@ -46,11 +46,11 @@ def send_request(survey: str, url: str, method: str = "GET", message=None, **kwa
         response.raise_for_status()
 
     except CONNECTION_ERRORS as e:
-        print(e)
         if message:
             print(message)
         else:
-            warnings.warn(f"Note: experiencing issues with {survey} (timeout)")
+            warnings.warn(f"Note: experiencing issues with {survey} (timeout). Details:")
+            print(e)
         return RETURNS.EXCEPTION
 
     except requests.HTTPError:

@@ -40,6 +40,6 @@ def query(target: Target, **kwargs: dict):
         }
     )
 
-    lcs = get_lightcurves(target, "ztf", df, kwargs.get("split", False))
+    lcs = get_lightcurves("ztf", target, kwargs["radius"], df, kwargs.get("split", False))
 
     return lcs

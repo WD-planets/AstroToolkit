@@ -170,6 +170,49 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     return pd.DataFrame.from_dict(data)
 
 
+def struct_to_table(structure: any) -> Table:
+    """
+    Combines array-like attributes of a data structure into a single astropy Table
+    """
+
+    cols = get_cols(structure)
+
+    table = Table()
+    for col in cols:
+        val = getattr(structure, col)
+        if val is None:
+            continue
+
+        if not isinstance(val, COLUMN_TYPES):
+            val = [val]
+        table[col] = val
+
+    return table
+
+
+def struct_from_table(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
+    ctnr_cols = get_cols(ctnr)
+
+    relevant_data = {}
+    for col_name in data.colnames:
+        if hasattr(ctnr, col_name) and col_name in ctnr_cols:
+            col = data[col_name]
+            unit = getattr(col, "unit")
+
+            if unit is not None:
+                relevant_data[col_name] = Quantity(col, unit=unit)
+            else:
+                relevant_data[col_name] = col[:]
+
+    for arg, val in kwargs.items():
+        if hasattr(ctnr, arg) and arg not in ctnr_cols:
+            relevant_data[arg] = val
+
+    print(relevant_data)
+
+    return ctnr(**relevant_data)
+
+
 def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
     ctnr_cols = get_cols(ctnr)
 
@@ -202,8 +245,7 @@ def struct_to_hdu(
 
     # combine array-like attributes into a dataframe
     cols = get_cols(structure)
-    df = struct_to_dataframe(structure)
-    tbl = Table.from_pandas(df)
+    tbl = struct_to_table(structure)
 
     # PrimaryHDU stores query kind, extensions store data container kind
     kind_str = "ATK query kind" if hdu_kind is PrimaryHDU else "ATK container kind"

@@ -46,6 +46,7 @@ To-Do Now
 - try to remove unnecessary dependencies
     - reproject
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally) these should also save and read a file to test this
+    - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
 - use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert
 - include distances in overlay corrections
 - add survey ID to SED hovertool
@@ -56,7 +57,6 @@ To-Do Now
 - add annotation to ATK keywords in fits headers
 - sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get())
 - check type hints, especially for astropy quantities after change was made
-- add separation to light curves (split and unsplit by obj ID) by calculating distance to mean coordinate of photometry (in unit of requested radius)
 - consider turning off split = True for ZTF lightcurves as default, too many "objects"
 - add units to array attributes somehow (some sort of annotation or something)?
 
@@ -65,3 +65,4 @@ To-Do Later
 - calibrating + combining multiple light curves to make one massive light curve
 - decouple from Gaia with a properly implemented astrometric backend system
 - allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...
+- see if I can get crts working, possibly a temporary outage

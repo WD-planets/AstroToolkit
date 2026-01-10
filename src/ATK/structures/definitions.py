@@ -6,7 +6,7 @@ import pandas
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.time import Time
-from astropy.units import Quantity
+from astropy.units import Quantity, Unit
 from astropy.wcs import WCS
 from bokeh.plotting import figure as Figure
 
@@ -130,6 +130,24 @@ class BaseContainer:
     def __str__(self):
         return self.__repr__()
 
+    def _get_attr_value(self, attr: str) -> numpy.ndarray:
+        val = getattr(self, attr)
+        if val is None:
+            raise ValueError(f"Empty or invalid {type(self).__name__} attribute '{attr}'.")
+
+        if isinstance(val, Quantity):
+            return val.value
+        return val
+
+    def _get_attr_unit(self, attr: str) -> Unit:
+        val = getattr(self, attr)
+        if val is None:
+            raise ValueError(f"Empty or invalid {type(self).__name__} attribute '{attr}'.")
+
+        if isinstance(val, Quantity):
+            return val.unit
+        return None
+
     def to_dataframe(self) -> pandas.DataFrame:
         from .structure_io import struct_to_dataframe
 
@@ -151,14 +169,15 @@ class BaseContainer:
 class Lightcurve(BaseContainer):
     survey: str | None = None
     band: str | None = None
+    separation: Quantity | None = None
     obj_id: str | None = None
     mjd: numpy.ndarray | None = None
-    flux: numpy.ndarray | None = None
-    flux_err: numpy.ndarray | None = None
+    flux: numpy.ndarray | Quantity | None = None
+    flux_err: numpy.ndarray | Quantity | None = None
     mag: numpy.ndarray | None = None
     mag_err: numpy.ndarray | None = None
-    ra: numpy.ndarray | None = None
-    dec: numpy.ndarray | None = None
+    ra: numpy.ndarray | Quantity | None = None
+    dec: numpy.ndarray | Quantity | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
@@ -215,18 +234,18 @@ class Spectrum(BaseContainer):
     position: SkyCoord | None = None
     separation: Quantity | None = None
     exposure: Quantity | None = None
-    wavelength: numpy.ndarray | None = None
-    flux: numpy.ndarray | None = None
+    wavelength: numpy.ndarray | Quantity | None = None
+    flux: numpy.ndarray | Quantity | None = None
 
 
 @dataclass(repr=False)
 class SED(BaseContainer):
     survey: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
-    separation: numpy.ndarray | None = None
-    wavelength: numpy.ndarray | None = None
-    flux: numpy.ndarray | None = None
-    flux_err: numpy.ndarray | None = None
+    separation: numpy.ndarray | Quantity | None = None
+    wavelength: numpy.ndarray | Quantity | None = None
+    flux: numpy.ndarray | Quantity | None = None
+    flux_err: numpy.ndarray | Quantity | None = None
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"

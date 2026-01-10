@@ -1,12 +1,17 @@
+import astropy.units as u
+import numpy as np
 import pandas as pd
+from astropy.coordinates import SkyCoord
+from astropy.units import Quantity
 
 from ...structures.definitions import Lightcurve, Target
+from ...utilities.misc import angle_to_quantity
 
 # required light curve columns (in order)
 REQUIRED_COLS = ["band", "mjd", "mag", "mag_err", "ra", "dec"]
 
 
-def get_lightcurves(target: Target, survey: str, data: pd.DataFrame, split: bool) -> Lightcurve:
+def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.DataFrame, split: bool) -> Lightcurve:
     # check for any missing columns
     missing_cols = [col for col in REQUIRED_COLS if col not in data.columns]
     if missing_cols:
@@ -40,5 +45,10 @@ def get_lightcurves(target: Target, survey: str, data: pd.DataFrame, split: bool
     # sort by object ID
     if split:
         lcs.sort(key=lambda lc: lc.obj_id)
+
+    for lc in lcs:
+        mean_ra, mean_dec = np.mean(lc.ra), np.mean(lc.dec)
+        lc_pos = SkyCoord(ra=mean_ra * u.deg, dec=mean_dec * u.deg, frame="icrs")
+        lc.separation = angle_to_quantity(lc_pos.separation(target.coords), radius.unit)
 
     return lcs

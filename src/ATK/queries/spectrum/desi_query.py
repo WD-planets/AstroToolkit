@@ -99,7 +99,12 @@ def query(target: Target, **kwargs: dict):
     spectra = []
     for record in records.data[1:]:
         if record["specprimary"]:
-            spec = Spectrum("desi", wavelength=record["wavelength"], flux=record["flux"], exposure=record["exptime"] * u.s)
+            spec = Spectrum(
+                "desi",
+                wavelength=record["wavelength"] * u.Unit("Angstrom"),
+                flux=record["flux"] * u.Unit("1e-17 erg cm-2 s-1 Angstrom-1"),
+                exposure=record["exptime"] * u.s,
+            )
             spec_pos = SkyCoord(ra=record["ra"] * u.deg, dec=record["dec"] * u.deg, frame="icrs")
             spec.position = spec_pos
             spec.separation = angle_to_quantity(spec_pos.separation(target.coords), kwargs["radius"].unit)

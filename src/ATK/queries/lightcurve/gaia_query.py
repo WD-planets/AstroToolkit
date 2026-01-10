@@ -61,6 +61,6 @@ def query(target: Target, **kwargs: dict):
     # combine bands into single DataFrame
     combined_data = pd.concat(all_bands)
 
-    lcs = get_lightcurves(target, "gaia", combined_data, kwargs.get("split", False))
+    lcs = get_lightcurves("gaia", target, kwargs["radius"], combined_data, kwargs.get("split", False))
 
     return lcs

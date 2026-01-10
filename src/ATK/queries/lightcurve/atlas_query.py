@@ -128,6 +128,6 @@ def query(target: Target, **kwargs: dict):
 
     df = df.rename(columns={"MJD": "mjd", "m": "mag", "dm": "mag_err", "F": "band", "RA": "ra", "Dec": "dec"})
 
-    lcs = get_lightcurves(target, "atlas", df, kwargs.get("split", False))
+    lcs = get_lightcurves("atlas", target, kwargs["radius"], df, kwargs.get("split", False))
 
     return lcs
