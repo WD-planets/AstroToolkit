@@ -47,8 +47,15 @@ def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.Data
         lcs.sort(key=lambda lc: lc.obj_id)
 
     for lc in lcs:
-        mean_ra, mean_dec = np.mean(lc.ra), np.mean(lc.dec)
-        lc_pos = SkyCoord(ra=mean_ra * u.deg, dec=mean_dec * u.deg, frame="icrs")
-        lc.separation = angle_to_quantity(lc_pos.separation(target.coords), radius.unit)
+        coords = SkyCoord(ra=lc.ra * u.deg, dec=lc.dec * u.deg)
+        # calculate mean coordinate, handles wrap-around
+        mean_coord = SkyCoord(
+            x=coords.cartesian.x.mean(),
+            y=coords.cartesian.y.mean(),
+            z=coords.cartesian.z.mean(),
+            representation_type="cartesian",
+            frame=coords.frame,
+        ).icrs
+        lc.separation = angle_to_quantity(mean_coord.separation(target.coords), radius.unit)
 
     return lcs

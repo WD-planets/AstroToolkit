@@ -1,3 +1,4 @@
+import astropy.units as u
 import numpy as np
 import pandas as pd
 
@@ -63,10 +64,12 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
     return sed
 
 
-def query(target: Target, radius: float, **kwargs):
+def query(target: Target, **kwargs):
     """
     Constructs an SED by combining photometry from Vizier catalogues
     """
+
+    radius = kwargs["radius"]
 
     sed_tables = []
 
@@ -88,13 +91,16 @@ def query(target: Target, radius: float, **kwargs):
     # combine surveys
     df = pd.concat(sed_tables, ignore_index=True)
 
+    max_survey_len = max(len(s) for s in df["survey"].unique())
+    max_band_len = max(len(b) for b in df["band"].unique())
+
     sed = SED(
-        survey=df["survey"].to_numpy(),
-        band=df["band"].to_numpy(),
-        wavelength=df["wavelength"].to_numpy(),
-        flux=df["flux_mjy"].to_numpy(),
-        flux_err=df["flux_err_mjy"].to_numpy(),
-        separation=df["_r"].to_numpy(),
+        survey=df["survey"].to_numpy(dtype=f"<U{max_survey_len}"),
+        band=df["band"].to_numpy(dtype=f"<U{max_band_len}"),
+        wavelength=df["wavelength"].to_numpy() * u.Unit("Angstrom"),
+        flux=df["flux_mjy"].to_numpy() * u.Unit("mJy"),
+        flux_err=df["flux_err_mjy"].to_numpy() * u.Unit("mJy"),
+        separation=df["_r"].to_numpy() * kwargs["radius"].unit,
     )
 
     return sed

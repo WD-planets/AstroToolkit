@@ -85,8 +85,8 @@ def get_query_arguments(kind: str, kwargs: dict) -> dict:
                     "ATLAS light curves are provided as forced photometry, and hence object IDs to not apply and no splitting will be performed."
                 )
 
-        # ATLAS does its own proper motion correction
-        out_args["defer_correction"] = True
+            # ATLAS does its own proper motion correction
+            out_args["defer_correction"] = True
 
     # iterate through parameters, setting defaults from the config if not marked as REQUIRED.NOW or REQUIRED.LATER
     for key, val in defaults.items():

@@ -16,6 +16,9 @@ from bokeh.plotting import figure as Figure
 
 PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual"}
 
+# type hint for arrays of astropy Quantities
+QuantityArray = numpy.ndarray[Quantity]
+
 
 @dataclass
 class Target:
@@ -172,12 +175,12 @@ class Lightcurve(BaseContainer):
     separation: Quantity | None = None
     obj_id: str | None = None
     mjd: numpy.ndarray | None = None
-    flux: numpy.ndarray | Quantity | None = None
-    flux_err: numpy.ndarray | Quantity | None = None
+    flux: numpy.ndarray | QuantityArray | None = None
+    flux_err: numpy.ndarray | QuantityArray | None = None
     mag: numpy.ndarray | None = None
     mag_err: numpy.ndarray | None = None
-    ra: numpy.ndarray | Quantity | None = None
-    dec: numpy.ndarray | Quantity | None = None
+    ra: numpy.ndarray | None = None
+    dec: numpy.ndarray | None = None
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
@@ -234,18 +237,18 @@ class Spectrum(BaseContainer):
     position: SkyCoord | None = None
     separation: Quantity | None = None
     exposure: Quantity | None = None
-    wavelength: numpy.ndarray | Quantity | None = None
-    flux: numpy.ndarray | Quantity | None = None
+    wavelength: numpy.ndarray | QuantityArray | None = None
+    flux: numpy.ndarray | QuantityArray | None = None
 
 
 @dataclass(repr=False)
 class SED(BaseContainer):
     survey: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
-    separation: numpy.ndarray | Quantity | None = None
-    wavelength: numpy.ndarray | Quantity | None = None
-    flux: numpy.ndarray | Quantity | None = None
-    flux_err: numpy.ndarray | Quantity | None = None
+    separation: numpy.ndarray | QuantityArray | None = None
+    wavelength: numpy.ndarray | QuantityArray | None = None
+    flux: numpy.ndarray | QuantityArray | None = None
+    flux_err: numpy.ndarray | QuantityArray | None = None
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"

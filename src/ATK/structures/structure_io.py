@@ -185,6 +185,7 @@ def struct_to_table(structure: any) -> Table:
 
         if not isinstance(val, COLUMN_TYPES):
             val = [val]
+
         table[col] = val
 
     return table

@@ -142,6 +142,12 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTab
     # read table from hdu data + header
     tbl = Table.read(hdu)
 
+    # fixes big/little-endian data issue with fits and pandas
+    for col in tbl.colnames:
+        dtype = tbl[col].dtype
+        if dtype.kind in "fc" and dtype.byteorder == ">":  # float or complex big-endian
+            tbl[col] = tbl[col].astype(dtype.newbyteorder())  # convert in-place
+
     # get container constructor
     ctnr_constr = structure_map.get(hdr.get("ATK_KIND"))
 

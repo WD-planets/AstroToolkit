@@ -36,18 +36,17 @@ Changes
 - Added integration with astropy units. Where relevant, parameters are treated and stored as astropy Quantities.
     - Input parameters may also use astropy quantities, e.g. a radius of 2 * u.arcmin may be requested for a 2 arcmin search
     - Added global config option 'unit_format' = 'text'/'symbol' to print units as text or symbol representations (defaults to 'symbol')
-    - Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
+- Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
+- Significantly reduced the number of dependencies
 
 To-Do Now
 ---------
 - Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
-- use astropy units to define axes
 - move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
 - try to remove unnecessary dependencies
     - reproject
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally) these should also save and read a file to test this
     - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
-- use astropy units in query radius/size, assume arcsec if no unit given but accept other units + convert
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - add spectral line fitting tool
@@ -56,9 +55,9 @@ To-Do Now
 - add filter kwarg to light curve queries to disable all unrequired filtering
 - add annotation to ATK keywords in fits headers
 - sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get())
+- check docstrings / comments
 - check type hints, especially for astropy quantities after change was made
 - consider turning off split = True for ZTF lightcurves as default, too many "objects"
-- add units to array attributes somehow (some sort of annotation or something)?
 
 To-Do Later
 -----------
@@ -66,3 +65,5 @@ To-Do Later
 - decouple from Gaia with a properly implemented astrometric backend system
 - allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...
 - see if I can get crts working, possibly a temporary outage
+- add best-epoch separation to light curves
+- add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)

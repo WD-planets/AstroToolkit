@@ -124,12 +124,23 @@ def format_array(array: np.ndarray | pd.Series) -> str:
 
 
 def format_quantity(val: Quantity) -> str:
+    """
+    Formats astropy Quantities or array-like Quantities into string representation
+    """
+
+    if val.shape:
+        val_arr = format_value(val.value)
+        if val.unit in UNITS:
+            val_arr += " "
+    else:
+        val_arr = f"{val.value:.{SIG_FIGS}g}"
+
     if val.unit in UNITS:
-        str_rep = f"{val.value}{UNITS[val.unit]}"
+        str_rep = f"{val_arr}{UNITS[val.unit]}"
     elif unit_format == "text":
-        str_rep = f"{val.value} {val.unit.to_string()}"
+        str_rep = f"{val_arr} {val.unit.to_string()}"
     elif unit_format == "symbol":
-        str_rep = f"{val.value} {val.unit.to_string('unicode')}"
+        str_rep = f"{val_arr} {val.unit.to_string('unicode')}"
 
     return str_rep
 
