@@ -37,7 +37,7 @@ class EpochConfig(ParserConfig):
         else:
             section = f"{query_kind}_surveys"
 
-        return self.as_dict()[section]
+        return self.as_dict().get(section, [])
 
 
 EPOCH_CONFIG = EpochConfig()

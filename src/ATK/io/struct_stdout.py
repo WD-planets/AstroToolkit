@@ -49,7 +49,11 @@ else:
 
 
 def format_skycoord(coord: SkyCoord) -> str:
-    return f"{round(coord.ra.deg, 3)}{UNITS[u.deg]}, {round(coord.dec.deg, 3)}{UNITS[u.deg]}"
+    """
+    Format SkyCoord into string representation
+    """
+
+    return f"{round(coord.ra.deg, 3)}{UNITS[u.deg]} {round(coord.dec.deg, 3)}{UNITS[u.deg]}"
 
 
 def format_dict(dct: dict) -> str:
@@ -90,7 +94,7 @@ def format_list(lst: list) -> str:
         return "<empty list>\n"
 
     # recursively format each item
-    for item in lst:
+    for i, item in enumerate(lst):
         str_rep += format_value(item)
 
     return str_rep
@@ -411,6 +415,9 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
 
         # iterate through attributes in group if requested
         for attr, val in attr_group.items():
+            if val is None:
+                continue
+
             line = f".{attr}: ".ljust(pad)
 
             update_col_widths(len(line), CURRENT_DEPTH)

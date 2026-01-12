@@ -33,6 +33,7 @@ QUERY_ARGUMENTS = {
     "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
     # correction needs to be deferred as SED queries use data queries under-the-hood
     "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
+    "hrd": {"survey": "gaia", "colour": "bp-rp", "mag": "g", "defer_correction": True},
 }
 
 # get default unit scale from config

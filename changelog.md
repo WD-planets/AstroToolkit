@@ -38,6 +38,7 @@ Changes
     - Added global config option 'unit_format' = 'text'/'symbol' to print units as text or symbol representations (defaults to 'symbol')
 - Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
 - Significantly reduced the number of dependencies
+- added ability to query multiple targets at once with targets = ...
 
 To-Do Now
 ---------
@@ -58,6 +59,14 @@ To-Do Now
 - check docstrings / comments
 - check type hints, especially for astropy quantities after change was made
 - consider turning off split = True for ZTF lightcurves as default, too many "objects"
+- default units for Quantity arrays?
+
+
+
+add position/identifier to each returned container when doing a multiple-object query
+identifier/position should go into container names if one is being stored, e.g. <1234567 gaia G vs bp-rp HRD>
+store position/identifier of each container in header + reconstruct individually, don't need query position/identifier here
+
 
 To-Do Later
 -----------

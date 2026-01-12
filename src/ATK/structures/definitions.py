@@ -14,7 +14,8 @@ from bokeh.plotting import figure as Figure
 # QUERY RESULTS
 # -------------
 
-PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual"}
+# whether to combine data structures into combined plots
+PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual", "hrd": "combined"}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
@@ -57,8 +58,10 @@ class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
     radius: Quantity | None = None
-    position: SkyCoord | None = None
     identifier: int | None = None
+    identifiers: None = None
+    position: SkyCoord | None = None
+    positions: SkyCoord | None = None
     epoch: Time | None = None
     frame: str | None = None
     correction: str | None = None
@@ -83,9 +86,13 @@ class BaseQueryResult:
     @property
     def _fname(self):
         if self.identifier:
-            return Path(f"{self.identifier}_{self.survey}_ATKdata.fits")
+            return Path(f"{self.identifier}_{self.survey}_ATK{self.kind}.fits")
         elif self.position:
-            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_{self.survey}_ATKdata.fits")
+            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_{self.survey}_ATK{self.kind}.fits")
+        elif self.identifiers:
+            return Path(f"{self.identifiers[0]}_and_others_{self.survey}_ATK{self.kind}.fits")
+        elif self.positions:
+            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_and_others_{self.survey}_ATK{self.kind}.fits")
         else:
             raise ValueError("No source or position data to be used in generating a file name.")
 
@@ -150,6 +157,11 @@ class BaseContainer:
         if isinstance(val, Quantity):
             return val.unit
         return None
+
+    def _get_cols(self):
+        from .structure_io import get_cols
+
+        return get_cols(self)
 
     def to_dataframe(self) -> pandas.DataFrame:
         from .structure_io import struct_to_dataframe
@@ -252,3 +264,16 @@ class SED(BaseContainer):
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"
+
+
+@dataclass(repr=False)
+class HRD(BaseContainer):
+    survey: str | None = None
+    mag: str | None = None
+    filter: str | None = None
+    colour: float | None = None
+    distance: Quantity | None = None
+    abs_mag: float | None = None
+
+    def __repr__(self):
+        return f"<{self.survey} {self.mag} vs {self.filter} HRD>"

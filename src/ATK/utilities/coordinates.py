@@ -43,23 +43,6 @@ def check_correction(coord: SkyCoord) -> str:
         return "full"
 
 
-def check_target(target: Target | SkyCoord | int):
-    """
-    Convers a given targeting input (e.g. Gaia SOURCE_ID or an astropy SkyCoord) to an ATK target
-    """
-
-    if isinstance(target, Target):
-        pass
-    elif isinstance(target, SkyCoord):
-        target = Target.from_pos(target)
-    elif isinstance(target, int):
-        target = Target.from_id(target, BASE_CONFIG.get("global_settings", "astrometric_backend"))
-    else:
-        raise ValueError(f"Unexpected target type '{type(target)}'.")
-
-    return target
-
-
 def get_gaia_target(source: int) -> Target:
     """
     Generates a SkyCoord using Gaia astrometry
