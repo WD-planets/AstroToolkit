@@ -1,12 +1,14 @@
+import warnings
 from pathlib import Path
 
 from astropy.coordinates import SkyCoord
 
 from .io.files.read import read_local
 from .queries.arguments import get_query_arguments
-from .queries.query_core import (multiple_target_query, setup_targeting,
-                                 single_target_query)
+from .queries.query_core import general_query, setup_targeting
 from .structures.definitions import PlottableQueryResult, QueryResult
+from .utilities.defaults import RETURNS
+from .utilities.mapping import get_query_result_map
 
 
 def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
@@ -25,21 +27,39 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
     # get targets that were provided
     targeting = target if target is not None else targets
 
+    # get flattened list of targets
     targets = setup_targeting(kind, targeting)
+
+    # targets may return exception if Vizier is down
+    if any(target is RETURNS.EXCEPTION for target in targets):
+        warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
+
+        structure_map = get_query_result_map()
+        structure = structure_map[kind](
+            kind=kind,
+            survey=arguments.get("survey", None),
+            targets=None,
+            radius=arguments.get("radius", None),
+            frame=None,
+            epoch=None,
+            correction="none",
+            exception=True,
+        )
+        return structure
 
     # disable proper motion correction
     if arguments.get("disable_corrections", False):
         for target in targets:
-            coords = target.coords
-            target.coords = SkyCoord(ra=coords.ra, dec=coords.dec, frame=coords.frame, obstime=coords.obstime)
+            initial_coords = target.initial_coords
+            target.initial_coords = SkyCoord(
+                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
+            )
+            target.coords = initial_coords
             target.identifier = None
             target.survey = None
             target.correction = "none"
 
-    if len(targets) > 1:
-        return multiple_target_query(kind, targets, **arguments)
-    else:
-        return single_target_query(kind, targets[0], **arguments)
+    return general_query(kind, targets, **arguments)
 
 
 def read(path: str | Path):

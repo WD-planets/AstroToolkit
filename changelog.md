@@ -38,7 +38,8 @@ Changes
     - Added global config option 'unit_format' = 'text'/'symbol' to print units as text or symbol representations (defaults to 'symbol')
 - Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
 - Significantly reduced the number of dependencies
-- added ability to query multiple targets at once with targets = ...
+- added ability to query multiple targets at once
+    - QueryResults now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id() and .fetch_by_coord() methods to extract data per-source
 
 To-Do Now
 ---------
@@ -62,8 +63,9 @@ To-Do Now
 - default units for Quantity arrays?
 
 
+QueryResults should store a target, not positions and identifiers separately -> print as e.g. "123.456 12.345 (identifier if present)"
+    - now these are coupled together, removes complexity of some targets having an identifier while others do not
 
-add position/identifier to each returned container when doing a multiple-object query
 identifier/position should go into container names if one is being stored, e.g. <1234567 gaia G vs bp-rp HRD>
 store position/identifier of each container in header + reconstruct individually, don't need query position/identifier here
 

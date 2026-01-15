@@ -1,16 +1,14 @@
-import copy
 import importlib
 
 from astropy.coordinates import SkyCoord
 
 from ..configuration.base_config import BASE_CONFIG
 from ..configuration.epoch_config import EPOCH_CONFIG
-from ..structures.definitions import PlottableQueryResult, QueryResult, Target
+from ..structures.definitions import (BaseQueryResult, PlottableQueryResult,
+                                      QueryResult, Target)
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_map, get_query_result_map
-
-MULTI_QUERY_KEEP_ATTRS = ["kind", "survey", "positions", "identifiers", "epoch", "frame", "exception", "data", "figure"]
 
 
 def _normalise_targeting_input(targeting: any):
@@ -101,37 +99,16 @@ def _set_results(structure: QueryResult | PlottableQueryResult, query_result: an
     return structure
 
 
-def single_target_query(kind: str, target: Target, **arguments):
+def single_target_query(kind: str, target: Target, structure: BaseQueryResult, **arguments):
     """
     Sets up a query on a single target
     """
-
-    # if Vizier is down, a target may fail to generate from an ID
-    if target is RETURNS.EXCEPTION:
-        structure_map = get_query_result_map()
-        structure = structure_map[kind](
-            kind=kind,
-            survey=arguments.get("survey", None),
-            position=None,
-            identifier=None,
-            radius=arguments.get("radius", None),
-            frame=None,
-            epoch=None,
-            correction="none",
-            exception=True,
-        )
-        return structure
 
     module = importlib.import_module(f"ATK.queries.{kind}")
     query_map = build_map(module, "query", suffix="_query")
 
     # get specific query function (for given survey if multiple are available)
     query_function = query_map[arguments.get("survey")] if len(query_map) > 1 else list(query_map.values())[0]
-
-    # get search position and structure
-    search_pos, structure = prepare_search(target=target, query_kind=kind, **arguments)
-    if not search_pos:
-        return structure
 
     # perform query
     query_result = query_function(target, **arguments)
@@ -170,27 +147,14 @@ def single_target_query(kind: str, target: Target, **arguments):
     return structure
 
 
-def multiple_target_query(kind: str, targets: list[Target | int | SkyCoord], **arguments):
+def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments):
     """
     Sets up a query on multiple targets
     """
 
-    structures = []
-    for target in targets:
-        structure = single_target_query(kind, target, **arguments)
-        structures.append(structure)
+    corrected_targets, structure = prepare_search(targets=targets, query_kind=kind, **arguments)
 
-    final_structure = copy.deepcopy(structures[0])
+    for target in corrected_targets:
+        structure = single_target_query(kind, target, structure, **arguments)
 
-    final_structure.data = []
-    final_structure.identifiers = "multiple"
-    final_structure.positions = "multiple"
-
-    for attr in vars(final_structure):
-        if attr not in MULTI_QUERY_KEEP_ATTRS:
-            setattr(final_structure, attr, None)
-
-    for structure in structures:
-        final_structure.data += structure.data
-
-    return final_structure
+    return structure

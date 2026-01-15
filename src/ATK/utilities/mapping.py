@@ -4,6 +4,7 @@ import pkgutil
 from enum import EnumType
 from types import ModuleType
 
+from ..structures.definitions import BaseContainer, BaseQueryResult
 from .defaults import QUERY_KINDS
 
 
@@ -65,7 +66,13 @@ def build_structure_map():
     struct_map = {}
 
     for name, obj in inspect.getmembers(module, inspect.isclass):
-        if obj.__module__ == module.__name__ and not isinstance(obj, EnumType):
-            struct_map[name] = obj
+        if obj.__module__ != module.__name__:
+            continue
+        if isinstance(obj, EnumType):
+            continue
+        if not issubclass(obj, (BaseContainer, BaseQueryResult)):
+            continue
+
+        struct_map[name] = obj
 
     return struct_map

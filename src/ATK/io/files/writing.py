@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pandas as pd
 from astropy.io.fits import HDUList, Header
-from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU
 from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
 
-from ...structures.structure_io import BASIC_TYPES, struct_to_hdu
+from ...io.files.structure_io import struct_to_hdu
 from ...utilities.misc import get_package_version
 
 warnings.simplefilter("ignore", category=VerifyWarning)
@@ -46,35 +46,25 @@ def write_local(structure: any, path: str | Path) -> Path:
 
     hdul = HDUList()
 
-    query_hdu = struct_to_hdu(structure, ignore_attrs=["data", "frame", "epoch"], hdu_kind=PrimaryHDU)
+    query_hdu = struct_to_hdu(structure, ignore_attrs=["kind", "targets", "data", "frame", "epoch", "figure"])
     hdul.append(query_hdu)
 
-    # iterate through structure attributes
-    for attr, val in structure.__dict__.items():
-        # basic types are already written to the header
-        if isinstance(val, BASIC_TYPES):
+    # iterate through .data
+    for ctr in structure.data:
+        # write dataframe to hdu (e.g. in Vizier queries)
+        if isinstance(ctr, pd.DataFrame):
+            hdul.append(dataframe_to_hdu(structure, ctr))
             continue
 
-        # .data attribute is the only bit that stores complex data structures
-        if not isinstance(val, list):
+        # otherwise use .to_hdu() method of ATK container
+        hdus = ctr.to_hdu()
+        if not isinstance(hdus, (tuple, list)):
+            hdul.append(hdus)
             continue
 
-        # iterate through .data
-        for ctr in val:
-            # write dataframe to hdu (e.g. in Vizier queries)
-            if isinstance(ctr, pd.DataFrame):
-                hdul.append(dataframe_to_hdu(structure, ctr))
-                continue
-
-            # otherwise use .to_hdu() method of ATK container
-            hdus = ctr.to_hdu()
-            if not isinstance(hdus, (tuple, list)):
-                hdul.append(hdus)
-                continue
-
-            # if multiple hdus returned (e.g. images)
-            for hdu in hdus:
-                hdul.append(hdu)
+        # if multiple hdus returned (e.g. images)
+        for hdu in hdus:
+            hdul.append(hdu)
 
     # store ATK version used to generate file
     for hdu in hdul:

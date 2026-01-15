@@ -1,6 +1,8 @@
+import copy
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import astropy.units as u
 import numpy
 import pandas
 from astropy.coordinates import SkyCoord
@@ -9,6 +11,8 @@ from astropy.time import Time
 from astropy.units import Quantity, Unit
 from astropy.wcs import WCS
 from bokeh.plotting import figure as Figure
+
+from ..configuration.base_config import BASE_CONFIG
 
 # -------------
 # QUERY RESULTS
@@ -23,10 +27,33 @@ QuantityArray = numpy.ndarray[Quantity]
 
 @dataclass
 class Target:
+    initial_coords: SkyCoord
     coords: SkyCoord
     identifier: int | None = None
     survey: str | None = None
     correction: str = "none"
+
+    _key: str = field(init=False)
+    _aliases: set[str] = field(default_factory=set, init=False)
+
+    def __post_init__(self):
+        id_key = f"id:{self.identifier}"
+        coord_key = f"coord:{self.initial_coords.ra.deg:.8f},{self.initial_coords.dec.deg:.8f}"
+
+        if self.identifier is not None:
+            self._key = id_key
+            self._aliases.add(id_key)
+        else:
+            self._key = coord_key
+        self._aliases.add(coord_key)
+
+    @property
+    def frame(self):
+        return self.coords.frame.name
+
+    @property
+    def epoch(self):
+        return self.coords.obstime
 
     def show(self, show_all_types=False) -> None:
         from ..io.struct_stdout import pprint_structure
@@ -50,7 +77,9 @@ class Target:
 
             position = SkyCoord(position.data, frame=position.frame, obstime=j2000)
 
-        return cls(position.transform_to("icrs"), None, None, "none")
+        icrs_pos = position.transform_to("icrs")
+
+        return cls(copy.deepcopy(icrs_pos), copy.deepcopy(icrs_pos), None, None, "none")
 
 
 @dataclass
@@ -58,30 +87,60 @@ class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
     radius: Quantity | None = None
-    identifier: int | None = None
-    identifiers: None = None
-    position: SkyCoord | None = None
-    positions: SkyCoord | None = None
+    targets: list[Target] | None = field(default_factory=list)
     epoch: Time | None = None
     frame: str | None = None
     correction: str | None = None
     exception: bool | None = False
 
-    def show(self, show_all_types=False) -> None:
-        from ..io.struct_stdout import pprint_structure
+    # maps per-Target key to Target
+    _key_map: dict[str, Target] = field(init=False, default_factory=dict)
+    # maps per-Target alias to per-Target key
+    _alias_map: dict[str, str] = field(init=False, default_factory=dict)
 
-        pprint_structure(self, show_all_types)
-
-    def save(self, path: str | Path = None) -> Path:
-        from ..io.files.writing import write_local
-
-        return write_local(self, path)
+    def __post_init__(self):
+        self._build_target_maps()
 
     def __repr__(self):
         return f"<{self.survey} {self.kind} data>"
 
     def __str__(self):
         return self.__repr__()
+
+    def _build_target_maps(self):
+        self._key_map = {t._key: t for t in self.targets}
+        self._alias_map = {}
+        for t in self.targets:
+            for alias in t._aliases:
+                self._alias_map[alias] = t._key
+
+    def show(self, show_all_types=False, **kwargs) -> None:
+        from ..io.struct_stdout import pprint_structure
+
+        pprint_structure(self, show_all_types, **kwargs)
+
+    def save(self, path: str | Path = None) -> Path:
+        from ..io.files.writing import write_local
+
+        return write_local(self, path)
+
+    def _fetch_by_key(self, key: str):
+        return [d for d in self.data if d._target_key == key]
+
+    def fetch_by_id(self, id: int):
+        key = self._alias_map.get(f"id:{id}")
+        if key is None:
+            return []
+        return self._fetch_by_key(key)
+
+    def fetch_by_coord(self, coord: SkyCoord, radius: Quantity | None = 3 * u.arcsec):
+        for t in self.targets:
+            if coord.separation(t.initial_coords) < radius:
+                return self._fetch_by_key(t._key)
+        return []
+
+    def fetch_by_target(self, target: Target):
+        return self._fetch_by_key(target._key)
 
     @property
     def _fname(self):
@@ -129,6 +188,8 @@ class PlottableQueryResult(BaseQueryResult):
 
 @dataclass
 class BaseContainer:
+    _target_key: str | None = None
+
     def show(self, show_all_types=False) -> None:
         from ..io.struct_stdout import pprint_structure
 
@@ -159,23 +220,23 @@ class BaseContainer:
         return None
 
     def _get_cols(self):
-        from .structure_io import get_cols
+        from ..io.files.structure_io import get_cols
 
         return get_cols(self)
 
     def to_dataframe(self) -> pandas.DataFrame:
-        from .structure_io import struct_to_dataframe
+        from ..io.files.structure_io import struct_to_dataframe
 
         return struct_to_dataframe(self)
 
     @classmethod
     def from_dataframe(cls, data: pandas.DataFrame, **kwargs: any):
-        from .structure_io import struct_from_dataframe
+        from ..io.files.structure_io import struct_from_dataframe
 
         return struct_from_dataframe(cls, data, **kwargs)
 
     def to_hdu(self) -> BinTableHDU:
-        from .structure_io import struct_to_hdu
+        from ..io.files.structure_io import struct_to_hdu
 
         return struct_to_hdu(self)
 
@@ -184,6 +245,7 @@ class BaseContainer:
 class Lightcurve(BaseContainer):
     survey: str | None = None
     band: str | None = None
+    search_pos: SkyCoord | None = None
     separation: Quantity | None = None
     obj_id: str | None = None
     mjd: numpy.ndarray | None = None
@@ -238,7 +300,7 @@ class Image(BaseContainer):
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity
-        from .structure_io import image_to_hdu
+        from ..io.files.structure_io import image_to_hdu
 
         return image_to_hdu(self)
 

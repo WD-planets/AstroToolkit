@@ -14,8 +14,10 @@ from bokeh.models import Column, Row
 from bokeh.plotting import figure
 
 from ..configuration.base_config import BASE_CONFIG
+from ..structures.definitions import Target
 from ..utilities.mapping import build_structure_map
 
+# this should be left to False, kwarg 'debug' can be used to set it locally
 DEBUG = False
 
 STRUCTURE_MAP = build_structure_map()
@@ -27,9 +29,8 @@ OUTPUT = ""
 SEEN_IDS = set()
 
 # OPTIONS
-SIG_FIGS = 3  # significant figures of array elements
+ROUND = 3  # decimal places of float elements
 MAX_DISPLAY = 4  # max entries in an array before truncation occurs
-METHODS_TO_IGNORE = ["__eq__", "__init__", "__repr__", "__str__"]
 
 # Headers are printed for containers that need to be expanded (ATK containers are handled separately using MAP
 CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>"}
@@ -48,12 +49,24 @@ else:
     raise ValueError(f"Unexpected config entry for unit_format '{unit_format}'.")
 
 
+def format_target(target: Target) -> str:
+    """
+    Format ATK Target into string representation
+    """
+
+    str_rep = format_skycoord(target.initial_coords)
+    if target.identifier:
+        str_rep += f" ({target.identifier})"
+
+    return str_rep
+
+
 def format_skycoord(coord: SkyCoord) -> str:
     """
     Format SkyCoord into string representation
     """
 
-    return f"{round(coord.ra.deg, 3)}{UNITS[u.deg]} {round(coord.dec.deg, 3)}{UNITS[u.deg]}"
+    return f"{round(coord.ra.deg, ROUND)}{UNITS[u.deg]} {round(coord.dec.deg, ROUND)}{UNITS[u.deg]}"
 
 
 def format_dict(dct: dict) -> str:
@@ -71,6 +84,9 @@ def format_dict(dct: dict) -> str:
     key_pad = get_dict_pad(dct, "key: ")
 
     for key, val in dct.items():
+        if key.startswith("_") and not DEBUG:
+            continue
+
         str_rep += pad_placeholder(CURRENT_DEPTH)
 
         line = f"{key}: ".ljust(key_pad)
@@ -95,7 +111,13 @@ def format_list(lst: list) -> str:
 
     # recursively format each item
     for i, item in enumerate(lst):
+        if i == MAX_DISPLAY:
+            str_rep += format_value(f"+{len(lst) - MAX_DISPLAY} more ...")
+            return str_rep
+
         str_rep += format_value(item)
+        if type(item) not in STRUCTURE_MAP.values() and i != len(lst) - 1:
+            str_rep += ", "
 
     return str_rep
 
@@ -113,7 +135,7 @@ def format_array(array: np.ndarray | pd.Series) -> str:
         if v == "...":
             formatted.append("...")
         elif isinstance(v, (float, np.floating)):
-            formatted.append(f"{v:.{SIG_FIGS}g}")
+            formatted.append(f"{round(v, ROUND)}")
         else:
             formatted.append(str(v))
 
@@ -137,7 +159,7 @@ def format_quantity(val: Quantity) -> str:
         if val.unit in UNITS:
             val_arr += " "
     else:
-        val_arr = f"{val.value:.{SIG_FIGS}g}"
+        val_arr = f"{round(val.value, ROUND)}"
 
     if val.unit in UNITS:
         str_rep = f"{val_arr}{UNITS[val.unit]}"
@@ -159,6 +181,7 @@ SPECIAL_FORMATTERS = {
     pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df)),
     np.ndarray: format_array,
     pd.Series: format_array,
+    Target: format_target,
     SkyCoord: format_skycoord,
     Time: lambda t: f"{t}",
     PrimaryHDU: lambda x: "<PrimaryHDU>",
@@ -383,17 +406,20 @@ def print_methods(cls: any) -> str:
     Prints available methods of an object, excluding
     """
 
-    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if name not in METHODS_TO_IGNORE and not inspect.isbuiltin(f)]
+    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if not inspect.isbuiltin(f) and not name.startswith("_")]
 
     return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 
 
-def pprint_structure(structure: any, show_all_types: bool) -> None:
+def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
     """
     Prints a structure's attributes and methods in a human-readable format. Optionally also prints the types of attributes.
     """
 
-    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS
+    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG
+
+    if kwargs.get("debug"):
+        DEBUG = True
 
     # get structure attrs
     attrs = structure.__dict__
@@ -410,12 +436,12 @@ def pprint_structure(structure: any, show_all_types: bool) -> None:
 
     for index, attr_group in enumerate([inherited_attrs, own_attrs]):
         # add type strings
-        if show_all_types:
+        if show_all_types or DEBUG:
             attr_group = add_types_to_keys(attr_group)
 
         # iterate through attributes in group if requested
         for attr, val in attr_group.items():
-            if val is None:
+            if not DEBUG and (val is None or attr.startswith("_")):
                 continue
 
             line = f".{attr}: ".ljust(pad)

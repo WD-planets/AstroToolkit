@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
-from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
+from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
-from .definitions import Image
+from ...structures.definitions import Image
 
 # types (in typehints) that should be considered as being columns of a dataframe
-COLUMN_TYPES = (np.ndarray, pd.Series, list, tuple, set)
+COLUMN_TYPES = (np.ndarray, pd.Series)
 
 BASIC_TYPES = (int, float, str, bool, NoneType)
 
@@ -39,7 +39,9 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
         hdr.append((f"ATK_{key.upper()}", str(value)))
         return hdr
     except Exception:
-        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key '{key}'.")
+        raise ValueError(
+            f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'."
+        )
 
     return hdr
 
@@ -209,8 +211,6 @@ def struct_from_table(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
             relevant_data[arg] = val
 
-    print(relevant_data)
-
     return ctnr(**relevant_data)
 
 
@@ -226,18 +226,15 @@ def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
             relevant_data[arg] = val
 
+    relevant_data["_target_key"] = kwargs.get("key")
+
     return ctnr(**relevant_data)
 
 
-def struct_to_hdu(
-    structure: any, ignore_attrs: list = [], hdu_kind: PrimaryHDU | BinTableHDU | ImageHDU = BinTableHDU
-) -> PrimaryHDU | BinTableHDU | ImageHDU:
+def struct_to_hdu(structure: any, ignore_attrs: list = []) -> BinTableHDU:
     """
     Convert a data structure into a fits HDU.
     """
-
-    # make sure kind is always ignored by dispatcher, this is handled separately below
-    ignore_attrs.append("kind")
 
     hdr = Header()
 
@@ -249,12 +246,13 @@ def struct_to_hdu(
     tbl = struct_to_table(structure)
 
     # PrimaryHDU stores query kind, extensions store data container kind
-    kind_str = "ATK query kind" if hdu_kind is PrimaryHDU else "ATK container kind"
-    kind = structure.__dict__.get("kind", type(structure).__name__)
-    hdr.append(("ATK_KIND", kind, kind_str))
+    kind = structure.__dict__.get("kind", type(structure).__name__.lower())
+    hdr.append("ATK_KIND", kind)
 
     # iterate through remaining structure attributes and write them to the header
     for attr, val in structure.__dict__.items():
+        if attr.startswith("_"):
+            continue
         if attr in ignore_attrs:
             continue
         if attr in cols:
@@ -264,14 +262,7 @@ def struct_to_hdu(
 
     # generate HDU
     extname = structure.__str__().lstrip("<").rstrip(">")
-    if hdu_kind == PrimaryHDU:
-        hdu = PrimaryHDU(None, header=hdr)
-    elif hdu_kind == ImageHDU:
-        hdu = ImageHDU(tbl, header=hdr, name=extname)
-    elif hdu_kind == BinTableHDU:
-        hdu = BinTableHDU(tbl, header=hdr, name=extname)
-    else:
-        raise ValueError(f"Invalid table type '{kind}' passed to struct_to_hdu.")
+    hdu = BinTableHDU(tbl, header=hdr, name=extname)
 
     return hdu
 

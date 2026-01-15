@@ -27,4 +27,12 @@ def query(target: Target, **kwargs):
 
     colour = data[f"{bands[0].upper()}mag"][0] - data[f"{bands[1].upper()}mag"][0]
 
-    return HRD("gaia", kwargs["mag"].upper(), kwargs["colour"], np.asarray([colour]), np.asarray([distance]) * u.pc, np.asarray([abs_mag]))
+    return HRD(
+        target._key,
+        "gaia",
+        kwargs["mag"].upper(),
+        kwargs["colour"],
+        np.asarray([colour]),
+        np.asarray([distance]) * u.pc,
+        np.asarray([abs_mag]),
+    )

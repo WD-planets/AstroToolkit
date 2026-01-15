@@ -37,7 +37,7 @@ QUERY_ARGUMENTS = {
 }
 
 # get default unit scale from config
-default_scale = BASE_CONFIG.get("query_settings", "default_unit")
+default_scale = BASE_CONFIG.get("query_settings", "default_scale")
 try:
     default_unit = u.Unit(default_scale)
 except ValueError:

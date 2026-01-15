@@ -1,5 +1,4 @@
 import astropy.units as u
-import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
@@ -35,12 +34,12 @@ def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.Data
                     continue
 
                 obj_data = obj_data[REQUIRED_COLS]
-                lc = Lightcurve.from_dataframe(obj_data, survey=survey, band=band)
+                lc = Lightcurve.from_dataframe(obj_data, survey=survey, band=band, key=target._key)
                 lc.obj_id = str(id)
                 lcs.append(lc)
         else:
             band_data = band_data[REQUIRED_COLS]
-            lcs.append(Lightcurve.from_dataframe(band_data, survey=survey, band=band))
+            lcs.append(Lightcurve.from_dataframe(band_data, survey=survey, band=band, key=target._key))
 
     # sort by object ID
     if split:

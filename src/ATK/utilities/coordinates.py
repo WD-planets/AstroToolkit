@@ -1,3 +1,4 @@
+import copy
 import warnings
 from dataclasses import replace
 
@@ -9,7 +10,6 @@ from astropy.time import Time
 from astropy.units import Quantity
 from erfa import ErfaWarning
 
-from ..configuration.base_config import BASE_CONFIG
 from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
 from ..structures.definitions import Target
@@ -59,7 +59,7 @@ def get_gaia_target(source: int) -> Target:
     parallax = gaia_data["Plx"].tolist()[0]
 
     if not np.isfinite(ra) or not np.isfinite(dec):
-        raise ValueError(f"Couldn't get RA and DEC for Gaia source '{source}'.")
+        return RETURNS.NULL
 
     # if pmra or pmdec are bad, don't supply these to SkyCoord -> no correction
     if not check_finite(pmra) or not check_finite(pmdec):
@@ -77,7 +77,7 @@ def get_gaia_target(source: int) -> Target:
 
     correction = check_correction(coord)
 
-    return Target(coord, source, "gaia", correction)
+    return Target(copy.deepcopy(coord), copy.deepcopy(coord), source, "gaia", correction)
 
 
 def correct_target(target: Target, survey: str = None, epoch: Time = None, query_kind: str = None, make_copy=False) -> Target:
@@ -113,36 +113,40 @@ def correct_target(target: Target, survey: str = None, epoch: Time = None, query
         return replace(target, coords=new_coords)
 
 
-def prepare_search(target: Target, query_kind: str, survey: str = None, epoch: Time = None, **kwargs) -> tuple[SkyCoord, any]:
+def prepare_search(targets: list[Target], query_kind: str, survey: str = None, epoch: Time = None, **kwargs) -> tuple[SkyCoord, any]:
     """
     Prepares a search with an input skycoord. Returns the position of the search and a partially completed ATK QueryResult
     """
 
-    # if a catalogue is provided for Vizier queries, treat this as a survey for correction
-    if kwargs.get("catalogue"):
-        survey = kwargs["catalogue"]
+    corrected_targets = []
+    for target in targets:
+        # if a catalogue is provided for Vizier queries, treat this as a survey for correction
+        if kwargs.get("catalogue"):
+            survey = kwargs["catalogue"]
 
-    # correct target to given survey/epoch
-    if not kwargs.get("defer_correction", False):
-        corrected_target = correct_target(target, survey, epoch, query_kind)
-    else:
-        corrected_target = target
+        # correct target to given survey/epoch
+        if not kwargs.get("defer_correction", False):
+            corrected_target = correct_target(target, survey, epoch, query_kind)
+        else:
+            corrected_target = target
+        corrected_targets.append(corrected_target)
 
     # create requested structure
     structure_map = get_query_result_map()
     structure = structure_map[query_kind](
         kind=query_kind,
         survey=survey,
-        position=corrected_target.coords,
-        identifier=corrected_target.identifier,
+        targets=targets,
         radius=kwargs.get("radius", None),
-        frame=getattr(getattr(corrected_target.coords, "frame", None), "name", None),
-        epoch=getattr(corrected_target.coords, "obstime", None),
+        frame=getattr(
+            getattr(corrected_targets[0].initial_coords, "frame", None), "name", None
+        ),  # corrected targets should all have same frame
+        epoch=getattr(corrected_targets[0].initial_coords, "obstime", None),  # corrected targets should all have same epoch
         correction=target.correction,
         exception=False,
     )
 
-    return corrected_target, structure
+    return corrected_targets, structure
 
 
 def correct_radius(target: Target, radius: Quantity, query_kind: str, survey: str):
