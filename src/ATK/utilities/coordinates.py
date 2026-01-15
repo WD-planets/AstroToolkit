@@ -97,6 +97,7 @@ def correct_target(target: Target, survey: str = None, epoch: Time = None, query
 
         # If no epoch definition, can't correct
         if survey not in epochs:
+            target.correction = "none"
             return target
         else:
             survey_epoch = epochs[survey]
@@ -142,7 +143,6 @@ def prepare_search(targets: list[Target], query_kind: str, survey: str = None, e
             getattr(corrected_targets[0].initial_coords, "frame", None), "name", None
         ),  # corrected targets should all have same frame
         epoch=getattr(corrected_targets[0].initial_coords, "obstime", None),  # corrected targets should all have same epoch
-        correction=target.correction,
         exception=False,
     )
 
@@ -191,8 +191,15 @@ def skycoord_to_dataframe(coord: SkyCoord):
 
     df["ra"] = coord.ra.deg
     df["dec"] = coord.dec.deg
-    df["pm_ra_cosdec"] = coord.pm_ra_cosdec.to(u.mas / u.yr).value
-    df["pm_dec"] = coord.pm_dec.to(u.mas / u.yr).value
+
+    if coord.data.differentials:
+        df["pm_ra_cosdec"] = coord.pm_ra_cosdec.to(u.mas / u.yr).value
+        df["pm_dec"] = coord.pm_dec.to(u.mas / u.yr).value
+    if coord.distance != u.one:
+        df["distance"] = coord.distance
+
+    df["frame"] = coord.frame.name
+    df["epoch"] = coord.obstime.fits
 
     return df
 

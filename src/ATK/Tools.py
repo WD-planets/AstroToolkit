@@ -42,13 +42,12 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
             radius=arguments.get("radius", None),
             frame=None,
             epoch=None,
-            correction="none",
             exception=True,
         )
         return structure
 
     # disable proper motion correction
-    if arguments.get("disable_corrections", False):
+    if arguments.get("disable_correction", False):
         for target in targets:
             initial_coords = target.initial_coords
             target.initial_coords = SkyCoord(

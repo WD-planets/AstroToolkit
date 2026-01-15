@@ -1,6 +1,5 @@
 import warnings
 from pathlib import Path
-from types import NoneType
 
 import astropy.units as u
 import numpy as np
@@ -16,6 +15,7 @@ from ...configuration.base_config import translator
 from ...structures.definitions import Image, QueryResult
 from ...utilities.mapping import build_structure_map, get_query_result_map
 from ...utilities.misc import get_package_version
+from .target_io import hdu_to_targets
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
 
@@ -93,12 +93,6 @@ def parse_primary_header(path: str | Path, hdr: Header) -> QueryResult:
 
     structure = get_query_result_map()[hdr.get("ATK_KIND")]()
 
-    # a position should always be generated, so this should not trigger
-    if "ATK_SC" not in hdr:
-        raise ValueError(f"No targeting information found in primary header of {path}.")
-
-    structure.position = parse_header_skycoord(path, hdr)
-
     structure = parse_header(path, hdr, structure)
 
     return structure
@@ -113,7 +107,7 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
     if sc_attr:
         setattr(obj, sc_attr, parse_header_skycoord(path, hdr))
 
-    ATK_keys = {key: val for key, val in hdr.items() if key.startswith("ATK_")}
+    ATK_keys = {key: val for key, val in hdr.items() if key.startswith("ATK_") and key not in SKYCOORD_KEYS}
     for key, val in ATK_keys.items():
         if f"{key}_U" in ATK_keys:
             val = read_quantity(hdr, key)
@@ -163,7 +157,7 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTab
             if getattr(col, "unit", None):
                 ctnr_data[col_name] = Quantity(col, unit=col.unit)
             else:
-                ctnr_data[col_name] = np.asarray(col[:])
+                ctnr_data[col_name] = np.array(col)
 
     # construct container with data
     ctnr = ctnr_constr(**ctnr_data)
@@ -205,12 +199,18 @@ def read_local(path: str | Path) -> QueryResult:
 
     hdul = fits.open(path)
 
+    # get structure
     structure = parse_primary_header(path, hdul[0].header)
+
+    # get .targets attr
+    structure.targets = hdu_to_targets(hdul[1])
+    # call post init to generate key mapping
+    structure.__post_init__()
 
     # iterate through extensions
     completed = []
-    hdul_no_primary = hdul[1:]
-    for index, hdu in enumerate(hdul_no_primary):
+    hdul_trimmed = hdul[2:]
+    for index, hdu in enumerate(hdul_trimmed):
         if hdu in completed:
             continue
 
@@ -235,9 +235,9 @@ def read_local(path: str | Path) -> QueryResult:
             data = parse_generic_imagehdu(structure, path, hdu)
             completed.append(hdu)
             # get overlay from next extension
-            overlay = parse_generic_bintable(structure, path, hdul_no_primary[index + 1].header, hdul_no_primary[index + 1].data)
+            overlay = parse_generic_bintable(structure, path, hdul_trimmed[index + 1].header, hdul_trimmed[index + 1].data)
             data.overlay = None if overlay.empty else overlay
-            completed.append(hdul_no_primary[index + 1])
+            completed.append(hdul_trimmed[index + 1])
 
         structure.data.append(data)
 

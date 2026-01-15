@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import Header
-from astropy.io.fits.hdu import BinTableHDU, ImageHDU
+from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
@@ -193,7 +193,7 @@ def struct_to_table(structure: any) -> Table:
     return table
 
 
-def struct_from_table(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
+def struct_from_table(ctnr: any, data: Table, **kwargs: dict) -> any:
     ctnr_cols = get_cols(ctnr)
 
     relevant_data = {}
@@ -205,7 +205,7 @@ def struct_from_table(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
             if unit is not None:
                 relevant_data[col_name] = Quantity(col, unit=unit)
             else:
-                relevant_data[col_name] = col[:]
+                relevant_data[col_name] = np.array(col)
 
     for arg, val in kwargs.items():
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
@@ -231,23 +231,24 @@ def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
     return ctnr(**relevant_data)
 
 
-def struct_to_hdu(structure: any, ignore_attrs: list = []) -> BinTableHDU:
+def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:
     """
     Convert a data structure into a fits HDU.
     """
 
     hdr = Header()
 
-    # tag all HDUs as coming from ATK
-    hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
-
     # combine array-like attributes into a dataframe
     cols = get_cols(structure)
     tbl = struct_to_table(structure)
 
     # PrimaryHDU stores query kind, extensions store data container kind
-    kind = structure.__dict__.get("kind", type(structure).__name__.lower())
-    hdr.append("ATK_KIND", kind)
+    kind = structure.__dict__.get("kind", type(structure).__name__)
+    hdr.append(("ATK_KIND", kind))
+
+    # write target key for mapping targets to containers (exception to ignoring attrs with _ below)
+    if hasattr(structure, "_target_key"):
+        hdr.append(("ATK__TARGET_KEY", structure._target_key))
 
     # iterate through remaining structure attributes and write them to the header
     for attr, val in structure.__dict__.items():
@@ -262,7 +263,13 @@ def struct_to_hdu(structure: any, ignore_attrs: list = []) -> BinTableHDU:
 
     # generate HDU
     extname = structure.__str__().lstrip("<").rstrip(">")
-    hdu = BinTableHDU(tbl, header=hdr, name=extname)
+
+    if hdu_kind == BinTableHDU:
+        hdu = BinTableHDU(tbl, header=hdr, name=extname)
+    elif hdu_kind == PrimaryHDU:
+        hdu = PrimaryHDU(tbl, header=hdr)
+    else:
+        raise ValueError(f"Unexpected fits extension '{hdu_kind}'.")
 
     return hdu
 
@@ -280,7 +287,6 @@ def image_to_hdu(image: Image):
     hdu = image.hdu
     hdr = hdu.header
 
-    hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
     hdr.append(("ATK_KIND", "Image", "ATK container kind"))
     for attr, val in image.__dict__.items():
         # basic types and those with special writing functions (e.g. SkyCoord decomposition)

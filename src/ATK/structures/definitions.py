@@ -12,8 +12,6 @@ from astropy.units import Quantity, Unit
 from astropy.wcs import WCS
 from bokeh.plotting import figure as Figure
 
-from ..configuration.base_config import BASE_CONFIG
-
 # -------------
 # QUERY RESULTS
 # -------------
@@ -55,10 +53,10 @@ class Target:
     def epoch(self):
         return self.coords.obstime
 
-    def show(self, show_all_types=False) -> None:
+    def show(self, show_all_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_all_types)
+        pprint_structure(self, show_all_types, **kwargs)
 
     @classmethod
     def from_id(cls, id: int, survey="gaia"):
@@ -90,7 +88,6 @@ class BaseQueryResult:
     targets: list[Target] | None = field(default_factory=list)
     epoch: Time | None = None
     frame: str | None = None
-    correction: str | None = None
     exception: bool | None = False
 
     # maps per-Target key to Target
@@ -190,10 +187,10 @@ class PlottableQueryResult(BaseQueryResult):
 class BaseContainer:
     _target_key: str | None = None
 
-    def show(self, show_all_types=False) -> None:
+    def show(self, show_all_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_all_types)
+        pprint_structure(self, show_all_types, **kwargs)
 
     def __repr__(self):
         return f"<{self.survey} {type(self).__name__}>"
@@ -246,6 +243,8 @@ class Lightcurve(BaseContainer):
     survey: str | None = None
     band: str | None = None
     search_pos: SkyCoord | None = None
+    correction: str | None = None
+    epoch: Time | None = None
     separation: Quantity | None = None
     obj_id: str | None = None
     mjd: numpy.ndarray | None = None

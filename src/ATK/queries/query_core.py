@@ -138,11 +138,9 @@ def single_target_query(kind: str, target: Target, structure: BaseQueryResult, *
         else:
             structure.data[0].overlay = overlay
 
-    survey = arguments.get("survey", None)
-    if survey and survey not in EPOCH_CONFIG.get_section_by_query_kind(kind):
-        structure.correction = "none"
-    else:
-        structure.correction = target.correction
+    for ctnr in structure.data:
+        ctnr.correction = target.correction
+        ctnr.epoch = target.coords.obstime.fits
 
     return structure
 
