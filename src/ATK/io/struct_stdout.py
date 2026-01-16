@@ -87,6 +87,9 @@ def format_dict(dct: dict) -> str:
         if key.startswith("_") and not DEBUG:
             continue
 
+        if val is None:
+            continue
+
         str_rep += pad_placeholder(CURRENT_DEPTH)
 
         line = f"{key}: ".ljust(key_pad)

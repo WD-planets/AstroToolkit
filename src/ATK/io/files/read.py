@@ -15,7 +15,7 @@ from ...configuration.base_config import translator
 from ...structures.definitions import Image, QueryResult
 from ...utilities.mapping import build_structure_map, get_query_result_map
 from ...utilities.misc import get_package_version
-from .target_io import hdu_to_targets
+from .target_io import get_targets_from_hdu
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
 
@@ -57,7 +57,7 @@ def read_quantity(header: Header, key: str, default_unit: Unit | None = None) ->
 # -----------------
 
 
-def parse_header_skycoord(path: str | Path, hdr: Header) -> SkyCoord:
+def parse_header_skycoord(path: str | Path, hdr: Header, obj: object) -> object:
     """
     Parses multiple header keys into an astropy SkyCoord object
     """
@@ -76,7 +76,15 @@ def parse_header_skycoord(path: str | Path, hdr: Header) -> SkyCoord:
         obstime=hdr.get("ATK_EPOCH"),
     )
 
-    return coord
+    sc_attr = hdr["ATK_SC"]
+    setattr(obj, sc_attr, coord)
+
+    if hasattr(obj, "frame"):
+        obj.frame = coord.frame.name
+    if hasattr(obj, "epoch"):
+        obj.epoch = coord.obstime.fits
+
+    return obj
 
 
 def parse_primary_header(path: str | Path, hdr: Header) -> QueryResult:
@@ -105,7 +113,7 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
 
     sc_attr = hdr.get("ATK_SC", None)
     if sc_attr:
-        setattr(obj, sc_attr, parse_header_skycoord(path, hdr))
+        obj = parse_header_skycoord(path, hdr, obj)
 
     ATK_keys = {key: val for key, val in hdr.items() if key.startswith("ATK_") and key not in SKYCOORD_KEYS}
     for key, val in ATK_keys.items():
@@ -203,7 +211,7 @@ def read_local(path: str | Path) -> QueryResult:
     structure = parse_primary_header(path, hdul[0].header)
 
     # get .targets attr
-    structure.targets = hdu_to_targets(hdul[1])
+    structure = get_targets_from_hdu(structure, hdul[0], hdul[1])
     # call post init to generate key mapping
     structure.__post_init__()
 

@@ -31,24 +31,35 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
         warnings.warn("Structure contains no data to for plotting.")
         return None
 
-    # plot .data containers individually (e.g. images)
-    if structure._plot_method == "individual":
-        figures = [plotting_func(ctnr, **kwargs) for ctnr in structure.data]
+    target_keys = [t._key for t in structure.targets]
 
-    # combine multiple .data containers into single plots (e.g. light curves)
-    elif structure._plot_method == "combined":
-        figures = plotting_func(structure.data, **kwargs)
+    all_figures = []
+    for key in target_keys:
+        containers = structure._fetch_by_key(key)
 
-    # e.g. if no data was returned and plotting was attempted
-    if not figures:
+        # plot .data containers individually (e.g. images)
+        if structure._plot_method == "individual":
+            figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
+
+        # combine multiple .data containers into single plots (e.g. light curves)
+        elif structure._plot_method == "combined":
+            figures = plotting_func(containers, **kwargs)
+
+        # e.g. if no data was returned and plotting was attempted
+        if not figures:
+            continue
+
+        all_figures += figures
+
+    if not all_figures:
         return None
 
     # get rid of any None figures (shouldn't ever happen)
-    figures = [f for f in figures if f is not None]
+    all_figures = [f for f in all_figures if f is not None]
 
     # combines multiple plots into a grid layout of FIGS_PER_COLUMN rows and any number of columns
-    figures = [figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(figures), FIGS_PER_COLUMN)]
-    rows = [Column(*col) for col in figures]
+    all_figures = [all_figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(all_figures), FIGS_PER_COLUMN)]
+    rows = [Column(*col) for col in all_figures]
 
     return Row(*rows)
 
@@ -71,9 +82,7 @@ def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dic
         tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
         os.makedirs(tmp_dir, exist_ok=True)
 
-        with tempfile.NamedTemporaryFile(
-            suffix=".html", prefix=f"{structure.survey}_{structure.kind}_", dir=tmp_dir, delete=False
-        ) as tmpfile:
+        with tempfile.NamedTemporaryFile(suffix=".html", prefix=f"{structure.survey}_{structure.kind}_", dir=tmp_dir, delete=False) as tmpfile:
             tmp_html = tmpfile.name
 
         output_file(tmp_html)

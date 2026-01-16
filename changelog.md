@@ -43,8 +43,7 @@ Changes
 
 To-Do Now
 ---------
-- light curve colours and plotting in general messed up, bands should use separate colours even if separated -> assign one colour per band per survey and go from there
-- frame/epoch attributes of QueryResult not being recovered properly -> does it even need these now?
+- add targeting information to plots
 - check effect of bad pm data/distance manually
 - don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords
 - Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)

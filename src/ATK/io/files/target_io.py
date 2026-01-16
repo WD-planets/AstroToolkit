@@ -1,13 +1,10 @@
-import astropy.units as u
-import pandas as pd
 from astropy.coordinates import SkyCoord
-from astropy.io.fits import BinTableHDU, Header
+from astropy.io.fits import BinTableHDU, Header, PrimaryHDU
 from astropy.table import Table, hstack
 from astropy.table.row import Row
 from astropy.units import Unit
 
-from ...structures.definitions import Target
-from ...utilities.coordinates import skycoord_to_dataframe
+from ...structures.definitions import BaseQueryResult, Target
 
 
 def stack_skycoords(coords: list[SkyCoord]):
@@ -89,8 +86,15 @@ def read_skycoord(row: Row, prefix: str = ""):
     return coord
 
 
-def hdu_to_targets(hdu: BinTableHDU) -> list[Target]:
-    table = Table.read(hdu)
+def get_targets_from_hdu(structure: BaseQueryResult, primary_hdu: BinTableHDU, target_hdu: BinTableHDU) -> list[Target]:
+    primary_header = primary_hdu.header
+
+    if primary_header.get("ATK_FRAME") and hasattr(structure, "frame"):
+        structure.frame = primary_header["ATK_FRAME"]
+    if primary_header.get("ATK_EPOCH") and hasattr(structure, "epoch"):
+        structure.epoch = primary_header["ATK_EPOCH"]
+
+    table = Table.read(target_hdu)
 
     targets = []
     for row in table:
@@ -100,4 +104,6 @@ def hdu_to_targets(hdu: BinTableHDU) -> list[Target]:
         target = Target(init_coord, final_coord, row["identifier"], row["survey"], row["correction"])
         targets.append(target)
 
-    return targets
+    structure.targets = targets
+
+    return structure

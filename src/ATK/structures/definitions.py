@@ -17,7 +17,13 @@ from bokeh.plotting import figure as Figure
 # -------------
 
 # whether to combine data structures into combined plots
-PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual", "hrd": "combined"}
+PLOT_METHODS = {
+    "image": "individual",
+    "lightcurve": "combined",
+    "spectrum": "individual",
+    "sed": "individual",
+    "hrd": "combined",
+}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
@@ -242,8 +248,8 @@ class BaseContainer:
 class Lightcurve(BaseContainer):
     survey: str | None = None
     band: str | None = None
-    search_pos: SkyCoord | None = None
     correction: str | None = None
+    search_pos: SkyCoord | None = None
     epoch: Time | None = None
     separation: Quantity | None = None
     obj_id: str | None = None
