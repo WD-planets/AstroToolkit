@@ -21,6 +21,7 @@ from ..utilities.mapping import build_structure_map
 DEBUG = False
 
 STRUCTURE_MAP = build_structure_map()
+NO_COMMA_SEP = list(STRUCTURE_MAP.values()) + [pd.DataFrame]
 
 # GLOBALS for tracking state
 CURRENT_DEPTH = 0
@@ -54,9 +55,12 @@ def format_target(target: Target) -> str:
     Format ATK Target into string representation
     """
 
-    str_rep = format_skycoord(target.initial_coords)
     if target.identifier:
-        str_rep += f" ({target.identifier})"
+        str_rep = f"{target.identifier} | "
+    else:
+        str_rep = ""
+
+    str_rep += format_skycoord(target.initial_coords)
 
     return str_rep
 
@@ -66,7 +70,16 @@ def format_skycoord(coord: SkyCoord) -> str:
     Format SkyCoord into string representation
     """
 
-    return f"{round(coord.ra.deg, ROUND)}{UNITS[u.deg]} {round(coord.dec.deg, ROUND)}{UNITS[u.deg]}"
+    str_rep = f"{round(coord.ra.deg, ROUND)}{UNITS[u.deg]} {round(coord.dec.deg, ROUND)}{UNITS[u.deg]}"
+
+    if hasattr(coord, "frame") and hasattr(coord, "obstime"):
+        str_rep += f" ({coord.frame.name}, {coord.obstime.fits})"
+    elif hasattr(coord, "frame"):
+        str_rep += f" ({coord.frame.name})"
+    elif hasattr(coord, "obstime"):
+        str_rep += f" ({coord.obstime.fits})"
+
+    return str_rep
 
 
 def format_dict(dct: dict) -> str:
@@ -119,7 +132,7 @@ def format_list(lst: list) -> str:
             return str_rep
 
         str_rep += format_value(item)
-        if type(item) not in STRUCTURE_MAP.values() and i != len(lst) - 1:
+        if type(item) not in NO_COMMA_SEP and i != len(lst) - 1:
             str_rep += ", "
 
     return str_rep
@@ -174,6 +187,10 @@ def format_quantity(val: Quantity) -> str:
     return str_rep
 
 
+def format_time(time: Time) -> str:
+    return f"{time.fits}"
+
+
 # ----------------
 # SPECIAL TYPE MAP
 # ----------------
@@ -186,7 +203,7 @@ SPECIAL_FORMATTERS = {
     pd.Series: format_array,
     Target: format_target,
     SkyCoord: format_skycoord,
-    Time: lambda t: f"{t}",
+    Time: format_time,
     PrimaryHDU: lambda x: "<PrimaryHDU>",
     ImageHDU: lambda x: "<ImageHDU>",
     BinTableHDU: lambda x: "<BinTableHDU>",
@@ -409,7 +426,11 @@ def print_methods(cls: any) -> str:
     Prints available methods of an object, excluding
     """
 
-    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if not inspect.isbuiltin(f) and not name.startswith("_")]
+    methods = [
+        name
+        for name, f in inspect.getmembers(cls, inspect.ismethod)
+        if not inspect.isbuiltin(f) and not name.startswith("_")
+    ]
 
     return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 

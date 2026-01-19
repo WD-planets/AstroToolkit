@@ -1,14 +1,15 @@
 import importlib
+from types import FunctionType
 
+import pandas as pd
 from astropy.coordinates import SkyCoord
 
 from ..configuration.base_config import BASE_CONFIG
-from ..configuration.epoch_config import EPOCH_CONFIG
 from ..structures.definitions import (BaseQueryResult, PlottableQueryResult,
                                       QueryResult, Target)
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
-from ..utilities.mapping import build_map, get_query_result_map
+from ..utilities.mapping import build_map
 
 
 def _normalise_targeting_input(targeting: any):
@@ -74,29 +75,71 @@ def setup_targeting(kind: str, targeting, **arguments) -> list[Target]:
     return targets
 
 
-def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
+def _set_results(
+    structure: QueryResult | PlottableQueryResult, query_result: any
+) -> QueryResult | PlottableQueryResult:
     """
     Sets the .data and .exception attributes of an ATK structure based on what was returned from a query
     """
 
     # an exception was encountered
     if query_result is RETURNS.EXCEPTION:
-        structure.data = []
         structure.exception = True
         return structure
 
     # no data was returned
     if query_result is RETURNS.NULL:
-        structure.data = []
         return structure
 
     # data was returned correctly
     if isinstance(query_result, list):
         structure.data += query_result
     else:
-        structure.data.append(query_result)
+        raise Exception(f"Unexpected query_result type '{type(query_result)}', expected list.")
 
     return structure
+
+
+def set_container_keys(target: Target, query_result: any) -> any:
+    if query_result is RETURNS.EXCEPTION:
+        return query_result
+
+    if query_result is RETURNS.NULL:
+        return query_result
+
+    for ctnr in query_result:
+        # e.g. SED gets a correction array instead, don't want to overwrite this
+        if ctnr.correction is not None:
+            ctnr.correction = target.correction
+        ctnr._target_key = target._key
+
+    return query_result
+
+
+def image_requery(
+    query_function: FunctionType, target: Target, structure: BaseQueryResult, query_result: list, **arguments
+) -> tuple[Target, list]:
+    from .image.overlays import get_overlay
+
+    image_time = query_result[0].search_pos.obstime
+    corrected_pos = correct_target(target, epoch=image_time)
+
+    query_result = query_function(corrected_pos, **arguments)
+    if not query_result or query_result is RETURNS.NULL:
+        return query_result
+    if query_result is RETURNS.EXCEPTION:
+        structure.exception = True
+        return query_result
+
+    overlay = get_overlay(target, query_result[0], **arguments)
+
+    if overlay is RETURNS.EXCEPTION:
+        query_result[0].overlay = None
+        structure.exception = True
+    else:
+        query_result[0].overlay = overlay
+
+    return target, query_result
 
 
 def single_target_query(kind: str, target: Target, structure: BaseQueryResult, **arguments):
@@ -112,35 +155,21 @@ def single_target_query(kind: str, target: Target, structure: BaseQueryResult, *
 
     # perform query
     query_result = query_function(target, **arguments)
+    if query_result is RETURNS.NULL:
+        return structure
+    if query_result is RETURNS.EXCEPTION:
+        structure.exception = True
+        return structure
+
+    # perform second query in image queries (at image-corrected position)
+    if kind == "image":
+        target, query_result = image_requery(query_function, target, structure, query_result, **arguments)
 
     # set data and exception attributes
     structure = _set_results(structure, query_result)
 
-    # perform second query in image queries (at image-corrected position)
-    if kind == "image" and structure.data:
-        from .queries.image.overlays import get_overlay
-
-        image_time = query_result[0].focus.obstime
-        corrected_pos = correct_target(search_pos, epoch=image_time)
-
-        query_result = query_function(corrected_pos, **arguments)
-
-        # delete initial image
-        structure.data = []
-        # structure.epoch = image_time
-        structure = _set_results(structure, query_result)
-
-        overlay = get_overlay(target, structure.data[0], **arguments)
-
-        if overlay is RETURNS.EXCEPTION:
-            structure.data[0].overlay = None
-            structure.exception = True
-        else:
-            structure.data[0].overlay = overlay
-
-    for ctnr in structure.data:
-        ctnr.correction = target.correction
-        ctnr.epoch = target.coords.obstime.fits
+    # set any additional container keys on each returned container
+    query_result = set_container_keys(target, query_result)
 
     return structure
 

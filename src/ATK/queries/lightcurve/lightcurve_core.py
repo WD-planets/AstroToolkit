@@ -34,12 +34,12 @@ def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.Data
                     continue
 
                 obj_data = obj_data[REQUIRED_COLS]
-                lc = Lightcurve.from_dataframe(obj_data, search_pos=target.coords, survey=survey, band=band, key=target._key)
+                lc = Lightcurve.from_dataframe(obj_data, search_pos=target.coords, survey=survey, band=band)
                 lc.obj_id = str(id)
                 lcs.append(lc)
         else:
             band_data = band_data[REQUIRED_COLS]
-            lcs.append(Lightcurve.from_dataframe(band_data, search_pos=target.coords, survey=survey, band=band, key=target._key))
+            lcs.append(Lightcurve.from_dataframe(band_data, search_pos=target.coords, survey=survey, band=band))
 
     # sort by object ID
     if split:

@@ -73,7 +73,15 @@ def get_gaia_target(source: int) -> Target:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
+    coord = SkyCoord(
+        ra=ra * u.deg,
+        dec=dec * u.deg,
+        pm_ra_cosdec=pmra,
+        pm_dec=pmdec,
+        distance=distance,
+        obstime=gaia_epoch,
+        frame="icrs",
+    )
 
     correction = check_correction(coord)
 
@@ -134,17 +142,7 @@ def prepare_search(targets: list[Target], query_kind: str, survey: str = None, e
 
     # create requested structure
     structure_map = get_query_result_map()
-    structure = structure_map[query_kind](
-        kind=query_kind,
-        survey=survey,
-        targets=targets,
-        radius=kwargs.get("radius", None),
-        frame=getattr(
-            getattr(corrected_targets[0].initial_coords, "frame", None), "name", None
-        ),  # corrected targets should all have same frame
-        epoch=getattr(corrected_targets[0].initial_coords, "obstime", None),  # corrected targets should all have same epoch
-        exception=False,
-    )
+    structure = structure_map[query_kind](kind=query_kind, survey=survey, targets=targets, radius=kwargs.get("radius", None), exception=False)
 
     return corrected_targets, structure
 

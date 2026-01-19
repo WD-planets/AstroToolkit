@@ -24,6 +24,8 @@ PLOT_METHODS = {
     "sed": "individual",
     "hrd": "combined",
 }
+# whether to split plots by target
+SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
@@ -33,6 +35,7 @@ QuantityArray = numpy.ndarray[Quantity]
 class Target:
     initial_coords: SkyCoord
     coords: SkyCoord
+
     identifier: int | None = None
     survey: str | None = None
     correction: str = "none"
@@ -57,7 +60,15 @@ class Target:
 
     @property
     def epoch(self):
-        return self.coords.obstime
+        return self.coords.obstime.fits
+
+    @property
+    def initial_frame(self):
+        return self.initial_coords.frame.name
+
+    @property
+    def initial_epoch(self):
+        return self.initial_coords.obstime.fits
 
     def show(self, show_all_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure
@@ -90,10 +101,8 @@ class Target:
 class BaseQueryResult:
     kind: str | None = None
     survey: str | None = None
-    radius: Quantity | None = None
     targets: list[Target] | None = field(default_factory=list)
-    epoch: Time | None = None
-    frame: str | None = None
+    radius: Quantity | None = None
     exception: bool | None = False
 
     # maps per-Target key to Target
@@ -147,16 +156,17 @@ class BaseQueryResult:
 
     @property
     def _fname(self):
-        if self.identifier:
-            return Path(f"{self.identifier}_{self.survey}_ATK{self.kind}.fits")
-        elif self.position:
-            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_{self.survey}_ATK{self.kind}.fits")
-        elif self.identifiers:
-            return Path(f"{self.identifiers[0]}_and_others_{self.survey}_ATK{self.kind}.fits")
-        elif self.positions:
-            return Path(f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}_and_others_{self.survey}_ATK{self.kind}.fits")
+        if self.targets[0].identifier:
+            fname = f"{self.targets[0].identifier}"
         else:
-            raise ValueError("No source or position data to be used in generating a file name.")
+            fname = f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}"
+        if self.survey:
+            fname += f"_{self.survey}"
+        if len(self.targets) > 1:
+            fname += "_multi"
+        fname += f"_ATK{self.kind}.fits"
+
+        return fname
 
 
 @dataclass(repr=False)
@@ -170,8 +180,16 @@ class PlottableQueryResult(BaseQueryResult):
     figure: Figure | None = None
 
     @property
+    def _title(self):
+        return f"ATK {self.kind.upper()}"
+
+    @property
     def _plot_method(self):
         return PLOT_METHODS[self.kind]
+
+    @property
+    def _split_by_target(self):
+        return SPLIT_BY_TARGET[self.kind]
 
     def plot(self, kind: str | None = None, **kwargs: any):
         from .plot_io import plot_data
@@ -245,13 +263,33 @@ class BaseContainer:
 
 
 @dataclass(repr=False)
+class VizierEntry(BaseContainer):
+    survey: str | None = None
+    catalogue: str | None = None
+    correction: str | None = None
+    search_pos: str | None = None
+    separation: str | None = None
+
+    data: pandas.DataFrame | None = None
+
+    def __repr__(self):
+        return f"<{self.survey} ({self.catalogue}) Vizier Data>"
+
+    def to_hdu(self):
+        # overwrites the default to_hdu method due to complexity
+        from ..io.files.structure_io import simple_to_hdu
+
+        return simple_to_hdu(self)
+
+
+@dataclass(repr=False)
 class Lightcurve(BaseContainer):
     survey: str | None = None
-    band: str | None = None
     correction: str | None = None
     search_pos: SkyCoord | None = None
-    epoch: Time | None = None
     separation: Quantity | None = None
+    band: str | None = None
+
     obj_id: str | None = None
     mjd: numpy.ndarray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
@@ -292,12 +330,14 @@ class Lightcurve(BaseContainer):
 @dataclass(repr=False)
 class Image(BaseContainer):
     survey: str | None = None
+    correction: str | None = None
+    search_pos: SkyCoord | None = None
     band: str | None = None
+
     size: Quantity | None = None
+    epoch: Time | None = None
     hdu: ImageHDU | None = None
     wcs: WCS | None = None
-    focus: SkyCoord | None = None
-    epoch: Time | None = None
     overlay: pandas.DataFrame | None = None
 
     def __repr__(self):
@@ -313,7 +353,9 @@ class Image(BaseContainer):
 @dataclass(repr=False)
 class Spectrum(BaseContainer):
     survey: str | None = None
-    position: SkyCoord | None = None
+    correction: str | None = None
+    search_pos: SkyCoord | None = None
+
     separation: Quantity | None = None
     exposure: Quantity | None = None
     wavelength: numpy.ndarray | QuantityArray | None = None
@@ -323,7 +365,9 @@ class Spectrum(BaseContainer):
 @dataclass(repr=False)
 class SED(BaseContainer):
     survey: numpy.ndarray | None = None
+    correction: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
+
     separation: numpy.ndarray | QuantityArray | None = None
     wavelength: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
@@ -336,11 +380,14 @@ class SED(BaseContainer):
 @dataclass(repr=False)
 class HRD(BaseContainer):
     survey: str | None = None
-    mag: str | None = None
-    filter: str | None = None
-    colour: float | None = None
+    identifier: int | None = None
+    correction: str | None = None
+    abs_mag_band: str | None = None
+    colour_bands: str | None = None
+
+    colour: numpy.ndarray | None = None
+    abs_mag: numpy.ndarray | None = None
     distance: Quantity | None = None
-    abs_mag: float | None = None
 
     def __repr__(self):
-        return f"<{self.survey} {self.mag} vs {self.filter} HRD>"
+        return f"<{self.survey} {self.abs_mag_band} vs {self.colour_bands} HRD>"

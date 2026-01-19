@@ -74,7 +74,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
     Adds an overlay of nearby detections to the image
     """
 
-    overlay = image.overlay
+    # make copy so that original overlay dataframe isn't edited
+    overlay = image.overlay.copy()
 
     # set up hovertool
     hvr = HoverTool(
@@ -106,8 +107,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
 
     # set marker locations
     if relative_axes:
-        overlay["marker_ra"] = (overlay["ra"] - image.focus.ra.value) * 3600
-        overlay["marker_dec"] = (overlay["dec"] - image.focus.dec.value) * 3600
+        overlay["marker_ra"] = (overlay["ra"] - image.search_pos.ra.value) * 3600
+        overlay["marker_dec"] = (overlay["dec"] - image.search_pos.dec.value) * 3600
     else:
         overlay["marker_ra"] = overlay["ra"]
         overlay["marker_dec"] = overlay["dec"]
@@ -181,7 +182,12 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     """
 
     # create figure
-    plot = figure(width=400, height=400, title=f'{image.survey} {image.band}-band Image ({image.size}")', tools=("pan,wheel_zoom,reset"))
+    plot = figure(
+        width=400,
+        height=400,
+        title=f"{image.survey} {image.band}-band Image ({image.size})",
+        tools=("pan,wheel_zoom,reset"),
+    )
     plot.grid.grid_line_color = None
 
     # get image centre and deg/pixel
@@ -237,19 +243,25 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         else:
             plot.y_range = Range1d(-image_size_as.value / 2, image_size_as.value / 2)
 
-        focus_ra, focus_dec = 0.0, 0.0
+        search_pos_ra, search_pos_dec = 0.0, 0.0
 
     # coordinates axes
     else:
-        image_focus = (image.focus.ra.value, image.focus.dec.value)
+        image_search_pos = (image.search_pos.ra.value, image.search_pos.dec.value)
         image_size_deg = image_size_as.to(u.deg)
 
         plot.xaxis.axis_label = "Right Ascension / deg"
         plot.yaxis.axis_label = "Declination / deg"
 
         # image bounds in deg
-        x_bounds = (image_focus[0] - n_pixels[0] / 2 * pixel_scales[0], image_focus[0] + n_pixels[0] / 2 * pixel_scales[0])
-        y_bounds = (image_focus[1] - n_pixels[1] / 2 * pixel_scales[1], image_focus[1] + n_pixels[1] / 2 * pixel_scales[1])
+        x_bounds = (
+            image_search_pos[0] - n_pixels[0] / 2 * pixel_scales[0],
+            image_search_pos[0] + n_pixels[0] / 2 * pixel_scales[0],
+        )
+        y_bounds = (
+            image_search_pos[1] - n_pixels[1] / 2 * pixel_scales[1],
+            image_search_pos[1] + n_pixels[1] / 2 * pixel_scales[1],
+        )
 
         # image range in deg
         x_range = (x_bounds[1] - x_bounds[0]) * u.deg
@@ -259,18 +271,22 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         if x_range < image_size_deg:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
-            plot.x_range = Range1d(image_focus[0] + image_size_deg.value / 2, image_focus[0] - image_size_deg.value / 2)
+            plot.x_range = Range1d(
+                image_search_pos[0] + image_size_deg.value / 2, image_search_pos[0] - image_size_deg.value / 2
+            )
 
         if y_range < image_size_deg:
             plot.y_range = Range1d(y_bounds[0], y_bounds[1])
         else:
-            plot.y_range = Range1d(image_focus[1] - image_size_deg.value / 2, image_focus[1] + image_size_deg.value / 2)
+            plot.y_range = Range1d(
+                image_search_pos[1] - image_size_deg.value / 2, image_search_pos[1] + image_size_deg.value / 2
+            )
 
-        focus_ra, focus_dec = image_focus[0], image_focus[1]
+        search_pos_ra, search_pos_dec = image_search_pos[0], image_search_pos[1]
 
     # don't allow panning outside of image bounds
-    # plot.x_range.bounds = "auto"
-    # plot.y_range.bounds = "auto"
+    plot.x_range.bounds = "auto"
+    plot.y_range.bounds = "auto"
 
     # plot image
     plot.image(
@@ -285,8 +301,8 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         color_mapper=colour_mapper,
     )
 
-    # plot focus marker
-    plot.scatter(x=focus_ra, y=focus_dec, marker="cross", color="lime", size=25, line_width=4)
+    # plot search_pos marker
+    plot.scatter(x=search_pos_ra, y=search_pos_dec, marker="cross", color="lime", size=25, line_width=4)
 
     # plot overlay
     if image.overlay is not None:

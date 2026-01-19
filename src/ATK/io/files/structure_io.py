@@ -12,7 +12,7 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
-from ...structures.definitions import Image
+from ...structures.definitions import BaseContainer, Image
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series)
@@ -226,12 +226,12 @@ def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
             relevant_data[arg] = val
 
-    relevant_data["_target_key"] = kwargs.get("key")
-
     return ctnr(**relevant_data)
 
 
-def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:
+def struct_to_hdu(
+    structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU
+) -> BinTableHDU:
     """
     Convert a data structure into a fits HDU.
     """
@@ -305,3 +305,20 @@ def image_to_hdu(image: Image):
     overlay_hdu = BinTableHDU(data=table, header=overlay_hdr, name="<Overlay Data>")
 
     return (image_hdu, overlay_hdu)
+
+
+def simple_to_hdu(entry: BaseContainer):
+    table = Table.from_pandas(entry.data)
+    hdr = Header()
+
+    hdr.append(("ATK_KIND", type(entry).__name__, "ATK container kind"))
+    hdr.append(("ATK_SIMPLE", True, "If True, data is stored as a dataframe"))
+
+    for attr, val in entry.__dict__.items():
+        if type(val) in WRITE_MAP or type(val) in BASIC_TYPES:
+            hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
+
+    extname = entry.__str__().lstrip("<").rstrip(">")
+    hdu = BinTableHDU(data=table, header=hdr, name=extname)
+
+    return hdu

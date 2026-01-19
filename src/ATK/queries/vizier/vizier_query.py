@@ -1,13 +1,12 @@
 import warnings
 
-import astropy.units as u
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
 
 from ...configuration.alias_config import ALIAS_CONFIG
-from ...structures.definitions import Target
+from ...structures.definitions import Target, VizierEntry
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 warnings.simplefilter("ignore", category=NoResultsWarning)
@@ -58,7 +57,9 @@ def gaia_query_by_source(source: int, kind="data") -> pd.DataFrame | RETURNS:
     if not data:
         return RETURNS.NULL
 
-    return data[0].to_pandas().reset_index(drop=True)
+    df = data[0].to_pandas().reset_index(drop=True)
+
+    return df
 
 
 def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
@@ -83,7 +84,17 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
 
     # perform source query if a source was provided
     if target.identifier and catalogue == "I/355/gaiadr3":
-        return gaia_query_by_source(target.identifier)
+        df = gaia_query_by_source(target.identifier)
+    else:
+        # otherwise perform query by position
+        df = query_by_position(target.coords, kwargs["radius"], catalogue)
 
-    # otherwise perform query by position
-    return query_by_position(target.coords, kwargs["radius"], catalogue)
+    if df is RETURNS.NULL or df is RETURNS.EXCEPTION:
+        return df
+
+    if "_r" in df:
+        separation = df["_r"][0] * kwargs["radius"].unit
+    else:
+        separation = 0.0 * kwargs["radius"].unit
+
+    return [VizierEntry(survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df)]

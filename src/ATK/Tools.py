@@ -40,8 +40,6 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
             survey=arguments.get("survey", None),
             targets=None,
             radius=arguments.get("radius", None),
-            frame=None,
-            epoch=None,
             exception=True,
         )
         return structure
@@ -50,9 +48,7 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
     if arguments.get("disable_correction", False):
         for target in targets:
             initial_coords = target.initial_coords
-            target.initial_coords = SkyCoord(
-                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
-            )
+            target.initial_coords = SkyCoord(ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime)
             target.coords = initial_coords
             target.identifier = None
             target.survey = None

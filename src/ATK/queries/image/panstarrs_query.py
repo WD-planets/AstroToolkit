@@ -4,6 +4,7 @@ import astropy.units as u
 from astropy.table import Table
 
 from ...structures.definitions import Target
+from ...utilities.coordinates import correct_target
 from ...utilities.defaults import RETURNS
 from ...utilities.misc import suppress_stdout
 from ...utilities.requests import send_request
@@ -51,6 +52,6 @@ def query(target: Target, **kwargs: any):
     fname = table["filename"][0]
     main_url = f"{sub_url}{fname}"
 
-    image_hdu = get_image_data(main_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
+    image = get_image_data(main_url, "panstarrs", band, size, mjd_to_epoch, "MJD-OBS")
 
-    return image_hdu
+    return image

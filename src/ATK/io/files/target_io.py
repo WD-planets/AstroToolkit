@@ -1,7 +1,8 @@
 from astropy.coordinates import SkyCoord
-from astropy.io.fits import BinTableHDU, Header, PrimaryHDU
+from astropy.io.fits import BinTableHDU, Header
 from astropy.table import Table, hstack
 from astropy.table.row import Row
+from astropy.time import Time
 from astropy.units import Unit
 
 from ...structures.definitions import BaseQueryResult, Target
@@ -12,7 +13,7 @@ def stack_skycoords(coords: list[SkyCoord]):
     Combines multiple SkyCoords into a single SkyCoord while retaining all proper motion and frame information
     """
 
-    frame = coords[0].frame
+    frame = coords[0].frame.name
     obstime = coords[0].obstime
 
     return SkyCoord(
@@ -61,7 +62,9 @@ def targets_to_hdu(targets: list[Target]) -> BinTableHDU:
     combined_tbl["correction"] = [target.correction for target in targets]
 
     combined_tbl.remove_columns(["final_pm_ra_cosdec", "final_pm_dec", "final_distance"])
-    combined_tbl.rename_columns(["input_pm_ra_cosdec", "input_pm_dec", "input_distance"], ["pm_ra_cosdec", "pm_dec", "distance"])
+    combined_tbl.rename_columns(
+        ["input_pm_ra_cosdec", "input_pm_dec", "input_distance"], ["pm_ra_cosdec", "pm_dec", "distance"]
+    )
 
     hdu = BinTableHDU(combined_tbl, header=Header(), name="TARGETING INFO")
 
@@ -81,7 +84,15 @@ def read_skycoord(row: Row, prefix: str = ""):
     frame = row[f"{prefix}frame"]
     epoch = row[f"{prefix}epoch"]
 
-    coord = SkyCoord(ra=ra, dec=dec, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, frame=frame, obstime=epoch)
+    coord = SkyCoord(
+        ra=ra,
+        dec=dec,
+        pm_ra_cosdec=pmra,
+        pm_dec=pmdec,
+        distance=distance,
+        frame=frame,
+        obstime=Time(epoch, format="fits"),
+    )
 
     return coord
 

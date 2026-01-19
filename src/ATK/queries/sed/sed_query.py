@@ -72,18 +72,23 @@ def query(target: Target, **kwargs):
     radius = kwargs["radius"]
 
     sed_tables = []
+    correction = []
 
     # perform queries
     for survey in SED_INFO:
         data = general_query(kind="vizier", survey=survey, target=target, radius=radius)
 
-        if data.exception or not data.data:
-            return data
+        if data.exception:
+            return RETURNS.EXCEPTION
+        if not data.data:
+            continue
 
         # get SED dataframe for each survey
-        phot = get_survey_phot(survey, data.data[0])
+        phot = get_survey_phot(survey, data.data[0].data)
         if not phot.empty:
             sed_tables.append(phot)
+
+        correction += [data.data[0].correction] * len(data.data[0].data)
 
     if not sed_tables:
         return RETURNS.NULL
@@ -96,6 +101,7 @@ def query(target: Target, **kwargs):
 
     sed = SED(
         survey=df["survey"].to_numpy(dtype=f"<U{max_survey_len}"),
+        correction=np.asarray(correction),
         band=df["band"].to_numpy(dtype=f"<U{max_band_len}"),
         wavelength=df["wavelength"].to_numpy() * u.Unit("Angstrom"),
         flux=df["flux_mjy"].to_numpy() * u.Unit("mJy"),
@@ -103,4 +109,4 @@ def query(target: Target, **kwargs):
         separation=df["_r"].to_numpy() * kwargs["radius"].unit,
     )
 
-    return sed
+    return [sed]

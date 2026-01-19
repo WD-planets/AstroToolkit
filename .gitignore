@@ -5,6 +5,7 @@ docs/_build/
 *.html
 !docs/_static/*.html
 *.fits
+!src/ATK/plotting/hrd/backdrop_hrd_allmags.fits
 
 src/AstroToolkit.egg-info
 testing/

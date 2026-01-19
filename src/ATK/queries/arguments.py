@@ -20,7 +20,11 @@ class REQUIRED(Enum):
 # map of necessary arguments and their default values for each query type. Those with config values do not need to be provided by the user
 QUERY_ARGUMENTS = {
     # one of 'survey' and 'catalogue' needed
-    "vizier": {"survey": REQUIRED.LATER, "catalogue": REQUIRED.LATER, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
+    "vizier": {
+        "survey": REQUIRED.LATER,
+        "catalogue": REQUIRED.LATER,
+        "radius": BASE_CONFIG.get("query_settings", "query_radius"),
+    },
     # ATLAS requires username and password
     "lightcurve": {
         "survey": REQUIRED.NOW,
@@ -29,11 +33,16 @@ QUERY_ARGUMENTS = {
         "radius": BASE_CONFIG.get("query_settings", "query_radius"),
         "split": True,
     },
-    "image": {"survey": REQUIRED.NOW, "size": BASE_CONFIG.get("query_settings", "image_size"), "overlays": None, "band": REQUIRED.NOW},
+    "image": {
+        "survey": REQUIRED.NOW,
+        "size": BASE_CONFIG.get("query_settings", "image_size"),
+        "overlays": None,
+        "band": REQUIRED.NOW,
+    },
     "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
     # correction needs to be deferred as SED queries use data queries under-the-hood
     "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
-    "hrd": {"survey": "gaia", "colour": "bp-rp", "mag": "g", "defer_correction": True},
+    "hrd": {"survey": "gaia", "colour": "BPmag-RPmag", "mag": "Gmag", "defer_correction": True},
 }
 
 # get default unit scale from config

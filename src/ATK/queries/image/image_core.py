@@ -16,7 +16,8 @@ from astropy.wcs import WCS, FITSFixedWarning
 from astropy.wcs.utils import proj_plane_pixel_scales
 from reproject import reproject_interp
 
-from ...structures.definitions import Image
+from ...structures.definitions import Image, Target
+from ...utilities.coordinates import correct_target
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 
@@ -33,7 +34,7 @@ def mjd_to_epoch(hdr: Header, key: str) -> Time:
     if not mjd:
         raise ValueError(f"Epoch Key '{key}' not found in image header.")
 
-    return Time(mjd, format="mjd").fits
+    return Time(mjd, format="mjd")
 
 
 def iso_to_epoch(hdr: Header, key: str) -> Time:
@@ -45,7 +46,7 @@ def iso_to_epoch(hdr: Header, key: str) -> Time:
     if not iso:
         raise ValueError(f"Epoch Key '{key}' not found in image header.")
 
-    return Time(iso, format="iso").fits
+    return Time(iso, format="iso")
 
 
 def fits_to_epoch(hdr: Header, key: str) -> Time:
@@ -69,7 +70,7 @@ def fits_to_epoch(hdr: Header, key: str) -> Time:
     delta = timedelta(minutes=minute, seconds=second)
     fixed_time = base + delta
 
-    return Time(fixed_time).fits
+    return Time(fixed_time)
 
 
 def get_image_skycoord(hdu: ImageHDU, epoch_fetcher: FunctionType | None = None, epoch_key: str | None = None) -> SkyCoord:
@@ -102,7 +103,7 @@ def get_image_skycoord(hdu: ImageHDU, epoch_fetcher: FunctionType | None = None,
     else:
         obstime = epoch_fetcher(hdu.header)
 
-    centre_skycoord = SkyCoord(centre.ra, centre.dec, frame=centre.frame, obstime=obstime)
+    centre_skycoord = SkyCoord(centre.ra, centre.dec, frame=centre.frame, obstime=obstime).transform_to("icrs")
 
     return centre_skycoord
 
@@ -154,7 +155,15 @@ def get_image_data(url: str, survey: str, band: str, size: int, epoch_fetcher: F
     img_centre = get_image_skycoord(img, epoch_fetcher, epoch_key)
     wcs = WCS(hdu.header)
 
-    image = Image(survey=survey, band=band, size=size, focus=img_centre, hdu=hdu, wcs=wcs, epoch=img_centre.obstime)
+    image = Image(
+        survey=survey,
+        band=band,
+        size=size,
+        search_pos=img_centre,
+        hdu=hdu,
+        wcs=wcs,
+        epoch=epoch_fetcher(hdu.header, epoch_key),
+    )
 
     return [image]
 

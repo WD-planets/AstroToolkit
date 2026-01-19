@@ -5,7 +5,7 @@ Changes
 - All coordinate/source handling now done via a central Target class
     - A Target is automatically generated if a source_id or SkyCoord is entered, or one can be manually created via Target.from_pos() or Target.from_id()
     - Reduces explicit dependency on Gaia, so future astrometric surveys like LSST will be a lot easier to implement, just need to provide an equivalent to get_gaia_target (i.e. converts LSST id -> ATK Target with LSST astrometry)
-    - Added an "astrometric_backend" config key, which will (in future) select the default astrometry survey (currently only Gaia)
+    - Added an "astrometric_backend" config key, which will (in future) select the default astrometry survey (currently only Gaia is supported)
     - Coordinates can be provided in any frame, automatically transformed to ICRS
 - Configuration setup now far more robust
     - Added ATKoverlay show
@@ -19,7 +19,7 @@ Changes
 - Images bands now correctly supported, and added 2 new colour maps - viridis (default) and false colour. Latter converts filter wavelength to an approximate real colour. Can choose colour map by passing cmap = 'viridis' | 'false_colour' | 'grey' to plot()
 - Image plotting can now use relatives axes (i.e. +- arcsec from the centre)
 - Unified all structures into a single class BaseQueryResult, from which QueryResult and PlottableQueryResult inherit
-- Unified .data attribute - all query types now stored data as a list of pandas DataFrames (vizier queries) or new ATK data objects (basically everything else).
+- Unified .data attribute - all query types now stored data as a list of ATK data containers
 - SkyMapper image queries updated to SkyMapper DR4, and now sorted by exposure time (desc) and air mass (asc) to return best image
 - Image queries to DSS1/DSS2 now properly implemented
 - Added support for WISE, 2MASS and SDSS image queries 
@@ -36,41 +36,37 @@ Changes
 - Added integration with astropy units. Where relevant, parameters are treated and stored as astropy Quantities.
     - Input parameters may also use astropy quantities, e.g. a radius of 2 * u.arcmin may be requested for a 2 arcmin search
     - Added global config option 'unit_format' = 'text'/'symbol' to print units as text or symbol representations (defaults to 'symbol')
-- Added query settings config option 'default_unit' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
+- Added query settings config option 'default_scale' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
 - Significantly reduced the number of dependencies
 - added ability to query multiple targets at once
-    - QueryResults now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id() and .fetch_by_coord() methods to extract data per-source
+    - QueryResults now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id(), .fetch_by_coord() and .fetch_by_target() methods to extract data per-source
+- added kwarg "background" to HRD plotting, which limits the background sample to a given fraction of the full sample (e.g. 0.5 would half the number of background points to reduced file size and lag)
+- added tab titles to plots when opened in browser
+- added targeting information to figure titles (i.e. identifier or coordinates)
 
 To-Do Now
 ---------
-- add targeting information to plots
+- light curves should choose colour per-band
+- implement features from previous version
+    - sed spectra overlay
+    - light curve cropping/binning/sigma clipping/phase folding/power spectra
+
+
 - check effect of bad pm data/distance manually
-- don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords
-- Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
-- move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
-- try to remove unnecessary dependencies
-    - reproject
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally) these should also save and read a file to test this
     - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - add spectral line fitting tool
-- possibly store metadata, e.g. object IDs from light curve surveys in a .meta attribute
 - properly sort warnings/logging (no print statements?)
 - add filter kwarg to light curve queries to disable all unrequired filtering
-- add annotation to ATK keywords in fits headers
-- sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get())
+- add annotations to ATK keywords in fits headers
 - check docstrings / comments
-- check type hints, especially for astropy quantities after change was made
-- consider turning off split = True for ZTF lightcurves as default, too many "objects"
+- check type hints
+- turn off split = True default for ZTF lightcurves as default, too many "objects"
 - default units for Quantity arrays?
 
-
-QueryResults should store a target, not positions and identifiers separately -> print as e.g. "123.456 12.345 (identifier if present)"
-    - now these are coupled together, removes complexity of some targets having an identifier while others do not
-
-identifier/position should go into container names if one is being stored, e.g. <1234567 gaia G vs bp-rp HRD>
-store position/identifier of each container in header + reconstruct individually, don't need query position/identifier here
+- identifier/position should go into container names if one is being stored, e.g. <1234567 gaia G vs bp-rp HRD>
 
 
 To-Do Later
@@ -81,3 +77,12 @@ To-Do Later
 - see if I can get crts working, possibly a temporary outage
 - add best-epoch separation to light curves
 - add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)
+- don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords?
+- try to remove unnecessary dependencies
+    - reproject
+- possibly store metadata, e.g. object IDs from light curve surveys in a .meta attribute
+- add search_pos to SEDs?
+- allow any magnitudes to be used in hrd query - i.e. user searches with Gaia ID to make sure there is a valid distance (if not return no data) -> supplied two bands are fetched from a Vizier query to get the colour?
+- Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
+- move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
+- sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get()) (?)

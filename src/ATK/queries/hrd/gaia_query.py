@@ -9,30 +9,33 @@ from ...utilities.defaults import RETURNS
 def query(target: Target, **kwargs):
     bands = kwargs["colour"].split("-")
     for band in bands:
-        if band not in ["g", "bp", "rp"]:
+        if band not in ["Gmag", "BPmag", "RPmag"]:
             raise ValueError(f"Unknown Gaia band '{band}'.")
     if not target.identifier:
-        raise ValueError("Target must be a source ID or list of source IDs.")
+        raise ValueError("Targets must be a source ID or list of source IDs.")
 
     gaia_data = general_query("vizier", target=target, survey="gaia")
     if not gaia_data.data or gaia_data.exception:
         return RETURNS.EXCEPTION
 
-    data = gaia_data.data[0]
+    data = gaia_data.data[0].data
     plx = data["Plx"][0]
     distance = 1 / (plx * 1e-3)
     if np.isnan(plx):
         return RETURNS.NULL
-    abs_mag = data[f"{kwargs['mag'].upper()}mag"][0] + 5 * np.log10(plx / 1000) + 5
 
-    colour = data[f"{bands[0].upper()}mag"][0] - data[f"{bands[1].upper()}mag"][0]
+    abs_mag = data[kwargs["mag"]][0] + 5 * np.log10(plx / 1000) + 5
+    colour = data[bands[0]][0] - data[bands[1]][0]
 
-    return HRD(
-        target._key,
-        "gaia",
-        kwargs["mag"].upper(),
-        kwargs["colour"],
-        np.asarray([colour]),
-        np.asarray([distance]) * u.pc,
-        np.asarray([abs_mag]),
+    hrd = HRD(
+        survey="gaia",
+        abs_mag_band=kwargs["mag"],
+        colour_bands=kwargs["colour"],
+        colour=np.asarray([colour]),
+        distance=np.asarray([distance]) * u.pc,
+        abs_mag=np.asarray([abs_mag]),
+        correction="n/a",
+        identifier=target.identifier,
     )
+
+    return [hrd]

@@ -10,8 +10,7 @@ from ...configuration.epoch_config import EPOCH_CONFIG
 from ...configuration.overlay_config import OVERLAY_CONFIG
 from ...structures.definitions import Image, Target
 from ...Tools import query
-from ...utilities.coordinates import (correct_radius, correct_skycoord,
-                                      dataframe_to_skycoord)
+from ...utilities.coordinates import correct_radius, correct_skycoord, dataframe_to_skycoord
 from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids
 
@@ -27,18 +26,18 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     piggyback_radius = BASE_CONFIG.get("overlay_settings", "piggyback_radius")
 
     # get non-gaia data
-    non_gaia_data = query(kind="vizier", target=image.focus, radius=radius, survey=survey).data
+    non_gaia_data = query(kind="vizier", target=image.search_pos, radius=radius, survey=survey).data
     if not non_gaia_data:
         return pd.DataFrame()
     else:
-        non_gaia_data = non_gaia_data[0]
+        non_gaia_data = non_gaia_data[0].data
 
     # get gaia data
-    gaia_data = query(kind="vizier", target=image.focus, radius=radius, survey="gaia").data
+    gaia_data = query(kind="vizier", target=image.search_pos, radius=radius, survey="gaia").data
     if not gaia_data:
         gaia_data = pd.DataFrame()
     else:
-        gaia_data = gaia_data[0]
+        gaia_data = gaia_data[0].data
 
     # extract basic info
     vizier_epochs = EPOCH_CONFIG.get_section_by_query_kind("vizier")
@@ -149,8 +148,14 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     # cull detections that are outside the final image bounds
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
     pixel_scales = proj_plane_pixel_scales(image.wcs)
-    x_bounds = (image.focus.ra.value - n_pixels[0] / 2 * pixel_scales[0], image.focus.ra.value + n_pixels[0] / 2 * pixel_scales[0])
-    y_bounds = (image.focus.dec.value - n_pixels[1] / 2 * pixel_scales[1], image.focus.dec.value + n_pixels[1] / 2 * pixel_scales[1])
+    x_bounds = (
+        image.search_pos.ra.value - n_pixels[0] / 2 * pixel_scales[0],
+        image.search_pos.ra.value + n_pixels[0] / 2 * pixel_scales[0],
+    )
+    y_bounds = (
+        image.search_pos.dec.value - n_pixels[1] / 2 * pixel_scales[1],
+        image.search_pos.dec.value + n_pixels[1] / 2 * pixel_scales[1],
+    )
     ra_mask = (final_df["ra"] < x_bounds[0]) | (final_df["ra"] > x_bounds[1])
     dec_mask = (final_df["dec"] < y_bounds[0]) | (final_df["dec"] > y_bounds[1])
     cull_mask = ra_mask | dec_mask

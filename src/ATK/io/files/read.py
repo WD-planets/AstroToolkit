@@ -82,7 +82,7 @@ def parse_header_skycoord(path: str | Path, hdr: Header, obj: object) -> object:
     if hasattr(obj, "frame"):
         obj.frame = coord.frame.name
     if hasattr(obj, "epoch"):
-        obj.epoch = coord.obstime.fits
+        obj.epoch = coord.obstime
 
     return obj
 
@@ -147,25 +147,28 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTab
     # fixes big/little-endian data issue with fits and pandas
     for col in tbl.colnames:
         dtype = tbl[col].dtype
-        if dtype.kind in "fc" and dtype.byteorder == ">":  # float or complex big-endian
-            tbl[col] = tbl[col].astype(dtype.newbyteorder())  # convert in-place
+        if dtype.kind in "fc" and dtype.byteorder == ">":
+            tbl[col] = tbl[col].astype(dtype.newbyteorder())
 
     # get container constructor
     ctnr_constr = structure_map.get(hdr.get("ATK_KIND"))
 
-    # if no container exists (i.e. in vizier queries), just set .data = dataframe
+    # if no container exists (e.g. in overlay data), just set .data = dataframe
     if not ctnr_constr:
         return tbl.to_pandas()
 
-    # populate dict with dataframe columns as arrays
     ctnr_data = {}
-    for col_name in tbl.colnames:
-        if hasattr(ctnr_constr, col_name):
-            col = tbl[col_name]
-            if getattr(col, "unit", None):
-                ctnr_data[col_name] = Quantity(col, unit=col.unit)
-            else:
-                ctnr_data[col_name] = np.array(col)
+    if hdr.get("ATK_SIMPLE"):
+        ctnr_data["data"] = tbl.to_pandas()
+    else:
+        # populate dict with dataframe columns as arrays
+        for col_name in tbl.colnames:
+            if hasattr(ctnr_constr, col_name):
+                col = tbl[col_name]
+                if getattr(col, "unit", None):
+                    ctnr_data[col_name] = Quantity(col, unit=col.unit)
+                else:
+                    ctnr_data[col_name] = np.array(col)
 
     # construct container with data
     ctnr = ctnr_constr(**ctnr_data)
@@ -243,7 +246,7 @@ def read_local(path: str | Path) -> QueryResult:
             data = parse_generic_imagehdu(structure, path, hdu)
             completed.append(hdu)
             # get overlay from next extension
-            overlay = parse_generic_bintable(structure, path, hdul_trimmed[index + 1].header, hdul_trimmed[index + 1].data)
+            overlay = parse_generic_bintable(structure, path, hdul_trimmed[index + 1])
             data.overlay = None if overlay.empty else overlay
             completed.append(hdul_trimmed[index + 1])
 
