@@ -43,17 +43,24 @@ Changes
 - added kwarg "background" to HRD plotting, which limits the background sample to a given fraction of the full sample (e.g. 0.5 would half the number of background points to reduced file size and lag)
 - added tab titles to plots when opened in browser
 - added targeting information to figure titles (i.e. identifier or coordinates)
+- improved SED/spectra overlay functionality
+    - uses target matching to automatically match SEDs and spectra
+    - plots with overlays now keep all interactive elements from both plot types
+    - can now overlay both ways, i.e. can overlay spectra on an SED as before, but can also overlay an SED over spectra
+    - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
+- 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
+
 
 To-Do Now
 ---------
 - light curves should choose colour per-band
 - implement features from previous version
-    - sed spectra overlay
     - light curve cropping/binning/sigma clipping/phase folding/power spectra
+    - path parameter to replace check_exists
 
 
 - check effect of bad pm data/distance manually
-- add unit tests for each survey (known working examples to check if survey is not working, can auto run thes on exception optionally) these should also save and read a file to test this
+- add unit tests for each survey (known working examples to check if survey is not working, can auto run these on exception optionally) these should also save and read a file to test this
     - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
 - include distances in overlay corrections
 - add survey ID to SED hovertool
@@ -65,8 +72,6 @@ To-Do Now
 - check type hints
 - turn off split = True default for ZTF lightcurves as default, too many "objects"
 - default units for Quantity arrays?
-
-- identifier/position should go into container names if one is being stored, e.g. <1234567 gaia G vs bp-rp HRD>
 
 
 To-Do Later
@@ -86,3 +91,4 @@ To-Do Later
 - Let Vizier catalogue names be used in overlays (as a fallback if alias not in alias file)
 - move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
 - sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get()) (?)
+- used ValueError too much, should only be used for argument errors

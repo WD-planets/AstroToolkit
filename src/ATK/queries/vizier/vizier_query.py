@@ -97,4 +97,8 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     else:
         separation = 0.0 * kwargs["radius"].unit
 
-    return [VizierEntry(survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df)]
+    return [
+        VizierEntry(
+            survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df, correction=target.correction
+        )
+    ]

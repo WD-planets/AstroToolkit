@@ -29,6 +29,11 @@ def dispatch_plotting(
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
+        # flatten list if e.g. SED plotting with spectral overlat returned multiple SED plots due to having to overlay multiple spectra
+        try:
+            figures = [fig for fig_list in figures for fig in fig_list]
+        except TypeError:
+            pass
 
     # combine multiple .data containers into single plots (e.g. light curves)
     elif structure._plot_method == "combined":
@@ -110,9 +115,9 @@ def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dic
         tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
         os.makedirs(tmp_dir, exist_ok=True)
 
-        with tempfile.NamedTemporaryFile(
-            suffix=".html", prefix=f"{structure.survey}_{structure.kind}_", dir=tmp_dir, delete=False
-        ) as tmpfile:
+        fname_prefix = f"{structure.survey}_{structure.kind}_" if structure.survey else f"{structure.kind}_"
+
+        with tempfile.NamedTemporaryFile(suffix=".html", prefix=fname_prefix, dir=tmp_dir, delete=False) as tmpfile:
             tmp_html = tmpfile.name
 
         output_file(tmp_html, title=structure._title)

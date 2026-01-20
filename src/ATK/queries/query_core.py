@@ -5,8 +5,7 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 
 from ..configuration.base_config import BASE_CONFIG
-from ..structures.definitions import (BaseQueryResult, PlottableQueryResult,
-                                      QueryResult, Target)
+from ..structures.definitions import BaseQueryResult, PlottableQueryResult, QueryResult, Target
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_map
@@ -75,9 +74,7 @@ def setup_targeting(kind: str, targeting, **arguments) -> list[Target]:
     return targets
 
 
-def _set_results(
-    structure: QueryResult | PlottableQueryResult, query_result: any
-) -> QueryResult | PlottableQueryResult:
+def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
     """
     Sets the .data and .exception attributes of an ATK structure based on what was returned from a query
     """
@@ -109,16 +106,14 @@ def set_container_keys(target: Target, query_result: any) -> any:
 
     for ctnr in query_result:
         # e.g. SED gets a correction array instead, don't want to overwrite this
-        if ctnr.correction is not None:
+        if ctnr.correction is None:
             ctnr.correction = target.correction
         ctnr._target_key = target._key
 
     return query_result
 
 
-def image_requery(
-    query_function: FunctionType, target: Target, structure: BaseQueryResult, query_result: list, **arguments
-) -> tuple[Target, list]:
+def image_requery(query_function: FunctionType, target: Target, structure: BaseQueryResult, query_result: list, **arguments) -> tuple[Target, list]:
     from .image.overlays import get_overlay
 
     image_time = query_result[0].search_pos.obstime
@@ -176,12 +171,17 @@ def single_target_query(kind: str, target: Target, structure: BaseQueryResult, *
 
 def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments):
     """
-    Sets up a query on multiple targets
+    Dispatches a query on one or multiple targets
     """
+
+    print(arguments)
 
     corrected_targets, structure = prepare_search(targets=targets, query_kind=kind, **arguments)
 
     for target in corrected_targets:
         structure = single_target_query(kind, target, structure, **arguments)
+
+    if arguments.get("path"):
+        structure.save(arguments["path"])
 
     return structure

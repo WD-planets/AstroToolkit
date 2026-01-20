@@ -17,13 +17,7 @@ from bokeh.plotting import figure as Figure
 # -------------
 
 # whether to combine data structures into combined plots
-PLOT_METHODS = {
-    "image": "individual",
-    "lightcurve": "combined",
-    "spectrum": "individual",
-    "sed": "individual",
-    "hrd": "combined",
-}
+PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual", "hrd": "combined"}
 # whether to split plots by target
 SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False}
 

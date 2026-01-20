@@ -71,8 +71,7 @@ def query(target: Target, **kwargs):
 
     radius = kwargs["radius"]
 
-    sed_tables = []
-    correction = []
+    sed_tables, correction = [], []
 
     # perform queries
     for survey in SED_INFO:
@@ -88,7 +87,7 @@ def query(target: Target, **kwargs):
         if not phot.empty:
             sed_tables.append(phot)
 
-        correction += [data.data[0].correction] * len(data.data[0].data)
+        correction += [data.data[0].correction] * len(phot)
 
     if not sed_tables:
         return RETURNS.NULL

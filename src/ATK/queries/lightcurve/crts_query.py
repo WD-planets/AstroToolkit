@@ -41,8 +41,6 @@ def fetch_csv_link(url: str) -> str | RETURNS:
     """
 
     response = send_request("crts", url)
-    print(url)
-    print(response.content)
     if response is RETURNS.EXCEPTION:
         return response
 
@@ -88,3 +86,5 @@ def query(target: Target, **kwargs: dict):
     # return df.loc[sep < radius].reset_index(drop=True)
 
     lcs = get_lightcurves("crts", target, kwargs["radius"], df, kwargs.get("split", False))
+
+    return lcs

@@ -1,26 +1,55 @@
+import copy
+
+import astropy.units as u
 from bokeh.models import BasicTickFormatter, ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 
-from ...structures.definitions import SED
+from ...structures.definitions import SED, PlottableQueryResult, Spectrum
 from ..colours import get_palette
 from ..formatting import format_plot
 
 
-def plot(sed: SED, *args: any, **kwargs: any):
-    """
-    Plots an ATK SED object
-    """
+def overlay_spectrum(sed: SED, spectra: PlottableQueryResult | list[Spectrum] | Spectrum, **kwargs):
+    from ..spectrum.plot_spectrum import plot as plot_spectrum
 
-    plot = figure(
-        width=400,
-        height=400,
-        title="Spectral Energy Distribution",
-        x_axis_label="Effective Wavelength / \u212b",
-        y_axis_label=r"\[\text{flux / mJy}\]",
-        x_axis_type="log",
-        y_axis_type="log",
-        tools=("pan,wheel_zoom,box_zoom,reset"),
-    )
+    if isinstance(spectra, PlottableQueryResult):
+        spectra = spectra.data
+    elif isinstance(spectra, list):
+        pass
+    elif isinstance(spectra, SED):
+        spectra = [spectra]
+    else:
+        raise ValueError(f"Invalid type for SED overlay '{type(spectra)}'.")
+
+    plots = []
+    for spectrum in spectra:
+        if spectrum._target_key != sed._target_key:
+            continue
+
+        plot = plot_sed(sed, **kwargs)
+        spectrum = copy.deepcopy(spectrum)
+        spectrum.flux = spectrum.flux.to(u.mJy, equivalencies=u.spectral_density(spectrum.wavelength))
+        # sed.flux_err = spectrum.flux_err.to(u.mJy, equivalencies=u.spectral_density(spectrum.wavelength))
+
+        plots.append(plot_spectrum(spectrum, sed_plot=plot))
+
+    return plots
+
+
+def plot_sed(sed: SED, **kwargs: any):
+    if kwargs.get("spectrum_plot"):
+        plot = kwargs["spectrum_plot"]
+    else:
+        plot = figure(
+            width=400,
+            height=400,
+            title="Spectral Energy Distribution",
+            x_axis_label="Effective Wavelength / \u212b",
+            y_axis_label=r"\[\text{flux / mJy}\]",
+            x_axis_type="log",
+            y_axis_type="log",
+            tools=("pan,wheel_zoom,box_zoom,reset"),
+        )
 
     # make ticks more readable
     plot.yaxis.formatter = BasicTickFormatter(use_scientific=False)
@@ -34,9 +63,9 @@ def plot(sed: SED, *args: any, **kwargs: any):
             ("survey", "@survey"),
             ("band", "@band"),
             ("wavelength", "@wavelength \u212b"),
-            ("flux", "@flux mJy"),
-            ("error", "@flux_err mJy"),
-            ("separation", "@separation arcsec"),
+            ("flux", f"@flux {sed.flux.unit.to_string('unicode')}"),
+            ("error", f"@flux_err {sed.flux.unit.to_string('unicode')}"),
+            ("separation", f"@separation {sed.separation.unit.to_string('unicode')}"),
         ]
     )
     hvr.renderers = []
@@ -94,5 +123,20 @@ def plot(sed: SED, *args: any, **kwargs: any):
         hvr.renderers.append(scatter)
 
     plot.add_tools(hvr)
+
+    return plot
+
+
+def plot(sed: SED, **kwargs: any):
+    """
+    Plots an ATK SED object
+    """
+
+    if kwargs.get("overlay"):
+        plots = overlay_spectrum(sed, kwargs["overlay"], **kwargs)
+        return [format_plot("sed", plot) for plot in plots]
+
+    # if plotting as an overlay for spectra
+    plot = plot_sed(sed, **kwargs)
 
     return format_plot("sed", plot)

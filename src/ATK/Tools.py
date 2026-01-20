@@ -1,3 +1,4 @@
+import os
 import warnings
 from pathlib import Path
 
@@ -19,6 +20,10 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
     # get necessary parameters from config if not given
     arguments = get_query_arguments(kind, arguments)
 
+    if arguments.get("path") and os.path.exists(arguments["path"]):
+        structure = read(arguments["path"])
+        return structure
+
     target, targets = arguments.pop("target", None), arguments.pop("targets", None)
 
     if target is None == targets is None:
@@ -35,13 +40,7 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
         structure_map = get_query_result_map()
-        structure = structure_map[kind](
-            kind=kind,
-            survey=arguments.get("survey", None),
-            targets=None,
-            radius=arguments.get("radius", None),
-            exception=True,
-        )
+        structure = structure_map[kind](kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
         return structure
 
     # disable proper motion correction
