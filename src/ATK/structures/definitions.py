@@ -135,6 +135,8 @@ class BaseQueryResult:
 
         pprint_structure(self, show_all_types, **kwargs)
 
+        return self
+
     def save(self, path: str | Path = None) -> Path:
         from ..io.files.writing import write_local
 
@@ -362,11 +364,11 @@ class Lightcurve(BaseContainer):
             raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
 
     def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
-        from .methods.lightcurve.binning import bin_2d
+        from .methods.lightcurve.binning import bin_nd
 
         struct = manage_inplace(self, inplace)
 
-        x, ys, errs = bin_2d(x=struct.mjd, ys=[struct.brightness, struct.ra, struct.dec], errs=[struct.brightness_err], bins=bins, size=size)
+        x, ys, errs = bin_nd(x=struct.mjd, ys=[struct.brightness, struct.ra, struct.dec], errs=[struct.brightness_err], bins=bins, size=size)
 
         brightness, ra, dec = ys
         brightness_err = errs[0]
@@ -377,11 +379,22 @@ class Lightcurve(BaseContainer):
         struct.ra = ra
         struct.dec = dec
 
-        for arr in self._get_cols():
-            try:
-                print(arr, len(getattr(self, arr)))
-            except:
-                pass
+        return struct
+
+    def crop(self, min: float, max: float, inplace=True):
+        from .methods.lightcurve.cropping import crop_nd
+
+        struct = manage_inplace(self, inplace)
+
+        x, ys = crop_nd(x=struct.mjd, ys=[struct.brightness, struct.brightness_err, struct.ra, struct.dec], lower_lim=min, upper_lim=max)
+
+        brightness, brightness_err, ra, dec = ys
+
+        struct.mjd = x
+        struct.set_brightness(brightness)
+        struct.set_brightness_err(brightness_err)
+        struct.ra = ra
+        struct.dec = dec
 
         return struct
 
