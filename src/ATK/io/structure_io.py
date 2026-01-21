@@ -12,7 +12,7 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
-from ...structures.definitions import BaseContainer, Image
+from ..structures.definitions import BaseContainer, Image
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series)
@@ -229,9 +229,7 @@ def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
     return ctnr(**relevant_data)
 
 
-def struct_to_hdu(
-    structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU
-) -> BinTableHDU:
+def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:
     """
     Convert a data structure into a fits HDU.
     """

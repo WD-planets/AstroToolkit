@@ -15,7 +15,7 @@ from ...configuration.base_config import translator
 from ...structures.definitions import Image, QueryResult
 from ...utilities.mapping import build_structure_map, get_query_result_map
 from ...utilities.misc import get_package_version
-from .target_io import get_targets_from_hdu
+from ..target_io import get_targets_from_hdu
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
 

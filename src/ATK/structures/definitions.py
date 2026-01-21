@@ -25,6 +25,16 @@ SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": T
 QuantityArray = numpy.ndarray[Quantity]
 
 
+def manage_inplace(structure: any, inplace: bool):
+    if inplace:
+        return structure
+    else:
+        if hasattr(structure, "figure") and structure.figure:
+            structure.figure = None
+
+        return copy.deepcopy(structure)
+
+
 @dataclass
 class Target:
     initial_coords: SkyCoord
@@ -162,6 +172,17 @@ class BaseQueryResult:
 
         return fname
 
+    def apply(self, method: str, inplace=True, *args, **kwargs):
+        struct = manage_inplace(self, inplace)
+
+        for ctnr in struct.data:
+            if hasattr(ctnr, method):
+                getattr(ctnr, method)(*args, **kwargs)
+            else:
+                raise ValueError(f"{self.kind} data does not support the method '{method}'.")
+
+        return struct
+
 
 @dataclass(repr=False)
 class QueryResult(BaseQueryResult):
@@ -172,6 +193,8 @@ class QueryResult(BaseQueryResult):
 class PlottableQueryResult(BaseQueryResult):
     data: list = field(default_factory=list)
     figure: Figure | None = None
+
+    _stored_plot_params: dict | None = None
 
     @property
     def _title(self):
@@ -186,14 +209,19 @@ class PlottableQueryResult(BaseQueryResult):
         return SPLIT_BY_TARGET[self.kind]
 
     def plot(self, kind: str | None = None, **kwargs: any):
-        from .plot_io import plot_data
+        from ..io.plot_io import plot_data
 
         self.figure = plot_data(kind, self, **kwargs)
+        self._stored_plot_params = kwargs
+
+        return self
 
     def open(self, fname: Path | str | None = None, **kwargs: any):
-        from .plot_io import open
+        from ..io.plot_io import open as open_html
 
-        open(self, fname=fname, **kwargs)
+        open_html(self, fname=fname, **kwargs)
+
+        return self
 
 
 # ---------------
@@ -235,23 +263,23 @@ class BaseContainer:
         return None
 
     def _get_cols(self):
-        from ..io.files.structure_io import get_cols
+        from ..io.structure_io import get_cols
 
         return get_cols(self)
 
     def to_dataframe(self) -> pandas.DataFrame:
-        from ..io.files.structure_io import struct_to_dataframe
+        from ..io.structure_io import struct_to_dataframe
 
         return struct_to_dataframe(self)
 
     @classmethod
     def from_dataframe(cls, data: pandas.DataFrame, **kwargs: any):
-        from ..io.files.structure_io import struct_from_dataframe
+        from ..io.structure_io import struct_from_dataframe
 
         return struct_from_dataframe(cls, data, **kwargs)
 
     def to_hdu(self) -> BinTableHDU:
-        from ..io.files.structure_io import struct_to_hdu
+        from ..io.structure_io import struct_to_hdu
 
         return struct_to_hdu(self)
 
@@ -271,7 +299,7 @@ class VizierEntry(BaseContainer):
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity
-        from ..io.files.structure_io import simple_to_hdu
+        from ..io.structure_io import simple_to_hdu
 
         return simple_to_hdu(self)
 
@@ -310,8 +338,21 @@ class Lightcurve(BaseContainer):
                 self.__dict__.pop(f, None)
 
     @property
+    def brightness(self):
+        return getattr(self, self.brightness_type)
+
+    @property
+    def brightness_err(self):
+        return getattr(self, f"{self.brightness_type}_err")
+
+    def set_brightness(self, val: numpy.ndarray):
+        setattr(self, self.brightness_type, val)
+
+    def set_brightness_err(self, val: numpy.ndarray):
+        setattr(self, f"{self.brightness_type}_err", val)
+
+    @property
     def brightness_type(self):
-        # prioritise brightness_type = 'mag'
         if self.mag is not None:
             return "mag"
         elif self.flux is not None:
@@ -319,6 +360,30 @@ class Lightcurve(BaseContainer):
         else:
             # shouldn't happen due to __post_init__
             raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
+
+    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
+        from .methods.lightcurve.binning import bin_2d
+
+        struct = manage_inplace(self, inplace)
+
+        x, ys, errs = bin_2d(x=struct.mjd, ys=[struct.brightness, struct.ra, struct.dec], errs=[struct.brightness_err], bins=bins, size=size)
+
+        brightness, ra, dec = ys
+        brightness_err = errs[0]
+
+        struct.mjd = x
+        struct.set_brightness(brightness)
+        struct.set_brightness_err(brightness_err)
+        struct.ra = ra
+        struct.dec = dec
+
+        for arr in self._get_cols():
+            try:
+                print(arr, len(getattr(self, arr)))
+            except:
+                pass
+
+        return struct
 
 
 @dataclass(repr=False)
@@ -339,7 +404,7 @@ class Image(BaseContainer):
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity
-        from ..io.files.structure_io import image_to_hdu
+        from ..io.structure_io import image_to_hdu
 
         return image_to_hdu(self)
 

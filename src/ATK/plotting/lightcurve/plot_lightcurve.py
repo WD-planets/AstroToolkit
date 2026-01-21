@@ -36,9 +36,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     # set up colour map
     colour_mapper = LinearColorMapper(palette=palette, low=0, high=1)
 
-    df = pd.DataFrame(
-        {"time": time, "y": getattr(lc, lc.brightness_type), "y_err": getattr(lc, f"{lc.brightness_type}_err"), "obj_id": obj_id}
-    )
+    df = pd.DataFrame({"time": time, "y": getattr(lc, lc.brightness_type), "y_err": getattr(lc, f"{lc.brightness_type}_err"), "obj_id": obj_id})
     df["colour"] = y_norm
 
     source = ColumnDataSource(df)
@@ -61,9 +59,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     err_xs = [[t, t] for t in time]
     err_ys = [[v - e, v + e] for v, e in zip(y, y_err)]
     err_source = ColumnDataSource(data={"xs": err_xs, "ys": err_ys, "y": y, "colour": y_norm})
-    plot.multi_line(
-        xs="xs", ys="ys", source=err_source, color=colour, line_width=0.5, level="underlay", legend_label=f"{lc.survey} {lc.band}"
-    )
+    plot.multi_line(xs="xs", ys="ys", source=err_source, color=colour, line_width=0.5, level="underlay", legend_label=f"{lc.survey} {lc.band}")
 
     # don't show MJD in scientific notation
     plot.xaxis.formatter = BasicTickFormatter(use_scientific=False)
@@ -71,22 +67,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     return plot
 
 
-def group_lc_ids(lcs: list[Lightcurve]):
-    """
-    Group light curves by object ID
-    """
-
-    ids = list(set([lc.obj_id for lc in lcs]))
-
-    groups = []
-    for id in ids:
-        id_group = [lc for lc in lcs if lc.obj_id == id]
-        groups.append(id_group)
-
-    return groups
-
-
-def dispatch_groups(survey: str, lcs: list[Lightcurve], **kwargs: dict):
+def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     """
     Plots light curves of a given survey grouped by object ID
     """
@@ -100,9 +81,6 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], **kwargs: dict):
 
     # get single brightness type once above check has passed
     brightness_type = brightness_types[0]
-
-    # colour handling
-    palettes = assign_gradient_palettes(len(lcs), kwargs.get("colours"))
 
     # set up title
     band_names = ", ".join(d.band for d in lcs)
@@ -122,8 +100,8 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], **kwargs: dict):
     time_min = min(all_times)
 
     # Plot each band independently
-    for lc, palette in zip(lcs, palettes):
-        plot = plot_band(plot=plot, lc=lc, palette=palette, time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+    for lc in lcs:
+        plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
 
     if brightness_type == "flux":
         plot.y_range.flipped = True
@@ -131,20 +109,50 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], **kwargs: dict):
     return plot
 
 
+def get_band_colours(bands: list, colours: list) -> dict:
+    # colour handling
+    palettes = assign_gradient_palettes(len(bands), colours)
+
+    palette_map = {band: palette for band, palette in zip(bands, palettes)}
+
+    return palette_map
+
+
+def group_lc_ids(lcs: list[Lightcurve]):
+    """
+    Group light curves by object ID
+    """
+
+    ids = list(set([lc.obj_id for lc in lcs]))
+
+    groups = []
+    for id in ids:
+        id_group = [lc for lc in lcs if lc.obj_id == id]
+        groups.append(id_group)
+
+    return groups
+
+
 def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     """
     Plots any number of light curves into combined per-survey and per-id plots
     """
-
-    bands = kwargs.get("bands")
 
     plots = []
     surveys = list(set([lc.survey for lc in lightcurves]))
 
     # loop through surveys + combine light curve containers into single plot for each survey
     for survey in surveys:
+        requested_bands = kwargs.get("bands")
         # filter data to only keep requested (and valid) light curves
-        per_survey_lcs = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (bands is None or lc.band in bands)]
+        per_survey_lcs = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (requested_bands is None or lc.band in requested_bands)]
+        # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
+
+        bands = list(set(lc.band for lc in per_survey_lcs))
+        bands.sort()
+
+        colours = kwargs.get("colours")
+        palette_map = get_band_colours(bands, colours)
 
         if not per_survey_lcs:
             continue
@@ -152,7 +160,7 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
         # group by object ID
         lc_groups = group_lc_ids(per_survey_lcs)
         for per_id_lcs in lc_groups:
-            per_id_plots = dispatch_groups(survey, per_id_lcs, **kwargs)
+            per_id_plots = dispatch_groups(survey, per_id_lcs, palette_map, **kwargs)
             plots.append(per_id_plots)
 
     return [format_plot("lightcurve", p) for p in plots]

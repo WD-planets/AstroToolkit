@@ -49,14 +49,18 @@ Changes
     - can now overlay both ways, i.e. can overlay spectra on an SED as before, but can also overlay an SED over spectra
     - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
-
+- light curve binning now much faster
+- usability of all data methods (e.g. lightcurve .bin(),.crop(), etc.) significantly improved:
+    - added method .apply() to QueryResult, applies a given method to all stored containers
+    - data methods can also be applied to each container individually
+    - both of the above support a kwarg 'inplace' to modify the structure/container in-place or perform modifications on a copy which is then returned
 
 To-Do Now
 ---------
 - light curves should choose colour per-band
 - implement features from previous version
-    - light curve cropping/binning/sigma clipping/phase folding/power spectra
-    - path parameter to replace check_exists
+    - light curve cropping/sigma clipping/phase folding/power spectra
+    - light curves are sorting in a different order before/after reading
 
 
 - check effect of bad pm data/distance manually
@@ -72,6 +76,7 @@ To-Do Now
 - check type hints
 - turn off split = True default for ZTF lightcurves as default, too many "objects"
 - default units for Quantity arrays?
+- store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
 
 
 To-Do Later

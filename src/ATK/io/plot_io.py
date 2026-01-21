@@ -12,8 +12,8 @@ from bokeh.models import Column, Row
 from bokeh.plotting import figure, show
 
 from ..configuration.base_config import BASE_CONFIG
+from ..structures.definitions import BaseContainer, PlottableQueryResult, Target
 from ..utilities.mapping import build_map
-from .definitions import BaseContainer, PlottableQueryResult, Target
 
 FIGS_PER_COLUMN = 3
 
@@ -102,6 +102,11 @@ def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dic
     Opens the Bokeh plot in the .figure attribute of a PlottableQueryResult in the default browser
     """
 
+    # get previous plot parameters if they exist
+    # this only really matters if a plot doesn't exist but previously did (e.g. due to using inplace=False in data methods which cannot copy a bokeh figure)
+    if not kwargs and structure._stored_plot_params:
+        kwargs = structure._stored_plot_params
+
     # plot data if it hasn't been plotted
     if not structure.figure:
         structure.plot(**kwargs)
@@ -110,9 +115,10 @@ def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dic
     if not structure.figure:
         return
 
+    tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
+
     # unless a file name was provided, save to the cached_figures directory
     if not fname:
-        tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
         os.makedirs(tmp_dir, exist_ok=True)
 
         fname_prefix = f"{structure.survey}_{structure.kind}_" if structure.survey else f"{structure.kind}_"

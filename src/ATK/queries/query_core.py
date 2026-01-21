@@ -174,8 +174,6 @@ def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments
     Dispatches a query on one or multiple targets
     """
 
-    print(arguments)
-
     corrected_targets, structure = prepare_search(targets=targets, query_kind=kind, **arguments)
 
     for target in corrected_targets:

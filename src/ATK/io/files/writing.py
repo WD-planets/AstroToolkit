@@ -7,9 +7,9 @@ from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
 
-from ...io.files.structure_io import struct_to_hdu
+from ...io.structure_io import struct_to_hdu
 from ...utilities.misc import get_package_version
-from .target_io import targets_to_hdu
+from ..target_io import targets_to_hdu
 
 warnings.simplefilter("ignore", category=VerifyWarning)
 
