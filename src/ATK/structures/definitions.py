@@ -12,17 +12,30 @@ from astropy.units import Quantity, Unit
 from astropy.wcs import WCS
 from bokeh.plotting import figure as Figure
 
-# -------------
-# QUERY RESULTS
-# -------------
+from .methods.lightcurve.phasefold import fold_lc
+from .methods.lightcurve.powspec import gen_powspec
+
+# data methods that required a collection of containers to be processed
+GROUP_METHODS = {"fold": fold_lc, "pspec": gen_powspec}
 
 # whether to combine data structures into combined plots
-PLOT_METHODS = {"image": "individual", "lightcurve": "combined", "spectrum": "individual", "sed": "individual", "hrd": "combined"}
+PLOT_METHODS = {
+    "image": "individual",
+    "lightcurve": "combined",
+    "spectrum": "individual",
+    "sed": "individual",
+    "hrd": "combined",
+    "powspec": "individual",
+}
 # whether to split plots by target
-SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False}
+SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False, "powspec": True}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
+
+# -------------
+# QUERY RESULTS
+# -------------
 
 
 def manage_inplace(structure: any, inplace: bool):
@@ -30,8 +43,12 @@ def manage_inplace(structure: any, inplace: bool):
         return structure
     else:
         if hasattr(structure, "figure") and structure.figure:
+            figure = structure.figure
             structure.figure = None
+            struct_copy = copy.deepcopy(structure)
+            structure.figure = figure
 
+            return struct_copy
         return copy.deepcopy(structure)
 
 
@@ -177,11 +194,22 @@ class BaseQueryResult:
     def apply(self, method: str, inplace=True, *args, **kwargs):
         struct = manage_inplace(self, inplace)
 
-        for ctnr in struct.data:
-            if hasattr(ctnr, method):
-                getattr(ctnr, method)(*args, **kwargs)
-            else:
-                raise ValueError(f"{self.kind} data does not support the method '{method}'.")
+        if method in GROUP_METHODS:
+            # collect by target key
+            data = []
+            keys = list(set([ctnr._target_key for ctnr in self.data]))
+            for key in keys:
+                ctnrs = [ctnr for ctnr in self.data if ctnr._target_key == key]
+                if not ctnrs:
+                    continue
+                data.append(GROUP_METHODS[method](struct, ctnrs, *args, **kwargs))
+            struct.data = data
+        else:
+            for ctnr in struct.data:
+                if hasattr(ctnr, method):
+                    getattr(ctnr, method)(*args, **kwargs)
+                else:
+                    raise ValueError(f"{struct.kind} data does not support the method '{method}'.")
 
         return struct
 
@@ -398,6 +426,11 @@ class Lightcurve(BaseContainer):
 
         return struct
 
+    def fold(ctnrs: list[object], min: float, max: float, samples: int):
+        return fold_lc(ctnrs, min=min, max=max, samples=samples)
+
+    def pspec(self, samples: int): ...
+
 
 @dataclass(repr=False)
 class Image(BaseContainer):
@@ -463,3 +496,18 @@ class HRD(BaseContainer):
 
     def __repr__(self):
         return f"<{self.survey} {self.abs_mag_band} vs {self.colour_bands} HRD>"
+
+
+@dataclass(repr=False)
+class Powspec(BaseContainer):
+    survey: str | None = None
+    band: str | None = None
+
+    obj_id: str | None = None
+    frequency: QuantityArray | None = None
+    power: numpy.ndarray | None = None
+    fopt: Quantity | None = None
+    popt: Quantity | None = None
+
+    def __repr__(self):
+        return f"<{self.survey} {self.band}-band {type(self).__name__}>"
