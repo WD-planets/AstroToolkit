@@ -28,7 +28,7 @@ def format_lc_data(lcs: list[Lightcurve]):
     return mjd, brightness, brightness_err, band
 
 
-def do_ls(lcs: list[Lightcurve], min: float, max: float, samples: int):
+def do_ls(lcs: list[Lightcurve], min: float, max: float, samples: int, return_model: bool):
     mjd, brightness, brightness_err, band = format_lc_data(lcs)
 
     freqs = np.linspace(min, max, samples) * (1 / u.day)
@@ -39,5 +39,8 @@ def do_ls(lcs: list[Lightcurve], min: float, max: float, samples: int):
         return None
 
     best_freq = freqs[np.argmax(power)]
+
+    if return_model:
+        return freqs, power, best_freq, ls
 
     return freqs, power, best_freq

@@ -511,3 +511,18 @@ class Powspec(BaseContainer):
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
+
+
+@dataclass(repr=False)
+class FoldedLightcurve(BaseContainer):
+    survey: str | None = None
+    band: str | None = None
+
+    obj_id: str | None = None
+    phase: numpy.ndarray | None = None
+    ms_mag: numpy.ndarray | None = None
+    ms_mag_err: numpy.ndarray | None = None
+    ms_flux: QuantityArray | None = None
+    ms_flux_err: QuantityArray | None = None
+    fopt: Quantity | None = None
+    popt: Quantity | None = None
