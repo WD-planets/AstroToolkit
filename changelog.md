@@ -57,7 +57,9 @@ Changes
 - powspec ('pspec') and phasefolding ('fold') now done via the .apply() method, allowing this data to be stored rather than being performed at plot-time
     - added 'multiband' kwarg to both of the above. If True, analyses all bands simultaneously to increase SNR and produce a single period. If False, each band is treated entirely separately
     - added 'subtract' kwarg to phase folding. If 'median', all bands are median-subtracted. If 'mean', all bands are mean-subtracted. If None, no subtraction is performed.
-    - all bands have individual fits (toggled using 'fit'=True/False, default False). These are lined-up vertically by the same method as 'subtract' (if subtract is None, align_method is median)
+    - all bands have individual fits (toggled using 'fit'=True/False, default False). These are placed vertically by the same method as 'subtract' (if subtract is None, align_method is median)
+- crop data method now supported by SEDs, spectra and power spectra
+- bin data method now supported by spectra
 
 
 
@@ -67,7 +69,7 @@ To-Do Now
 - implement features from previous version
     - light curve cropping/sigma clipping/phase folding/power spectra
     - light curves are sorting in a different order before/after reading
-
+- add freq parameter to phase folding
 
 - check effect of bad pm data/distance manually
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run these on exception optionally) these should also save and read a file to test this
@@ -81,9 +83,12 @@ To-Do Now
 - check docstrings / comments
 - check type hints
 - turn off split = True default for ZTF lightcurves as default, too many "objects"
-- default units for Quantity arrays?
+- default units for Quantity arrays
+    - needed to make sure .to() etc. doesn't fail
 - store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
 - remove per-survey splitting from light curves, no reason to support this and would need to do it everywhere otherwise
+- spectrum/sed overlay legend hiding not working
+
 
 To-Do Later
 -----------

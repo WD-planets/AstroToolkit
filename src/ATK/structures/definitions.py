@@ -436,35 +436,8 @@ class Lightcurve(BaseContainer):
     def set_time(self, val: numpy.ndarray):
         setattr(self, self.time_type, val)
 
-    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
-        from .methods.lightcurve.binning import bin_nd
-
-        struct = manage_inplace(self, inplace)
-
-        ys = [struct.brightness]
-        for attr in ["ra", "dec"]:
-            val = getattr(struct, attr)
-            if val is not None:
-                ys.append(val)
-
-        x, ys, errs = bin_nd(x=struct.time, ys=ys, errs=[struct.brightness_err], bins=bins, size=size)
-
-        if len(ys) > 1:
-            brightness, ra, dec = ys
-            struct.ra = ra
-            struct.dec = dec
-        else:
-            brightness = ys[0]
-        brightness_err = errs[0]
-
-        struct.set_time(x)
-        struct.set_brightness(brightness)
-        struct.set_brightness_err(brightness_err)
-
-        return struct
-
     def crop(self, min: float, max: float, inplace=True):
-        from .methods.lightcurve.cropping import crop_nd
+        from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
 
@@ -491,6 +464,36 @@ class Lightcurve(BaseContainer):
 
             struct.fit_x = x
             struct.fit_y = ys[0]
+
+        return struct
+
+    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
+        from .methods.binning import bin_nd
+
+        struct = manage_inplace(self, inplace)
+
+        ys = [struct.brightness]
+        for attr in ["ra", "dec"]:
+            val = getattr(struct, attr)
+            if val is not None:
+                ys.append(val)
+
+        if size is not None and not isinstance(size, Quantity):
+            size = size * u.day
+
+        x, ys, errs = bin_nd(x=struct.time, ys=ys, errs=[struct.brightness_err], bins=bins, size=size)
+
+        if len(ys) > 1:
+            brightness, ra, dec = ys
+            struct.ra = ra
+            struct.dec = dec
+        else:
+            brightness = ys[0]
+        brightness_err = errs[0]
+
+        struct.set_time(x)
+        struct.set_brightness(brightness)
+        struct.set_brightness_err(brightness_err)
 
         return struct
 
@@ -534,6 +537,34 @@ class Spectrum(BaseContainer):
     wavelength: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
 
+    def crop(self, min: float, max: float, inplace=True):
+        from .methods.cropping import crop_nd
+
+        struct = manage_inplace(self, inplace)
+
+        ys = [struct.flux]
+
+        x, ys = crop_nd(x=struct.wavelength, ys=ys, lower_lim=min, upper_lim=max)
+
+        struct.wavelength = x
+        struct.flux = ys[0]
+
+        return struct
+
+    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
+        from .methods.binning import bin_nd
+
+        struct = manage_inplace(self, inplace)
+
+        ys = [struct.flux]
+
+        x, ys, _ = bin_nd(x=struct.wavelength, ys=ys, errs=[], bins=bins, size=size)
+
+        struct.wavelength = x
+        struct.flux = ys[0]
+
+        return struct
+
 
 @dataclass(repr=False)
 class SED(BaseContainer):
@@ -548,6 +579,27 @@ class SED(BaseContainer):
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"
+
+    def crop(self, min: float, max: float, inplace=True):
+        from .methods.cropping import crop_nd
+
+        struct = manage_inplace(self, inplace)
+
+        ys = [struct.flux, struct.flux_err, struct.survey, struct.correction, struct.band, struct.separation]
+
+        x, ys = crop_nd(x=struct.wavelength, ys=ys, lower_lim=min, upper_lim=max)
+
+        flux, flux_err, survey, correction, band, separation = ys
+
+        struct.wavelength = x
+        struct.flux = flux
+        struct.flux_err = flux_err
+        struct.survey = survey
+        struct.correction = correction
+        struct.band = band
+        struct.separation = separation
+
+        return struct
 
 
 @dataclass(repr=False)
@@ -579,3 +631,17 @@ class Powspec(BaseContainer):
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
+
+    def crop(self, min: float, max: float, inplace=True):
+        from .methods.cropping import crop_nd
+
+        struct = manage_inplace(self, inplace)
+
+        ys = [struct.power]
+
+        x, ys = crop_nd(x=struct.frequency, ys=ys, lower_lim=min, upper_lim=max)
+
+        struct.frequency = x
+        struct.power = ys[0]
+
+        return struct

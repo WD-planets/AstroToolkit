@@ -65,7 +65,8 @@ def plot_sed(sed: SED, **kwargs: any):
             ("wavelength", "@wavelength \u212b"),
             ("flux", f"@flux {sed.flux.unit.to_string('unicode')}"),
             ("error", f"@flux_err {sed.flux.unit.to_string('unicode')}"),
-            ("separation", f"@separation {sed.separation.unit.to_string('unicode')}"),
+            # "/' can be impossible to differentiate if text is small
+            ("separation", f"@separation {sed.separation.unit.to_string('fits')}"),
         ]
     )
     hvr.renderers = []
