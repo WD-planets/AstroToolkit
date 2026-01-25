@@ -50,10 +50,16 @@ Changes
     - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
 - light curve binning now much faster
-- usability of all data methods (e.g. lightcurve .bin(),.crop(), etc.) significantly improved:
+- usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
     - added method .apply() to QueryResult, applies a given method to all stored containers
     - data methods can also be applied to each container individually
     - both of the above support a kwarg 'inplace' to modify the structure/container in-place or perform modifications on a copy which is then returned
+- powspec ('pspec') and phasefolding ('fold') now done via the .apply() method, allowing this data to be stored rather than being performed at plot-time
+    - added 'multiband' kwarg to both of the above. If True, analyses all bands simultaneously to increase SNR and produce a single period. If False, each band is treated entirely separately
+    - added 'subtract' kwarg to phase folding. If 'median', all bands are median-subtracted. If 'mean', all bands are mean-subtracted. If None, no subtraction is performed.
+    - all bands have individual fits (toggled using 'fit'=True/False, default False). These are lined-up vertically by the same method as 'subtract' (if subtract is None, align_method is median)
+
+
 
 To-Do Now
 ---------
@@ -77,7 +83,7 @@ To-Do Now
 - turn off split = True default for ZTF lightcurves as default, too many "objects"
 - default units for Quantity arrays?
 - store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
-
+- remove per-survey splitting from light curves, no reason to support this and would need to do it everywhere otherwise
 
 To-Do Later
 -----------

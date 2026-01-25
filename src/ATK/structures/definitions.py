@@ -4,6 +4,7 @@ from pathlib import Path
 
 import astropy.units as u
 import numpy
+import numpy as np
 import pandas
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
@@ -26,9 +27,18 @@ PLOT_METHODS = {
     "sed": "individual",
     "hrd": "combined",
     "powspec": "individual",
+    "phasefold": "combined",
 }
 # whether to split plots by target
-SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False, "powspec": True}
+SPLIT_BY_TARGET = {
+    "image": True,
+    "lightcurve": True,
+    "spectrum": True,
+    "sed": True,
+    "hrd": False,
+    "powspec": True,
+    "phasefold": True,
+}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
@@ -202,7 +212,11 @@ class BaseQueryResult:
                 ctnrs = [ctnr for ctnr in self.data if ctnr._target_key == key]
                 if not ctnrs:
                     continue
-                data.append(GROUP_METHODS[method](struct, ctnrs, *args, **kwargs))
+                returned_ctnrs = GROUP_METHODS[method](struct, ctnrs, *args, **kwargs)
+                if isinstance(returned_ctnrs, list):
+                    data += returned_ctnrs
+                else:
+                    data.append(returned_ctnrs)
             struct.data = data
         else:
             for ctnr in struct.data:
@@ -351,6 +365,13 @@ class Lightcurve(BaseContainer):
     ra: numpy.ndarray | None = None
     dec: numpy.ndarray | None = None
 
+    # folded parameters
+    phase: numpy.ndarray | None = None
+    fit_x: numpy.ndarray | None = None
+    fit_y: numpy.ndarray | None = None
+    fopt: Quantity | None = None
+    popt: Quantity | None = None
+
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 
@@ -366,6 +387,14 @@ class Lightcurve(BaseContainer):
         if self.mag is None:
             for f in ("mag", "mag_err"):
                 self.__dict__.pop(f, None)
+
+        if (self.mjd is None) == (self.phase is None):
+            raise ValueError("Lightcurve container must hold one of 'mjd' and 'phase'.")
+
+        if self.phase is None:
+            self.__dict__.pop("phase", None)
+        if self.mjd is None:
+            self.__dict__.pop("mjd", None)
 
     @property
     def brightness(self):
@@ -391,21 +420,46 @@ class Lightcurve(BaseContainer):
             # shouldn't happen due to __post_init__
             raise ValueError("Lightcurve container must hold one of 'mag' and 'flux'.")
 
+    @property
+    def time_type(self):
+        if self.mjd is not None:
+            return "mjd"
+        elif self.phase is not None:
+            return "phase"
+        else:
+            raise ValueError("Lightcurve container must hold one of 'mjd' and 'phase'.")
+
+    @property
+    def time(self):
+        return getattr(self, self.time_type)
+
+    def set_time(self, val: numpy.ndarray):
+        setattr(self, self.time_type, val)
+
     def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
         from .methods.lightcurve.binning import bin_nd
 
         struct = manage_inplace(self, inplace)
 
-        x, ys, errs = bin_nd(x=struct.mjd, ys=[struct.brightness, struct.ra, struct.dec], errs=[struct.brightness_err], bins=bins, size=size)
+        ys = [struct.brightness]
+        for attr in ["ra", "dec"]:
+            val = getattr(struct, attr)
+            if val is not None:
+                ys.append(val)
 
-        brightness, ra, dec = ys
+        x, ys, errs = bin_nd(x=struct.time, ys=ys, errs=[struct.brightness_err], bins=bins, size=size)
+
+        if len(ys) > 1:
+            brightness, ra, dec = ys
+            struct.ra = ra
+            struct.dec = dec
+        else:
+            brightness = ys[0]
         brightness_err = errs[0]
 
-        struct.mjd = x
+        struct.set_time(x)
         struct.set_brightness(brightness)
         struct.set_brightness_err(brightness_err)
-        struct.ra = ra
-        struct.dec = dec
 
         return struct
 
@@ -414,15 +468,29 @@ class Lightcurve(BaseContainer):
 
         struct = manage_inplace(self, inplace)
 
-        x, ys = crop_nd(x=struct.mjd, ys=[struct.brightness, struct.brightness_err, struct.ra, struct.dec], lower_lim=min, upper_lim=max)
+        ys = [struct.brightness, struct.brightness_err]
+        for attr in ["ra", "dec"]:
+            val = getattr(struct, attr)
+            if val is not None:
+                ys.append(val)
 
-        brightness, brightness_err, ra, dec = ys
+        x, ys = crop_nd(x=struct.time, ys=ys, lower_lim=min, upper_lim=max)
 
-        struct.mjd = x
+        if len(ys) > 2:
+            brightness, brightness_err, ra, dec = ys
+        else:
+            brightness, brightness_err = ys
+
+        struct.set_time(x)
         struct.set_brightness(brightness)
         struct.set_brightness_err(brightness_err)
-        struct.ra = ra
-        struct.dec = dec
+
+        if getattr(struct, "fit_x", None) is not None and getattr(struct, "fit_x", None) is not None:
+            ys = [struct.fit_y]
+            x, ys = crop_nd(struct.fit_x, ys=ys, lower_lim=min, upper_lim=max)
+
+            struct.fit_x = x
+            struct.fit_y = ys[0]
 
         return struct
 
@@ -511,18 +579,3 @@ class Powspec(BaseContainer):
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
-
-
-@dataclass(repr=False)
-class FoldedLightcurve(BaseContainer):
-    survey: str | None = None
-    band: str | None = None
-
-    obj_id: str | None = None
-    phase: numpy.ndarray | None = None
-    ms_mag: numpy.ndarray | None = None
-    ms_mag_err: numpy.ndarray | None = None
-    ms_flux: QuantityArray | None = None
-    ms_flux_err: QuantityArray | None = None
-    fopt: Quantity | None = None
-    popt: Quantity | None = None

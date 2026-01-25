@@ -144,11 +144,14 @@ def format_array(array: np.ndarray | pd.Series) -> str:
     """
 
     array = np.asarray(array)
+    str_rep = "[]"
 
     # format array
     formatted = []
     for v in array:
-        if v == "...":
+        if isinstance(v, np.ndarray):
+            formatted.append(format_value(v))
+        elif v == "...":
             formatted.append("...")
         elif isinstance(v, (float, np.floating)):
             formatted.append(f"{round(v, ROUND)}")
@@ -160,7 +163,7 @@ def format_array(array: np.ndarray | pd.Series) -> str:
         half = MAX_DISPLAY // 2
         formatted = formatted[:half] + ["..."] + formatted[-half:]
 
-    str_rep = "[" + ", ".join(formatted) + "]"
+    str_rep = str_rep[0] + ", ".join(formatted) + str_rep[-1]
 
     return str_rep
 
