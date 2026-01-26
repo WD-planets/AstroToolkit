@@ -3,15 +3,17 @@ import copy
 import astropy.units as u
 from bokeh.plotting import figure
 
-from ...structures.definitions import SED, PlottableQueryResult, Spectrum
+from ...structures.DataSet import DataSet
+from ...structures.SED import SED
+from ...structures.Spectrum import Spectrum
 from ..formatting import format_plot
 from ..plotting_core import get_axis_label
 
 
-def overlay_sed(plot: figure, spectrum: Spectrum, seds: PlottableQueryResult | list[SED] | SED):
+def overlay_sed(plot: figure, spectrum: Spectrum, seds: DataSet | list[SED] | SED):
     from ..sed.plot_sed import plot as plot_sed
 
-    if isinstance(seds, PlottableQueryResult):
+    if isinstance(seds, DataSet):
         seds = seds.data
     elif isinstance(seds, list):
         pass

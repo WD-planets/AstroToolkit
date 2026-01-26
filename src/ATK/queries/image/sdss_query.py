@@ -1,8 +1,8 @@
-import astropy.units as u
 from astropy.wcs import WCS
 from astroquery.sdss import SDSS
 
-from ...structures.definitions import Image, Target
+from ...structures.Image import Image
+from ...structures.Target import Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from .image_core import get_image_skycoord, iso_to_epoch, reproject_hdu
 

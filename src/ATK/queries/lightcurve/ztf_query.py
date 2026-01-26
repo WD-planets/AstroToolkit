@@ -3,7 +3,7 @@ from io import BytesIO
 import astropy.units as u
 import pandas as pd
 
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 from .lightcurve_core import get_lightcurves

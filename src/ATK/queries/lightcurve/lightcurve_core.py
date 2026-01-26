@@ -3,7 +3,8 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 
-from ...structures.definitions import Lightcurve, Target
+from ...structures.Lightcurve import Lightcurve
+from ...structures.Target import Target
 from ...utilities.misc import angle_to_quantity
 
 # required light curve columns (in order)

@@ -3,8 +3,7 @@ from io import BytesIO
 import astropy.units as u
 from astropy.table import Table
 
-from ...structures.definitions import Target
-from ...utilities.coordinates import correct_target
+from ...structures.Target import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.misc import suppress_stdout
 from ...utilities.requests import send_request

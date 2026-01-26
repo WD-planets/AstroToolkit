@@ -1,5 +1,4 @@
 import argparse
-import inspect
 import re
 
 from AstroToolkit.Configuration.baseconfig import ConfigStruct
@@ -109,13 +108,9 @@ def main():
             sub_parser.add_argument("survey", help="Target survey")
 
         if "username" in params[kind]:
-            sub_parser.add_argument(
-                "--username", nargs=1, type=str, help="ATLAS username (only needed in ATLAS queries)"
-            )
+            sub_parser.add_argument("--username", nargs=1, type=str, help="ATLAS username (only needed in ATLAS queries)")
         if "password" in params[kind]:
-            sub_parser.add_argument(
-                "--password", nargs=1, type=str, help="ATLAS password (only needed in ATLAS queries)"
-            )
+            sub_parser.add_argument("--password", nargs=1, type=str, help="ATLAS password (only needed in ATLAS queries)")
 
         if "target" in params[kind]:
             group = sub_parser.add_mutually_exclusive_group(required=True)

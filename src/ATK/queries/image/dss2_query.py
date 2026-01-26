@@ -1,4 +1,4 @@
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from .image_core import fits_to_epoch
 from .irsa_queries import irsa_query
 

@@ -12,7 +12,9 @@ from bokeh.models import Column, Row
 from bokeh.plotting import figure, show
 
 from ..configuration.base_config import BASE_CONFIG
-from ..structures.definitions import BaseContainer, PlottableQueryResult, Target
+from ..structures.DataSet import DataSet
+from ..structures.structures_core import BaseContainer
+from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
 FIGS_PER_COLUMN = 3
@@ -21,7 +23,7 @@ FIGS_PER_COLUMN = 3
 def dispatch_plotting(
     all_figures: list,
     plotting_func: FunctionType,
-    structure: PlottableQueryResult,
+    structure: DataSet,
     containers: list[BaseContainer],
     target: Target | None = None,
     **kwargs,
@@ -56,9 +58,9 @@ def dispatch_plotting(
     return all_figures
 
 
-def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figure:
+def plot_data(kind: str, structure: DataSet, **kwargs: any) -> figure:
     """
-    Plots the data stored in a PlottableQueryResult, and saves it to the .figure attribute of the data structure
+    Plots the data stored in a DataSet, and saves it to the .figure attribute of the data structure
     """
 
     module = importlib.import_module(f"ATK.plotting.{structure.kind}")
@@ -97,9 +99,9 @@ def plot_data(kind: str, structure: PlottableQueryResult, **kwargs: any) -> figu
     return Row(*rows)
 
 
-def open(structure: PlottableQueryResult, fname=Path | str | None, **kwargs: dict):
+def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
     """
-    Opens the Bokeh plot in the .figure attribute of a PlottableQueryResult in the default browser
+    Opens the Bokeh plot in the .figure attribute of a DataSet in the default browser
     """
 
     # get previous plot parameters if they exist

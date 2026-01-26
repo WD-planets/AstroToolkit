@@ -9,7 +9,7 @@ from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
-from ...structures.definitions import Image
+from ...structures.Image import Image
 from ...utilities.coordinates import correct_dataframe_coords
 from ..colours import get_palette
 from ..formatting import format_plot
@@ -182,12 +182,7 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     """
 
     # create figure
-    plot = figure(
-        width=400,
-        height=400,
-        title=f"{image.survey} {image.band}-band Image ({image.size})",
-        tools=("pan,wheel_zoom,reset"),
-    )
+    plot = figure(width=400, height=400, title=f"{image.survey} {image.band}-band Image ({image.size})", tools=("pan,wheel_zoom,reset"))
     plot.grid.grid_line_color = None
 
     # get image centre and deg/pixel
@@ -254,14 +249,8 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         plot.yaxis.axis_label = "Declination / deg"
 
         # image bounds in deg
-        x_bounds = (
-            image_search_pos[0] - n_pixels[0] / 2 * pixel_scales[0],
-            image_search_pos[0] + n_pixels[0] / 2 * pixel_scales[0],
-        )
-        y_bounds = (
-            image_search_pos[1] - n_pixels[1] / 2 * pixel_scales[1],
-            image_search_pos[1] + n_pixels[1] / 2 * pixel_scales[1],
-        )
+        x_bounds = (image_search_pos[0] - n_pixels[0] / 2 * pixel_scales[0], image_search_pos[0] + n_pixels[0] / 2 * pixel_scales[0])
+        y_bounds = (image_search_pos[1] - n_pixels[1] / 2 * pixel_scales[1], image_search_pos[1] + n_pixels[1] / 2 * pixel_scales[1])
 
         # image range in deg
         x_range = (x_bounds[1] - x_bounds[0]) * u.deg
@@ -271,16 +260,12 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         if x_range < image_size_deg:
             plot.x_range = Range1d(x_bounds[1], x_bounds[0])
         else:
-            plot.x_range = Range1d(
-                image_search_pos[0] + image_size_deg.value / 2, image_search_pos[0] - image_size_deg.value / 2
-            )
+            plot.x_range = Range1d(image_search_pos[0] + image_size_deg.value / 2, image_search_pos[0] - image_size_deg.value / 2)
 
         if y_range < image_size_deg:
             plot.y_range = Range1d(y_bounds[0], y_bounds[1])
         else:
-            plot.y_range = Range1d(
-                image_search_pos[1] - image_size_deg.value / 2, image_search_pos[1] + image_size_deg.value / 2
-            )
+            plot.y_range = Range1d(image_search_pos[1] - image_size_deg.value / 2, image_search_pos[1] + image_size_deg.value / 2)
 
         search_pos_ra, search_pos_dec = image_search_pos[0], image_search_pos[1]
 

@@ -12,7 +12,8 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
-from ..structures.definitions import BaseContainer, Image
+from ..structures.Image import Image
+from ..structures.structures_core import BaseContainer
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series)

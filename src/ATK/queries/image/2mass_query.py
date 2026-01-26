@@ -1,7 +1,7 @@
 from astropy.io.fits import Header
 from astropy.time import Time
 
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from .irsa_queries import irsa_query
 
 

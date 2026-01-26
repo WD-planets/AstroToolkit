@@ -10,7 +10,7 @@ from bokeh.plotting import figure
 from matplotlib.colors import LinearSegmentedColormap
 from scipy import stats
 
-from ...structures.definitions import HRD
+from ...structures.HRD import HRD
 from ..formatting import format_plot
 
 MAG_MAP = {"Gmag": "phot_g_mean_mag", "BPmag": "phot_bp_mean_mag", "RPmag": "phot_rp_mean_mag"}
@@ -64,11 +64,7 @@ def plot(hrds: list[HRD], **kwargs):
     colours = hrds[0].colour_bands.split("-")
 
     plot = figure(
-        width=400,
-        height=400,
-        x_axis_label=hrds[0].colour_bands,
-        y_axis_label=abs_mag_band,
-        tools=("pan,wheel_zoom,box_zoom,reset"),
+        width=400, height=400, x_axis_label=hrds[0].colour_bands, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset")
     )
 
     with fits.open(backdrop_file) as f:

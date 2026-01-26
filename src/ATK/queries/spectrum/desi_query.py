@@ -5,7 +5,8 @@ from astropy.units import Quantity
 from astroquery.utils.tap.core import TapPlus
 from sparcl.client import SparclClient
 
-from ...structures.definitions import Spectrum, Target
+from ...structures.Spectrum import Spectrum
+from ...structures.Target import Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from ...utilities.misc import angle_to_quantity, suppress_stdout
 

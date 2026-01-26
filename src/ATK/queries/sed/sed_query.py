@@ -2,8 +2,9 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 
-from ...structures.definitions import SED, Target
-from ...Tools import query as general_query
+from ...structures.SED import SED
+from ...structures.Target import Target
+from ...Tools.query import query as general_query
 from ...utilities.defaults import RETURNS
 from .sed_core import SED_INFO, ab_mag_to_flux_mjy, get_ab_mag_offset
 

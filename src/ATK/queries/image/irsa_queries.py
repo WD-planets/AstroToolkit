@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import astropy.units as u
 from requests import Response
 
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 from .image_core import get_image_data

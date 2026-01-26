@@ -8,8 +8,9 @@ from astropy.wcs.utils import proj_plane_pixel_scales
 from ...configuration.base_config import BASE_CONFIG
 from ...configuration.epoch_config import EPOCH_CONFIG
 from ...configuration.overlay_config import OVERLAY_CONFIG
-from ...structures.definitions import Image, Target
-from ...Tools import query
+from ...structures.Image import Image
+from ...structures.Target import Target
+from ...Tools.query import query
 from ...utilities.coordinates import correct_radius, correct_skycoord, dataframe_to_skycoord
 from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids

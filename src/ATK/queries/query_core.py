@@ -1,11 +1,16 @@
 import importlib
+import os
+import warnings
+from pathlib import Path
 from types import FunctionType
 
-import pandas as pd
 from astropy.coordinates import SkyCoord
 
 from ..configuration.base_config import BASE_CONFIG
-from ..structures.definitions import BaseQueryResult, PlottableQueryResult, QueryResult, Target
+from ..io.files.read import read_local
+from ..queries.arguments import get_query_arguments
+from ..structures.DataSet import DataSet
+from ..structures.Target import Target
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_map
@@ -74,7 +79,7 @@ def setup_targeting(kind: str, targeting, **arguments) -> list[Target]:
     return targets
 
 
-def _set_results(structure: QueryResult | PlottableQueryResult, query_result: any) -> QueryResult | PlottableQueryResult:
+def _set_results(structure: DataSet, query_result: any) -> DataSet:
     """
     Sets the .data and .exception attributes of an ATK structure based on what was returned from a query
     """
@@ -113,7 +118,7 @@ def set_container_keys(target: Target, query_result: any) -> any:
     return query_result
 
 
-def image_requery(query_function: FunctionType, target: Target, structure: BaseQueryResult, query_result: list, **arguments) -> tuple[Target, list]:
+def image_requery(query_function: FunctionType, target: Target, structure: DataSet, query_result: list, **arguments) -> tuple[Target, list]:
     from .image.overlays import get_overlay
 
     image_time = query_result[0].search_pos.obstime
@@ -137,7 +142,7 @@ def image_requery(query_function: FunctionType, target: Target, structure: BaseQ
     return target, query_result
 
 
-def single_target_query(kind: str, target: Target, structure: BaseQueryResult, **arguments):
+def single_target_query(kind: str, target: Target, structure: DataSet, **arguments):
     """
     Sets up a query on a single target
     """

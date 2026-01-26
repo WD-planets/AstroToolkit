@@ -16,8 +16,7 @@ from astropy.wcs import WCS, FITSFixedWarning
 from astropy.wcs.utils import proj_plane_pixel_scales
 from reproject import reproject_interp
 
-from ...structures.definitions import Image, Target
-from ...utilities.coordinates import correct_target
+from ...structures.Image import Image
 from ...utilities.defaults import RETURNS
 from ...utilities.requests import send_request
 
@@ -155,15 +154,7 @@ def get_image_data(url: str, survey: str, band: str, size: int, epoch_fetcher: F
     img_centre = get_image_skycoord(img, epoch_fetcher, epoch_key)
     wcs = WCS(hdu.header)
 
-    image = Image(
-        survey=survey,
-        band=band,
-        size=size,
-        search_pos=img_centre,
-        hdu=hdu,
-        wcs=wcs,
-        epoch=epoch_fetcher(hdu.header, epoch_key),
-    )
+    image = Image(survey=survey, band=band, size=size, search_pos=img_centre, hdu=hdu, wcs=wcs, epoch=epoch_fetcher(hdu.header, epoch_key))
 
     return [image]
 

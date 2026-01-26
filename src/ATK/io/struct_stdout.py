@@ -14,7 +14,7 @@ from bokeh.models import Column, Row
 from bokeh.plotting import figure
 
 from ..configuration.base_config import BASE_CONFIG
-from ..structures.definitions import Target
+from ..structures.Target import Target
 from ..utilities.mapping import build_structure_map
 
 # this should be left to False, kwarg 'debug' can be used to set it locally
@@ -429,11 +429,7 @@ def print_methods(cls: any) -> str:
     Prints available methods of an object, excluding
     """
 
-    methods = [
-        name
-        for name, f in inspect.getmembers(cls, inspect.ismethod)
-        if not inspect.isbuiltin(f) and not name.startswith("_")
-    ]
+    methods = [name for name, f in inspect.getmembers(cls, inspect.ismethod) if not inspect.isbuiltin(f) and not name.startswith("_")]
 
     return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 

@@ -4,7 +4,7 @@ from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper
 from bokeh.models.formatters import BasicTickFormatter
 from bokeh.plotting import figure
 
-from ...structures.definitions import Lightcurve
+from ...structures.Lightcurve import Lightcurve
 from ..colours import assign_gradient_palettes
 from ..formatting import format_plot
 
@@ -120,12 +120,7 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwa
     # Plot each band independently
     for lc in lcs:
         plot = plot_band(
-            plot=plot,
-            lc=lc,
-            palette=palette_map[lc.band],
-            time_min=time_min,
-            time_format=time_format,
-            cmap=kwargs.get("cmap", "mean"),
+            plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean")
         )
 
     if "flux" in brightness_type:
@@ -170,7 +165,11 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     for survey in surveys:
         requested_bands = kwargs.get("bands")
         # filter data to only keep requested (and valid) light curves
-        per_survey_lcs = [lc for lc in lightcurves if lc.brightness_type and lc.survey == survey and (requested_bands is None or lc.band in requested_bands)]
+        per_survey_lcs = [
+            lc
+            for lc in lightcurves
+            if lc.brightness_type and lc.survey == survey and (requested_bands is None or lc.band in requested_bands)
+        ]
         # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
 
         bands = list(set(lc.band for lc in per_survey_lcs))

@@ -12,9 +12,9 @@ from erfa import ErfaWarning
 
 from ..configuration.epoch_config import EPOCH_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
-from ..structures.definitions import Target
+from ..structures.DataSet import DataSet
+from ..structures.Target import Target
 from ..utilities.defaults import RETURNS
-from ..utilities.mapping import get_query_result_map
 
 # ignore bad distance warning
 warnings.filterwarnings("ignore", category=ErfaWarning)
@@ -73,15 +73,7 @@ def get_gaia_target(source: int) -> Target:
     else:
         distance = 1000 / parallax * u.pc
 
-    coord = SkyCoord(
-        ra=ra * u.deg,
-        dec=dec * u.deg,
-        pm_ra_cosdec=pmra,
-        pm_dec=pmdec,
-        distance=distance,
-        obstime=gaia_epoch,
-        frame="icrs",
-    )
+    coord = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, obstime=gaia_epoch, frame="icrs")
 
     correction = check_correction(coord)
 
@@ -124,7 +116,7 @@ def correct_target(target: Target, survey: str = None, epoch: Time = None, query
 
 def prepare_search(targets: list[Target], query_kind: str, survey: str = None, epoch: Time = None, **kwargs) -> tuple[SkyCoord, any]:
     """
-    Prepares a search with an input skycoord. Returns the position of the search and a partially completed ATK QueryResult
+    Prepares a search with an input skycoord. Returns the position of the search and a partially completed ATK DataSet
     """
 
     corrected_targets = []
@@ -141,8 +133,7 @@ def prepare_search(targets: list[Target], query_kind: str, survey: str = None, e
         corrected_targets.append(corrected_target)
 
     # create requested structure
-    structure_map = get_query_result_map()
-    structure = structure_map[query_kind](kind=query_kind, survey=survey, targets=targets, radius=kwargs.get("radius", None), exception=False)
+    structure = DataSet(kind=query_kind, survey=survey, targets=targets, radius=kwargs.get("radius", None), exception=False)
 
     return corrected_targets, structure
 

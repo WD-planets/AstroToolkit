@@ -12,13 +12,13 @@ Changes
     - Improved cross-platform file opening
     - Config files now stored in hidden HOME/.AstroToolkit directory
 - Improved .show() (previously .showdata()), now recursively handles the printing of arbitrarily complex structures in an improved format + can optionally show types via show_all_types = True
-    - .show() is now supported on all ATK objects (e.g. QueryResults, Containers, and Targets)
+    - .show() is now supported on all ATK objects (e.g. DataSets, Containers, and Targets)
 - Improved file saving to adaptively store structures as fits files
 - Improved file reading to adaptively generate ATK structures from fits files
 - Opened figures now save to HOME/.AstroToolkit/cached_figures/ temporarily, with a duration given by the config
 - Images bands now correctly supported, and added 2 new colour maps - viridis (default) and false colour. Latter converts filter wavelength to an approximate real colour. Can choose colour map by passing cmap = 'viridis' | 'false_colour' | 'grey' to plot()
 - Image plotting can now use relatives axes (i.e. +- arcsec from the centre)
-- Unified all structures into a single class BaseQueryResult, from which QueryResult and PlottableQueryResult inherit
+- Unified all structures into a single class DataSet
 - Unified .data attribute - all query types now stored data as a list of ATK data containers
 - SkyMapper image queries updated to SkyMapper DR4, and now sorted by exposure time (desc) and air mass (asc) to return best image
 - Image queries to DSS1/DSS2 now properly implemented
@@ -39,7 +39,7 @@ Changes
 - Added query settings config option 'default_scale' = 'arcsec'/'arcmin'/'deg' to choose the default unit for query radius/image sizes (defaults to 'arcsec')
 - Significantly reduced the number of dependencies
 - added ability to query multiple targets at once
-    - QueryResults now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id(), .fetch_by_coord() and .fetch_by_target() methods to extract data per-source
+    - DataSets now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id(), .fetch_by_coord() and .fetch_by_target() methods to extract data per-source
 - added kwarg "background" to HRD plotting, which limits the background sample to a given fraction of the full sample (e.g. 0.5 would half the number of background points to reduced file size and lag)
 - added tab titles to plots when opened in browser
 - added targeting information to figure titles (i.e. identifier or coordinates)
@@ -51,7 +51,7 @@ Changes
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
 - light curve binning now much faster
 - usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
-    - added method .apply() to QueryResult, applies a given method to all stored containers
+    - added method .apply() to DataSet, applies a given method to all stored containers
     - data methods can also be applied to each container individually
     - both of the above support a kwarg 'inplace' to modify the structure/container in-place or perform modifications on a copy which is then returned
 - powspec ('pspec') and phasefolding ('fold') now done via the .apply() method, allowing this data to be stored rather than being performed at plot-time
@@ -60,6 +60,9 @@ Changes
     - all bands have individual fits (toggled using 'fit'=True/False, default False). These are placed vertically by the same method as 'subtract' (if subtract is None, align_method is median)
 - crop data method now supported by SEDs, spectra and power spectra
 - bin data method now supported by spectra
+- improved structure of user-accessible imports
+    - main functions now available via: from ATK import ...
+    - all ATK models available via: from ATK.Models import ...
 
 
 
@@ -108,3 +111,4 @@ To-Do Later
 - move most globals (or things that need to be edited on occasion) to one place (?) + include global prefix to make sure that these aren't edited (?)
 - sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get()) (?)
 - used ValueError too much, should only be used for argument errors
+- struct vs ctnr vs etc.

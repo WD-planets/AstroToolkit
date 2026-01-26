@@ -4,15 +4,17 @@ import astropy.units as u
 from bokeh.models import BasicTickFormatter, ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 
-from ...structures.definitions import SED, PlottableQueryResult, Spectrum
+from ...structures.DataSet import DataSet
+from ...structures.SED import SED
+from ...structures.Spectrum import Spectrum
 from ..colours import get_palette
 from ..formatting import format_plot
 
 
-def overlay_spectrum(sed: SED, spectra: PlottableQueryResult | list[Spectrum] | Spectrum, **kwargs):
+def overlay_spectrum(sed: SED, spectra: DataSet | list[Spectrum] | Spectrum, **kwargs):
     from ..spectrum.plot_spectrum import plot as plot_spectrum
 
-    if isinstance(spectra, PlottableQueryResult):
+    if isinstance(spectra, DataSet):
         spectra = spectra.data
     elif isinstance(spectra, list):
         pass

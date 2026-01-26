@@ -12,8 +12,9 @@ from astropy.units import Quantity, Unit
 from astropy.wcs import WCS
 
 from ...configuration.base_config import translator
-from ...structures.definitions import Image, QueryResult
-from ...utilities.mapping import build_structure_map, get_query_result_map
+from ...structures.DataSet import DataSet
+from ...structures.Image import Image
+from ...utilities.mapping import build_structure_map
 from ...utilities.misc import get_package_version
 from ..target_io import get_targets_from_hdu
 
@@ -87,7 +88,7 @@ def parse_header_skycoord(path: str | Path, hdr: Header, obj: object) -> object:
     return obj
 
 
-def parse_primary_header(path: str | Path, hdr: Header) -> QueryResult:
+def parse_primary_header(path: str | Path, hdr: Header) -> DataSet:
     """
     Parse the primary HDU header, which contains all query information
     """
@@ -99,7 +100,7 @@ def parse_primary_header(path: str | Path, hdr: Header) -> QueryResult:
     if file_ver and file_ver != get_package_version():
         warnings.warn(f"File '{path}' was generated with a different ATK version, and so may not be read correctly.")
 
-    structure = get_query_result_map()[hdr.get("ATK_KIND")]()
+    structure = DataSet()
 
     structure = parse_header(path, hdr, structure)
 
@@ -132,7 +133,7 @@ def parse_header(path: str | Path, hdr: Header, obj: object) -> object:
     return obj
 
 
-def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTableHDU) -> any:
+def parse_generic_bintable(structure: DataSet, path: str | Path, hdu: BinTableHDU) -> any:
     """
     Parse a bintable extension into either a data container or dataframe (for vizier queries)
     """
@@ -179,7 +180,7 @@ def parse_generic_bintable(structure: QueryResult, path: str | Path, hdu: BinTab
     return ctnr
 
 
-def parse_generic_imagehdu(structure: QueryResult, path: str | Path, hdu: ImageHDU) -> any:
+def parse_generic_imagehdu(structure: DataSet, path: str | Path, hdu: ImageHDU) -> any:
     """
     Parse an imageHDU into a data container (i.e. an Image)
     """
@@ -203,7 +204,7 @@ def parse_generic_imagehdu(structure: QueryResult, path: str | Path, hdu: ImageH
 # ----
 
 
-def read_local(path: str | Path) -> QueryResult:
+def read_local(path: str | Path) -> DataSet:
     """
     Read a local ATK fits file back into the original data structure that was used to generate it
     """

@@ -3,7 +3,7 @@ import pandas as pd
 from astropy.time import Time
 from pyasassn.client import SkyPatrolClient
 
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from .lightcurve_core import get_lightcurves
 

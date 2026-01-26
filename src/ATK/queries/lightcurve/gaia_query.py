@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from astropy.time import Time
 
-from ...structures.definitions import Target
-from ...Tools import query as general_query
+from ...structures.Target import Target
+from ...Tools.query import query as general_query
 from ...utilities.defaults import RETURNS
 from ..vizier.vizier_query import gaia_query_by_source
 from .lightcurve_core import get_lightcurves

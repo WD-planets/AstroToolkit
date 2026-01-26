@@ -6,7 +6,8 @@ from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
 
 from ...configuration.alias_config import ALIAS_CONFIG
-from ...structures.definitions import Target, VizierEntry
+from ...structures.Target import Target
+from ...structures.VizierEntry import VizierEntry
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 warnings.simplefilter("ignore", category=NoResultsWarning)

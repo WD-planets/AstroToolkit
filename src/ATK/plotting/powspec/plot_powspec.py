@@ -2,7 +2,7 @@ import numpy as np
 from bokeh.models import Range1d
 from bokeh.plotting import figure
 
-from ...structures.definitions import Powspec
+from ...structures.Powspec import Powspec
 from ..formatting import format_plot
 
 

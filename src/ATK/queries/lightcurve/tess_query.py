@@ -10,7 +10,7 @@ from astropy.table import Table
 from astropy.units import UnitsWarning
 from astroquery.mast import Observations
 
-from ...structures.definitions import Target
+from ...structures.Target import Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from ...utilities.misc import suppress_stdout
 from ...utilities.requests import send_request

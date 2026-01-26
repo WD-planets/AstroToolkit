@@ -9,7 +9,7 @@ from astropy.timeseries import LombScargle, LombScargleMultiband
 
 # get around circular import for type hinting
 if TYPE_CHECKING:
-    from ....structures.definitions import Lightcurve
+    from ....structures.Lightcurve import Lightcurve
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -23,12 +23,7 @@ def format_lc_data(lcs: list[Lightcurve] | Lightcurve):
             brightness_err.append(lc.brightness_err)
             band.append(np.full(len(lc.mjd), lc.band))
     else:
-        mjd, brightness, brightness_err, band = (
-            lcs.mjd,
-            lcs.brightness,
-            lcs.brightness_err,
-            np.full(len(lcs.mjd), lcs.band),
-        )
+        mjd, brightness, brightness_err, band = (lcs.mjd, lcs.brightness, lcs.brightness_err, np.full(len(lcs.mjd), lcs.band))
 
     mjd = np.concatenate(mjd, axis=None) * u.day
     brightness = np.concatenate(brightness, axis=None)

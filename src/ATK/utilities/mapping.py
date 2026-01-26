@@ -4,20 +4,8 @@ import pkgutil
 from enum import EnumType
 from types import ModuleType
 
-from ..structures.definitions import BaseContainer, BaseQueryResult
-from .defaults import QUERY_KINDS
-
-
-def get_query_result_map():
-    """
-    Responds a map {str:class} from query kinds -> query result objects (QueryResult or PlottableQueryResult)
-    """
-
-    from ..structures.definitions import PlottableQueryResult, QueryResult
-
-    NON_PLOTTABLE = ["vizier"]
-
-    return {kind: QueryResult if kind in NON_PLOTTABLE else PlottableQueryResult for kind in QUERY_KINDS}
+from ..structures.DataSet import DataSet
+from ..structures.structures_core import BaseContainer
 
 
 def build_map(root_module: ModuleType, function_name: str, **kwargs):
@@ -61,18 +49,24 @@ def build_structure_map():
     Creates a map of ATK structure definitions, exluding enums
     """
 
-    module = importlib.import_module("ATK.structures.definitions")
-
     struct_map = {}
 
-    for name, obj in inspect.getmembers(module, inspect.isclass):
-        if obj.__module__ != module.__name__:
-            continue
-        if isinstance(obj, EnumType):
-            continue
-        if not issubclass(obj, (BaseContainer, BaseQueryResult)):
-            continue
+    package = importlib.import_module("ATK.structures")
 
-        struct_map[name] = obj
+    for _, module_name, _ in pkgutil.iter_modules(package.__path__):
+        module = importlib.import_module(f"{package.__name__}.{module_name}")
+
+        for name, obj in inspect.getmembers(module, inspect.isclass):
+            # Ensure class is defined in *this* module
+            if obj.__module__ != module.__name__:
+                continue
+
+            if isinstance(obj, EnumType):
+                continue
+
+            if not issubclass(obj, (BaseContainer, DataSet)):
+                continue
+
+            struct_map[name] = obj
 
     return struct_map

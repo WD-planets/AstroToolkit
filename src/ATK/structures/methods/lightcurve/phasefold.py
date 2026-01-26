@@ -8,7 +8,8 @@ import numpy as np
 from .timeseries_core import do_ls
 
 if TYPE_CHECKING:
-    from ....structures.definitions import BaseQueryResult, Lightcurve
+    from ....structures.DataSet import DataSet
+    from ....structures.Lightcurve import Lightcurve
 
 np.seterr(divide="ignore")
 
@@ -29,7 +30,7 @@ def repeat_arrs(x: np.ndarray, *ys: np.ndarray, repeat: int = 2):
 
 
 def fold_lc(
-    struct: BaseQueryResult,
+    struct: DataSet,
     lcs: list[Lightcurve],
     min: float,
     max: float,
@@ -39,7 +40,7 @@ def fold_lc(
     fit: bool = False,
     repeat: int = 2,
 ):
-    from ....structures.definitions import Lightcurve
+    from ....structures.Lightcurve import Lightcurve
 
     align_method = "mean" if subtract == "mean" else "median"
 

@@ -5,7 +5,8 @@ from astropy.table.row import Row
 from astropy.time import Time
 from astropy.units import Unit
 
-from ..structures.definitions import BaseQueryResult, Target
+from ..structures.DataSet import DataSet
+from ..structures.Target import Target
 
 
 def stack_skycoords(coords: list[SkyCoord]):
@@ -87,7 +88,7 @@ def read_skycoord(row: Row, prefix: str = ""):
     return coord
 
 
-def get_targets_from_hdu(structure: BaseQueryResult, primary_hdu: BinTableHDU, target_hdu: BinTableHDU) -> list[Target]:
+def get_targets_from_hdu(structure: DataSet, primary_hdu: BinTableHDU, target_hdu: BinTableHDU) -> list[Target]:
     primary_header = primary_hdu.header
 
     if primary_header.get("ATK_FRAME") and hasattr(structure, "frame"):

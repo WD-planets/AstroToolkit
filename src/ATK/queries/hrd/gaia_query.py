@@ -1,8 +1,9 @@
 import astropy.units as u
 import numpy as np
 
-from ...structures.definitions import HRD, Target
-from ...Tools import query as general_query
+from ...structures.HRD import HRD
+from ...structures.Target import Target
+from ...Tools.query import query as general_query
 from ...utilities.defaults import RETURNS
 
 

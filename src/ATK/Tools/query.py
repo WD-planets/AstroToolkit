@@ -1,18 +1,16 @@
 import os
 import warnings
-from pathlib import Path
 
 from astropy.coordinates import SkyCoord
 
-from .io.files.read import read_local
-from .queries.arguments import get_query_arguments
-from .queries.query_core import general_query, setup_targeting
-from .structures.definitions import PlottableQueryResult, QueryResult
-from .utilities.defaults import RETURNS
-from .utilities.mapping import get_query_result_map
+from ..queries.arguments import get_query_arguments
+from ..queries.query_core import general_query, setup_targeting
+from ..structures.DataSet import DataSet
+from ..utilities.defaults import RETURNS
+from .read import read
 
 
-def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
+def query(kind: str, **arguments) -> DataSet:
     """
     Central query function
     """
@@ -39,8 +37,7 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
     if any(target is RETURNS.EXCEPTION for target in targets):
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
-        structure_map = get_query_result_map()
-        structure = structure_map[kind](kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
+        structure = DataSet[kind](kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
         return structure
 
     # disable proper motion correction
@@ -54,11 +51,3 @@ def query(kind: str, **arguments) -> QueryResult | PlottableQueryResult:
             target.correction = "none"
 
     return general_query(kind, targets, **arguments)
-
-
-def read(path: str | Path):
-    """
-    Reads a local ATK fits file to recreate the original data structure
-    """
-
-    return read_local(path)
