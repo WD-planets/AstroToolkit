@@ -31,20 +31,24 @@ def query(kind: str, **arguments) -> DataSet:
     targeting = target if target is not None else targets
 
     # get flattened list of targets
-    targets = setup_targeting(kind, targeting)
+    targets = setup_targeting(targeting)
 
     # targets may return exception if Vizier is down
     if any(target is RETURNS.EXCEPTION for target in targets):
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
-        structure = DataSet[kind](kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
+        structure = DataSet[kind](
+            kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True
+        )
         return structure
 
     # disable proper motion correction
     if arguments.get("disable_correction", False):
         for target in targets:
             initial_coords = target.initial_coords
-            target.initial_coords = SkyCoord(ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime)
+            target.initial_coords = SkyCoord(
+                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
+            )
             target.coords = initial_coords
             target.identifier = None
             target.survey = None

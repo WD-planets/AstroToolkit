@@ -27,6 +27,14 @@ def do_binning(x: np.ndarray, ys: list[np.ndarray], y_errs: list[np.ndarray], bi
             err = np.ones(x.shape)
             save_errors = False
 
+        y_unit = None
+        if isinstance(y, Quantity):
+            y_unit = y.unit
+
+        x_unit = None
+        if isinstance(x, Quantity):
+            x_unit = x.unit
+
         weights = 1 / np.power(err, 2)
         # numerator
         numerator, bin_edges, _ = stats.binned_statistic(x, y * weights, statistic="sum", bins=bins)
@@ -41,6 +49,13 @@ def do_binning(x: np.ndarray, ys: list[np.ndarray], y_errs: list[np.ndarray], bi
 
         w_mean, w_mean_err, x_bins = df.T.to_numpy()
 
+        if y_unit is not None:
+            w_mean *= y_unit
+            w_mean_err *= y_unit
+
+        if x_unit is not None:
+            x_bins *= x_unit
+
         out_ys.append(w_mean)
         if save_errors:
             out_y_errs.append(w_mean_err)
@@ -49,11 +64,7 @@ def do_binning(x: np.ndarray, ys: list[np.ndarray], y_errs: list[np.ndarray], bi
 
 
 def bin_nd(
-    x: np.ndarray,
-    ys: list[np.ndarray],
-    errs: list[np.ndarray] | None = None,
-    bins: int | None = None,
-    size: Quantity | float | None = None,
+    x: np.ndarray, ys: list[np.ndarray], errs: list[np.ndarray] | None = None, bins: int | None = None, size: Quantity | float | None = None
 ):
     if bins is None == size is None:
         raise ValueError("Exactly one of 'bins', 'size' must be provided.")
@@ -67,5 +78,7 @@ def bin_nd(
         out_x, out_ys, out_y_errs = bin_by_size(x, ys, errs, size)
     else:
         out_x, out_ys, out_y_errs = do_binning(x, ys, errs, bins)
+
+    print(out_ys)
 
     return out_x, out_ys, out_y_errs

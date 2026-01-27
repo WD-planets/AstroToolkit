@@ -7,7 +7,7 @@ from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
 from .structures_core import (GROUP_METHODS, PLOT_METHODS, SPLIT_BY_TARGET,
-                              manage_inplace)
+                              BaseContainer, manage_inplace)
 from .Target import Target
 
 
@@ -155,4 +155,14 @@ class DataSet(BaseDataSet):
         return self
 
     @classmethod
-    def from_target(cls, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None): ...
+    def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None):
+        from ..queries.query_core import setup_targeting
+
+        # kind, targets, survey, radius, exception, data, figure
+
+        targets = setup_targeting(target)
+
+        return cls(kind=kind, targets=targets, survey=survey, radius=radius, exception=False)
+
+    def add(self, data: BaseContainer):
+        self.data.append(data)

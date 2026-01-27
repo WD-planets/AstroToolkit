@@ -1,14 +1,9 @@
 import importlib
-import os
-import warnings
-from pathlib import Path
 from types import FunctionType
 
 from astropy.coordinates import SkyCoord
 
 from ..configuration.base_config import BASE_CONFIG
-from ..io.files.read import read_local
-from ..queries.arguments import get_query_arguments
 from ..structures.DataSet import DataSet
 from ..structures.Target import Target
 from ..utilities.coordinates import correct_target, prepare_search
@@ -50,7 +45,7 @@ def _make_target(obj, astrometric_backend):
     raise TypeError(f"Unsupported target type: {type(obj)}")
 
 
-def setup_targeting(kind: str, targeting, **arguments) -> list[Target]:
+def setup_targeting(targeting: any) -> list[Target]:
     """
     Normalise user targeting input into a list of Targets
     """
