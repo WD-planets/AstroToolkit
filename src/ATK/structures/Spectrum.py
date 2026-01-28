@@ -4,22 +4,25 @@ import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 
-from .structures_core import BaseContainer
-from .structures_core import QuantityArray, manage_inplace
+from .structures_core import Container, QuantityArray, manage_inplace
 
 
 @dataclass(repr=False)
-class Spectrum(BaseContainer):
+class Spectrum(Container):
+    # --- metadata ---
     survey: str | None = None
     correction: str | None = None
     search_pos: SkyCoord | None = None
-
     separation: Quantity | None = None
     exposure: Quantity | None = None
+
+    # --- data ---
     wavelength: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
 
-    def crop(self, min: float, max: float, inplace=True):
+    _required: tuple[str] = ("wavelength", "flux")
+
+    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
@@ -46,3 +49,8 @@ class Spectrum(BaseContainer):
         struct.flux = ys[0]
 
         return struct
+
+    def rv_fit(self, feature_wavelengths: list[float], feature_widths: list[float]):
+        from .methods.spectrum.fitting_2 import do_fitting
+
+        do_fitting(self, feature_wavelengths, feature_widths)

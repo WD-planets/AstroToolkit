@@ -1,22 +1,26 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity, u
 
-from .structures_core import BaseContainer
-from .structures_core import GROUP_METHODS, QuantityArray, manage_inplace
+from .structures_core import (GROUP_METHODS, Container, QuantityArray,
+                              manage_inplace)
 
 
 @dataclass(repr=False)
-class Lightcurve(BaseContainer):
+class Lightcurve(Container):
+    # --- metadata ---
     survey: str | None = None
     correction: str | None = None
     search_pos: SkyCoord | None = None
     separation: Quantity | None = None
     band: str | None = None
-
     obj_id: str | None = None
+
+    _required: list = field(default_factory=list)
+
+    # --- data ---
     mjd: numpy.ndarray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
     flux_err: numpy.ndarray | QuantityArray | None = None
@@ -25,7 +29,7 @@ class Lightcurve(BaseContainer):
     ra: numpy.ndarray | None = None
     dec: numpy.ndarray | None = None
 
-    # folded parameters
+    # --- folded data ---
     phase: numpy.ndarray | None = None
     fit_x: numpy.ndarray | None = None
     fit_y: numpy.ndarray | None = None
@@ -96,7 +100,7 @@ class Lightcurve(BaseContainer):
     def set_time(self, val: numpy.ndarray):
         setattr(self, self.time_type, val)
 
-    def crop(self, min: float, max: float, inplace=True):
+    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)

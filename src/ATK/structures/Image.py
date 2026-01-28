@@ -6,11 +6,11 @@ from astropy.io.fits import ImageHDU
 from astropy.time import Time
 from astropy.units import Quantity
 from astropy.wcs import WCS
-from .structures_core import BaseContainer
+from .structures_core import Container
 
 
 @dataclass(repr=False)
-class Image(BaseContainer):
+class Image(Container):
     survey: str | None = None
     correction: str | None = None
     search_pos: SkyCoord | None = None

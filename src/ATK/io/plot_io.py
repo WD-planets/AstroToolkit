@@ -13,7 +13,7 @@ from bokeh.plotting import figure, show
 
 from ..configuration.base_config import BASE_CONFIG
 from ..structures.DataSet import DataSet
-from ..structures.structures_core import BaseContainer
+from ..structures.structures_core import Container
 from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
@@ -24,7 +24,7 @@ def dispatch_plotting(
     all_figures: list,
     plotting_func: FunctionType,
     structure: DataSet,
-    containers: list[BaseContainer],
+    containers: list[Container],
     target: Target | None = None,
     **kwargs,
 ):

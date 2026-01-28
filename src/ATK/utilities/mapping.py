@@ -5,7 +5,7 @@ from enum import EnumType
 from types import ModuleType
 
 from ..structures.DataSet import DataSet
-from ..structures.structures_core import BaseContainer
+from ..structures.structures_core import Container
 
 
 def build_map(root_module: ModuleType, function_name: str, **kwargs):
@@ -64,7 +64,7 @@ def build_structure_map():
             if isinstance(obj, EnumType):
                 continue
 
-            if not issubclass(obj, (BaseContainer, DataSet)):
+            if not issubclass(obj, (Container, DataSet)):
                 continue
 
             struct_map[name] = obj

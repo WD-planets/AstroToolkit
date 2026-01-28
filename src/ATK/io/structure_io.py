@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import typing
 from dataclasses import fields, is_dataclass
 from types import NoneType, UnionType
-from typing import get_args, get_origin
+from typing import TYPE_CHECKING, get_args, get_origin
 
 import astropy.units as u
 import numpy as np
@@ -12,8 +14,9 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
-from ..structures.Image import Image
-from ..structures.structures_core import BaseContainer
+if TYPE_CHECKING:
+    from ..structures.Image import Image
+    from ..structures.structures_core import Container
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series)
@@ -153,26 +156,6 @@ def get_cols(structure: any) -> tuple[str]:
 # -----------------------
 
 
-def struct_to_dataframe(structure: any) -> pd.DataFrame:
-    """
-    Combines the array-like attributes of a data structure into a single pandas DataFrame
-    """
-
-    cols = get_cols(structure)
-
-    data = {}
-    for col in cols:
-        val = getattr(structure, col)
-        if val is None:
-            continue
-
-        if not isinstance(val, COLUMN_TYPES):
-            val = [val]
-        data[col] = val
-
-    return pd.DataFrame.from_dict(data)
-
-
 def struct_to_table(structure: any) -> Table:
     """
     Combines array-like attributes of a data structure into a single astropy Table
@@ -207,21 +190,6 @@ def struct_from_table(ctnr: any, data: Table, **kwargs: dict) -> any:
                 relevant_data[col_name] = Quantity(col, unit=unit)
             else:
                 relevant_data[col_name] = np.array(col)
-
-    for arg, val in kwargs.items():
-        if hasattr(ctnr, arg) and arg not in ctnr_cols:
-            relevant_data[arg] = val
-
-    return ctnr(**relevant_data)
-
-
-def struct_from_dataframe(ctnr: any, data: pd.DataFrame, **kwargs: dict) -> any:
-    ctnr_cols = get_cols(ctnr)
-
-    relevant_data = {}
-    for col in data.columns.values.tolist():
-        if hasattr(ctnr, col) and col in ctnr_cols:
-            relevant_data[col] = data[col].to_numpy()
 
     for arg, val in kwargs.items():
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
@@ -306,7 +274,7 @@ def image_to_hdu(image: Image):
     return (image_hdu, overlay_hdu)
 
 
-def simple_to_hdu(entry: BaseContainer):
+def simple_to_hdu(entry: Container):
     table = Table.from_pandas(entry.data)
     hdr = Header()
 

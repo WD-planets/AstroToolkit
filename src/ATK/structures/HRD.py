@@ -3,11 +3,11 @@ from dataclasses import dataclass
 import numpy
 from astropy.units import Quantity
 
-from .structures_core import BaseContainer
+from .structures_core import Container
 
 
 @dataclass(repr=False)
-class HRD(BaseContainer):
+class HRD(Container):
     survey: str | None = None
     identifier: int | None = None
     correction: str | None = None

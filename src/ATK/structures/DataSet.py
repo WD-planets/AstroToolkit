@@ -6,8 +6,7 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
-from .structures_core import (GROUP_METHODS, PLOT_METHODS, SPLIT_BY_TARGET,
-                              BaseContainer, manage_inplace)
+from .structures_core import GROUP_METHODS, PLOT_METHODS, SPLIT_BY_TARGET, Container, manage_inplace
 from .Target import Target
 
 
@@ -84,7 +83,7 @@ class BaseDataSet:
 
         return fname
 
-    def apply(self, method: str, inplace=True, *args, **kwargs):
+    def apply(self, method: str, *args, inplace=True, **kwargs):
         struct = manage_inplace(self, inplace)
 
         if method in GROUP_METHODS:
@@ -164,5 +163,5 @@ class DataSet(BaseDataSet):
 
         return cls(kind=kind, targets=targets, survey=survey, radius=radius, exception=False)
 
-    def add(self, data: BaseContainer):
+    def add(self, data: Container):
         self.data.append(data)

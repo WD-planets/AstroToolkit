@@ -79,6 +79,4 @@ def bin_nd(
     else:
         out_x, out_ys, out_y_errs = do_binning(x, ys, errs, bins)
 
-    print(out_ys)
-
     return out_x, out_ys, out_y_errs

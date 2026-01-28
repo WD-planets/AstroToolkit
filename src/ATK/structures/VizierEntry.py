@@ -2,11 +2,11 @@ from dataclasses import dataclass
 
 import pandas
 
-from .structures_core import BaseContainer
+from .structures_core import Container
 
 
 @dataclass(repr=False)
-class VizierEntry(BaseContainer):
+class VizierEntry(Container):
     survey: str | None = None
     catalogue: str | None = None
     correction: str | None = None

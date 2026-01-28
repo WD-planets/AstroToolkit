@@ -1,7 +1,7 @@
-from ..structures.structures_core import BaseContainer
+from ..structures.structures_core import Container
 
 
-def get_axis_label(ctnr: BaseContainer, attr: str):
+def get_axis_label(ctnr: Container, attr: str):
     """
     Returns a Bokeh-suitable axis label for an astropy quantity
     """

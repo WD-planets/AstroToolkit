@@ -11,6 +11,22 @@ from ...utilities.misc import angle_to_quantity
 REQUIRED_COLS = ["band", "mjd", "mag", "mag_err", "ra", "dec"]
 
 
+def create_lc(data: pd.DataFrame, target: Target, survey: str, band: str, id: str):
+    lc = Lightcurve(
+        survey=survey,
+        search_pos=target.coords,
+        band=band,
+        mjd=data["mjd"].to_numpy(),
+        mag=data["mag"].to_numpy(),
+        mag_err=data["mag_err"].to_numpy(),
+        ra=data["ra"].to_numpy(),
+        dec=data["dec"].to_numpy(),
+        obj_id=id,
+    )
+
+    return lc
+
+
 def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.DataFrame, split: bool) -> Lightcurve:
     # check for any missing columns
     missing_cols = [col for col in REQUIRED_COLS if col not in data.columns]
@@ -35,12 +51,11 @@ def get_lightcurves(survey: str, target: Target, radius: Quantity, data: pd.Data
                     continue
 
                 obj_data = obj_data[REQUIRED_COLS]
-                lc = Lightcurve.from_dataframe(obj_data, search_pos=target.coords, survey=survey, band=band)
-                lc.obj_id = str(id)
+                lc = create_lc(obj_data, target.coords, survey, band, id)
                 lcs.append(lc)
         else:
             band_data = band_data[REQUIRED_COLS]
-            lcs.append(Lightcurve.from_dataframe(band_data, search_pos=target.coords, survey=survey, band=band))
+            lc = create_lc(obj_data, target.coords, survey, band)
 
     # sort by object ID
     if split:

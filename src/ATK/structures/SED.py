@@ -2,12 +2,11 @@ from dataclasses import dataclass
 
 import numpy
 
-from .structures_core import BaseContainer
-from .structures_core import QuantityArray, manage_inplace
+from .structures_core import Container, QuantityArray, manage_inplace
 
 
 @dataclass(repr=False)
-class SED(BaseContainer):
+class SED(Container):
     survey: numpy.ndarray | None = None
     correction: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
@@ -20,7 +19,7 @@ class SED(BaseContainer):
     def __repr__(self):
         return "<Spectral Energy Distribution>"
 
-    def crop(self, min: float, max: float, inplace=True):
+    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
