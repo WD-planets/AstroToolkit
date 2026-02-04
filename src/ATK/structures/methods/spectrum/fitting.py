@@ -1,25 +1,46 @@
+import warnings
+
+import astropy.units as u
 import numpy as np
 import pandas as pd
+from astropy.stats import sigma_clip
 from astropy.units import Quantity
 from bokeh.io import show
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
-from scipy.optimize import curve_fit
+from scipy.ndimage import gaussian_filter1d
+from scipy.optimize import OptimizeWarning, curve_fit
 from scipy.signal import find_peaks
 
+from ....plotting.formatting import format_plot
 from ....structures.Spectrum import Spectrum
 
+warnings.simplefilter("ignore", category=OptimizeWarning)
+
+DEBUG = False
+
 C_KMS = 299792.458
-BIN_N = 10
 GAUSS_PARAMS = ("h", "a", "mu", "sigma")
+
+INIT_WINDOW_WIDTH = 75  # initial window width in pixels
+MIN_PROM = 1.0  # minimum prominence of peaks
+MIN_SEP = 10  # minimum separation of 'new' peaks in pixels
+MIN_WIDTH = 10
+
+PROM_WEIGHT = 2.0  # weighting on prominence in scoring peaks
+SEP_WEIGHT = 1.0  # weighting on separation in scoring peaks
+
+INIT_LOCAL_WIN_WIDTH = 200  # width of initial local window in pixels
+FINAL_LOCAL_WIN_WIDTH = 5  # width of final local window in sigma
+
+CORE_SIGMA_WIDTH = 3  # width of 'core' of peak in sigma, used to determine edge pixels
+MIN_EDGE_POINTS = 4  # minimum number of points to use in continuum estimation
+
+FINAL_PLOTTING_WIDTH = 4  # width of final plotted Gaussian in sigma
 
 
 def get_velocities(wav: Quantity, wav_ref: Quantity) -> np.ndarray:
-    return (wav - wav_ref) / wav_ref * C_KMS
-
-
-def basic_bin(data: np.ndarray, bin_n: int):
-    return data[: (data.size // bin_n) * bin_n].reshape(-1, bin_n).mean(axis=1)
+    return (wav - wav_ref) / wav_ref * C_KMS * u.Unit("km s-1")
 
 
 def gaussian(x, h, a, mu, sigma, sign=-1.0):
@@ -41,99 +62,267 @@ def make_gaussian(fixed):
     return model
 
 
-def fit_gaussian(x, y, p0, fixed=None):
+def estimate_continuum(plot, x, y, mu, sigma):
+    wing_mask = np.abs(x - mu) > CORE_SIGMA_WIDTH * sigma
+
+    x_w = x[wing_mask]
+    y_w = y[wing_mask]
+
+    clipped = sigma_clip(y_w, sigma=3.0)
+
+    if wing_mask.sum() < MIN_EDGE_POINTS:
+        return np.median(y), x_w[~clipped.mask], y_w[~clipped.mask]
+
+    if clipped.count() < MIN_EDGE_POINTS:
+        return np.median(y_w), x_w[~clipped.mask], y_w[~clipped.mask]
+
+    return np.median(clipped.data[~clipped.mask]), x_w[~clipped.mask], y_w[~clipped.mask]
+
+
+def fit_gaussian(plot: figure, spectrum: Spectrum, p0: dict, snr_limit: float, fixed: dict | None = None):
     fixed = fixed or {}
+
+    d_pix = np.mean(np.diff(spectrum.wavelength))
+
+    init_pad = INIT_LOCAL_WIN_WIDTH * d_pix
+    local_mask = (spectrum.wavelength >= p0["mu"] - init_pad) & (spectrum.wavelength <= p0["mu"] + init_pad)
+    local_x, local_y = spectrum.wavelength[local_mask], spectrum.flux[local_mask]
+
+    # if DEBUG:
+    #     box = BoxAnnotation(left=p0["mu"] - INIT_PAD, right=p0["mu"] + INIT_PAD, fill_alpha=0.15, fill_color="orange")
+    #     plot.add_layout(box)
+
+    p0["sigma"] = 3 * d_pix
+    p0["h"] = np.median(local_y)
+
+    if p0["sign"] == -1:
+        p0["a"] = np.abs(p0["h"] - local_y.min())
+    else:
+        p0["a"] = np.abs(local_y.max() - p0["h"])
 
     model = make_gaussian(fixed)
     free_p0 = [p0[k] for k in GAUSS_PARAMS if k not in fixed]
 
-    popt, pcov = curve_fit(model, x, y, p0=free_p0, maxfev=20000)
+    popt, pcov = curve_fit(model, local_x, local_y, p0=free_p0, maxfev=20000)
 
-    params = fixed.copy()
-    i = 0
-    for name in GAUSS_PARAMS:
-        if name not in params:
-            params[name] = popt[i]
-            i += 1
+    h, a, mu, sigma = popt
 
-    return params, model(x, *popt)
+    sigma = abs(sigma)
+    if not np.isfinite(sigma) or sigma < d_pix:
+        sigma = FINAL_LOCAL_WIN_WIDTH * d_pix
+
+    final_pad = FINAL_LOCAL_WIN_WIDTH * sigma
+    local_mask = (spectrum.wavelength >= mu - final_pad) & (spectrum.wavelength <= mu + final_pad)
+    local_x, local_y = spectrum.wavelength[local_mask], spectrum.flux[local_mask]
+
+    # if DEBUG:
+    #     box = BoxAnnotation(left=mu - FINAL_PAD, right=mu + FINAL_PAD, fill_alpha=0.15, fill_color="red")
+    #     plot.add_layout(box)
+
+    model_free = make_gaussian({})
+    y_model = model_free(local_x, h, a, mu, sigma)
+    y_resid = local_y - (y_model - h)
+
+    continuum_h, wing_x, wing_y = estimate_continuum(plot, local_x, y_resid, mu, sigma)
+    model = make_gaussian(fixed={"h": continuum_h})
+
+    a0 = a
+    mu0 = mu
+    sigma0 = max(sigma, d_pix)
+
+    popt, pcov = curve_fit(model, local_x, local_y, p0=[a0, mu0, sigma0], maxfev=20000)
+
+    params = {"h": continuum_h}
+
+    for name, val in zip(("a", "mu", "sigma"), popt):
+        params[name] = val
+
+    x_mask = (spectrum.wavelength >= mu - FINAL_PLOTTING_WIDTH * sigma) & (spectrum.wavelength <= mu + FINAL_PLOTTING_WIDTH * sigma)
+    final_x = spectrum.wavelength[x_mask]
+    final_y = model(final_x, *popt)
+
+    local_y_smooth = gaussian_filter1d(local_y, sigma=5)
+    resid = local_y - local_y_smooth
+    noise = 1.4826 * np.median(np.abs(resid - np.median(resid)))
+
+    peak_amp = final_y.max() - final_y.min()
+    peak_width = final_x.max() - final_x.min()
+    peak_pix = len(final_x)
+
+    peak_snr = peak_amp / noise
+
+    filtering = {
+        "peak_width": [peak_width],
+        "peak_amp": peak_amp,
+        "peak_snr": peak_snr,
+        "peak_pix": peak_pix,
+        "local_noise": noise,
+        "local_std": np.std(final_y),
+        "continuum_h": continuum_h,
+    }
+
+    if peak_width > 0.1 * (spectrum.wavelength.max() - spectrum.wavelength.min()):
+        return None, f"width too wide ({peak_width:.2f})", filtering
+
+    if DEBUG:
+        plot.line(local_x, [continuum_h] * len(local_x), line_color="red", legend_label="Continuum Level")
+        plot.scatter(wing_x, wing_y, size=4, alpha=0.6, color="orange", legend_label="Continuum Points")
+
+    if peak_width < 10:
+        return None, f"width too narrow ({peak_pix} px)", filtering
+
+    if peak_snr < snr_limit:
+        return None, f"snr too low ({peak_snr:.2f})", filtering
+
+    final_model = {
+        "mu": params["mu"],
+        "sigma": params["sigma"],
+        "a": params["a"],
+        "h": params["h"],
+        "sign": p0["sign"],
+        "model_x": final_x,
+        "model_y": final_y,
+    }
+
+    return final_model, "accepted", filtering
 
 
-def estimate_priors(plot: figure, spectrum: Spectrum, line_vel: float, width: float, completed: list[int]):
-    flux_b = basic_bin(spectrum.flux, BIN_N)
-    vel_b = basic_bin(spectrum.velocity, BIN_N)
+def detect_features(plot, spectrum: Spectrum, min_prominence: float, smoothing: int):
+    flux_smooth = gaussian_filter1d(spectrum.flux, sigma=smoothing)
 
-    plot.line(vel_b, flux_b, line_alpha=0.25, line_width=5, line_color="black")
+    # emission peaks
+    em_peaks, em_props = find_peaks(flux_smooth, prominence=min_prominence, width=MIN_WIDTH)
 
-    # absorption → invert flux
-    peaks, props = find_peaks(-flux_b, prominence=0.5 * np.std(flux_b))
+    # absorption peaks
+    abs_peaks, abs_props = find_peaks(-flux_smooth, prominence=min_prominence, width=MIN_WIDTH)
 
-    if len(peaks) == 0:
-        return None
+    # combine
+    peaks = np.concatenate([em_peaks, abs_peaks])
+    signs = np.concatenate([np.ones(len(em_peaks), dtype=int), -np.ones(len(abs_peaks), dtype=int)])
+    prominences = np.concatenate([em_props["prominences"], abs_props["prominences"]])
+    widths = np.concatenate([em_props["widths"], abs_props["widths"]])
 
-    hvr = HoverTool(tooltips=[("peak", "@peak"), ("prominence", "@prominence")])
-    source = pd.DataFrame(
-        {
-            "peak": peaks,
-            "prominence": props["prominences"],
-            "vel": vel_b[peaks],
-            "flux": flux_b[peaks],
-            "sep": np.abs(vel_b[peaks] - line_vel),
-        }
-    )
-    source = source.sort_values(by=["sep", "prominence"])
-    scatter = plot.scatter(source=source, x="vel", y="flux", marker="x", size=10, line_color="red")
-    hvr.renderers = [scatter]
-    plot.add_tools(hvr)
-    peaks = source["peak"].to_numpy()
+    score = PROM_WEIGHT * prominences + SEP_WEIGHT * widths
 
-    idx = peaks[0]
-    while idx in completed:
-        idx = peaks[0]
-        peaks = [peak for peak in peaks if peak != idx]
+    data = pd.DataFrame({"idx": peaks, "sign": signs, "prominence": prominences, "width": widths, "score": score}).sort_values("idx")
 
-    mu = vel_b[idx]
-    h = np.median(flux_b)
-    a = h - flux_b[idx]
-
-    sigma = width / (2 * np.sqrt(2 * np.log(2)))
-
-    return {"id": idx, "h": h, "a": a, "mu": mu, "sigma": sigma}
-
-
-def do_fitting(spectrum: Spectrum, wavelengths: list[float], widths: list[float]):
-    # get velocities of requested features
-    if not isinstance(wavelengths, np.ndarray):
-        wavelengths = np.asarray(wavelengths)
-
-    line_vels = get_velocities(wavelengths, wavelengths[0])
-    vel = get_velocities(spectrum.wavelength, wavelengths[0])
-
-    vel_spec = spectrum.vspec(wav_ref=wavelengths[0], inplace=False)
-
-    plot = figure(
-        width=1000,
-        height=500,
-        x_axis_label=r"Velocity / $$\text{km\,s}^{-1}$$",
-        y_axis_label=r"Flux / $$10^{-16}\text{erg}\,\text{s}^{-1}\,\text{cm}^{-2}\,\text{Angstrom}^{-1}$$",
-    )
-
-    data = ColumnDataSource(data={"v": vel, "f": spectrum.flux})
-    plot.line(x="v", y="f", source=data, line_color="black")
-
-    completed = []
-    for line_vel, width in zip(line_vels, widths):
-        priors = estimate_priors(plot, vel_spec, line_vel, width, completed)
-
-        if priors is None:
+    keep = []
+    last_idx = None
+    for _, row in data.iterrows():
+        if last_idx is None:
+            keep.append(row)
+            last_idx = row["idx"]
             continue
 
-        completed.append(priors["id"])
+        if row["idx"] - last_idx < MIN_SEP:
+            if row["score"] > keep[-1]["score"]:
+                keep[-1] = row
+        else:
+            keep.append(row)
+            last_idx = row["idx"]
 
-        low, high = priors["mu"] - width, priors["mu"] + width
-        peak_data = vel_spec.crop(min=low, max=high, inplace=False)
+    data = pd.DataFrame(keep)
 
-        params, fit_y = fit_gaussian(peak_data.velocity, peak_data.flux, priors)
-        plot.line(peak_data.velocity, fit_y, line_color="green", line_width=2)
+    data["vel"] = spectrum.wavelength[data["idx"].to_numpy(dtype=int)]
+    data["flux"] = spectrum.flux[data["idx"].to_numpy(dtype=int)]
+
+    return flux_smooth, data
+
+
+def subtract_peak(wavelength: np.ndarray, flux: np.ndarray, model_x: np.ndarray, model_y: np.ndarray, h: float):
+    mask = (wavelength >= model_x.min()) & (wavelength <= model_x.max())
+    flux_new = flux.copy()
+    flux_new[mask] -= model_y - h
+
+    return flux_new
+
+
+def mad_sigma(x):
+    return 1.4826 * np.nanmedian(np.abs(x - np.nanmedian(x)))
+
+
+def remove_false_features(plot, spectrum, fits):
+    from scipy.ndimage import generic_filter, median_filter
+
+    resid_flux = spectrum.flux.copy()
+    for fit in fits:
+        resid_flux = subtract_peak(spectrum.wavelength, resid_flux, fit["model_x"], fit["model_y"], fit["h"])
+
+    resid_flux = sigma_clip(resid_flux, sigma=3)
+    resid_flux = resid_flux.filled(np.nan)
+    resid_flux = np.asarray(resid_flux, dtype=float)
+
+    window = 200
+    continuum = median_filter(resid_flux, size=window)
+
+    sigma = generic_filter(resid_flux, mad_sigma, size=window)
+
+    keep = []
+    for fit in fits:
+        idx = np.abs(spectrum.wavelength - fit["mu"]).argmin()
+        peak_val = fit["model_y"].max() if fit["sign"] == 1 else fit["model_y"].min()
+
+        if np.abs(peak_val - continuum[idx]) > 3 * sigma[idx]:
+            keep.append(fit)
+
+    if DEBUG:
+        plot.line(spectrum.wavelength, resid_flux, line_color="blue", legend_label="Residual Flux")
+        plot.line(spectrum.wavelength, continuum, line_color="red", legend_label="Running Median Flux")
+
+    return keep
+
+
+def do_fitting(spectrum: Spectrum, prominence: float, snr: float, smoothing: int, debug=False):
+    global DEBUG
+    DEBUG = debug
+
+    wavelength_unit = spectrum.wavelength.unit
+
+    spectrum.wavelength = spectrum.wavelength.value
+    spectrum.flux = spectrum.flux.value
+
+    plot = figure(width=1000, height=500, x_axis_label=f"Wavelength / {wavelength_unit.to_string('unicode')}", y_axis_label="Flux")
+    plot.line(spectrum.wavelength, spectrum.flux, line_color="black", line_alpha=0.5)
+
+    flux_smooth, peak_data = detect_features(plot, spectrum, prominence, smoothing)
+
+    fits, responses = [], []
+    filtering = []
+    for index, row in peak_data.iterrows():
+        p0 = {}
+        p0["mu"] = row["vel"]
+        p0["sign"] = row["sign"]
+
+        fit, response, filter = fit_gaussian(plot, spectrum, p0, snr_limit=snr, fixed={})
+
+        if fit:
+            fits.append(fit)
+        responses.append(response)
+        filtering.append(filter)
+
+    fits = remove_false_features(plot, spectrum, fits)
+    for fit in fits:
+        plot.line(fit["model_x"], fit["model_y"], line_color="limegreen", line_width=2, legend_label="Detected Peaks")
+
+    plot.line(spectrum.wavelength, flux_smooth, line_alpha=0.3, line_width=3, line_color="red", legend_label="Smoothed Flux")
+
+    filtering_df = pd.concat(pd.DataFrame(dct) for dct in filtering).reset_index(drop=True)
+
+    if DEBUG:
+        df = pd.DataFrame(
+            {
+                "x": spectrum.wavelength[peak_data["idx"].to_numpy(dtype=int)],
+                "y": flux_smooth[peak_data["idx"].to_numpy(dtype=int)],
+                "response": responses,
+            }
+        )
+        df = pd.concat([df, filtering_df], axis=1)
+        source = ColumnDataSource(df)
+        scatter = plot.scatter("x", "y", source=source, marker="x", size=10, color="red", legend_label="Detected Peaks")
+        hvr = HoverTool(tooltips=[(name, f"@{name}") for name in df.columns.values.tolist()])
+        hvr.renderers = [scatter]
+        plot.add_tools(hvr)
+
+    plot = format_plot("spectrum", plot)
 
     show(plot)

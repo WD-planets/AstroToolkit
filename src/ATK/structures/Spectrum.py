@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
@@ -31,8 +32,16 @@ class Spectrum(Container):
         # ensure valid combination of wavelength/velocity
         if self.velocity is None:
             self.__dict__.pop("velocity", None)
+            if not isinstance(self.wavelength, Quantity):
+                self.wavelength = self.wavelength * u.angstrom
+
         if self.wavelength is None:
+            if not isinstance(self.velocity, Quantity):
+                self.velocity = self.velocity * u.km_per_s
             self.__dict__.pop("wavelength", None)
+
+        if not isinstance(self.flux, Quantity):
+            self.flux = self.flux * u.Unit("1e-17 erg cm-2 s-1 Angstrom-1")
 
     @property
     def x_type(self):
@@ -78,17 +87,20 @@ class Spectrum(Container):
 
         return struct
 
-    def rv_fit(self, feature_wavelengths: list[float], feature_widths: list[float]):
+    def rv_fit(self, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs):
         from .methods.spectrum.fitting import do_fitting
 
-        do_fitting(self, feature_wavelengths, feature_widths)
+        do_fitting(self, prominence=prominence, smoothing=smoothing, snr=snr, **kwargs)
 
     def vspec(self, wav_ref: float | Quantity, inplace: bool = True):
         from .methods.spectrum.fitting import get_velocities
 
         struct = manage_inplace(self, inplace)
 
-        struct.velocity = get_velocities(struct.wavelength, wav_ref)
+        if isinstance(wav_ref, Quantity):
+            wav_ref = wav_ref.to(struct.wavelength.unit).value
+
+        struct.velocity = get_velocities(struct.wavelength.value, wav_ref)
         struct.wavelength = None
 
         return struct

@@ -63,6 +63,7 @@ Changes
 - improved structure of user-accessible imports
     - main functions now available via: from ATK import ...
     - all ATK models available via: from ATK.Models import ...
+- Added spectral peak fitting for radial velocity estimation via data method "rv_fit"
 
 
 
