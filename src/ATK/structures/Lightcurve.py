@@ -4,8 +4,9 @@ import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity, u
 
-from .structures_core import (GROUP_METHODS, Container, QuantityArray,
-                              manage_inplace)
+from .methods.lightcurve.phasefold import fold_lc
+from .methods.lightcurve.powspec import gen_powspec
+from .structures_core import Container, QuantityArray, manage_inplace
 
 
 @dataclass(repr=False)
@@ -19,6 +20,9 @@ class Lightcurve(Container):
     obj_id: str | None = None
 
     _required: list = field(default_factory=list)
+
+    _data_methods: tuple = ("crop", "bin")
+    _group_data_methods: dict = field(default_factory=lambda: {"fold": fold_lc, "pspec": gen_powspec})
 
     # --- data ---
     mjd: numpy.ndarray | None = None
@@ -162,6 +166,6 @@ class Lightcurve(Container):
         return struct
 
     def fold(ctnrs: list[object], min: float, max: float, samples: int):
-        return GROUP_METHODS["fold"](ctnrs, min=min, max=max, samples=samples)
+        return fold_lc(ctnrs, min=min, max=max, samples=samples)
 
     def pspec(self, samples: int): ...

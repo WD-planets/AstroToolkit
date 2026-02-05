@@ -1,5 +1,5 @@
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy
 import pandas
@@ -8,15 +8,10 @@ from astropy.io.fits import BinTableHDU
 from astropy.units import Quantity, Unit
 
 from ..io.structure_io import COLUMN_TYPES, get_cols
-from .methods.lightcurve.phasefold import fold_lc
-from .methods.lightcurve.powspec import gen_powspec
 from .Target import Target
 
-# data methods that required a collection of containers to be processed
-GROUP_METHODS = {"fold": fold_lc, "pspec": gen_powspec}
-
 # whether to combine data structures into combined plots
-PLOT_METHODS = {
+COMBINE_PLOTS = {
     "image": "individual",
     "lightcurve": "combined",
     "spectrum": "individual",
@@ -50,6 +45,12 @@ def manage_inplace(structure: any, inplace: bool):
 @dataclass
 class Container:
     _target_key: str | None = None
+    _plot_id: str | None = None
+
+    _data_methods: tuple = ()
+    _group_data_methods: dict = field(default_factory=dict)
+    _plot_methods: dict = field(default_factory=dict)
+    _group_plot_methods: dict = field(default_factory=dict)
 
     def show(self, show_all_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure

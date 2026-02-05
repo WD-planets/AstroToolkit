@@ -6,7 +6,8 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
-from .structures_core import GROUP_METHODS, PLOT_METHODS, SPLIT_BY_TARGET, Container, manage_inplace
+from .structures_core import (COMBINE_PLOTS, SPLIT_BY_TARGET, Container,
+                              manage_inplace)
 from .Target import Target
 
 
@@ -84,28 +85,14 @@ class BaseDataSet:
         return fname
 
     def apply(self, method: str, *args, inplace=True, **kwargs):
+        from .methods.apply import apply_methods
+
         struct = manage_inplace(self, inplace)
 
-        if method in GROUP_METHODS:
-            # collect by target key
-            data = []
-            keys = list(set([ctnr._target_key for ctnr in self.data]))
-            for key in keys:
-                ctnrs = [ctnr for ctnr in self.data if ctnr._target_key == key]
-                if not ctnrs:
-                    continue
-                returned_ctnrs = GROUP_METHODS[method](struct, ctnrs, *args, **kwargs)
-                if isinstance(returned_ctnrs, list):
-                    data += returned_ctnrs
-                else:
-                    data.append(returned_ctnrs)
-            struct.data = data
-        else:
-            for ctnr in struct.data:
-                if hasattr(ctnr, method):
-                    getattr(ctnr, method)(*args, **kwargs)
-                else:
-                    raise ValueError(f"{struct.kind} data does not support the method '{method}'.")
+        if len(set(type(ctnr) for ctnr in struct.data)) > 1:
+            raise ValueError("DataSet contains more than one kind of Container.")
+
+        struct = apply_methods(struct, method, *args, **kwargs)
 
         return struct
 
@@ -115,7 +102,7 @@ class DataSet(BaseDataSet):
     data: list = field(default_factory=list)
     figure: Figure | None = None
 
-    _stored_plot_params: dict | None = None
+    _stored_plot_params: dict = field(default_factory=dict)
 
     @property
     def _title(self):
@@ -123,10 +110,10 @@ class DataSet(BaseDataSet):
 
     @property
     def _plot_method(self):
-        if self.kind not in PLOT_METHODS:
+        if self.kind not in COMBINE_PLOTS:
             return
 
-        return PLOT_METHODS[self.kind]
+        return COMBINE_PLOTS[self.kind]
 
     @property
     def _split_by_target(self):
@@ -136,7 +123,7 @@ class DataSet(BaseDataSet):
         return SPLIT_BY_TARGET[self.kind]
 
     def plot(self, kind: str | None = None, **kwargs: any):
-        if self.kind not in PLOT_METHODS:
+        if self.kind not in COMBINE_PLOTS:
             raise ValueError(f"{kind} DataSet does not support plotting.")
 
         from ..io.plot_io import plot_data

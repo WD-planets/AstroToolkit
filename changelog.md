@@ -80,7 +80,6 @@ To-Do Now
     - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
 - include distances in overlay corrections
 - add survey ID to SED hovertool
-- add spectral line fitting tool
 - properly sort warnings/logging (no print statements?)
 - add filter kwarg to light curve queries to disable all unrequired filtering
 - add annotations to ATK keywords in fits headers
@@ -92,6 +91,7 @@ To-Do Now
 - store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
 - remove per-survey splitting from light curves, no reason to support this and would need to do it everywhere otherwise
 - spectrum/sed overlay legend hiding not working
+- let peak fitting work in velocity-space
 
 
 To-Do Later

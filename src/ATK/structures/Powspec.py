@@ -17,6 +17,8 @@ class Powspec(Container):
     fopt: Quantity | None = None
     popt: Quantity | None = None
 
+    _data_methods: tuple = ("crop",)
+
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 

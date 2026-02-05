@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy
 
@@ -15,6 +15,8 @@ class SED(Container):
     wavelength: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
     flux_err: numpy.ndarray | QuantityArray | None = None
+
+    _data_methods: tuple = ("crop", "bin")
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"

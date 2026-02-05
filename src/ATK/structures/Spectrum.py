@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 
+from .methods.spectrum.fitting import do_fitting
 from .structures_core import Container, QuantityArray, manage_inplace
 
 
@@ -16,13 +17,17 @@ class Spectrum(Container):
     search_pos: SkyCoord | None = None
     separation: Quantity | None = None
     exposure: Quantity | None = None
+    wav_ref: Quantity | None = None
 
     # --- data ---
     wavelength: numpy.ndarray | QuantityArray | None = None
     velocity: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None
 
-    _required: tuple[str] = "flux"
+    _required: tuple[str] = ("flux",)
+
+    _data_methods: tuple = ("crop", "bin", "vspec")
+    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting})
 
     def __post_init__(self):
         # check for a valid input combination
@@ -87,13 +92,8 @@ class Spectrum(Container):
 
         return struct
 
-    def rv_fit(self, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs):
-        from .methods.spectrum.fitting import do_fitting
-
-        do_fitting(self, prominence=prominence, smoothing=smoothing, snr=snr, **kwargs)
-
     def vspec(self, wav_ref: float | Quantity, inplace: bool = True):
-        from .methods.spectrum.fitting import get_velocities
+        from .methods.spectrum.radial_velocities import get_velocities
 
         struct = manage_inplace(self, inplace)
 
@@ -101,6 +101,7 @@ class Spectrum(Container):
             wav_ref = wav_ref.to(struct.wavelength.unit).value
 
         struct.velocity = get_velocities(struct.wavelength.value, wav_ref)
+        struct.wav_ref = wav_ref * struct.wavelength.unit
         struct.wavelength = None
 
         return struct

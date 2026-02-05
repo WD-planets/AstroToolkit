@@ -30,7 +30,6 @@ def repeat_arrs(x: np.ndarray, *ys: np.ndarray, repeat: int = 2):
 
 
 def fold_lc(
-    struct: DataSet,
     lcs: list[Lightcurve],
     min: float,
     max: float,

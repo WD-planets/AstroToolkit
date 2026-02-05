@@ -21,17 +21,12 @@ FIGS_PER_COLUMN = 3
 
 
 def dispatch_plotting(
-    all_figures: list,
-    plotting_func: FunctionType,
-    structure: DataSet,
-    containers: list[Container],
-    target: Target | None = None,
-    **kwargs,
+    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
 ):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
-        # flatten list if e.g. SED plotting with spectral overlat returned multiple SED plots due to having to overlay multiple spectra
+        # flatten list if e.g. SED plotting with spectral overlay returned multiple SED plots due to having to overlay multiple spectra
         try:
             figures = [fig for fig_list in figures for fig in fig_list]
         except TypeError:
@@ -53,7 +48,7 @@ def dispatch_plotting(
             else:
                 plot.title.text = f"{target.initial_coords.ra.value:.3f}° {target.initial_coords.dec.value:.3f}°"
 
-    all_figures += figures
+    all_figures.extend(figures)
 
     return all_figures
 

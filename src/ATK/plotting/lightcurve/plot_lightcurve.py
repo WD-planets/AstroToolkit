@@ -161,7 +161,7 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     plots = []
     surveys = list(set([lc.survey for lc in lightcurves]))
 
-    # loop through surveys + combine light curve containers into single plot for each survey
+    # loop through surveys (will be removed)
     for survey in surveys:
         requested_bands = kwargs.get("bands")
         # filter data to only keep requested (and valid) light curves

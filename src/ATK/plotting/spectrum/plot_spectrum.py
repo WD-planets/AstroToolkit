@@ -8,6 +8,7 @@ from ...structures.SED import SED
 from ...structures.Spectrum import Spectrum
 from ..formatting import format_plot
 from ..plotting_core import get_axis_label
+from .spectrum_overlay import plot_overlay
 
 
 def overlay_sed(plot: figure, spectrum: Spectrum, seds: DataSet | list[SED] | SED):
@@ -40,12 +41,19 @@ def plot(spectrum: Spectrum, *args: any, **kwargs: any):
     Plots an ATK Spectrum object
     """
 
+    if spectrum.wavelength is not None:
+        x = "wavelength"
+    elif spectrum.velocity is not None:
+        x = "velocity"
+    else:
+        raise ValueError("Spectrum requires one of 'wavelength', 'velocity'.")
+
     if not kwargs.get("sed_plot"):
         plot = figure(
             width=400,
             height=400,
             title=f"{spectrum.survey} Spectrum",
-            x_axis_label=get_axis_label(spectrum, "wavelength"),
+            x_axis_label=get_axis_label(spectrum, x),
             y_axis_label=get_axis_label(spectrum, "flux"),
             tools=("pan,wheel_zoom,box_zoom,reset"),
         )
@@ -54,9 +62,13 @@ def plot(spectrum: Spectrum, *args: any, **kwargs: any):
         plot = kwargs["sed_plot"]
 
     # plot spectrum
-    plot.line(spectrum._get_attr_value("wavelength"), spectrum._get_attr_value("flux"), color="black", line_width=1)
+    plot.line(spectrum._get_attr_value(x), spectrum._get_attr_value("flux"), color="black", line_width=1)
 
     if kwargs.get("overlay"):
         plot = overlay_sed(plot, spectrum, kwargs["overlay"])
+
+    plot = plot_overlay(plot, spectrum)
+
+    spectrum._plot_id = plot.id
 
     return format_plot("spectrum", plot)
