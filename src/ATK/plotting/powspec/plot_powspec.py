@@ -21,4 +21,6 @@ def plot(pspec: Powspec, *args: tuple, **kwargs: dict):
     plot.y_range = Range1d(0, np.nanmax(pspec.power) * 1.1)
     plot.x_range = Range1d(np.nanmin(pspec.frequency.value), np.nanmax(pspec.frequency.value))
 
+    pspec._plot_id = plot.id
+
     return format_plot("powspec", plot)

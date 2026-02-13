@@ -142,4 +142,6 @@ def plot(sed: SED, **kwargs: any):
     # if plotting as an overlay for spectra
     plot = plot_sed(sed, **kwargs)
 
+    sed._plot_id = plot.id
+
     return format_plot("sed", plot)

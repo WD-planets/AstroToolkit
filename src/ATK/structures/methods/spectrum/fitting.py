@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from astropy.stats import sigma_clip
+from astropy.units import Quantity
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from scipy.ndimage import gaussian_filter1d, generic_filter, median_filter
@@ -193,12 +194,13 @@ def fit_gaussian(plot: figure, spectrum: Spectrum, p0: dict, snr_limit: float):
         "sign": p0["sign"],
         "model_x": final_x,
         "model_y": final_y,
+        "snr": peak_snr,
     }
 
     return final_model, "accepted", filtering
 
 
-def detect_features(plot, spectrum: Spectrum, min_prominence: float, smoothing: int):
+def detect_features(plot: figure, spectrum: Spectrum, min_prominence: float, smoothing: int):
     """
     Identifies features in a spectrum
     """
@@ -302,7 +304,7 @@ def remove_false_features(plot, spectrum, fits):
     return keep
 
 
-def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs):
+def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs) -> figure | Quantity:
     """
     Identifies and fits any number of spectral absorption and emission features
     """
@@ -312,14 +314,18 @@ def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothin
     DEBUG = kwargs.get("debug", False)
 
     # convert quantity arrays to basic arrays
-    spectrum = copy.deepcopy(spectrum)
-    spectrum.wavelength = spectrum.wavelength.copy().value
-    spectrum.flux = spectrum.flux.copy().value
+    spectrum_copy = copy.deepcopy(spectrum)
+    wavelength_unit = spectrum_copy.wavelength.unit
+    spectrum_copy.wavelength = spectrum.wavelength.copy().value
+    spectrum_copy.flux = spectrum.flux.copy().value
+
+    if plot is None:
+        plot = figure(width=1000, height=500, x_axis_label=f"Wavelength / {wavelength_unit.to_string('unicode')}", y_axis_label="Flux")
 
     # get features
-    peak_data = detect_features(plot, spectrum, prominence, smoothing)
+    peak_data = detect_features(plot, spectrum_copy, prominence, smoothing)
 
-    flux_smooth = gaussian_filter1d(spectrum.flux, sigma=smoothing)
+    flux_smooth = gaussian_filter1d(spectrum_copy.flux, sigma=smoothing)
 
     # loop through returned peaks
     fits, responses, filtering = [], [], []
@@ -330,7 +336,7 @@ def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothin
         p0["sign"] = row["sign"]
 
         # fit gaussians to features
-        fit, response, filter = fit_gaussian(plot, spectrum, p0, snr_limit=snr)
+        fit, response, filter = fit_gaussian(plot, spectrum_copy, p0, snr_limit=snr)
 
         if fit:
             fits.append(fit)
@@ -339,21 +345,28 @@ def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothin
         filtering.append(filter)
 
     # remove fake features that result from two close real features
-    fits = remove_false_features(plot, spectrum, fits)
+    fits = remove_false_features(plot, spectrum_copy, fits)
 
     # plot peaks
+    features, peaks = [], []
     for fit in fits:
         plot.line(fit["model_x"], fit["model_y"], line_color="limegreen", line_width=2, legend_label="Detected Peaks")
+        features.append(fit["mu"])
+        peak_val = fit["model_y"].max() if fit["sign"] == 1 else fit["model_y"].min()
+        peaks.append(peak_val)
+
+    if kwargs.get("get_features"):
+        return np.asarray(features), peaks
 
     # plot smoothed flux
-    plot.line(spectrum.wavelength, flux_smooth, line_alpha=0.3, line_width=3, line_color="red", legend_label="Smoothed Flux")
+    plot.line(spectrum_copy.wavelength, flux_smooth, line_alpha=0.3, line_width=3, line_color="red", legend_label="Smoothed Flux")
 
     # peak filtering overlay
     filtering_df = pd.concat(pd.DataFrame(dct) for dct in filtering).reset_index(drop=True)
     if DEBUG:
         df = pd.DataFrame(
             {
-                "x": spectrum.wavelength[peak_data["idx"].to_numpy(dtype=int)],
+                "x": spectrum_copy.wavelength[peak_data["idx"].to_numpy(dtype=int)],
                 "y": flux_smooth[peak_data["idx"].to_numpy(dtype=int)],
                 "response": responses,
             }

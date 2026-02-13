@@ -26,7 +26,7 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
 
     all_methods = []
     for arr in [data_methods, data_group_methods, plot_methods, plot_group_methods]:
-        if isinstance(arr, list):
+        if isinstance(arr, (list, tuple)):
             all_methods += arr
         elif isinstance(arr, dict):
             all_methods += list(arr.keys())

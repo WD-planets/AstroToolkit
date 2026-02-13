@@ -6,6 +6,7 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 
 from .methods.spectrum.fitting import do_fitting
+from .methods.spectrum.radial_velocities import get_rvs
 from .structures_core import Container, QuantityArray, manage_inplace
 
 
@@ -18,6 +19,8 @@ class Spectrum(Container):
     separation: Quantity | None = None
     exposure: Quantity | None = None
     wav_ref: Quantity | None = None
+    snr: numpy.ndarray | None = None
+    features: Quantity | None = None
 
     # --- data ---
     wavelength: numpy.ndarray | QuantityArray | None = None
@@ -27,7 +30,7 @@ class Spectrum(Container):
     _required: tuple[str] = ("flux",)
 
     _data_methods: tuple = ("crop", "bin", "vspec")
-    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting})
+    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "get_rvs": get_rvs})
 
     def __post_init__(self):
         # check for a valid input combination

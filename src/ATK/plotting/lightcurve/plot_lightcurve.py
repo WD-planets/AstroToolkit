@@ -186,11 +186,15 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
         for per_id_lcs in lc_groups:
             if len(set(lc.time_type for lc in per_id_lcs)) > 1:
                 raise ValueError("Detected multiple time formats 'mjd' and 'phase' in Lightcurve plotting.")
+
             if per_id_lcs[0].time_type == "phase":
                 kwargs["time_format"] = "original"
                 kwargs["cmap"] = "flat"
 
-            per_id_plots = dispatch_groups(survey, per_id_lcs, palette_map, **kwargs)
-            plots.append(per_id_plots)
+            per_id_plot = dispatch_groups(survey, per_id_lcs, palette_map, **kwargs)
+            plots.append(per_id_plot)
+
+            for lc in per_id_lcs:
+                lc._plot_id = per_id_plot.id
 
     return [format_plot("lightcurve", p) for p in plots]

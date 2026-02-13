@@ -293,4 +293,6 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     if image.overlay is not None:
         plot = plot_overlay(plot, image, relative_axes)
 
+    image._plot_id = plot.id
+
     return format_plot("image", plot)

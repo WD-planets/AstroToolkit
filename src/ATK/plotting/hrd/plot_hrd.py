@@ -141,4 +141,7 @@ def plot(hrds: list[HRD], **kwargs):
     plot.add_tools(hvr)
     plot.y_range.flipped = True
 
+    for hrd in hrds:
+        hrd._plot_id = plot.id
+
     return [format_plot("hrd", plot)]
