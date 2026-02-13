@@ -8,7 +8,6 @@ import numpy as np
 from .timeseries_core import do_ls
 
 if TYPE_CHECKING:
-    from ....structures.DataSet import DataSet
     from ....structures.Lightcurve import Lightcurve
 
 np.seterr(divide="ignore")

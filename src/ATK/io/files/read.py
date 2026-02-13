@@ -9,7 +9,7 @@ from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
 from astropy.table import Table
 from astropy.units import Quantity, Unit
-from astropy.wcs import WCS
+from astropy.wcs import WCS, FITSFixedWarning
 
 from ...configuration.base_config import translator
 from ...structures.DataSet import DataSet
@@ -19,6 +19,9 @@ from ...utilities.misc import get_package_version
 from ..target_io import get_targets_from_hdu
 
 SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "ATK_FRAME", "ATK_EPOCH")
+
+# ignore fits warning
+warnings.filterwarnings("ignore", category=FITSFixedWarning)
 
 # ---------
 # UTILITIES

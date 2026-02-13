@@ -6,8 +6,29 @@ from astropy.coordinates import SkyCoord
 from ..queries.arguments import get_query_arguments
 from ..queries.query_core import general_query, setup_targeting
 from ..structures.DataSet import DataSet
+from ..structures.Target import Target
 from ..utilities.defaults import RETURNS
 from .read import read
+
+
+def recreate_struct(targeting: list[Target], kind: str, **arguments) -> DataSet:
+    structure = read(arguments["path"])
+
+    struct_dict = structure.__dict__
+
+    # check major parameter to see if any have changed since the file was saved
+    if targeting != struct_dict["targets"]:
+        return None
+    if kind != struct_dict["kind"]:
+        return None
+    if arguments.get("survey") is not None and struct_dict.get("survey") is not None:
+        if arguments["survey"] != struct_dict["survey"]:
+            return None
+    if arguments.get("radius") is not None and struct_dict.get("radius") is not None:
+        if arguments["radius"] != struct_dict["radius"]:
+            return None
+
+    return structure
 
 
 def query(kind: str, **arguments) -> DataSet:
@@ -17,10 +38,6 @@ def query(kind: str, **arguments) -> DataSet:
 
     # get necessary parameters from config if not given
     arguments = get_query_arguments(kind, arguments)
-
-    if arguments.get("path") and os.path.exists(arguments["path"]):
-        structure = read(arguments["path"])
-        return structure
 
     target, targets = arguments.pop("target", None), arguments.pop("targets", None)
 
@@ -32,6 +49,17 @@ def query(kind: str, **arguments) -> DataSet:
 
     # get flattened list of targets
     targets = setup_targeting(targeting)
+
+    if arguments.get("path") and os.path.exists(arguments["path"]):
+        structure = recreate_struct(targets, kind, **arguments)
+
+        if structure is not None:
+            return structure
+        else:
+            warnings.warn("Detected change in core query parameters, query will be re-run and local file will be overwritten.")
+
+    if targets is RETURNS.NULL:
+        raise ValueError("Query received no targets.")
 
     # targets may return exception if Vizier is down
     if any(target is RETURNS.EXCEPTION for target in targets):

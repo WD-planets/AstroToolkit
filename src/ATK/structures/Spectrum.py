@@ -30,7 +30,7 @@ class Spectrum(Container):
     _required: tuple[str] = ("flux",)
 
     _data_methods: tuple = ("crop", "bin", "vspec")
-    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "get_rvs": get_rvs})
+    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "rv_fit": get_rvs})
 
     def __post_init__(self):
         # check for a valid input combination

@@ -49,6 +49,7 @@ Changes
     - can now overlay both ways, i.e. can overlay spectra on an SED as before, but can also overlay an SED over spectra
     - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
+    - major changes in query parameters (i.e. query kind/survey/targets/radius) will now automatically re-run the query and overwrite the local file
 - light curve binning now much faster
 - usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
     - added method .apply() to DataSet, applies a given method to all stored containers
@@ -63,7 +64,9 @@ Changes
 - improved structure of user-accessible imports
     - main functions now available via: from ATK import ...
     - all ATK models available via: from ATK.Models import ...
-- Added spectral peak fitting for radial velocity estimation via data method "rv_fit"
+- added spectral feature fitting functionality via plot method 'fit'
+- added spectral radial velocity functionality via plot method 'rv_fit'
+    - can detect multi-component radial velocities
 
 
 
@@ -74,6 +77,7 @@ To-Do Now
     - light curve cropping/sigma clipping/phase folding/power spectra
     - light curves are sorting in a different order before/after reading
 - add freq parameter to phase folding
+- sed/spectral overlays are broken
 
 - check effect of bad pm data/distance manually
 - add unit tests for each survey (known working examples to check if survey is not working, can auto run these on exception optionally) these should also save and read a file to test this

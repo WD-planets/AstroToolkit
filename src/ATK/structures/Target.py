@@ -1,8 +1,19 @@
 import copy
 from dataclasses import dataclass, field
 
+import astropy.units as u
+import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+
+
+def skycoord_equality_check(self, other):
+    same_position = (
+        self.frame.name == other.frame.name and np.isclose(self.ra.deg, other.ra.deg) and np.isclose(self.dec.deg, other.dec.deg)
+    )
+    same_time = abs(self.obstime - other.obstime) < 1e-9 * u.day
+
+    return same_time and same_position
 
 
 @dataclass
@@ -17,6 +28,11 @@ class Target:
     _key: str = field(init=False)
     _aliases: set[str] = field(default_factory=set, init=False)
 
+    def __repr__(self):
+        from ..io.struct_stdout import format_target
+
+        return f"<{format_target(self)} {type(self).__name__}>"
+
     def __post_init__(self):
         id_key = f"id:{self.identifier}"
         coord_key = f"coord:{self.initial_coords.ra.deg:.8f},{self.initial_coords.dec.deg:.8f}"
@@ -27,6 +43,16 @@ class Target:
         else:
             self._key = coord_key
         self._aliases.add(coord_key)
+
+    def __eq__(self, other):
+        init_coords_match = skycoord_equality_check(self.initial_coords, other.initial_coords)
+        identifier_match = self.identifier == other.identifier
+        survey_match = self.survey == other.survey
+        correction_match = self.correction == other.correction
+
+        matches = [init_coords_match, identifier_match, survey_match, correction_match]
+
+        return all(matches)
 
     @property
     def frame(self):
