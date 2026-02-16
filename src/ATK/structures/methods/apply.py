@@ -1,4 +1,4 @@
-from bokeh.models import Column, Row
+from bokeh.models import Column, DataTable, Row
 from bokeh.plotting import figure
 
 from ...io.plot_io import FIGS_PER_COLUMN
@@ -8,7 +8,7 @@ from ..DataSet import DataSet
 def unpack_layout(layout):
     plots = []
 
-    if isinstance(layout, figure):
+    if isinstance(layout, (figure, DataTable)):
         plots.append(layout)
 
     elif hasattr(layout, "children"):
@@ -19,6 +19,9 @@ def unpack_layout(layout):
 
 
 def apply_methods(struct: DataSet, method: str, *args, **kwargs):
+    if not struct.data:
+        return struct
+
     data_methods = struct.data[0]._data_methods
     data_group_methods = struct.data[0]._group_data_methods
     plot_methods = struct.data[0]._plot_methods

@@ -194,6 +194,9 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     if not overlays:
         return None
 
+    if isinstance(overlays, str):
+        overlays = [overlays]
+
     # extract overlay info for requested surveys
     overlay_info = {}
     for survey in overlays:

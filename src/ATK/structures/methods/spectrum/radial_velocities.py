@@ -134,8 +134,6 @@ def find_rv_components(
     rv_components = [rv * u.km / u.s for rv in rv_components]
     rvs = rvs * u.km / u.s
 
-    print(rv_components)
-
     return rv_components, matched_lines, rvs, scores
 
 

@@ -19,10 +19,20 @@ COMBINE_PLOTS = {
     "hrd": "combined",
     "powspec": "individual",
     "phasefold": "combined",
+    "datatable": "individual",
 }
 
 # whether to split plots by target
-SPLIT_BY_TARGET = {"image": True, "lightcurve": True, "spectrum": True, "sed": True, "hrd": False, "powspec": True, "phasefold": True}
+SPLIT_BY_TARGET = {
+    "image": True,
+    "lightcurve": True,
+    "spectrum": True,
+    "sed": True,
+    "hrd": False,
+    "powspec": True,
+    "phasefold": True,
+    "datatable": True,
+}
 
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]

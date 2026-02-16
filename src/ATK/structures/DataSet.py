@@ -6,8 +6,7 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
-from .structures_core import (COMBINE_PLOTS, SPLIT_BY_TARGET, Container,
-                              manage_inplace)
+from .structures_core import COMBINE_PLOTS, SPLIT_BY_TARGET, Container, manage_inplace
 from .Target import Target
 
 
@@ -109,26 +108,39 @@ class DataSet(BaseDataSet):
         return f"ATK {self.kind.upper()}"
 
     @property
-    def _plot_method(self):
-        if self.kind not in COMBINE_PLOTS:
+    def _ctnr_kind(self):
+        ctnr_kinds = [type(ctnr).__name__.lower() for ctnr in self.data]
+        if len(set(ctnr_kinds)) > 1:
+            raise ValueError("DataSet contains multiple container types.")
+        if not ctnr_kinds:
             return
 
-        return COMBINE_PLOTS[self.kind]
+        return ctnr_kinds[0]
+
+    @property
+    def _plot_method(self):
+        if self._ctnr_kind not in COMBINE_PLOTS:
+            return
+
+        return COMBINE_PLOTS[self._ctnr_kind]
 
     @property
     def _split_by_target(self):
-        if self.kind not in SPLIT_BY_TARGET:
+        if self._ctnr_kind not in SPLIT_BY_TARGET:
             return
 
-        return SPLIT_BY_TARGET[self.kind]
+        return SPLIT_BY_TARGET[self._ctnr_kind]
 
-    def plot(self, kind: str | None = None, **kwargs: any):
-        if self.kind not in COMBINE_PLOTS:
-            raise ValueError(f"{kind} DataSet does not support plotting.")
+    def plot(self, **kwargs: any):
+        if not self._ctnr_kind:
+            return self
+
+        if self._ctnr_kind not in COMBINE_PLOTS:
+            raise ValueError(f"{self._ctnr_kind} containers do not support plotting.")
 
         from ..io.plot_io import plot_data
 
-        self.figure = plot_data(kind, self, **kwargs)
+        self.figure = plot_data(self, **kwargs)
         self._stored_plot_params = kwargs
 
         return self
@@ -151,4 +163,7 @@ class DataSet(BaseDataSet):
         return cls(kind=kind, targets=targets, survey=survey, radius=radius, exception=False)
 
     def add(self, data: Container):
+        if self.data and self._ctnr_kind != type(data).__name__.lower():
+            raise ValueError(f"Cannot add container of type '{type(data).__name__.lower()}' to DataSet containing {self._ctnr_kind} data.")
+
         self.data.append(data)

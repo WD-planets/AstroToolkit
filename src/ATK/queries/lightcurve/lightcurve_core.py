@@ -22,6 +22,7 @@ def create_lc(data: pd.DataFrame, target: Target, survey: str, band: str, id: st
         ra=data["ra"].to_numpy(),
         dec=data["dec"].to_numpy(),
         obj_id=id,
+        _target_key=target._key,
     )
 
     return lc

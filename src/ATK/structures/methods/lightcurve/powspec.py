@@ -22,7 +22,7 @@ def gen_powspec(lcs: list[Lightcurve], min: float, max: float, samples: int, mul
         band_str = ", ".join(list(set([lc.band for lc in lcs])))
         popt = (1 / fopt).to(u.day)
 
-        return [Powspec(lcs[0].survey, band=band_str, frequency=freq, power=power, fopt=fopt, popt=popt, _target_key=lcs[0]._target_key)]
+        return [Powspec(survey=lcs[0].survey, band=band_str, frequency=freq, power=power, fopt=fopt, popt=popt, _target_key=lcs[0]._target_key)]
 
     else:
         pspectra = []
@@ -31,8 +31,6 @@ def gen_powspec(lcs: list[Lightcurve], min: float, max: float, samples: int, mul
             band_str = lc.band
             popt = (1 / fopt).to(u.day)
 
-            pspectra.append(
-                Powspec(survey=lcs[0].survey, band=band_str, frequency=freq, power=power, fopt=fopt, popt=popt, _target_key=lc._target_key)
-            )
+            pspectra.append(Powspec(survey=lcs[0].survey, band=band_str, frequency=freq, power=power, fopt=fopt, popt=popt, _target_key=lc._target_key))
 
         return pspectra

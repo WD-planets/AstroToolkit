@@ -34,6 +34,7 @@ QUERY_ARGUMENTS = {
     # correction needs to be deferred as SED queries use data queries under-the-hood
     "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
     "hrd": {"survey": "gaia", "colour": "BPmag-RPmag", "mag": "Gmag", "defer_correction": True},
+    "datatable": {"rows": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
 }
 
 UNIVERSAL_ARGUMENTS = {"path": None}

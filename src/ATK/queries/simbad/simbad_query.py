@@ -10,17 +10,6 @@ from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 
 def get_ids(targets: SkyCoord, radius: Quantity):
-    """
-    Fetch SIMBAD IDs for each detection in `targets`.
-
-    Returns
-    -------
-    np.ndarray of str or None
-        One element per target. Each element is a human-readable, list-like
-        string of all SIMBAD IDs within `radius`, e.g.
-        '["HD 12345", "Gaia DR3 123456789"]', or None if no match.
-    """
-
     simbad = Simbad()
     simbad.ROW_LIMIT = -1
 

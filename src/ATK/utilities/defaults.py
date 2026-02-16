@@ -15,6 +15,14 @@ GAIA_CATALOGUE = "I/355/gaiadr3"
 
 QUERY_KINDS = ["vizier", "image", "lightcurve", "spectrum", "sed", "hrd", "powspec"]
 
-PLOT_DIMENSIONS = {"image": [2, 2], "sed": [3, 2], "spectrum": [2, 1], "lightcurve": [2, 1], "hrd": [2, 2], "powspec": [2, 2]}
+PLOT_DIMENSIONS = {
+    "image": [2, 2],
+    "sed": [3, 2],
+    "spectrum": [2, 1],
+    "lightcurve": [2, 1],
+    "hrd": [2, 2],
+    "powspec": [2, 2],
+    "datatable": [2, 1],
+}
 
 CONNECTION_ERRORS = (TimeoutError, ConnectionError, ConnectTimeout, HTTPError, requests_HTTPError, RetryError)

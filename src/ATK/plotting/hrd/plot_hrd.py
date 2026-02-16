@@ -44,28 +44,16 @@ def get_sub_cmap(name, vmin=0.0, vmax=1.0, n=256):
     return LinearSegmentedColormap.from_list(f"{name}_sub_{vmin}_{vmax}", colors)
 
 
-def plot(hrds: list[HRD], **kwargs):
-    """
-    Overlays multiple HRD containerson a single HRD plot
-    """
-
+def setup_background(colour_str, abs_mag_band, **kwargs):
     # -----------------
     # Backdrop plotting
     # ------------------
 
+    colours = colour_str.split("-")
+
     backdrop_file = files("ATK.plotting.hrd").joinpath("backdrop_hrd_allmags.fits")
 
-    if len(set(hrd.abs_mag_band for hrd in hrds)) > 1:
-        raise ValueError("Multiple HRD absolute magnitude bands detected.")
-    if len(set(hrd.colour_bands for hrd in hrds)) > 1:
-        raise ValueError("Multiple HRD colour bands detected.")
-
-    abs_mag_band = hrds[0].abs_mag_band
-    colours = hrds[0].colour_bands.split("-")
-
-    plot = figure(
-        width=400, height=400, x_axis_label=hrds[0].colour_bands, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset")
-    )
+    plot = figure(width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="HRD")
 
     with fits.open(backdrop_file) as f:
         bg_df = Table(f[1].data).to_pandas()
@@ -111,37 +99,73 @@ def plot(hrds: list[HRD], **kwargs):
             alpha=0.8,
             source=source,
             marker="circle",
-            legend_label=obj_type,  # note: use legend_label here
+            legend_label=obj_type,
         )
+
+    return plot
+
+
+def overlay_source(plot: figure, hrd: HRD):
+    df = pd.DataFrame({"identifier": str(hrd.identifier), "colour": hrd.colour, "abs_mag": hrd.abs_mag})
+    source = ColumnDataSource(df)
+    scatter = plot.scatter(
+        x="colour",
+        y="abs_mag",
+        source=source,
+        marker="square_dot",
+        line_color="black",
+        fill_color=None,
+        size=20,
+        line_width=3,
+        legend_label="Gaia source(s)",
+        level="overlay",
+    )
+    plot.y_range.flipped = True
+
+    return plot, scatter
+
+
+def plot(hrds: list[HRD], **kwargs):
+    """
+    Overlays multiple HRD containers on a single HRD plot
+    """
+
+    if len(set(hrd.abs_mag_band for hrd in hrds)) > 1:
+        raise ValueError("Multiple HRD absolute magnitude bands detected.")
+    if len(set(hrd.colour_bands for hrd in hrds)) > 1:
+        raise ValueError("Multiple HRD colour bands detected.")
+
+    abs_mag_band = hrds[0].abs_mag_band
+    colours = hrds[0].colour_bands
+
+    plots = []
+    if not kwargs.get("combine", True):
+        for _ in hrds:
+            plots.append(setup_background(colours, abs_mag_band, **kwargs))
+    else:
+        plots.append(setup_background(colours, abs_mag_band, **kwargs))
 
     # --------------
     # Source Overlay
     # --------------
 
-    hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
-    hvr.renderers = []
-
-    for hrd in hrds:
-        df = pd.DataFrame({"identifier": str(hrd.identifier), "colour": hrd.colour, "abs_mag": hrd.abs_mag})
-        source = ColumnDataSource(df)
-        scatter = plot.scatter(
-            x="colour",
-            y="abs_mag",
-            source=source,
-            marker="square_dot",
-            line_color="black",
-            fill_color=None,
-            size=20,
-            line_width=3,
-            legend_label="Gaia source(s)",
-            level="overlay",
-        )
+    if kwargs.get("combine", True):
+        hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
+        hvr.renderers = []
+        for hrd in hrds:
+            plots[0], scatter = overlay_source(plots[0], hrd)
         hvr.renderers.append(scatter)
+        plot.add_tools(hvr)
 
-    plot.add_tools(hvr)
-    plot.y_range.flipped = True
+        for hrd in hrds:
+            hrd._plot_id = plots[0].id
+    else:
+        for plot, hrd in zip(plots, hrds):
+            hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
+            hvr.renderers = []
+            plot, scatter = overlay_source(plot, hrd)
+            hvr.renderers.append(scatter)
+            plot.add_tools(hvr)
+            hrd._plot_id = plot.id
 
-    for hrd in hrds:
-        hrd._plot_id = plot.id
-
-    return [format_plot("hrd", plot)]
+    return [format_plot("hrd", plot) for plot in plots]

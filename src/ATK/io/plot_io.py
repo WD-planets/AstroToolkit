@@ -20,9 +20,7 @@ from ..utilities.mapping import build_map
 FIGS_PER_COLUMN = 3
 
 
-def dispatch_plotting(
-    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
-):
+def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -43,6 +41,10 @@ def dispatch_plotting(
     # add targeting info to plot titles if split by target
     if target:
         for plot in figures:
+            if not hasattr(plot, "title"):
+                continue
+            if not plot.title:
+                continue
             if target.identifier:
                 plot.title.text = f"{target.identifier} {plot.title.text}"
             else:
@@ -53,19 +55,19 @@ def dispatch_plotting(
     return all_figures
 
 
-def plot_data(kind: str, structure: DataSet, **kwargs: any) -> figure:
+def plot_data(structure: DataSet, **kwargs: any) -> figure:
     """
     Plots the data stored in a DataSet, and saves it to the .figure attribute of the data structure
     """
 
-    module = importlib.import_module(f"ATK.plotting.{structure.kind}")
-    plot_map = build_map(module, "plot", prefix="plot_")
-    kind = kind or structure.kind
-    plotting_func = plot_map[kind]
-
     if not structure.data:
         warnings.warn("Structure contains no data to for plotting.")
         return None
+
+    ctnr_kind = structure._ctnr_kind
+    module = importlib.import_module(f"ATK.plotting.{ctnr_kind}")
+    plot_map = build_map(module, "plot", prefix="plot_")
+    plotting_func = plot_map[ctnr_kind]
 
     target_keys = [t._key for t in structure.targets]
 

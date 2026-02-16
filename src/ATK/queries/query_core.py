@@ -106,7 +106,7 @@ def set_container_keys(target: Target, query_result: any) -> any:
 
     for ctnr in query_result:
         # e.g. SED gets a correction array instead, don't want to overwrite this
-        if ctnr.correction is None:
+        if hasattr(ctnr, "correction") and ctnr.correction is None:
             ctnr.correction = target.correction
         ctnr._target_key = target._key
 

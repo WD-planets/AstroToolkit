@@ -41,6 +41,7 @@ Changes
 - added ability to query multiple targets at once
     - DataSets now store targets and a mapping between the query target and the returned data containers, added .fetch_by_id(), .fetch_by_coord() and .fetch_by_target() methods to extract data per-source
 - added kwarg "background" to HRD plotting, which limits the background sample to a given fraction of the full sample (e.g. 0.5 would half the number of background points to reduced file size and lag)
+- added kwarg 'combine' to HRD plotting, if False one HRD will be plotted for each source (primarily for datapage creation where each datapage will want its own hrd)
 - added tab titles to plots when opened in browser
 - added targeting information to figure titles (i.e. identifier or coordinates)
 - improved SED/spectra overlay functionality
@@ -67,11 +68,17 @@ Changes
 - added spectral feature fitting functionality via plot method 'fit'
 - added spectral radial velocity functionality via plot method 'rv_fit'
     - can detect multi-component radial velocities
-
-
+- simplified datapage creation, layout now given as a list (columns) of lists (rows) of datasets
+- optimized datapage plotting to minimise whitespace, align axes and force square images as best as possible
+- greatly simplified DataTable creation
+    - now just takes a dict in form survey: <list of cols> to include, automatically provides survey/catalogue/correction/separation columns and fetches parameter/value columns using Vizier queries
+- DataTables now shrink in height to match table, and will grow in height up to requested size
 
 To-Do Now
 ---------
+- sort datapage return properly
+- add units to datatables
+
 - light curves should choose colour per-band
 - implement features from previous version
     - light curve cropping/sigma clipping/phase folding/power spectra
@@ -95,7 +102,8 @@ To-Do Now
 - store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
 - remove per-survey splitting from light curves, no reason to support this and would need to do it everywhere otherwise
 - spectrum/sed overlay legend hiding not working
-- let peak fitting work in velocity-space
+- let peak fitting work in velocity-space (?)
+- test all types of custom data set
 
 
 To-Do Later

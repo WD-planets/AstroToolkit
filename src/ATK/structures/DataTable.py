@@ -6,20 +6,11 @@ from .structures_core import Container
 
 
 @dataclass(repr=False)
-class VizierEntry(Container):
-    survey: str | None = None
-    catalogue: str | None = None
-    correction: str | None = None
-    search_pos: str | None = None
-    separation: str | None = None
-
+class DataTable(Container):
     data: pandas.DataFrame | None = None
 
     def __repr__(self):
-        if self.survey:
-            return f"<{self.survey} ({self.catalogue}) Vizier Data>"
-        else:
-            return f"<{self.catalogue} Vizier Data>"
+        return f"<{type(self).__name__}>"
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity
