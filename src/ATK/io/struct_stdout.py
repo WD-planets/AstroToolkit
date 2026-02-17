@@ -10,6 +10,7 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.time import Time
 from astropy.units import Quantity
 from astropy.wcs import WCS
+from bokeh.layouts import GridBox
 from bokeh.models import Column, Row
 from bokeh.plotting import figure
 
@@ -214,6 +215,7 @@ SPECIAL_FORMATTERS = {
     figure: lambda x: "<Bokeh Figure>",
     Row: lambda x: "<Bokeh Figure>",
     Column: lambda x: "<Bokeh Figure>",
+    GridBox: lambda x: "<Bokeh Figure>",
     Quantity: format_quantity,
 }
 

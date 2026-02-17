@@ -180,6 +180,6 @@ def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments
         structure = single_target_query(kind, target, structure, **arguments)
 
     if arguments.get("path"):
-        structure.save(arguments["path"])
+        structure.store(arguments["path"])
 
     return structure

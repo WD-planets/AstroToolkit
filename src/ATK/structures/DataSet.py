@@ -4,9 +4,12 @@ from pathlib import Path
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
+from bokeh.io import output_file
+from bokeh.io import save as bokeh_save
 from bokeh.plotting import figure as Figure
 
-from .structures_core import COMBINE_PLOTS, SPLIT_BY_TARGET, Container, manage_inplace
+from .structures_core import (COMBINE_PLOTS, SPLIT_BY_TARGET, Container,
+                              manage_inplace)
 from .Target import Target
 
 
@@ -46,13 +49,13 @@ class BaseDataSet:
 
         return self
 
-    def save(self, path: str | Path = None) -> Path:
+    def store(self, path: str | Path = None) -> Path:
         from ..io.files.writing import write_local
 
         return write_local(self, path)
 
     def _fetch_by_key(self, key: str):
-        return [d for d in self.data if d._target_key == key]
+        return [ctnr for ctnr in self.data if ctnr._target_key == key]
 
     def fetch_by_id(self, id: int):
         key = self._alias_map.get(f"id:{id}")
@@ -151,6 +154,13 @@ class DataSet(BaseDataSet):
         open_html(self, fname=fname, **kwargs)
 
         return self
+
+    def save(self, fname: Path | str):
+        if not fname.endswith(".html"):
+            fname = f"{fname}.html"
+
+        output_file(fname)
+        bokeh_save(self.figure, title=self._title)
 
     @classmethod
     def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None):

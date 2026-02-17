@@ -1,6 +1,6 @@
 Changes
 -------
-- Rewrote entire package, should be a lot easier to develop in the future
+- Rewrote entire package from the ground up, should be a lot easier to develop in the future
 
 - All coordinate/source handling now done via a central Target class
     - A Target is automatically generated if a source_id or SkyCoord is entered, or one can be manually created via Target.from_pos() or Target.from_id()
@@ -16,7 +16,7 @@ Changes
 - Improved file saving to adaptively store structures as fits files
 - Improved file reading to adaptively generate ATK structures from fits files
 - Opened figures now save to HOME/.AstroToolkit/cached_figures/ temporarily, with a duration given by the config
-- Images bands now correctly supported, and added 2 new colour maps - viridis (default) and false colour. Latter converts filter wavelength to an approximate real colour. Can choose colour map by passing cmap = 'viridis' | 'false_colour' | 'grey' to plot()
+- Image bands now correctly supported, and added 2 new colour maps - viridis (default) and false colour. Latter converts filter wavelength to an approximate real colour. Can choose colour map by passing cmap = 'viridis' | 'false_colour' | 'grey' to plot()
 - Image plotting can now use relatives axes (i.e. +- arcsec from the centre)
 - Unified all structures into a single class DataSet
 - Unified .data attribute - all query types now stored data as a list of ATK data containers
@@ -73,12 +73,11 @@ Changes
 - greatly simplified DataTable creation
     - now just takes a dict in form survey: <list of cols> to include, automatically provides survey/catalogue/correction/separation columns and fetches parameter/value columns using Vizier queries
 - DataTables now shrink in height to match table, and will grow in height up to requested size
+- Datapages now returned as a DataPages object, with show(), show_by_target(), show_by_id(), and show_by_coords() methods to show all datapages or single out those of individual targets
+- data is now saved via the .store() method, while plots are saved with the .save() method (the latter is also used for DataPages)
 
 To-Do Now
 ---------
-- sort datapage return properly
-- add units to datatables
-
 - light curves should choose colour per-band
 - implement features from previous version
     - light curve cropping/sigma clipping/phase folding/power spectra
@@ -87,8 +86,6 @@ To-Do Now
 - sed/spectral overlays are broken
 
 - check effect of bad pm data/distance manually
-- add unit tests for each survey (known working examples to check if survey is not working, can auto run these on exception optionally) these should also save and read a file to test this
-    - maybe add this as an option for the user - i.e. if an exception occurs and the unit test then fails, retry every ~ 5 mins (not too much traffic, only intended for large studies)
 - include distances in overlay corrections
 - add survey ID to SED hovertool
 - properly sort warnings/logging (no print statements?)

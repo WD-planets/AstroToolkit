@@ -1,9 +1,9 @@
-from bokeh.io import output_file, show
 from bokeh.models import GridBox, InlineStyleSheet, Label, Range1d
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
 from ...plotting.datatable.plot_datatable import autosize_table
+from ...structures.DataPages import DataPages
 from ...structures.DataSet import DataSet
 from ...structures.methods.apply import unpack_layout
 
@@ -238,6 +238,8 @@ def get_datapage(layout: list[list]):
     validate_layout(layout)
     regions = parse_layout(layout)
 
+    dps = []
+    plot_map = {}
     for index, key in enumerate(target_keys):
         plots = prepare_datasets(key, datasets)
 
@@ -271,5 +273,16 @@ def get_datapage(layout: list[list]):
 
         final_layout = GridBox(children=grid_children)
 
-        output_file(f"datapage_{index}.html", title="ATK DATAPAGE")
-        show(final_layout)
+        plot_map[key] = final_layout.id
+        dps.append(final_layout)
+
+    targets = []
+    for ds in datasets:
+        existing_keys = [target._key for target in targets]
+        for target in ds.targets:
+            if target._key not in existing_keys:
+                targets.append(target)
+
+    datapages = DataPages(targets=targets, figures=dps, _plot_map=plot_map)
+
+    return datapages

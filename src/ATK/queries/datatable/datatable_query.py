@@ -42,9 +42,11 @@ def query(target: Target, **kwargs):
         df["survey"] = survey
         df["catalogue"] = catalogue
         df["correction"] = survey_data.data[0].correction
-        df["separation"] = survey_data.data[0].separation
+        sep = survey_data.data[0].separation
+        sep_str = f"separation ({sep.unit.to_string('fits')})"
+        df[sep_str] = sep
 
-        front_cols = ["survey", "catalogue", "correction", "separation"]
+        front_cols = ["survey", "catalogue", "correction", sep_str]
         df = df[front_cols + [c for c in df.columns if c not in front_cols]]
 
         data.append(df)

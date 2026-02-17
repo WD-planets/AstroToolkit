@@ -20,7 +20,9 @@ from ..utilities.mapping import build_map
 FIGS_PER_COLUMN = 3
 
 
-def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs):
+def dispatch_plotting(
+    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
+):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -135,3 +137,24 @@ def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
             os.remove(f)
 
     show(structure.figure)
+
+
+def open_basic(plot: figure, prefix: str, title: str, fname=Path | str | None):
+    tmp_dir = os.path.expanduser("~/.AstroToolkit/cached_figures")
+
+    if not fname:
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(suffix=".html", prefix=prefix, dir=tmp_dir, delete=False) as tmpfile:
+            tmp_html = tmpfile.name
+
+            output_file(tmp_html, title=title)
+    else:
+        output_file(fname, title=title)
+
+    # clear cache directory of any old figures
+    for f in glob.glob(os.path.join(tmp_dir, "*.html")):
+        if time.time() - os.path.getmtime(f) > BASE_CONFIG.get("plot_settings", "cache_time"):
+            os.remove(f)
+
+    show(plot)
