@@ -78,12 +78,13 @@ Changes
 
 To-Do Now
 ---------
+- similarly to in lightcurves, add option to scale colour map in phase-folded light curves by distance to the sinusoid model
+
 - light curves should choose colour per-band
 - implement features from previous version
     - light curve cropping/sigma clipping/phase folding/power spectra
     - light curves are sorting in a different order before/after reading
 - add freq parameter to phase folding
-- sed/spectral overlays are broken
 
 - check effect of bad pm data/distance manually
 - include distances in overlay corrections

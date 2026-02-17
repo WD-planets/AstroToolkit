@@ -1,6 +1,6 @@
 import astropy.units as u
 import numpy as np
-from bokeh.models import CustomJS, Label, Range1d
+from bokeh.models import ColumnDataSource, CustomJS, Label, Span
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
@@ -30,58 +30,80 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
     x = spectrum._get_attr_value(spectrum.x_type)
 
     overlay_lines = OVERLAY_LINES
+
     if spectrum.x_type == "velocity":
         for line in overlay_lines:
             line["velocity"] = get_velocities(line["wavelength"], spectrum.wav_ref.to(u.angstrom).value).value
 
-    elements = list(set([line["label"] for line in OVERLAY_LINES]))
+    elements = list(set([line["label"] for line in overlay_lines]))
     colours = get_palette(len(elements))
 
-    y_min, y_max = 0, max(flux) * 1.4
-    plot.y_range = Range1d(y_min, y_max)
-    plot.y_range.min_interval = y_min
-    plot.y_range.max_interval = y_max
-
-    # Track how many labels per element for stacked annotations
     label_counters = {}
+    element_renderers = {element: {"spans": [], "labels": []} for element in elements}
 
     text_size = str(BASE_CONFIG.get("plot_settings", "font_size"))
     if not text_size.endswith("pt"):
         text_size += "pt"
     text_font = str(BASE_CONFIG.get("plot_settings", "font"))
 
-    for idx, line in enumerate(OVERLAY_LINES):
-        if not (line[spectrum.x_type] > np.min(x)) and (line[spectrum.x_type] < np.max(x)):
+    y_min = float(np.min(flux))
+    y_max = float(np.max(flux))
+
+    for line in overlay_lines:
+        xpos = line[spectrum.x_type]
+
+        if not (np.min(x) < xpos < np.max(x)):
             continue
 
         label_name = line["label"]
-
         colour = colours[elements.index(label_name)]
 
-        # Create vertical line
-        line_renderer = plot.line(
-            x=[line[spectrum.x_type], line[spectrum.x_type]],
-            y=[1.5 * y_min, 1.5 * y_max],
-            color=colour,
-            legend_label=label_name,
-            level="underlay",
-        )
+        span = Span(location=xpos, dimension="height", line_color=colour, line_width=1)
+        plot.add_layout(span)
+        element_renderers[label_name]["spans"].append(span)
 
-        # Handle annotation if it exists
         if "line_label" in line:
-            # count how many annotations for this element so far
             n_labels = label_counters.get(label_name, 0)
-            total_labels = sum(1 for line in OVERLAY_LINES if line.get("label") == label_name and "line_label" in line)
-            y_pos = max(flux) + (n_labels / max(1, total_labels)) * 0.3 * max(flux)
+            total_labels = sum(1 for ln in overlay_lines if ln.get("label") == label_name and "line_label" in ln)
 
-            label = Label(
-                x=line[spectrum.x_type], y=y_pos, x_offset=2, text=line["line_label"], text_font_size=text_size, text_font=text_font
-            )
-            plot.add_layout(label)
-
-            # Sync label visibility with line visibility
-            line_renderer.js_on_change("visible", CustomJS(args=dict(lbl=label), code="lbl.visible = cb_obj.visible;"))
-
+            y_pos = y_max + (n_labels / max(1, total_labels)) * 0.3 * y_max
+            lbl = Label(x=xpos, y=y_pos, x_offset=2, text=line["line_label"], text_font_size=text_size, text_font=text_font)
+            plot.add_layout(lbl)
+            element_renderers[label_name]["labels"].append(lbl)
             label_counters[label_name] = n_labels + 1
 
+    for idx, element in enumerate(elements):
+        colour = colours[idx]
+
+        y_min = float(np.min(flux))
+        y_max = float(np.max(flux))
+
+        if y_max == y_min:
+            y_inside = y_min
+        else:
+            y_inside = y_min + 0.01 * (y_max - y_min)
+
+        x_min = float(np.min(x))
+        x_span = (float(np.max(x)) - x_min) * 1e-6  # extremely small
+
+        source = ColumnDataSource(dict(x=[x_min, x_min + x_span], y=[y_inside, y_inside]))
+
+        dummy_renderer = plot.line("x", "y", source=source, line_color=colour, line_width=1, legend_label=element)
+
+        # CustomJS to toggle spans + labels
+        callback = CustomJS(
+            args=dict(spans=element_renderers[element]["spans"], labels=element_renderers[element]["labels"]),
+            code="""
+                const visible = cb_obj.visible;
+                for (let i = 0; i < spans.length; i++) {
+                    spans[i].visible = visible;
+                }
+                for (let j = 0; j < labels.length; j++) {
+                    labels[j].visible = visible;
+                }
+            """,
+        )
+        dummy_renderer.js_on_change("visible", callback)
+
+    plot.legend.click_policy = "hide"
     return plot
