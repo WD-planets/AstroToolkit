@@ -76,7 +76,7 @@ def query(target: Target, **kwargs):
 
     # perform queries
     for survey in SED_INFO:
-        data = general_query(kind="vizier", survey=survey, target=target, radius=radius)
+        data = general_query(kind="vizier", survey=survey, targets=target, radius=radius)
 
         if data.exception:
             return RETURNS.EXCEPTION

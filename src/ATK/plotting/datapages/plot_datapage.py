@@ -7,14 +7,14 @@ from ...structures.DataPages import DataPages
 from ...structures.DataSet import DataSet
 from ...structures.methods.apply import unpack_layout
 
-TEXT_SIZE = str(BASE_CONFIG.get("datapage_settings", "font_size"))
+TEXT_SIZE = str(BASE_CONFIG._get("datapage_settings", "font_size"))
 if not TEXT_SIZE.endswith("pt"):
     TEXT_SIZE = f"{TEXT_SIZE}pt"
-TEXT_FONT = str(BASE_CONFIG.get("datapage_settings", "font"))
+TEXT_FONT = str(BASE_CONFIG._get("datapage_settings", "font"))
 
 
 def format_datatable(table, height, width):
-    grid_size = BASE_CONFIG.get("datapage_settings", "grid_size")
+    grid_size = BASE_CONFIG._get("datapage_settings", "grid_size")
 
     table.width = grid_size * width
     table = autosize_table(table, table.source, TEXT_SIZE, grid_size * height)
@@ -31,15 +31,15 @@ def format_datatable(table, height, width):
 def compute_borders(max_tick_chars: int = 9, tick_length: int = 6, tick_standoff: int = 5, axis_standoff: int = 5):
     text_size = int(TEXT_SIZE[:-2])
 
-    # Average character width approximation
+    # average character width approximation
     char_width = 0.6 * text_size
 
-    # Left border estimate (y-axis footprint)
+    # left border estimate
     tick_width = max_tick_chars * char_width
 
     left = tick_width + tick_length + tick_standoff + text_size + axis_standoff
 
-    # Bottom border estimate (x-axis footprint)
+    # bottom border estimate
     bottom = (3 * text_size) + tick_length + tick_standoff + text_size + axis_standoff
 
     return int(left), int(bottom)
@@ -62,7 +62,7 @@ def set_font_sizes(panel):
 
 
 def set_panel_size(panel: figure, force_square: bool, height: int, width: int, shift_outline: bool = False):
-    grid_size = BASE_CONFIG.get("datapage_settings", "grid_size")
+    grid_size = BASE_CONFIG._get("datapage_settings", "grid_size")
 
     left, bottom = compute_borders()
     right, top = 0, int(TEXT_SIZE[:-2])
@@ -149,8 +149,9 @@ def get_missing_panel(dataset, height, width):
 
 def parse_layout(grid):
     """
-    Parses a 2D grid of objects (or None) into rectangular regions.
+    Parses a 2D grid of objects (or None) into rectangular regions
     """
+
     nrows = len(grid)
     ncols = len(grid[0])
 
@@ -268,7 +269,6 @@ def get_datapage(layout: list[list]):
             else:
                 plot = format_datatable(plot, region["rowspan"], region["colspan"])
 
-            # Append as (child, row, col, rowspan, colspan)
             grid_children.append((plot, region["row"], region["col"], region["rowspan"], region["colspan"]))
 
         final_layout = GridBox(children=grid_children)

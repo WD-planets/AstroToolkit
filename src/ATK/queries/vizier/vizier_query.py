@@ -68,7 +68,7 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     Perform a Vizier query by source or position (source will be present in kwargs) in the latter case
     """
 
-    aliases = ALIAS_CONFIG.as_dict()["vizier_aliases"]
+    aliases = ALIAS_CONFIG._as_dict()["vizier_aliases"]
 
     # survey = catalogue alias (here for parity with other query commands), catalogue = actual vizier catalogue
     survey, catalogue = kwargs.get("survey"), kwargs.get("catalogue")

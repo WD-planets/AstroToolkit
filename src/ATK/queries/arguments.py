@@ -20,27 +20,27 @@ class REQUIRED(Enum):
 # map of necessary arguments and their default values for each query type. Those with config values do not need to be provided by the user
 QUERY_ARGUMENTS = {
     # one of 'survey' and 'catalogue' needed
-    "vizier": {"survey": REQUIRED.LATER, "catalogue": REQUIRED.LATER, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
+    "vizier": {"survey": REQUIRED.LATER, "catalogue": REQUIRED.LATER, "radius": BASE_CONFIG._get("query_settings", "query_radius")},
     # ATLAS requires username and password
     "lightcurve": {
         "survey": REQUIRED.NOW,
         "username": REQUIRED.LATER,
         "password": REQUIRED.LATER,
-        "radius": BASE_CONFIG.get("query_settings", "query_radius"),
+        "radius": BASE_CONFIG._get("query_settings", "query_radius"),
         "split": True,
     },
-    "image": {"survey": REQUIRED.NOW, "size": BASE_CONFIG.get("query_settings", "image_size"), "overlays": None, "band": REQUIRED.NOW},
-    "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius")},
+    "image": {"survey": REQUIRED.NOW, "size": BASE_CONFIG._get("query_settings", "image_size"), "overlays": None, "band": REQUIRED.NOW},
+    "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG._get("query_settings", "query_radius")},
     # correction needs to be deferred as SED queries use data queries under-the-hood
-    "sed": {"radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
+    "sed": {"radius": BASE_CONFIG._get("query_settings", "query_radius"), "defer_correction": True},
     "hrd": {"survey": "gaia", "colour": "BPmag-RPmag", "mag": "Gmag", "defer_correction": True},
-    "datatable": {"rows": REQUIRED.NOW, "radius": BASE_CONFIG.get("query_settings", "query_radius"), "defer_correction": True},
+    "datatable": {"rows": REQUIRED.NOW, "radius": BASE_CONFIG._get("query_settings", "query_radius"), "defer_correction": True},
 }
 
 UNIVERSAL_ARGUMENTS = {"path": None}
 
 # get default unit scale from config
-default_scale = BASE_CONFIG.get("query_settings", "default_scale")
+default_scale = BASE_CONFIG._get("query_settings", "default_scale")
 try:
     default_unit = u.Unit(default_scale)
 except ValueError:
@@ -82,10 +82,14 @@ def get_query_arguments(kind: str, kwargs: dict) -> dict:
         # ATLAS doesn't take a radius
         if out_args.get("survey") == "atlas":
             if out_args.get("radius"):
-                warnings.warn("ATLAS light curves are provided as forced photometry at an exact position, and hence setting the radius will have no effect.")
+                warnings.warn(
+                    "ATLAS light curves are provided as forced photometry at an exact position, and hence setting the radius will have no effect."
+                )
             # ATLAS doesn't have object IDs
             if out_args.get("split"):
-                warnings.warn("ATLAS light curves are provided as forced photometry, and hence object IDs to not apply and no splitting will be performed.")
+                warnings.warn(
+                    "ATLAS light curves are provided as forced photometry, and hence object IDs to not apply and no splitting will be performed."
+                )
 
             # ATLAS does its own proper motion correction
             out_args["defer_correction"] = True

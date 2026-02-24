@@ -2,7 +2,7 @@ import argparse
 
 from ATK.configuration.base_config import BASE_CONFIG
 
-sections = list(BASE_CONFIG.as_dict().keys())
+sections = list(BASE_CONFIG._as_dict().keys())
 
 
 def handle_set(args):
@@ -10,15 +10,15 @@ def handle_set(args):
 
 
 def handle_reset(args):
-    BASE_CONFIG._reset()
+    BASE_CONFIG.reset()
 
 
 def handle_open(args):
-    BASE_CONFIG._open()
+    BASE_CONFIG.open()
 
 
 def handle_show(args):
-    BASE_CONFIG._show()
+    BASE_CONFIG.show()
 
 
 def main():

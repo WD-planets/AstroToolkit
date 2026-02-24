@@ -27,7 +27,7 @@ class EpochConfig(ParserConfig):
     def __init__(self):
         super().__init__(PATH, DEFAULTS, translator)
 
-    def get_section_by_query_kind(self, query_kind: str):
+    def _get_section_by_query_kind(self, query_kind: str):
         """
         Returns a requested epoch config section (i.e. the section for a specified query kind) as a dict
         """
@@ -37,7 +37,7 @@ class EpochConfig(ParserConfig):
         else:
             section = f"{query_kind}_surveys"
 
-        return self.as_dict().get(section, [])
+        return self._as_dict().get(section, [])
 
 
 EPOCH_CONFIG = EpochConfig()

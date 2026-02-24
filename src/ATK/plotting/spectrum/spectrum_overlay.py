@@ -41,10 +41,10 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
     label_counters = {}
     element_renderers = {element: {"spans": [], "labels": []} for element in elements}
 
-    text_size = str(BASE_CONFIG.get("plot_settings", "font_size"))
+    text_size = str(BASE_CONFIG._get("plot_settings", "font_size"))
     if not text_size.endswith("pt"):
         text_size += "pt"
-    text_font = str(BASE_CONFIG.get("plot_settings", "font"))
+    text_font = str(BASE_CONFIG._get("plot_settings", "font"))
 
     y_min = float(np.min(flux))
     y_max = float(np.max(flux))

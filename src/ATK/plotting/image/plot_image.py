@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 from astropy.time import Time
 from astropy.wcs.utils import proj_plane_pixel_scales
-from bokeh.models import (ColumnDataSource, HoverTool, LinearColorMapper,
-                          OpenURL, Range1d, TapTool)
+from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, OpenURL, Range1d, TapTool
 from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
@@ -22,11 +21,9 @@ def get_simbad_urls(image: Image, overlay_data: pd.DataFrame) -> pd.DataFrame:
     """
 
     # get j2000 coords of detections + add to "simbad_ra" / "simbad_dec" columns
-    overlay_data = correct_dataframe_coords(
-        overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"]
-    )
+    overlay_data = correct_dataframe_coords(overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"])
 
-    simbad_radius = BASE_CONFIG.get("overlay_settings", "simbad_radius")
+    simbad_radius = BASE_CONFIG._get("overlay_settings", "simbad_radius")
 
     # add url column
     overlay_data["simbad_url"] = (
@@ -287,12 +284,16 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
     )
 
     # plot search_pos marker
-    plot.scatter(x=search_pos_ra, y=search_pos_dec, marker="cross", color="lime", size=25, line_width=4)
+    plot.scatter(x=search_pos_ra, y=search_pos_dec, marker="cross", color="black", size=10, line_width=2, line_alpha=0.5)
 
     # plot overlay
     if image.overlay is not None:
         plot = plot_overlay(plot, image, relative_axes)
 
     image._plot_id = plot.id
+
+    if not relative_axes:
+        plot.xaxis.ticker.desired_num_ticks = 4
+        plot.yaxis.ticker.desired_num_ticks = 4
 
     return format_plot("image", plot)

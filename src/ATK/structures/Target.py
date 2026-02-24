@@ -85,7 +85,7 @@ class Target:
             raise NotImplementedError("Other astronometric surveys will be added at a later date.")
 
     @classmethod
-    def from_pos(cls, position: SkyCoord):
+    def from_coord(cls, position: SkyCoord):
         # if no epoch was set, assume J2000
         if not position.obstime:
             j2000 = Time("2000-01-01T00:00:00.000", format="fits")

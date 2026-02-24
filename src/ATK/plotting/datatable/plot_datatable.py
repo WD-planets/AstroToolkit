@@ -39,12 +39,12 @@ def plot(dt: list[DataTable], **kwargs):
     table = bokeh_DataTable(source=source, columns=cols, width=400, height=400)
 
     dimensions = PLOT_DIMENSIONS["datatable"]
-    table.width = int(BASE_CONFIG.get("plot_settings", "size")) * dimensions[0]
+    table.width = int(BASE_CONFIG._get("plot_settings", "size")) * dimensions[0]
 
-    text_size = str(BASE_CONFIG.get("plot_settings", "font_size"))
+    text_size = str(BASE_CONFIG._get("plot_settings", "font_size"))
     if not text_size.endswith("pt"):
         text_size += "pt"
-    text_font = str(BASE_CONFIG.get("plot_settings", "font"))
+    text_font = str(BASE_CONFIG._get("plot_settings", "font"))
 
     style_sheet = InlineStyleSheet(
         css=f".slick-header-columns {{background-color: #e0e0e0 !important;font-family: {text_font.lower()};font-size: {int(text_size[:-2])}pt; font-weight: normal}}.slick-row {{font-size: {int(text_size[:-2]) - 1}pt; font-weight: normal}}"
@@ -52,7 +52,7 @@ def plot(dt: list[DataTable], **kwargs):
 
     table.stylesheets = [style_sheet]
 
-    height = int(BASE_CONFIG.get("plot_settings", "size")) * dimensions[1]
+    height = int(BASE_CONFIG._get("plot_settings", "size")) * dimensions[1]
     table = autosize_table(table, source, text_size, height)
 
     dt._plot_id = table.id

@@ -12,15 +12,15 @@ def handle_del(args):
 
 
 def handle_reset(args):
-    ALIAS_CONFIG._reset()
+    ALIAS_CONFIG.reset()
 
 
 def handle_open(args):
-    ALIAS_CONFIG._open()
+    ALIAS_CONFIG.open()
 
 
 def handle_show(args):
-    ALIAS_CONFIG._show()
+    ALIAS_CONFIG.show()
 
 
 def main():

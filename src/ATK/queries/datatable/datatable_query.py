@@ -11,16 +11,16 @@ def query(target: Target, **kwargs):
     radius = kwargs["radius"]
     rows = kwargs["rows"]
 
-    aliases = ALIAS_CONFIG.as_dict()["vizier_aliases"]
+    aliases = ALIAS_CONFIG._as_dict()()["vizier_aliases"]
 
     data = []
     for survey, cols in rows.items():
         if survey in aliases:
-            survey_data = general_query(kind="vizier", target=target, survey=survey, radius=radius)
+            survey_data = general_query(kind="vizier", targets=target, survey=survey, radius=radius)
 
             catalogue = aliases[survey]
         else:
-            survey_data = general_query(kind="vizier", target=target, catalogue=survey, radius=radius)
+            survey_data = general_query(kind="vizier", targets=target, catalogue=survey, radius=radius)
 
             catalogue = survey
             survey = None

@@ -24,24 +24,24 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     # correct search radius (i.e. size of image) for maximum possible proper motion of object
     # between image epoch and non-gaia survey epoch. Padded by 25% to account for error
     radius = correct_radius(target, image.size, "vizier", survey) * 1.25
-    piggyback_radius = BASE_CONFIG.get("overlay_settings", "piggyback_radius")
+    piggyback_radius = BASE_CONFIG._get("overlay_settings", "piggyback_radius")
 
     # get non-gaia data
-    non_gaia_data = query(kind="vizier", target=image.search_pos, radius=radius, survey=survey).data
+    non_gaia_data = query(kind="vizier", targets=image.search_pos, radius=radius, survey=survey).data
     if not non_gaia_data:
         return pd.DataFrame()
     else:
         non_gaia_data = non_gaia_data[0].data
 
     # get gaia data
-    gaia_data = query(kind="vizier", target=image.search_pos, radius=radius, survey="gaia").data
+    gaia_data = query(kind="vizier", targets=image.search_pos, radius=radius, survey="gaia").data
     if not gaia_data:
         gaia_data = pd.DataFrame()
     else:
         gaia_data = gaia_data[0].data
 
     # extract basic info
-    vizier_epochs = EPOCH_CONFIG.get_section_by_query_kind("vizier")
+    vizier_epochs = EPOCH_CONFIG._get_section_by_query_kind("vizier")
     gaia_epoch = vizier_epochs["gaia"]
     non_gaia_epoch = vizier_epochs[survey]
     lat_col = survey_info["lat_column"]
@@ -170,7 +170,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     coord = correct_skycoord(coord, image.epoch, Time("2000-01-01", format="iso"))
 
     # get SIMBAD object IDs
-    ids = get_ids(coord, BASE_CONFIG.get("overlay_settings", "simbad_radius") * u.arcsec)
+    ids = get_ids(coord, BASE_CONFIG._get("overlay_settings", "simbad_radius") * u.arcsec)
 
     if ids is RETURNS.EXCEPTION:
         return ids
@@ -187,7 +187,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     Fetches detection overlay information within a given image for a list of Vizier catalogue aliases or a dict of survey:band keys
     """
 
-    overlay_dict = OVERLAY_CONFIG.as_dict()
+    overlay_dict = OVERLAY_CONFIG._as_dict()
     disable_corrections = kwargs.get("disable_corrections", False)
 
     overlays = kwargs.get("overlays")
@@ -220,10 +220,9 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
         overlay_info = reduced_overlay_info
 
     elif isinstance(overlays, dict):
-        requested_mags, errors = [], []
-
         reduced_overlay_info = {}
         for survey, entry in overlay_info.items():
+            requested_mags, errors = [], []
             for mag in overlays[survey]:
                 if mag not in entry["mags"]:
                     raise ValueError(f"Magnitude column '{mag}' not found in overlay definition for survey '{survey}'.")
@@ -245,5 +244,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     final_overlay = pd.concat(overlay_data).reset_index(drop=True)
     if final_overlay.empty:
         return None
+
+    print(final_overlay)
 
     return final_overlay

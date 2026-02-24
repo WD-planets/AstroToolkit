@@ -1,4 +1,6 @@
 import importlib
+import os
+import warnings
 from types import FunctionType
 
 from astropy.coordinates import SkyCoord
@@ -6,9 +8,11 @@ from astropy.coordinates import SkyCoord
 from ..configuration.base_config import BASE_CONFIG
 from ..structures.DataSet import DataSet
 from ..structures.Target import Target
+from ..Tools.read import read
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_map
+from .checksum import make_cache_key
 
 
 def _normalise_targeting_input(targeting: any):
@@ -36,7 +40,7 @@ def _make_target(obj, astrometric_backend):
 
     # SkyCoord -> Target
     if isinstance(obj, SkyCoord):
-        return Target.from_pos(obj)
+        return Target.from_coord(obj)
 
     # id -> Target
     if isinstance(obj, int):
@@ -50,7 +54,7 @@ def setup_targeting(targeting: any) -> list[Target]:
     Normalise user targeting input into a list of Targets
     """
 
-    backend = BASE_CONFIG.get("global_settings", "astrometric_backend")
+    backend = BASE_CONFIG._get("global_settings", "astrometric_backend")
 
     # normalise into flat list of things that can be turned into Targets
     try:
@@ -169,6 +173,19 @@ def single_target_query(kind: str, target: Target, structure: DataSet, **argumen
     return structure
 
 
+def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
+    structure = read(arguments["path"])
+
+    current_key = make_cache_key(kind, targeting, arguments)
+
+    # print(f"Recreated key:\n{structure._cache_key}\nCurrent key:\n{current_key}")
+
+    if getattr(structure, "_cache_key", None) != current_key:
+        return None
+
+    return structure
+
+
 def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments):
     """
     Dispatches a query on one or multiple targets
@@ -176,10 +193,16 @@ def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments
 
     corrected_targets, structure = prepare_search(targets=targets, query_kind=kind, **arguments)
 
+    if arguments.get("path") and os.path.exists(arguments["path"]):
+        # passing corrected targets not actually necessary currently, but might want to check corrected coords in future
+        rec_structure = recreate_struct(kind, corrected_targets, **arguments)
+
+        if rec_structure is not None:
+            return rec_structure
+        else:
+            warnings.warn("Detected change in query parameters, query will be re-run and local file will be overwritten.")
+
     for target in corrected_targets:
         structure = single_target_query(kind, target, structure, **arguments)
-
-    if arguments.get("path"):
-        structure.store(arguments["path"])
 
     return structure

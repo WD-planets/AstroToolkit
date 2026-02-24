@@ -1,0 +1,113 @@
+"""
+###################
+Image Customisation
+###################
+Similarly to :func:`~ATK.Tools.query`, the :meth:`~ATK.Models.DataSet.plot` method of a :class:`~ATK.Models.DataSet` accepts various additional arguments depending on the kind of data being plotted.
+
+.. note::
+
+   Since calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated, :meth:`~ATK.Models.DataSet.open` also accepts these parameters and will pass them to :meth:`~ATK.Models.DataSet.plot` in this case.
+
+When plotting :class:`images <ATK.Models.Image>`, we can utilise two such arguments: ``cmap`` and ``relative_axes``.
+
+|
+
+Changing the Colour Map
+-----------------------
+The ``cmap`` parameter sets the colour map of the plotted image:
+
+1. ``viridis`` (the default):
+"""
+
+# sphinx_gallery_start_ignore
+# fmt: off
+# isort: skip_file
+from _utilities import format_plot
+from bokeh.document import Document
+# sphinx_gallery_end_ignore
+
+from ATK import query
+
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+# sphinx_gallery_start_ignore
+ps_query.plot(cmap="viridis")
+figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+ps_query.open(cmap="viridis")
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+# 
+# |
+# 
+# 2. ``grey`` (greyscale):
+
+from ATK import query
+
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+# sphinx_gallery_start_ignore
+ps_query.plot(cmap="grey")
+figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+ps_query.open(cmap="grey")
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+# 
+# |
+#
+# 3. ``false_colour``, which maps the wavelength of the image filter into a single RGB colour:
+
+from ATK import query
+
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+# sphinx_gallery_start_ignore
+ps_query.plot(cmap="false_colour")
+figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+ps_query.open(cmap="false_colour")
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+#
+# |
+# |
+#
+# Configuring Axes Coordinates
+# ----------------------------
+# So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). If we instead want to use absolute coordinates on the sky, we can pass ``relative_axes = False``:
+
+from ATK import query
+
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+# sphinx_gallery_start_ignore
+ps_query.plot(relative_axes=False)
+figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+ps_query.open(relative_axes=False)
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+#
+# |
+# |
+# |
+#
+# Download this Tutorial
+# ----------------------

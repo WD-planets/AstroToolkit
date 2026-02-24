@@ -3,7 +3,7 @@ Changes
 - Rewrote entire package from the ground up, should be a lot easier to develop in the future
 
 - All coordinate/source handling now done via a central Target class
-    - A Target is automatically generated if a source_id or SkyCoord is entered, or one can be manually created via Target.from_pos() or Target.from_id()
+    - A Target is automatically generated if a source_id or SkyCoord is entered, or one can be manually created via Target.from_coord() or Target.from_id()
     - Reduces explicit dependency on Gaia, so future astrometric surveys like LSST will be a lot easier to implement, just need to provide an equivalent to get_gaia_target (i.e. converts LSST id -> ATK Target with LSST astrometry)
     - Added an "astrometric_backend" config key, which will (in future) select the default astrometry survey (currently only Gaia is supported)
     - Coordinates can be provided in any frame, automatically transformed to ICRS
@@ -50,7 +50,7 @@ Changes
     - can now overlay both ways, i.e. can overlay spectra on an SED as before, but can also overlay an SED over spectra
     - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
-    - major changes in query parameters (i.e. query kind/survey/targets/radius) will now automatically re-run the query and overwrite the local file
+    - DataSets now use a checksum system -> changes in any query parameters will now automatically re-run the query and overwrite the local file
 - light curve binning now much faster
 - usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
     - added method .apply() to DataSet, applies a given method to all stored containers
@@ -78,13 +78,21 @@ Changes
 
 To-Do Now
 ---------
+- relative axes = False in images makes them less square (compare to implementation in datapages to improve?)
+- remove extra whitespace in .show() after __repr__ and .data
+- notifications don't actually do anything, either delete or implement
+- add better error messages for bad surveys, query kinds, etc
 - similarly to in lightcurves, add option to scale colour map in phase-folded light curves by distance to the sinusoid model
+- remove class splitting from show()
+- rename tutorial .py files
+- check what happens if saving a data structure that returned no data (needs to be an empty file which gets reconstructed into an empty DataSet)
 
 - light curves should choose colour per-band
 - implement features from previous version
     - light curve cropping/sigma clipping/phase folding/power spectra
     - light curves are sorting in a different order before/after reading
 - add freq parameter to phase folding
+- add docs changes to changelog
 
 - check effect of bad pm data/distance manually
 - include distances in overlay corrections

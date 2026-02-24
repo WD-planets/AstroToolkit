@@ -7,6 +7,7 @@ import warnings
 from pathlib import Path
 from types import FunctionType
 
+import numpy as np
 from bokeh.io import output_file
 from bokeh.models import Column, Row
 from bokeh.plotting import figure, show
@@ -17,12 +18,8 @@ from ..structures.structures_core import Container
 from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
-FIGS_PER_COLUMN = 3
 
-
-def dispatch_plotting(
-    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
-):
+def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -91,8 +88,10 @@ def plot_data(structure: DataSet, **kwargs: any) -> figure:
     # get rid of any None figures (shouldn't ever happen)
     all_figures = [f for f in all_figures if f is not None]
 
+    figs_per_col = int(np.ceil(np.sqrt(len(all_figures))))
+
     # combines multiple plots into a grid layout of FIGS_PER_COLUMN rows and any number of columns
-    all_figures = [all_figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(all_figures), FIGS_PER_COLUMN)]
+    all_figures = [all_figures[i : i + figs_per_col] for i in range(0, len(all_figures), figs_per_col)]
     rows = [Column(*col) for col in all_figures]
 
     return Row(*rows)
@@ -133,7 +132,7 @@ def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
 
     # clear cache directory of any old figures
     for f in glob.glob(os.path.join(tmp_dir, "*.html")):
-        if time.time() - os.path.getmtime(f) > BASE_CONFIG.get("plot_settings", "cache_time"):
+        if time.time() - os.path.getmtime(f) > BASE_CONFIG._get("plot_settings", "cache_time"):
             os.remove(f)
 
     show(structure.figure)
@@ -154,7 +153,7 @@ def open_basic(plot: figure, prefix: str, title: str, fname=Path | str | None):
 
     # clear cache directory of any old figures
     for f in glob.glob(os.path.join(tmp_dir, "*.html")):
-        if time.time() - os.path.getmtime(f) > BASE_CONFIG.get("plot_settings", "cache_time"):
+        if time.time() - os.path.getmtime(f) > BASE_CONFIG._get("plot_settings", "cache_time"):
             os.remove(f)
 
     show(plot)

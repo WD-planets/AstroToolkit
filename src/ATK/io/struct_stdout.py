@@ -42,7 +42,7 @@ CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda 
 # ------------------
 
 UNITS = {u.arcsec: "″", u.arcmin: "′", u.deg: ["°", " deg"]}
-unit_format = BASE_CONFIG.get("global_settings", "unit_format")
+unit_format = BASE_CONFIG._get("global_settings", "unit_format")
 if unit_format == "symbol":
     UNITS = {key: val if not isinstance(val, list) else val[0] for key, val in UNITS.items()}
 elif unit_format == "text":
@@ -286,11 +286,17 @@ def replace_pad_placeholder(match: re.Match) -> str:
     half = match.group(2) == "H"
 
     pad = 0
+    last_pad = 0
     for key, val in COL_WIDTHS.items():
         if key < depth:
             pad += val
+            last_pad = val
+    if half:
+        final_pad = pad - last_pad // 2
+    else:
+        final_pad = pad
 
-    return " " * (pad // 2 if half else pad)
+    return " " * final_pad
 
 
 def is_expandable(val: any) -> bool:
@@ -369,10 +375,10 @@ def format_value(value: any) -> str:
 
     # 3rd party expandable objects
     if type(value) in CONTAINER_HEADERS:
-        line = f"\n{pad_placeholder(max(CURRENT_DEPTH * 2, 1), True)}{safe_representation(value)}\n"
+        line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{safe_representation(value)}\n"
     # ATK objects
     elif type(value) in STRUCTURE_MAP.values():
-        line = f"\n{pad_placeholder(max(CURRENT_DEPTH * 2, 1), True)}{value.__repr__()}\n"
+        line = f"\n{pad_placeholder(CURRENT_DEPTH + 1, True)}{value.__repr__()}\n"
     # everything else
     else:
         line = ""
@@ -455,6 +461,8 @@ def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
 
     # calculate base pad
     pad = get_dict_pad(attrs, ".attr: ")
+
+    print(structure.__repr__(), "\n")
 
     # split attributes into inherited + uninherited
     inherited_attrs, own_attrs = split_instance_attributes(structure)

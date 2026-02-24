@@ -17,9 +17,9 @@ class VizierEntry(Container):
 
     def __repr__(self):
         if self.survey:
-            return f"<{self.survey} ({self.catalogue}) Vizier Data>"
+            return f"<{self.survey} ({self.catalogue}) VizierEntry>"
         else:
-            return f"<{self.catalogue} Vizier Data>"
+            return f"<{self.catalogue} VizierEntry>"
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity

@@ -15,7 +15,7 @@ def query(target: Target, **kwargs):
     if not target.identifier:
         raise ValueError("Targets must be a source ID or list of source IDs.")
 
-    gaia_data = general_query("vizier", target=target, survey="gaia")
+    gaia_data = general_query("vizier", targets=target, survey="gaia")
     if not gaia_data.data or gaia_data.exception:
         return RETURNS.EXCEPTION
 

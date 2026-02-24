@@ -6,7 +6,7 @@ class AliasConfig(ParserConfig):
     def __init__(self):
         super().__init__(PATH, DEFAULTS, None)
 
-    def as_flattened_dict(self) -> None:
+    def _as_flattened_dict(self) -> None:
         """
         Returns config as a single flattened dictionary of alias:id definitions
         """

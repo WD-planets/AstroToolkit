@@ -2,7 +2,7 @@ import argparse
 
 from ATK.configuration.epoch_config import EPOCH_CONFIG
 
-sections = list(EPOCH_CONFIG.as_dict().keys())
+sections = list(EPOCH_CONFIG._as_dict().keys())
 
 
 def handle_set(args):
@@ -14,15 +14,15 @@ def handle_del(args):
 
 
 def handle_reset(args):
-    EPOCH_CONFIG._reset()
+    EPOCH_CONFIG.reset()
 
 
 def handle_open(args):
-    EPOCH_CONFIG._open()
+    EPOCH_CONFIG.open()
 
 
 def handle_show(args):
-    EPOCH_CONFIG._show()
+    EPOCH_CONFIG.show()
 
 
 def main():
@@ -44,16 +44,12 @@ def main():
     # set()
     p_set = subparsers.add_parser("set", help="Sets the epoch of a survey or Vizier table alias.")
     p_set.add_argument("alias", type=str, metavar="<ALIAS>", help="Survey or alias of new epoch definition.")
-    p_set.add_argument(
-        "epoch", type=str, metavar="<EPOCH>", help="Epoch of survey in ISOT format (YYYY-MM-DDTHH:MM:SS.SSS)."
-    )
+    p_set.add_argument("epoch", type=str, metavar="<EPOCH>", help="Epoch of survey in ISOT format (YYYY-MM-DDTHH:MM:SS.SSS).")
     p_set.set_defaults(func=handle_set)
 
     # del()
     del_parser = subparsers.add_parser("del", help="Deletes an existing epoch definition for a Vizier catalogue alias.")
-    del_parser.add_argument(
-        "alias", type=str, metavar="<ALIAS>", help="Name of alias for which an epoch definition should be deleted."
-    )
+    del_parser.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of alias for which an epoch definition should be deleted.")
 
     # parse and dispatch
     args = parser.parse_args()

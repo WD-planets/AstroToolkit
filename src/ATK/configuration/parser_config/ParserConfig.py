@@ -5,6 +5,31 @@ from types import FunctionType
 from ...utilities.file_io import open_file
 
 
+class ConfigSection:
+    """
+    Proxy object for a config section
+    """
+
+    def __init__(self, parent, name):
+        self._parent = parent
+        self._name = name
+
+    def __getattr__(self, key):
+        config = self._parent._(self._name, {})
+        if key not in config:
+            raise AttributeError(f"Key '{key}' not found in section '{self._name}'")
+        return config[key]
+
+    def __setattr__(self, key, value):
+        if key in {"_parent", "_name"}:
+            super().__setattr__(key, value)
+            return
+        self._parent._set(self._name, key, value)
+
+    def __delattr__(self, key):
+        self._parent._del(self._name, key)
+
+
 def parser_to_dict(parser: ConfigParser, translator: FunctionType) -> dict:
     """
     Convert a ConfigParser to a dictionary of values, using a translation function if provided.
@@ -57,7 +82,7 @@ class ParserConfig:
         with open(self._path, "w") as f:
             self._parser.write(f)
 
-    def _reset(self) -> None:
+    def reset(self) -> None:
         """
         Reset parser and config to their default states, and write this to the config file
         """
@@ -96,7 +121,7 @@ class ParserConfig:
         del self._parser[section][key]
         self._save()
 
-    def get(self, section: str, key: str, fallback=None):
+    def _get(self, section: str, key: str, fallback=None):
         """
         Get the value of a key in a given section
         """
@@ -104,7 +129,7 @@ class ParserConfig:
         self._load()
         return self._config.get(section, {}).get(key, fallback)
 
-    def get_section(self, section: str):
+    def _get_section(self, section: str):
         """
         Get an entire section by its key in the config
         """
@@ -112,7 +137,7 @@ class ParserConfig:
         self._load()
         return self._config.get(section, {})
 
-    def as_dict(self):
+    def _as_dict(self):
         """
         Get entire config as a 2D dictionary
         """
@@ -120,7 +145,7 @@ class ParserConfig:
         self._load()
         return self._config
 
-    def _show(self) -> None:
+    def show(self) -> None:
         """
         Print config to stdout
         """
@@ -132,9 +157,18 @@ class ParserConfig:
                 print(f"{key} = {val}")
             print()
 
-    def _open(self) -> None:
+    def open(self) -> None:
         """
         Opens the config file in the default text editor
         """
 
         open_file(self._path)
+
+    def __getattr__(self, section):
+        if section in self.__dict__:
+            return self.__dict__[section]
+
+        if section not in self._config:
+            raise ValueError(f"Config section '{section}' does not exist.")
+
+        return ConfigSection(self, section)

@@ -1,0 +1,13 @@
+.wy-nav-content {
+    background-color: #ffffff;
+}
+
+.document {
+    background-color: #ffffff;
+}
+
+.wy-nav-content {
+    max-width: none;
+    padding-left: 8rem;
+    padding-right: 8rem;
+}

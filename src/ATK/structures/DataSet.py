@@ -8,29 +8,37 @@ from bokeh.io import output_file
 from bokeh.io import save as bokeh_save
 from bokeh.plotting import figure as Figure
 
-from .structures_core import (COMBINE_PLOTS, SPLIT_BY_TARGET, Container,
-                              manage_inplace)
+from .structures_core import COMBINE_PLOTS, SPLIT_BY_TARGET, Container, manage_inplace
 from .Target import Target
 
 
 @dataclass
-class BaseDataSet:
+class DataSet:
     kind: str | None = None
     survey: str | None = None
     targets: list[Target] | None = field(default_factory=list)
     radius: Quantity | None = None
     exception: bool | None = False
 
+    data: list = field(default_factory=list)
+    figure: Figure | None = None
+
+    _stored_plot_params: dict = field(default_factory=dict)
+
     # maps per-Target key to Target
     _key_map: dict[str, Target] = field(init=False, default_factory=dict)
     # maps per-Target alias to per-Target key
     _alias_map: dict[str, str] = field(init=False, default_factory=dict)
 
+    _cache_key: str | None = None
+
     def __post_init__(self):
         self._build_target_maps()
 
     def __repr__(self):
-        return f"<{self.survey} {self.kind} data>"
+        if self.survey:
+            return f"<{self.survey} {self.kind} DataSet>"
+        return f"<{self.kind} DataSet>"
 
     def __str__(self):
         return self.__repr__()
@@ -98,14 +106,6 @@ class BaseDataSet:
 
         return struct
 
-
-@dataclass(repr=False)
-class DataSet(BaseDataSet):
-    data: list = field(default_factory=list)
-    figure: Figure | None = None
-
-    _stored_plot_params: dict = field(default_factory=dict)
-
     @property
     def _title(self):
         return f"ATK {self.kind.upper()}"
@@ -148,16 +148,16 @@ class DataSet(BaseDataSet):
 
         return self
 
-    def open(self, fname: Path | str | None = None, **kwargs: any):
+    def open(self, path: Path | str | None = None, **kwargs: any):
         from ..io.plot_io import open as open_html
 
-        open_html(self, fname=fname, **kwargs)
+        open_html(self, fname=path, **kwargs)
 
         return self
 
-    def save(self, fname: Path | str):
-        if not fname.endswith(".html"):
-            fname = f"{fname}.html"
+    def save(self, path: Path | str):
+        if not path.endswith(".html"):
+            fname = f"{path}.html"
 
         output_file(fname)
         bokeh_save(self.figure, title=self._title)

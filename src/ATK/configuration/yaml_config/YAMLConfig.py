@@ -75,7 +75,7 @@ class YAMLConfig:
         with open(self._path, "w") as f:
             yaml.dump(self._raw, f, sort_keys=False, indent=YAML_INDENT, Dumper=CustomDumper)
 
-    def _reset(self):
+    def reset(self):
         """
         Reset yaml and dict representation of config to their default states, and write this to the config file
         """
@@ -123,7 +123,7 @@ class YAMLConfig:
         """
 
         self.load()
-        return self._config.get(section, {}).get(key, fallback)
+        return self._(section, {}).get(key, fallback)
 
     def get_section(self, section: str):
         """
@@ -131,9 +131,9 @@ class YAMLConfig:
         """
 
         self._load()
-        return self._config.get(section, {})
+        return self._(section, {})
 
-    def as_dict(self):
+    def _as_dict(self):
         """
         Get entire config as a 2D dictionary
         """
@@ -141,14 +141,14 @@ class YAMLConfig:
         self._load()
         return self._config
 
-    def _show(self):
+    def show(self):
         """
         Print config to stdout
         """
 
         print(self._printer(self._config))
 
-    def _open(self) -> None:
+    def open(self) -> None:
         """
         Opens the config file in the default text editor
         """

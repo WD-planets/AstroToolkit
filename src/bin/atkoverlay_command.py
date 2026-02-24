@@ -4,7 +4,7 @@ from ATK.configuration.alias_config import ALIAS_CONFIG
 from ATK.configuration.overlay_config import OVERLAY_CONFIG
 
 sections = ["photometric", "positional"]
-aliases = list(ALIAS_CONFIG.as_dict()["vizier_aliases"].keys())
+aliases = list(ALIAS_CONFIG._as_dict()["vizier_aliases"].keys())
 
 
 def validate_common_args(parser, section, args):
@@ -12,7 +12,7 @@ def validate_common_args(parser, section, args):
     Ensure lat/lon/ID/frame args existfor all overlay sections
     """
 
-    missing = [f"--{name}" for name in ("lat", "lon", "id", "frame") if getattr(args, name) is None]
+    missing = [f"--{name}" for name in ("lat", "lon", "frame") if getattr(args, name) is None]
 
     if missing:
         parser.error(f"For section '{section}', the following arguments are required: {', '.join(missing)}")
@@ -35,16 +35,7 @@ def handle_set(parser, args):
     validate_common_args(parser, section, args)
     validate_specific_args(parser, section, args)
 
-    OVERLAY_CONFIG._set(
-        section,
-        args.alias,
-        lon_column=args.lon,
-        lat_column=args.lat,
-        frame=args.frame,
-        id_column=args.id,
-        mags=args.mags,
-        errors=args.errors,
-    )
+    OVERLAY_CONFIG._set(section, args.alias, mags=args.mags, errors=args.errors, lon_column=args.lon, lat_column=args.lat, frame=args.frame)
 
 
 def handle_del(args):
@@ -54,15 +45,15 @@ def handle_del(args):
 
 
 def handle_reset(args):
-    OVERLAY_CONFIG._reset()
+    OVERLAY_CONFIG.reset()
 
 
 def handle_open(args):
-    OVERLAY_CONFIG._open()
+    OVERLAY_CONFIG.open()
 
 
 def handle_show(args):
-    OVERLAY_CONFIG._show()
+    OVERLAY_CONFIG.show()
 
 
 def main():
@@ -100,15 +91,12 @@ def main():
     # common args
     p_set.add_argument("--lon", help="Name of longitudinal column in Vizier table (e.g. RA, GLON).", required=True)
     p_set.add_argument("--lat", help="Name of latitudinal column in Vizier table (e.g. DEC, GLAT).", required=True)
-    p_set.add_argument("--id", help="Survey-specific ID column in Vizier table.", required=True)
     p_set.add_argument("--frame", help="Frame of coordinates (e.g. icrs, galactic).", required=True)
 
     # photometric only
     list_group = p_set.add_argument_group("Only required for photometric overlays")
     list_group.add_argument("--mags", nargs="+", metavar="MAGS", help="Names of magnitude columns in Vizier table.")
-    list_group.add_argument(
-        "--errors", nargs="+", metavar="ERRORS", help="Names of magnitude error columns in Vizier table."
-    )
+    list_group.add_argument("--errors", nargs="+", metavar="ERRORS", help="Names of magnitude error columns in Vizier table.")
 
     p_set.set_defaults(func=lambda args: handle_set(p_set, args))
 
@@ -120,12 +108,7 @@ def main():
         help=f"Overlay type, from: {', '.join(sections)}. Photometric overlays use magnitudes to scale markers.",
         choices=sections,
     )
-    p_del.add_argument(
-        "alias",
-        type=str,
-        metavar="<ALIAS>",
-        help="Name of survey or alias for which an overlay definition should be deleted.",
-    )
+    p_del.add_argument("alias", type=str, metavar="<ALIAS>", help="Name of survey or alias for which an overlay definition should be deleted.")
     p_del.set_defaults(func=handle_del)
 
     # parse and dispatch

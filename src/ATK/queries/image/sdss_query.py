@@ -1,3 +1,4 @@
+import astropy.units as u
 from astropy.wcs import WCS
 from astroquery.sdss import SDSS
 
@@ -7,12 +8,21 @@ from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 from .image_core import get_image_skycoord, iso_to_epoch, reproject_hdu
 
 
+def check_inputs(band: str, size: int):
+    if size > 500 * u.arcsec:
+        raise ValueError("Size too large. Maximum supported by panstarrs is 1500 arcsec.")
+    if band not in ["u", "g", "r", "i", "z"]:
+        raise ValueError("Invalid panstarrs bands. Supported bands are ['u', 'g', 'r', 'i', 'z'].")
+
+
 def query(target: Target, **kwargs) -> Image:
     """
     Performs an SDSS image query
     """
 
     band, size = kwargs["band"], kwargs["size"]
+
+    check_inputs(band, size)
 
     # get image list
     try:

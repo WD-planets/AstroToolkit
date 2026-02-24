@@ -10,7 +10,6 @@ DEFAULTS = {
             "lon_column": "RA_ICRS",
             "lat_column": "DE_ICRS",
             "frame": "icrs",
-            "id_column": "Source",
         },
         "galex": {
             "mags": ["NUVmag", "FUVmag"],
@@ -18,7 +17,6 @@ DEFAULTS = {
             "lon_column": "RAJ2000",
             "lat_column": "DEJ2000",
             "frame": "icrs",
-            "id_column": "Name",
         },
         "wise": {
             "mags": ["W1mag", "W2mag", "W3mag", "W4mag"],
@@ -26,7 +24,6 @@ DEFAULTS = {
             "lon_column": "RAJ2000",
             "lat_column": "DEJ2000",
             "frame": "icrs",
-            "id_column": "WISE",
         },
         "sdss": {
             "mags": ["uPmag", "gPmag", "rPmag", "iPmag", "zPmag"],
@@ -34,7 +31,6 @@ DEFAULTS = {
             "lon_column": "RA_ICRS",
             "lat_column": "DE_ICRS",
             "frame": "icrs",
-            "id_column": "objID",
         },
         "2mass": {
             "mags": ["Jmag", "Hmag", "Kmag"],
@@ -42,7 +38,6 @@ DEFAULTS = {
             "lon_column": "RAJ2000",
             "lat_column": "DEJ2000",
             "frame": "icrs",
-            "id_column": "2MASS",
         },
         "skymapper": {
             "mags": ["gPSF", "rPSF", "iPSF", "zPSF", "uPSF", "vPSF"],
@@ -50,7 +45,6 @@ DEFAULTS = {
             "lon_column": "RAICRS",
             "lat_column": "DEICRS",
             "frame": "icrs",
-            "id_column": "ObjectId",
         },
         "panstarrs": {
             "mags": ["gmag", "rmag", "imag", "zmag", "ymag"],
@@ -58,11 +52,10 @@ DEFAULTS = {
             "lon_column": "RAJ2000",
             "lat_column": "DEJ2000",
             "frame": "icrs",
-            "id_column": "objID",
         },
     },
     "positional": {
-        "rosat": {"lon_column": "RAJ2000", "lat_column": "DEJ2000", "frame": "icrs", "id_column": "Name"},
-        "erosita": {"lon_column": "RA_ICRS", "lat_column": "DE_ICRS", "frame": "icrs", "id_column": "IAUName"},
+        "rosat": {"lon_column": "RAJ2000", "lat_column": "DEJ2000", "frame": "icrs"},
+        "erosita": {"lon_column": "RA_ICRS", "lat_column": "DE_ICRS", "frame": "icrs"},
     },
 }
