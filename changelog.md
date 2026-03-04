@@ -93,6 +93,7 @@ To-Do Now
     - light curves are sorting in a different order before/after reading
 - add freq parameter to phase folding
 - add docs changes to changelog
+- light curve overlays in images as way to show how to recombine data
 
 - check effect of bad pm data/distance manually
 - include distances in overlay corrections

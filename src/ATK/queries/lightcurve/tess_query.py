@@ -60,7 +60,7 @@ def query(target: Target, **kwargs: dict):
     Performs a TESS light curve query
     """
 
-    BASE_CONFIGurl = "https://mast.stsci.edu/api/v0.1/Download/file?uri="
+    base_url = "https://mast.stsci.edu/api/v0.1/Download/file?uri="
 
     radius = kwargs["radius"].to(u.deg)
 
@@ -94,7 +94,7 @@ def query(target: Target, **kwargs: dict):
             continue
 
         # construct URL and send request
-        url = f"{BASE_CONFIGurl}{mast_uri}"
+        url = f"{base_url}{mast_uri}"
         response = send_request("tess", url)
         if response is RETURNS.EXCEPTION:
             continue

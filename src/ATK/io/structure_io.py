@@ -220,8 +220,6 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
     # ^
     if hasattr(structure, "_cache_key"):
         hdr.append(("ATK__CACHE_KEY", structure._cache_key))
-    else:
-        raise RuntimeError("DataSet has no cache key.")
 
     # iterate through remaining structure attributes and write them to the header
     for attr, val in structure.__dict__.items():

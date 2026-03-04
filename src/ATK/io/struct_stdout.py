@@ -20,6 +20,7 @@ from ..utilities.mapping import build_structure_map
 
 # this should be left to False, kwarg 'debug' can be used to set it locally
 DEBUG = False
+SHOW_ALL = False
 
 STRUCTURE_MAP = build_structure_map()
 NO_COMMA_SEP = list(STRUCTURE_MAP.values()) + [pd.DataFrame]
@@ -128,7 +129,7 @@ def format_list(lst: list) -> str:
 
     # recursively format each item
     for i, item in enumerate(lst):
-        if i == MAX_DISPLAY:
+        if i == MAX_DISPLAY and not SHOW_ALL:
             str_rep += format_value(f"+{len(lst) - MAX_DISPLAY} more ...")
             return str_rep
 
@@ -447,10 +448,12 @@ def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
     Prints a structure's attributes and methods in a human-readable format. Optionally also prints the types of attributes.
     """
 
-    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG
+    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG, SHOW_ALL
 
     if kwargs.get("debug"):
         DEBUG = True
+    if kwargs.get("show_all"):
+        SHOW_ALL = True
 
     # get structure attrs
     attrs = structure.__dict__
@@ -462,7 +465,7 @@ def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
     # calculate base pad
     pad = get_dict_pad(attrs, ".attr: ")
 
-    print(structure.__repr__(), "\n")
+    print(structure.__repr__())
 
     # split attributes into inherited + uninherited
     inherited_attrs, own_attrs = split_instance_attributes(structure)

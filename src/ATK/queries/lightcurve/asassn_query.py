@@ -26,10 +26,11 @@ def query(target: Target, **kwargs: dict):
     all_lcs = []
     for id in ids:
         lc = data[id].data
+        catalogue_info = data.catalog_info[data.catalog_info["asas_sn_id"] == id]
         df = lc.rename(columns={"phot_filter": "band", "asas_sn_id": "id"})
         df["mjd"] = Time(lc["jd"], format="jd").mjd
-        df["ra"] = data.catalog_info["ra_deg"][0]
-        df["dec"] = data.catalog_info["dec_deg"][0]
+        df["ra"] = float(catalogue_info["ra_deg"].iloc[0])
+        df["dec"] = float(catalogue_info["dec_deg"].iloc[0])
         df["band"] = df["band"].str.lower()
         df["id"] = id
 

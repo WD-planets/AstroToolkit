@@ -27,7 +27,7 @@ QUERY_ARGUMENTS = {
         "username": REQUIRED.LATER,
         "password": REQUIRED.LATER,
         "radius": BASE_CONFIG._get("query_settings", "query_radius"),
-        "split": True,
+        "split": False,
     },
     "image": {"survey": REQUIRED.NOW, "size": BASE_CONFIG._get("query_settings", "image_size"), "overlays": None, "band": REQUIRED.NOW},
     "spectrum": {"survey": REQUIRED.NOW, "radius": BASE_CONFIG._get("query_settings", "query_radius")},

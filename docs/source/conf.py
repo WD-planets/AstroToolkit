@@ -15,7 +15,7 @@ sphinx_gallery_conf = {
     "write_computation_times": False,
     "filename_pattern": r"\.py$",
     "ignore_pattern": r"^_.*\.py$",
-    "run_stale_examples": True,
+    # "run_stale_examples": True,
 }
 
 # -------------------

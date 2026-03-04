@@ -20,7 +20,7 @@ ps_query.show()
 from ATK.queries.image._query_info import BAND_MAP
 with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
     f.write(".. note::\n")
-    f.write("    ATK supports queries to the following imaging surveys:\n")
+    f.write("    ATK supports queries to the following imaging surveys and bands:\n")
     for survey in BAND_MAP:
         f.write(f"        - {survey} - {', '.join(BAND_MAP[survey])}\n")
     f.write("\n")
@@ -28,7 +28,7 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 
 # %%
 # 
-# As with all queries, this returns a :class:`~ATK.Models.DataSet` with the ``data`` attribute being a list of data containers - in this case :class:`~ATK.Models.Images`.
+# As with all queries, this returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of data containers - in this case :class:`~ATK.Models.Images`.
 # 
 # .. note:: 
 #
