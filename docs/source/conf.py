@@ -65,7 +65,11 @@ html_theme_options = {"collapse_navigation": False}
 # InterSphinx Options
 # -------------------
 
-intersphinx_mapping = {"pandas": ("https://pandas.pydata.org/docs/", None), "astropy": ("https://docs.astropy.org/en/stable/", None)}
+intersphinx_mapping = {
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "astropy": ("https://docs.astropy.org/en/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+}
 
 # --------------------------------
 # Sphinx-Gallery Bokeh Integration

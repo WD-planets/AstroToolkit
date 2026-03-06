@@ -28,11 +28,13 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 
 # %%
 # 
-# As with all queries, this returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of data containers - in this case :class:`~ATK.Models.Images`.
-# 
+# As with all queries, this returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of data containers - in this case :class:`~ATK.Models.Images`. Each :class:`~ATK.Models.Image` contains information about the search, along with the image's ``epoch``, astropy :class:`~astropy.io.fits.ImageHDU`, and astropy :class:`~astropy.wcs.WCS`.
+#
 # .. note:: 
 #
 #    Since we have not supplied the units of ``size``, it has been assumed to be in arcsec. This can be changed in :doc:`the config <../configuration/config>`.
+#
+# | 
 #
 # .. include:: supported_image_surveys.rst
 # 

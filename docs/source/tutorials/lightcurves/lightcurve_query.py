@@ -32,8 +32,10 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 #
 #    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
 #
-# This returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of returned :class:`~ATK.Models.Lightcurve` containers (**one per photometric band per target**). 
+# This returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of returned :class:`~ATK.Models.Lightcurve` containers (**one per photometric band per target**). Each :class:`~ATK.Models.Lightcurve` contains information about the search, including the ``separation`` between the light curve and the position of the search, along with the actual photometric data as numpy :class:`arrays <numpy.ndarray>`.
 #
+# |
+# 
 # .. include:: supported_lightcurve_surveys.rst
 #
 # |
@@ -88,6 +90,16 @@ import astropy.units as u
 
 asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn", path="example_lightcurve.fits", radius = 60 * u.arcsec, split=True)
 asassn_query.show(show_all=True)
+
+# %%
+# .. note::
+#
+#    By default, :meth:`~ATK.Models.DataSet.show` will truncate printing when a :class:`~ATK.Model.DataSet` contains many data containers. This can be disabled by passing ``show_all=True`` to :meth:`~ATK.Models.DataSet.show`, as above.
+#
+# This splits the returned :class:`Lightcurves <ATK.Models.Lightcurve>` into whatever the survey considers to be distinct detections. In this case, we can see that our original light curve has been split into three (hence the three unique ``separations`` of our returned :class:`Lightcurves <ATK.Models.Lightcurve>`).
+#
+# We can then :meth:`~ATK.Models.DataSet.plot` our newly split :class:`Lightcurves <ATK.Models.Lightcurve>` as usual:
+
 # sphinx_gallery_start_ignore
 asassn_query.plot()
 figure = format_plot(asassn_query.figure, 3, 1.5)
@@ -100,10 +112,15 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# .. note::
-#
-#    By default, :meth:`~ATK.Models.DataSet.show` will truncate printing when a :class:`~ATK.Model.DataSet` contains many data containers. This can be disabled by passing ``show_all=True`` to :meth:`~ATK.Models.DataSet.show`, as above.
-#
 # .. warning::
 #
-#    <WARNING ABOUT split NOT WORKING WELL FOR SOME SURVEYS, E.G. ZTF>
+#    As ``split`` utilises a per-survey object ID to separate detections, its efficacy depends heavily on the specific implementation provided by o each survey.
+
+# %%
+#
+# |
+# |
+# |
+#
+# Download this Tutorial
+# ----------------------

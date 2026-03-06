@@ -115,7 +115,7 @@ galex_entry = galex_query.data[0]
 galex_entry.show()
 
 # %%
-# Just as the attributes of the returned :class:`~ATK.Models.DataSet` described the query that we requested, those of the :class:`~ATK.Models.VizierEntry` provide the details of the final query as it was performed:
+# Just as the attributes of the returned :class:`~ATK.Models.DataSet` described the query that we requested, those of the :class:`~ATK.Models.VizierEntry` provide the details of the actual search as it was performed:
 #
 # - The :attr:`~ATK.Models.VizierEntry.survey` attribute gives the name of the survey to which the data pertains.
 #
