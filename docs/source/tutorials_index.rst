@@ -4,7 +4,7 @@ Getting Started
 .. toctree::
     :hidden:
     :caption: Getting Started
-    :maxdepth: 2
+    :maxdepth: 1
 
     auto_tutorials/getting_started/data_query
     auto_tutorials/getting_started/data_query_2
@@ -28,8 +28,11 @@ Working with Lightcurves
 ========================
 
 .. toctree::
+    :maxdepth: 1
     :hidden:
     :caption: Working with Lightcurves
-    :maxdepth: 1
 
     auto_tutorials/lightcurves/lightcurve_query
+    auto_tutorials/lightcurves/lightcurve_plotting
+    auto_tutorials/lightcurves/lightcurve_manipulation
+    auto_tutorials/lightcurves/lightcurve_timeseries

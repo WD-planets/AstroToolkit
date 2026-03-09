@@ -63,18 +63,16 @@ def do_binning(x: np.ndarray, ys: list[np.ndarray], y_errs: list[np.ndarray], bi
     return x_bins, out_ys, out_y_errs
 
 
-def bin_nd(
-    x: np.ndarray, ys: list[np.ndarray], errs: list[np.ndarray] | None = None, bins: int | None = None, size: Quantity | float | None = None
-):
+def bin_nd(x: np.ndarray, ys: list[np.ndarray], errs: list[np.ndarray] | None = None, bins: int | None = None, size: Quantity | float | None = None):
     if bins is None == size is None:
         raise ValueError("Exactly one of 'bins', 'size' must be provided.")
 
     while len(errs) < len(ys):
         errs.append(None)
 
-    if size:
+    if size is not None:
         if isinstance(size, Quantity):
-            size = size.value
+            size = size.to(u.day).value
         out_x, out_ys, out_y_errs = bin_by_size(x, ys, errs, size)
     else:
         out_x, out_ys, out_y_errs = do_binning(x, ys, errs, bins)

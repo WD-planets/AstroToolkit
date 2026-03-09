@@ -158,9 +158,9 @@ galex_query.show()
 #    While a default radius of 3 arcseconds is reasonable for a modern optical telescope, for other workloads it may be preferrable to work at a different spatial resolution. To accomodate this, most of the core defaults in ATK are configurable via a config file. See :doc:`here <../configuration/config>` for details.
 
 # %%
+#
 # |
 # |
 # |
 #
-# Download this Tutorial
-# ======================
+# .. rubric:: Download this Tutorial

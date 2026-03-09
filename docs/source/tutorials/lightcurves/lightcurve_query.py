@@ -122,5 +122,4 @@ figure
 # |
 # |
 #
-# Download this Tutorial
-# ----------------------
+# .. rubric:: Download this Tutorial

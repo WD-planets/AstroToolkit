@@ -1,9 +1,10 @@
 """
+##########
 The Config
-==========
+##########
 
 Opening the Config
-------------------
+==================
 .. code-block:: console
 
     $ ATKconfig open
@@ -19,7 +20,7 @@ or:
 |
 
 Viewing the Config
--------------------
+==================
 
 .. code-block:: console
 
@@ -37,7 +38,7 @@ CONFIG.show()
 # |
 #
 # Editing the config
-# ------------------
+# ==================
 #
 # .. code-block:: console
 #
@@ -51,9 +52,9 @@ CONFIG.show()
 #    CONFIG.<section>.<key> = <value>
 
 # %%
+#
 # |
 # |
 # |
 #
-# Download this Tutorial
-# ----------------------
+# .. rubric:: Download this Tutorial

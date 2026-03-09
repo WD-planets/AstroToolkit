@@ -107,5 +107,4 @@ print(hu_leo)
 # |
 # |
 #
-# Download this Tutorial
-# ======================
+# .. rubric:: Download this Tutorial

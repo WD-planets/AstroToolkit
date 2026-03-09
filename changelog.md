@@ -86,14 +86,18 @@ To-Do Now
 - remove class splitting from show()
 - rename tutorial .py files
 - check what happens if saving a data structure that returned no data (needs to be an empty file which gets reconstructed into an empty DataSet)
+- check font of powspec axes labels
 
 - light curves should choose colour per-band
+- powspec needs to be labelled by band in legend (e.g. when using multiband=False)
 - implement features from previous version
-    - light curve cropping/sigma clipping/phase folding/power spectra
+    - light curve sigma clipping
     - light curves are sorting in a different order before/after reading
 - add freq parameter to phase folding
+    - check phase folding in docs and finish this section, hopefully once ztf is actually working and above is implemented
 - add docs changes to changelog
 - light curve overlays in images as way to show how to recombine data
+- look into using container methods on the containers themselves rather than via .apply on a DataSet
 
 - check effect of bad pm data/distance manually
 - include distances in overlay corrections

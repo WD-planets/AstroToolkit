@@ -73,7 +73,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     return plot
 
 
-def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
+def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     """
     Plots light curves of a given survey grouped by object ID
     """
@@ -100,6 +100,7 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwa
         x_label = "Time (days)"
 
     # create per-survey plot
+    survey = lcs[0].survey
     plot = figure(
         width=400,
         height=400,
@@ -112,6 +113,8 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwa
     # get MJD at start of data
     if lcs[0].time_type == "mjd":
         all_times = [t for lc in lcs for t in lc.mjd]
+        if not all_times:
+            return None
         time_min = min(all_times)
     else:
         all_times = None
@@ -119,9 +122,7 @@ def dispatch_groups(survey: str, lcs: list[Lightcurve], palette_map: dict, **kwa
 
     # Plot each band independently
     for lc in lcs:
-        plot = plot_band(
-            plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean")
-        )
+        plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
 
     if "flux" in brightness_type:
         plot.y_range.flipped = True
@@ -159,42 +160,33 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     """
 
     plots = []
-    surveys = list(set([lc.survey for lc in lightcurves]))
 
     # loop through surveys (will be removed)
-    for survey in surveys:
-        requested_bands = kwargs.get("bands")
-        # filter data to only keep requested (and valid) light curves
-        per_survey_lcs = [
-            lc
-            for lc in lightcurves
-            if lc.brightness_type and lc.survey == survey and (requested_bands is None or lc.band in requested_bands)
-        ]
-        # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
+    requested_bands = kwargs.get("bands")
+    # filter data to only keep requested (and valid) light curves
+    lcs = [lc for lc in lightcurves if lc.brightness_type and (requested_bands is None or lc.band in requested_bands)]
+    # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
 
-        bands = list(set(lc.band for lc in per_survey_lcs))
-        bands.sort()
+    bands = list(set(lc.band for lc in lcs))
 
-        colours = kwargs.get("colours")
-        palette_map = get_band_colours(bands, colours)
+    colours = kwargs.get("colours")
+    palette_map = get_band_colours(bands, colours)
 
-        if not per_survey_lcs:
-            continue
+    # group by object ID
+    lc_groups = group_lc_ids(lcs)
+    for per_id_lcs in lc_groups:
+        if len(set(lc.time_type for lc in per_id_lcs)) > 1:
+            raise ValueError("Detected multiple time formats 'mjd' and 'phase' in Lightcurve plotting.")
 
-        # group by object ID
-        lc_groups = group_lc_ids(per_survey_lcs)
-        for per_id_lcs in lc_groups:
-            if len(set(lc.time_type for lc in per_id_lcs)) > 1:
-                raise ValueError("Detected multiple time formats 'mjd' and 'phase' in Lightcurve plotting.")
+        if per_id_lcs[0].time_type == "phase":
+            kwargs["time_format"] = "original"
+            kwargs["cmap"] = "flat"
 
-            if per_id_lcs[0].time_type == "phase":
-                kwargs["time_format"] = "original"
-                kwargs["cmap"] = "flat"
-
-            per_id_plot = dispatch_groups(survey, per_id_lcs, palette_map, **kwargs)
+        per_id_plot = dispatch_groups(per_id_lcs, palette_map, **kwargs)
+        if plot:
             plots.append(per_id_plot)
 
-            for lc in per_id_lcs:
-                lc._plot_id = per_id_plot.id
+        for lc in per_id_lcs:
+            lc._plot_id = per_id_plot.id
 
     return [format_plot("lightcurve", p) for p in plots]

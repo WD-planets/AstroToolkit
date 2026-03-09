@@ -19,7 +19,7 @@ Tutorials
 =========
 
 .. toctree::
-    :titlesonly:
+    :maxdepth: 1
     :hidden:
     :caption: Tutorials
     
@@ -27,14 +27,14 @@ Tutorials
     tutorials_index
     
 .. toctree::
-    :titlesonly:
+    :maxdepth: 1
     :hidden:
     :caption: Configuration
 
     auto_tutorials/configuration/config
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :hidden:
     :caption: Modules
     

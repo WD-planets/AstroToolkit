@@ -119,6 +119,8 @@ class Lightcurve(Container):
 
         if len(ys) > 2:
             brightness, brightness_err, ra, dec = ys
+            struct.ra = ra
+            struct.dec = dec
         else:
             brightness, brightness_err = ys
 

@@ -1,7 +1,7 @@
+import numpy as np
 from bokeh.models import Column, DataTable, Row
 from bokeh.plotting import figure
 
-from ...io.plot_io import FIGS_PER_COLUMN
 from ..DataSet import DataSet
 
 
@@ -90,8 +90,11 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
     # get rid of any None figures (shouldn't ever happen)
     all_figures = [f for f in all_figures if f is not None]
 
+    figs_per_col = int(np.ceil(np.sqrt(len(all_figures))))
+
     # combines multiple plots into a grid layout of FIGS_PER_COLUMN rows and any number of columns
-    all_figures = [all_figures[i : i + FIGS_PER_COLUMN] for i in range(0, len(all_figures), FIGS_PER_COLUMN)]
+    all_figures = [all_figures[i : i + figs_per_col] for i in range(0, len(all_figures), figs_per_col)]
+    rows = [Column(*col) for col in all_figures]
 
     rows = [Column(*col) for col in all_figures]
     struct.figure = Row(*rows)

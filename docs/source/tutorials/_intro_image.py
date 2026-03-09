@@ -24,3 +24,11 @@ figure
 # sphinx_gallery_end_ignore
 
 image.show()
+
+# %%
+#
+# |
+# |
+# |
+#
+# .. rubric:: Download this Tutorial

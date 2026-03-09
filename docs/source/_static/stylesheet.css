@@ -11,3 +11,12 @@
     padding-left: 8rem;
     padding-right: 8rem;
 }
+
+.rubric {
+    font-size: 175%;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 24px;
+	box-sizing: border-box;
+	font-family: Roboto Slab,ff-tisa-web-pro,Georgia,Arial,sans-serif;
+}
