@@ -11,7 +11,12 @@ from ..utilities.defaults import RETURNS
 
 def query(kind: str, **arguments) -> DataSet:
     """
-    Central query function
+    Perform a query.
+
+    Returns
+    -------
+    DataSet
+        Container holding query metadata and results.
     """
 
     # get necessary parameters from config if not given

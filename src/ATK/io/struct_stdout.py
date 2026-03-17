@@ -21,6 +21,7 @@ from ..utilities.mapping import build_structure_map
 # this should be left to False, kwarg 'debug' can be used to set it locally
 DEBUG = False
 SHOW_ALL = False
+SHOW_TYPES = False
 
 STRUCTURE_MAP = build_structure_map()
 NO_COMMA_SEP = list(STRUCTURE_MAP.values()) + [pd.DataFrame]
@@ -84,7 +85,7 @@ def format_skycoord(coord: SkyCoord) -> str:
     return str_rep
 
 
-def format_dict(dct: dict) -> str:
+def format_dict(dct: dict, show_types_override: bool | None = None) -> str:
     """
     Format dict recursively into string representation
     """
@@ -94,6 +95,9 @@ def format_dict(dct: dict) -> str:
     # If dict empty, append label + {} and return
     if not dct:
         return "{}"
+
+    if (SHOW_TYPES or show_types_override is True) and (show_types_override is None or show_types_override is True):
+        dct = add_types_to_keys(dct)
 
     # compute padding for keys inside dict
     key_pad = get_dict_pad(dct, "key: ")
@@ -203,7 +207,7 @@ def format_time(time: Time) -> str:
 # Maps to special formatting functions
 SPECIAL_FORMATTERS = {
     dict: format_dict,
-    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df)),
+    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df), False),
     np.ndarray: format_array,
     pd.Series: format_array,
     Target: format_target,
@@ -443,23 +447,22 @@ def print_methods(cls: any) -> str:
     return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 
 
-def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
+def pprint_structure(structure: any, show_types: bool, **kwargs) -> None:
     """
     Prints a structure's attributes and methods in a human-readable format. Optionally also prints the types of attributes.
     """
 
-    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG, SHOW_ALL
+    global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG, SHOW_ALL, SHOW_TYPES
 
-    if kwargs.get("debug"):
-        DEBUG = True
-    if kwargs.get("show_all"):
-        SHOW_ALL = True
+    DEBUG = kwargs.get("debug", False)
+    SHOW_ALL = kwargs.get("show_all", False)
+    SHOW_TYPES = show_types
 
     # get structure attrs
     attrs = structure.__dict__
 
     # get list of types in attributes
-    if show_all_types:
+    if show_types:
         attrs = add_types_to_keys(attrs)
 
     # calculate base pad
@@ -472,7 +475,7 @@ def pprint_structure(structure: any, show_all_types: bool, **kwargs) -> None:
 
     for index, attr_group in enumerate([inherited_attrs, own_attrs]):
         # add type strings
-        if show_all_types or DEBUG:
+        if show_types or DEBUG:
             attr_group = add_types_to_keys(attr_group)
 
         # iterate through attributes in group if requested

@@ -10,8 +10,7 @@ To avoid having to rerun a query every time a script is used, :class:`DataSets <
 
 Storing Data Automatically
 ==========================
-
-The easiest way to do this is provide :func:`~ATK.Tools.query` with the **path** argument:
+The easiest way to do this is to provide :func:`~ATK.Tools.query` with the **path** argument:
 """
 
 # sphinx_gallery_start_ignore
@@ -28,7 +27,7 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# This will automatically save the returned :class:`~ATK.Models.DataSet` to ``path``, and running the script again will read this local file instead of rerunning the :func:`~ATK.Tools.query`.
+# This will automatically save the returned :class:`~ATK.Models.DataSet` to ``path``, and running the script again will read this local file instead of rerunning :func:`~ATK.Tools.query`.
 #
 # .. note::
 #

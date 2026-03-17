@@ -1,28 +1,53 @@
 """
-##########################
-Generalised Vizier Queries
-##########################
-To immediately use any Vizier catalogue, we can simply pass the ``catalogue`` parameter with a Vizier catalogue ID instead of specifying a ``survey``. For this tutorial, we will extend our query to also work for AllWISE:
+###############################
+Vizier Queries to Any Catalogue
+###############################
+ATK uses aliases to map between Vizier catalogue names (``"galex"``) and Vizier catalogue IDs (``"II/335/galex_ais"``). In this tutorial, :func:`~ATK.Tools.query` will be extended to work with AllWISE.
+
+|
+
+To immediately access any Vizier catalogue, its catalogue ID can be passed directly to :func:`~ATK.Tools.query`:
 """
+
+# sphinx_gallery_start_ignore
+from ATK.Config import ALIAS_CONFIG, EPOCH_CONFIG
+from ATK.queries.vizier._query_info import SUPPORTED_SURVEYS
+
+ALIAS_CONFIG.reset()
+EPOCH_CONFIG.reset()
+
+with open("../../auto_tutorials/getting_started/supported_aliases.rst", "w") as f:
+    for alias in SUPPORTED_SURVEYS:
+        f.write(f"    - {alias}\n")
+# sphinx_gallery_end_ignore
 
 from ATK import query
 
 target = 2552928187080872832
-allwise_query = query("vizier", targets=target, catalogue="II/328/allwise")
+allwise_query = query("vizier", targets=target, survey="II/328/allwise")
 allwise_query.show()
 # sphinx_gallery_start_ignore
 pass
 # sphinx_gallery_end_ignore
 
 # %%
-# This works, but if we regularly use AllWISE it may become tedious to remember its Vizier ID. Additionally (and perhaps more importantly), we are not benefitting from proper motion correction as ATK doesn't know AllWISE's median epoch.
+#
+# .. note::
+#
+#    By default, ATK supports the following aliases to Vizier catalogues:
+#
+#    .. include:: supported_aliases.rst
+#
+# |
+#
+# **However, if a Vizier catalogue is being used regularly it may become tedious to remember its ID. Additionally, and perhaps more importantly, we are not benefitting from proper motion correction as ATK doesn't know AllWISE's epoch.**
 #
 # |
 # |
 #
-# Adding a New Vizier Catalogue
-# =============================
-# To solve the first of these problems, we can add a new catalogue alias. ATK uses an alias file to map between surveys (AllWISE) and the corresponding Vizier catalogue ID (II/328/allwise). We can see the current state of the alias file from the command line:
+# Adding a New Catalogue Alias
+# ============================
+# To solve the first of these problems, we can add a new catalogue alias. This is done through an alias config file, which can be accessed from the command line:
 #
 # .. code-block:: console
 #
@@ -35,29 +60,27 @@ from ATK.Config import ALIAS_CONFIG
 ALIAS_CONFIG.show()
 
 # %%
-# The easiest way to edit the alias file is to simply open it in the default text editor with:
+# |
+#
+# Editing the Alias File
+# ----------------------
+# The easiest way to edit the alias file is to open it in the default text editor:
 #
 # .. code-block:: console
 #
 #    $ ATKalias open
 #
-# from the command line, or:
-#
 # .. code-block:: python
+#
+#    from ATK.Config import ALIAS_CONFIG
 #
 #    ALIAS_CONFIG.open()
 #
-# from inside a script.
-#
 # |
 #
-# After adding the following line to the alias file:
-#
-# .. code-block:: console
-#
-#    allwise = II/328/allwise
-#
-# we can now use ``allwise`` as an alias inside Vizier queries:
+# Utilising an Alias
+# ------------------
+# After adding ``allwise = II/328/allwise`` to the alias file, ``allwise`` can now be used as an alias in Vizier queries:
 
 # sphinx_gallery_start_ignore
 ALIAS_CONFIG.vizier_aliases.allwise = "II/328/allwise"
@@ -65,6 +88,9 @@ ALIAS_CONFIG.vizier_aliases.allwise = "II/328/allwise"
 
 allwise_query = query("vizier", targets=target, survey="allwise")
 allwise_query.show()
+# sphinx_gallery_start_ignore
+pass
+# sphinx_gallery_end_ignore
 
 
 # %%
@@ -72,29 +98,28 @@ allwise_query.show()
 # |
 # |
 #
-# Setting a Catalogue's Epoch
-# ===========================
-# We have now added an catalogue alias to AllWISE, but we are still getting no data as we have not yet set AllWISE's epoch. ATK stores the epochs of all supported surveys in an epoch file, which (like the alias file) can be accessed via the command line or from inside a script:
+# Setting Survey Epochs
+# =====================
+# An alias to AllWISE has now been added, but we are still getting no data. This is because ATK does not know AllWISE's epoch, and so no correction can be performed. ATK stores the epochs of all surveys in an epoch file, which can be accessed in the same way as the alias file:
 #
 # .. code-block:: console
 #
 #    $ ATKepoch show
-#
-# or:
 
 from ATK.Config import EPOCH_CONFIG
 
 EPOCH_CONFIG.show()
 
 # %%
+# |
 #
-# We can then use:
+# Editing the Epoch File
+# ----------------------
+# Just like the alias file, the epoch file can be opened in the default text editor with:
 #
 # .. code-block:: console
 #
 #    $ ATKepoch open
-#
-# or:
 #
 # .. code-block:: python
 #
@@ -102,23 +127,20 @@ EPOCH_CONFIG.show()
 #
 #    EPOCH_CONFIG.open()
 #
-# to add the median epoch of AllWISE (mid-2010) under the category **vizier_aliases**:
-#
-# .. code-block:: console
-#
-#    allwise = 2010-06-01T00:00:00.000
+# An epoch can then be set for AllWISE by adding ``allwise = 2010-06-01T00:00:00.000`` under the category ``vizier_aliases``.
 #
 # |
-# |
 #
-# If we now rerun our query, we successfully retrieve AllWISE data for van Maanen's Star:
+# Rerunning the Query
+# -------------------
+# Running the same query as above now utilises proper motion correction to retrieve AllWISE data for van Maanen's Star:
 
 # sphinx_gallery_start_ignore
 EPOCH_CONFIG.vizier_aliases.allwise = "2010-05-01T00:00:00.000"
 # sphinx_gallery_end_ignore
 
 target = 2552928187080872832
-allwise_query = query("vizier", targets=target, catalogue="allwise")
+allwise_query = query("vizier", targets=target, survey="allwise")
 allwise_query.show()
 # sphinx_gallery_start_ignore
 pass

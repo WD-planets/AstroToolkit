@@ -6,7 +6,7 @@ from .structures_core import Container
 
 
 @dataclass(repr=False)
-class VizierEntry(Container):
+class Record(Container):
     survey: str | None = None
     catalogue: str | None = None
     correction: str | None = None
@@ -17,9 +17,9 @@ class VizierEntry(Container):
 
     def __repr__(self):
         if self.survey:
-            return f"<{self.survey} ({self.catalogue}) VizierEntry>"
+            return f"<{self.survey} ({self.catalogue}) Record>"
         else:
-            return f"<{self.catalogue} VizierEntry>"
+            return f"<{self.catalogue} Record>"
 
     def to_hdu(self):
         # overwrites the default to_hdu method due to complexity

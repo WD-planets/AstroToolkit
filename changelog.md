@@ -75,6 +75,7 @@ Changes
 - DataTables now shrink in height to match table, and will grow in height up to requested size
 - Datapages now returned as a DataPages object, with show(), show_by_target(), show_by_id(), and show_by_coords() methods to show all datapages or single out those of individual targets
 - data is now saved via the .store() method, while plots are saved with the .save() method (the latter is also used for DataPages)
+- Made spectral lines hidden by default
 
 To-Do Now
 ---------
@@ -87,9 +88,10 @@ To-Do Now
 - rename tutorial .py files
 - check what happens if saving a data structure that returned no data (needs to be an empty file which gets reconstructed into an empty DataSet)
 - check font of powspec axes labels
-
+- spectral element labels (h-alpha etc.) show outside spectrum's y range
+- talk to boris about my rv_fit process
 - light curves should choose colour per-band
-- powspec needs to be labelled by band in legend (e.g. when using multiband=False)
+- powspec needs to be labelled by band(s) in legend
 - implement features from previous version
     - light curve sigma clipping
     - light curves are sorting in a different order before/after reading
@@ -123,8 +125,8 @@ To-Do Later
 - decouple from Gaia with a properly implemented astrometric backend system
 - allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...
 - see if I can get crts working, possibly a temporary outage
-- add best-epoch separation to light curves
-- add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)
+- add best-epoch separation to light curves?
+- add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)?
 - don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords?
 - try to remove unnecessary dependencies
     - reproject

@@ -15,6 +15,7 @@ sphinx_gallery_conf = {
     "write_computation_times": False,
     "filename_pattern": r"\.py$",
     "ignore_pattern": r"^_.*\.py$",
+    "reference_url": {"ATK": None},
     # "run_stale_examples": True,
 }
 
@@ -46,6 +47,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
     "bokeh.sphinxext.bokeh_plot",
 ]

@@ -62,10 +62,10 @@ class Container:
     _plot_methods: dict = field(default_factory=dict)
     _group_plot_methods: dict = field(default_factory=dict)
 
-    def show(self, show_all_types=False, **kwargs) -> None:
+    def show(self, show_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_all_types, **kwargs)
+        pprint_structure(self, show_types, **kwargs)
 
     def __repr__(self):
         survey_str = f"{self.survey} " if self.survey else ""

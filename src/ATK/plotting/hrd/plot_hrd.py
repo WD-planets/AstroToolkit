@@ -138,12 +138,12 @@ def plot(hrds: list[HRD], **kwargs):
     abs_mag_band = hrds[0].abs_mag_band
     colours = hrds[0].colour_bands
 
-    plots = []
+    figs = []
     if not kwargs.get("combine", True):
         for _ in hrds:
-            plots.append(setup_background(colours, abs_mag_band, **kwargs))
+            figs.append(setup_background(colours, abs_mag_band, **kwargs))
     else:
-        plots.append(setup_background(colours, abs_mag_band, **kwargs))
+        figs.append(setup_background(colours, abs_mag_band, **kwargs))
 
     # --------------
     # Source Overlay
@@ -153,19 +153,19 @@ def plot(hrds: list[HRD], **kwargs):
         hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
         hvr.renderers = []
         for hrd in hrds:
-            plots[0], scatter = overlay_source(plots[0], hrd)
-        hvr.renderers.append(scatter)
-        plot.add_tools(hvr)
+            figs[0], scatter = overlay_source(figs[0], hrd)
+            hvr.renderers.append(scatter)
+        figs[0].add_tools(hvr)
 
         for hrd in hrds:
-            hrd._plot_id = plots[0].id
+            hrd._plot_id = figs[0].id
     else:
-        for plot, hrd in zip(plots, hrds):
+        for fig, hrd in zip(figs, hrds):
             hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
             hvr.renderers = []
-            plot, scatter = overlay_source(plot, hrd)
+            fig, scatter = overlay_source(fig, hrd)
             hvr.renderers.append(scatter)
-            plot.add_tools(hvr)
-            hrd._plot_id = plot.id
+            fig.add_tools(hvr)
+            hrd._plot_id = fig.id
 
-    return [format_plot("hrd", plot) for plot in plots]
+    return [format_plot("hrd", plot) for plot in figs]

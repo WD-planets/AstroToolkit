@@ -27,7 +27,7 @@ pspec_data = asassn_query.apply("pspec", min=0, max=60, samples=100000, inplace=
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits")
 # sphinx_gallery_end_ignore
-pspec_data.show()
+pspec_data.show(show_types=True)
 # sphinx_gallery_start_ignore
 pass
 # sphinx_gallery_end_ignore
@@ -60,7 +60,7 @@ pspec_data = asassn_query.apply("pspec", min=0, max=60, samples=100000, multiban
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits")
 # sphinx_gallery_end_ignore
-pspec_data.show()
+pspec_data.show(show_types=True)
 # sphinx_gallery_start_ignore
 pass
 # sphinx_gallery_end_ignore
@@ -89,7 +89,7 @@ folded_data = asassn_query.apply("fold", min=0, max=60, samples=100000, multiban
 # sphinx_gallery_start_ignore
 folded_data.store("example_folded_lc.fits")
 # sphinx_gallery_end_ignore
-folded_data.show()
+folded_data.show(show_types=True)
 # sphinx_gallery_start_ignore
 pass
 # sphinx_gallery_end_ignore

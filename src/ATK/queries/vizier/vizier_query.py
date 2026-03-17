@@ -6,8 +6,8 @@ from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
 
 from ...configuration.alias_config import ALIAS_CONFIG
+from ...structures.Record import Record
 from ...structures.Target import Target
-from ...structures.VizierEntry import VizierEntry
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
 
 warnings.simplefilter("ignore", category=NoResultsWarning)
@@ -70,16 +70,11 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
 
     aliases = ALIAS_CONFIG._as_dict()["vizier_aliases"]
 
-    # survey = catalogue alias (here for parity with other query commands), catalogue = actual vizier catalogue
-    survey, catalogue = kwargs.get("survey"), kwargs.get("catalogue")
-
-    # ensure exactly one of 'survey', 'catalogue' provided
-    if survey is None == catalogue is None:
-        raise ValueError("Either 'survey' or 'catalogue' required for Vizier queries.")
+    survey = kwargs.get("survey")
 
     # try to get catalogue from alias file
     if survey and survey not in aliases:
-        raise ValueError(f"Survey '{survey}' not found in ATK alias file.")
+        catalogue = survey
     elif survey:
         catalogue = aliases[survey]
 
@@ -98,8 +93,4 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     else:
         separation = 0.0 * kwargs["radius"].unit
 
-    return [
-        VizierEntry(
-            survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df, correction=target.correction
-        )
-    ]
+    return [Record(survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df, correction=target.correction)]

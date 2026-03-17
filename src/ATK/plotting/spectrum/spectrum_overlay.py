@@ -59,6 +59,7 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
         colour = colours[elements.index(label_name)]
 
         span = Span(location=xpos, dimension="height", line_color=colour, line_width=1)
+        span.visible = False
         plot.add_layout(span)
         element_renderers[label_name]["spans"].append(span)
 
@@ -68,6 +69,7 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
 
             y_pos = y_max + (n_labels / max(1, total_labels)) * 0.3 * y_max
             lbl = Label(x=xpos, y=y_pos, x_offset=2, text=line["line_label"], text_font_size=text_size, text_font=text_font)
+            lbl.visible = False
             plot.add_layout(lbl)
             element_renderers[label_name]["labels"].append(lbl)
             label_counters[label_name] = n_labels + 1
@@ -89,6 +91,7 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
         source = ColumnDataSource(dict(x=[x_min, x_min + x_span], y=[y_inside, y_inside]))
 
         dummy_renderer = plot.line("x", "y", source=source, line_color=colour, line_width=1, legend_label=element)
+        dummy_renderer.visible = False
 
         # CustomJS to toggle spans + labels
         callback = CustomJS(

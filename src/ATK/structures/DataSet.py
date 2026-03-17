@@ -50,10 +50,10 @@ class DataSet:
             for alias in t._aliases:
                 self._alias_map[alias] = t._key
 
-    def show(self, show_all_types=False, **kwargs) -> None:
+    def show(self, show_types=False, **kwargs) -> None:
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_all_types, **kwargs)
+        pprint_structure(self, show_types, **kwargs)
 
         return self
 

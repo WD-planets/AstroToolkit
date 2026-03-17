@@ -14,17 +14,18 @@ This project has received funding from the European Research Council (ERC) under
     :scale: 15%
     :align: center
 
-
-Tutorials
-=========
-
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :hidden:
     :caption: Tutorials
     
     rst/introduction
-    tutorials_index
+    tutorials/getting_started/custom_index
+    tutorials/images/custom_index
+    tutorials/lightcurves/custom_index
+    tutorials/seds/custom_index
+    tutorials/spectra/custom_index
+    tutorials/hrds/custom_index
     
 .. toctree::
     :maxdepth: 1

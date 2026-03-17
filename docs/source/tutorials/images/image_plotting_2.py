@@ -1,7 +1,7 @@
 """
-#####################
-Multi-Target Plotting
-#####################
+#########################
+Plotting Multiple Targets
+#########################
 Just as :func:`~ATK.Tools.query` can retrieve data for multiple targets, :meth:`~ATK.Models.DataSet.plot` can process multiple data containers simultaneously.
 
 The following will query four targets (van Maanen's Star, Hu Leo, AR Sco, and Sco X-1) for Pan-STARRS image data, before plotting and combining the data into a grid:

@@ -1,7 +1,7 @@
 """
-##################################
-Fetching and Plotting Light Curves
-##################################
+#########################
+Working with Light Curves
+#########################
 
 We can fetch light curves in a way that is now hopefully familiar:
 """
@@ -15,7 +15,7 @@ from bokeh.document import Document
 from ATK import query
 
 asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
-asassn_query.show()
+asassn_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 from ATK.queries.lightcurve._query_info import BAND_MAP
 
@@ -28,13 +28,13 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 # sphinx_gallery_end_ignore
 
 # %%
-# .. note::
-#
-#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
-#
 # This returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of returned :class:`~ATK.Models.Lightcurve` containers (**one per photometric band per target**). Each :class:`~ATK.Models.Lightcurve` contains information about the search, including the ``separation`` between the light curve and the position of the search, along with the actual photometric data as numpy :class:`arrays <numpy.ndarray>`.
 #
 # |
+#
+# .. note::
+#
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
 # 
 # .. include:: supported_lightcurve_surveys.rst
 #
@@ -71,7 +71,7 @@ figure
 import astropy.units as u
 
 asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn", path="example_lightcurve.fits", radius = 60 * u.arcsec, split=False)
-asassn_query.show()
+asassn_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 asassn_query.plot()
 figure = format_plot(asassn_query.figure, 3, 1.5)
@@ -89,7 +89,10 @@ figure
 import astropy.units as u
 
 asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn", path="example_lightcurve.fits", radius = 60 * u.arcsec, split=True)
-asassn_query.show(show_all=True)
+asassn_query.show(show_types=True)
+# sphinx_gallery_start_ignore
+pass
+# sphinx_gallery_end_ignore
 
 # %%
 # .. note::
@@ -114,7 +117,13 @@ figure
 # %%
 # .. warning::
 #
-#    As ``split`` utilises a per-survey object ID to separate detections, its efficacy depends heavily on the specific implementation provided by o each survey.
+#    As ``split`` utilises a per-survey object ID to separate detections, its efficacy depends heavily on the specific implementation provided by each survey.
+#
+# |
+#
+# Multi-Target Plotting
+# =====================
+# If a :class:`~ATK.Models.DataSet` contains data for multiple targets, plotting will automatically sort thjese
 
 # %%
 #

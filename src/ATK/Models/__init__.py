@@ -6,7 +6,7 @@ from ..structures.Powspec import Powspec
 from ..structures.SED import SED
 from ..structures.Spectrum import Spectrum
 from ..structures.Target import Target
-from ..structures.VizierEntry import VizierEntry
+from ..structures.Record import Record
 
-__all__ = ["DataSet", "HRD", "Image", "Lightcurve", "Powspec", "SED", "Spectrum", "Target", "VizierEntry"]
+__all__ = ["DataSet", "HRD", "Image", "Lightcurve", "Powspec", "SED", "Spectrum", "Target", "Record"]
 
