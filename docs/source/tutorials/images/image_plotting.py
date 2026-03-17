@@ -2,13 +2,13 @@
 ###################
 Image Customisation
 ###################
-Similarly to :func:`~ATK.Tools.query`, the :meth:`~ATK.Models.DataSet.plot` method of a :class:`~ATK.Models.DataSet` accepts various additional arguments depending on the kind of data being plotted.
+Similarly to :func:`~ATK.Tools.query`, the :meth:`~ATK.Models.DataSet.plot` method of a :class:`~ATK.Models.DataSet` accepts various additional arguments depending on the kind of data that is being plotted.
+
+When plotting :class:`images <ATK.Models.Image>`, we can utilise two such arguments: ``cmap`` and ``relative_axes``.
 
 .. note::
 
    Since calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated, :meth:`~ATK.Models.DataSet.open` also accepts these parameters and will pass them to :meth:`~ATK.Models.DataSet.plot` in this case.
-
-When plotting :class:`images <ATK.Models.Image>`, we can utilise two such arguments: ``cmap`` and ``relative_axes``.
 
 |
 
@@ -16,7 +16,7 @@ Changing the Colour Map
 -----------------------
 The ``cmap`` parameter sets the colour map of the plotted image:
 
-1. ``viridis`` (the default):
+1. ``viridis`` (default):
 """
 
 # sphinx_gallery_start_ignore
@@ -44,7 +44,7 @@ figure
 # 
 # |
 # 
-# 2. ``grey`` (greyscale):
+# 2. ``grey``:
 
 from ATK import query
 

@@ -26,6 +26,8 @@ This project has received funding from the European Research Council (ERC) under
     tutorials/seds/custom_index
     tutorials/spectra/custom_index
     tutorials/hrds/custom_index
+    tutorials/datapages/custom_index
+    tutorials/extension/custom_index
     
 .. toctree::
     :maxdepth: 1
@@ -40,3 +42,4 @@ This project has received funding from the European Research Council (ERC) under
     :caption: Modules
     
     rst/modules/index.rst
+

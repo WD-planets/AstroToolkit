@@ -93,8 +93,15 @@ class YAMLConfig:
         if section not in self._raw:
             raise ValueError(f"Section '{section}' not found in config.")
 
-        self._raw[section][key] = {}
-        self._config[section][key] = {}
+        if section not in self._raw:
+            self._raw[section] = {}
+        if key not in self._raw[section]:
+            self._raw[section][key] = {}
+
+        if section not in self._config:
+            self._config[section] = {}
+        if key not in self._config[section]:
+            self._config[section][key] = {}
 
         for kwarg, val in kwargs.items():
             if val:

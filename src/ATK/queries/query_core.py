@@ -146,7 +146,7 @@ def single_target_query(kind: str, target: Target, structure: DataSet, **argumen
     Sets up a query on a single target
     """
 
-    module = importlib.import_module(f"ATK.queries.{kind}")
+    module = importlib.import_module(f".queries.{kind}", package="ATK")
     query_map = build_map(module, "query", suffix="_query")
 
     # get specific query function (for given survey if multiple are available)

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ...configuration.alias_config import ALIAS_CONFIG
+from ...configuration.survey_config import SURVEY_CONFIG
 from ...structures.DataTable import DataTable
 from ...structures.Target import Target
 from ...Tools.query import query as general_query
@@ -11,7 +11,7 @@ def query(target: Target, **kwargs):
     radius = kwargs["radius"]
     rows = kwargs["rows"]
 
-    aliases = ALIAS_CONFIG._as_dict()()["vizier_aliases"]
+    aliases = SURVEY_CONFIG._get_aliases()
 
     data = []
     for survey, cols in rows.items():

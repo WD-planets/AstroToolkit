@@ -6,8 +6,7 @@ from astropy.time import Time
 from astropy.wcs.utils import proj_plane_pixel_scales
 
 from ...configuration.base_config import BASE_CONFIG
-from ...configuration.epoch_config import EPOCH_CONFIG
-from ...configuration.overlay_config import OVERLAY_CONFIG
+from ...configuration.survey_config import SURVEY_CONFIG
 from ...structures.Image import Image
 from ...structures.Target import Target
 from ...Tools.query import query
@@ -41,7 +40,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
         gaia_data = gaia_data[0].data
 
     # extract basic info
-    vizier_epochs = EPOCH_CONFIG._get_section_by_query_kind("vizier")
+    vizier_epochs = SURVEY_CONFIG._get_epochs("vizier")
     gaia_epoch = vizier_epochs["gaia"]
     non_gaia_epoch = vizier_epochs[survey]
     lat_col = survey_info["lat_column"]
@@ -187,7 +186,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     Fetches detection overlay information within a given image for a list of Vizier catalogue aliases or a dict of survey:band keys
     """
 
-    overlay_dict = OVERLAY_CONFIG._as_dict()
+    overlay_dict = SURVEY_CONFIG._get_overlays()
     disable_corrections = kwargs.get("disable_corrections", False)
 
     overlays = kwargs.get("overlays")

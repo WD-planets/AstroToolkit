@@ -5,7 +5,7 @@ from astropy.coordinates import SkyCoord
 from astroquery.exceptions import NoResultsWarning
 from astroquery.vizier import Vizier
 
-from ...configuration.alias_config import ALIAS_CONFIG
+from ...configuration.survey_config import SURVEY_CONFIG
 from ...structures.Record import Record
 from ...structures.Target import Target
 from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
@@ -68,7 +68,7 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     Perform a Vizier query by source or position (source will be present in kwargs) in the latter case
     """
 
-    aliases = ALIAS_CONFIG._as_dict()["vizier_aliases"]
+    aliases = SURVEY_CONFIG._get_aliases()
 
     survey = kwargs.get("survey")
 

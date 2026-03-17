@@ -33,7 +33,7 @@ Elements in all ATK plots (such as the Gaia/GALEX detections here) can be toggle
 |
  
 Proper Motion Correction
-------------------------
+========================
 
 Another key feature of ATK is its use of proper motion correction. There will be more on this later, but many examples of this can already be seen in the image above. Van Maanen's Star is the closest known solitary white dwarf to our solar system, and hence has an extremely high proper motion of approximately 3 arcsec/yr. The above image displays performs proper motion correction in the following ways:
 
@@ -42,3 +42,10 @@ Another key feature of ATK is its use of proper motion correction. There will be
 - Gaia's detection markers have been corrected for this displacement, correctly aligning them with their host systems. GALEX detection markers have also been corrected where possible, despite the survey not providing its own proper motion measurements.
 
 - Proper motion correction has been used to successfully find the host object in SIMBAD.
+
+
+|
+ 
+Tutorials
+=========
+A full set of tutorials can be found in the :doc:`next section <../auto_tutorials/getting_started/data_query>`. These are designed to be followed sequentially, and so some tutorials may utilise information from previous sections. Anything that appears to be unexplained can therefore likely be found in a previous tutorial (this will typically be pointed out with a link to the necessary information).

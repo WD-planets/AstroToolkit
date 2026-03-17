@@ -12,7 +12,7 @@ from .Target import Target
 
 
 @dataclass
-class DataPages:
+class DataPage:
     targets: list[Target] = field(default_factory=list)
     figures: list[GridBox] = field(default_factory=list)
 
@@ -24,7 +24,7 @@ class DataPages:
     _plot_map: dict[str, str] = field(default_factory=dict)
 
     def __repr__(self):
-        return f"<{len(self.data)} DataPages>"
+        return f"<{len(self.figures)} DataPages>"
 
     def __str__(self):
         return self.__repr__()

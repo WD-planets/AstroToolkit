@@ -2,7 +2,7 @@
 ####################
 Multi-Target Queries
 ####################
-Below is an example of a multi-target Vizier :func:`~ATK.Tools.query` for two sources: **van Maanen's star**, a lone white dwarf, and **Hu Leo**, a cataclysmic variable:
+Everything in ATK is designed to work modularly with any number of targets. Below is an example of a multi-target Vizier :func:`~ATK.Tools.query` for two sources: **van Maanen's star** and **Hu Leo**, a cataclysmic variable:
 """
 
 # sphinx_gallery_start_ignore
@@ -31,7 +31,7 @@ pass
 #
 # Accessing the Returned Data
 # ===========================
-# The returned :class:`~ATK.Models.DataSet` contains two :class:`records <ATK.Models.Record>`. We could extract data from these as in the :doc:`previous tutorial <data_query>`:
+# The returned :class:`~ATK.Models.DataSet` contains two :class:`records <ATK.Models.Record>`. We could extract these as in the :doc:`previous tutorial <data_query>`:
 
 van_maanen, hu_leo = galex_query.data
 
@@ -77,7 +77,7 @@ van_maanen
 #
 # Matching Returned Data by Target 
 # --------------------------------
-# Finally, :meth:`~ATK.Models.DataSet.fetch_by_target` can be used to retrieve containers using a :class:`~ATK.Models.Target` directly. This allows for exact matching without using a ``radius``:
+# Finally, :meth:`~ATK.Models.DataSet.fetch_by_target` can be used to retrieve containers using a :class:`~ATK.Models.Target` directly. This allows for exact matching without the need for a ``radius``:
 
 from ATK.Models import Target
 

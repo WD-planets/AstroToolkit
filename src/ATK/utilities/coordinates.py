@@ -10,7 +10,7 @@ from astropy.time import Time
 from astropy.units import Quantity
 from erfa import ErfaWarning
 
-from ..configuration.epoch_config import EPOCH_CONFIG
+from ..configuration.survey_config import SURVEY_CONFIG
 from ..queries.vizier.vizier_query import gaia_query_by_source
 from ..structures.DataSet import DataSet
 from ..structures.Target import Target
@@ -48,7 +48,7 @@ def get_gaia_target(source: int) -> Target:
     Generates a SkyCoord using Gaia astrometry
     """
 
-    gaia_epoch = EPOCH_CONFIG._as_dict()["vizier_aliases"]["gaia"]
+    gaia_epoch = SURVEY_CONFIG._get_epochs("vizier")["gaia"]
 
     gaia_data = gaia_query_by_source(source)
     if gaia_data is RETURNS.EXCEPTION or gaia_data is RETURNS.NULL:
@@ -93,7 +93,7 @@ def correct_target(target: Target, survey: str = None, epoch: Time = None, query
         return target
 
     if survey:
-        epochs = EPOCH_CONFIG._get_section_by_query_kind(query_kind)
+        epochs = SURVEY_CONFIG._get_epochs(query_kind)
 
         # If no epoch definition, can't correct
         if survey not in epochs:

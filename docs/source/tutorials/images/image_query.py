@@ -2,7 +2,9 @@
 ###################
 Working with Images
 ###################
-To fetch an image, simply set the :func:`~ATK.Tools.query` ``kind`` to ``image`` and supply both a ``band`` and a ``size`` (rather than a ``radius``). An imaging ``survey`` must also be chosen - this tutorial will make use of Pan-STARRS (``panstarrs``):
+Performing an Image Query
+=========================
+To fetch an image, simply set the :func:`~ATK.Tools.query` ``kind`` to ``image`` and supply both a ``band`` and a ``size`` (rather than a ``radius``). An imaging ``survey`` must also be chosen - this tutorial will make use of Pan-STARRS (``"panstarrs"``):
 """
 
 # sphinx_gallery_start_ignore
@@ -32,18 +34,18 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 #
 # | 
 #
+# .. include:: supported_image_surveys.rst
+#
 # .. note:: 
 #
 #    Since we have not supplied the units of ``size``, it has been assumed to be in arcsec. This can be changed in :doc:`the config <../configuration/config>`.
 #
-# .. include:: supported_image_surveys.rst
-# 
 # |
 # |
 #
-# Plotting Data
-# =============
-# Unlike :class:`Records <ATK.Models.Record>`, :class:`~ATK.Models.Images` are plottable. The :meth:`~ATK.Models.DataSet.plot` method of the returned :class:`~ATK.Models.DataSet` can therefore be used to create a figure from the returned data:
+# Plotting the Returned Data
+# ==========================
+# Unlike :class:`Records <ATK.Models.Record>`, :class:`~ATK.Models.Images` are plottable. The :meth:`~ATK.Models.DataSet.plot` method of the returned :class:`~ATK.Models.DataSet` can therefore be used to create a Bokeh :class:`~bokeh.plotting.figure` from the returned data:
 
 ps_query.plot()
 # sphinx_gallery_start_ignore
@@ -58,8 +60,15 @@ ps_query.show()
 pass
 # sphinx_gallery_end_ignore
 
+
 # %%
-# The figure can be opened in the default browser by calling the :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.open` method:
+# 
+# |
+# |
+#
+# Viewing a Figure
+# ================
+# A figure can be opened in the default browser by calling the :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.open` method:
 
 # sphinx_gallery_start_ignore
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)
@@ -75,7 +84,7 @@ figure
 #
 # .. note::
 #
-#    If a figure has not yet been generated when :meth:`~ATK.Models.DataSet.open` is called, :meth:`~ATK.Models.DataSet.plot` will be called automatically.
+#    If a figure has not yet been generated when :meth:`~ATK.Models.DataSet.open` is called, :meth:`~ATK.Models.DataSet.plot` is called automatically.
 #
 # |
 # |
