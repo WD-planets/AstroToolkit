@@ -3,6 +3,13 @@ Defining New Detection Overlays
 ===============================
 """
 
+# sphinx_gallery_start_ignore
+# fmt: off
+# isort: skip_file
+from _utilities import format_plot
+from bokeh.document import Document
+# sphinx_gallery_end_ignore
+
 # .. note::
 #
 #    Detection markers are corrected for proper motion by utilising the catalogue's epoch from the epoch file. Non-Gaia detections are corrected where possible by "piggybacking" them with nearby Gaia detections.
@@ -27,12 +34,15 @@ Defining New Detection Overlays
 # %%
 # from the command line, or:
 
-from ATK.Config import OVERLAY_CONFIG
+import subprocess
+
+from ATK.Config import SURVEY_CONFIG
+from ATK import query
 
 # sphinx_gallery_start_ignore
-OVERLAY_CONFIG.reset()
+SURVEY_CONFIG.reset()
 # sphinx_gallery_end_ignore
-OVERLAY_CONFIG.show()
+SURVEY_CONFIG.show()
 
 # %%
 # from inside a script. By opening the file with:
@@ -68,9 +78,8 @@ OVERLAY_CONFIG.show()
 # sphinx_gallery_start_ignore
 subprocess.run(
     [
-        "ATKoverlay",
+        "ATKsurvey",
         "set",
-        "photometric",
         "allwise",
         "--mags",
         "W1mag",
@@ -92,7 +101,9 @@ subprocess.run(
 )
 # sphinx_gallery_end_ignore
 
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex", "allwise"], path="example_image_3.fits")
+ps_query = query(
+    "image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex", "allwise"], path="example_image_3.fits"
+)
 # sphinx_gallery_start_ignore
 ps_query.plot()
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)

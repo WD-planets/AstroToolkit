@@ -9,17 +9,6 @@ ATK uses aliases to map between Vizier catalogue names (``"galex"``) and Vizier 
 To immediately access any Vizier catalogue, its catalogue ID can be passed directly to :func:`~ATK.Tools.query`:
 """
 
-# sphinx_gallery_start_ignore
-from ATK.Config import SURVEY_CONFIG
-from ATK.queries.vizier._query_info import SUPPORTED_SURVEYS
-
-SURVEY_CONFIG.reset()
-
-with open("../../auto_tutorials/getting_started/supported_aliases.rst", "w") as f:
-    for alias in SUPPORTED_SURVEYS:
-        f.write(f"    - {alias}\n")
-# sphinx_gallery_end_ignore
-
 from ATK import query
 
 target = 2552928187080872832

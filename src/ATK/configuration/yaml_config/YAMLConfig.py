@@ -9,6 +9,74 @@ from .yaml_io import CustomDumper, default_printer
 YAML_INDENT = 4
 
 
+class _SectionProxy:
+    """
+    Acts as a live proxy to a section in a YAMLConfig
+    """
+
+    def __init__(self, parent: "YAMLConfig", section: str):
+        self._parent = parent
+        self._section = section
+
+    def __getitem__(self, key):
+        self._parent._load()
+        if key not in self._parent._config[self._section]:
+            self._parent._config[self._section][key] = None
+        return _KeyProxy(self._parent, self._section, key)
+
+    def __setitem__(self, key, value):
+        self._parent._load()
+
+        self._parent._raw.setdefault(self._section, {})
+        self._parent._config.setdefault(self._section, {})
+
+        self._parent._raw[self._section][key] = value
+        self._parent._config[self._section][key] = value
+
+        self._parent._save()
+
+    def __delitem__(self, key):
+        self._parent._del(self._section, key)
+
+    def keys(self):
+        return self._parent._config[self._section].keys()
+
+    def items(self):
+        return self._parent._config[self._section].items()
+
+    def values(self):
+        return self._parent._config[self._section].values()
+
+
+class _KeyProxy:
+    """
+    Acts as a live proxy to a key inside a section of a YAMLConfig
+    """
+
+    def __init__(self, parent: "YAMLConfig", section: str, key: str):
+        self._parent = parent
+        self._section = section
+        self._key = key
+
+    def __getitem__(self, param):
+        self._parent._load()
+        return self._parent._config[self._section][self._key].get(param)
+
+    def __setitem__(self, param, value):
+        self._parent._load()
+
+        self._parent._raw[self._section].setdefault(self._key, {})
+        self._parent._config[self._section].setdefault(self._key, {})
+
+        self._parent._raw[self._section][self._key][param] = value
+        self._parent._config[self._section][self._key][param] = value
+
+        self._parent._save()
+
+    def __repr__(self):
+        return repr(self._parent._config[self._section][self._key])
+
+
 def translate_dict(raw: dict, translator: FunctionType) -> dict:
     """
     Applies a translation function to a yaml config (nested dictionary)
@@ -104,7 +172,7 @@ class YAMLConfig:
             self._config[section][key] = {}
 
         for kwarg, val in kwargs.items():
-            if val:
+            if val is not None:
                 self._raw[section][key][kwarg] = val
                 self._config[section][key][kwarg] = val
 
@@ -161,3 +229,11 @@ class YAMLConfig:
         """
 
         open_file(self._path)
+
+    def __getitem__(self, section: str):
+        self._load()
+
+        if section not in self._config:
+            raise KeyError(f"Section '{section}' not found.")
+
+        return _SectionProxy(self, section)
