@@ -1,5 +1,6 @@
 import warnings
 
+import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astroquery.exceptions import NoResultsWarning
@@ -88,9 +89,4 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
     if df is RETURNS.NULL or df is RETURNS.EXCEPTION:
         return df
 
-    if "_r" in df:
-        separation = df["_r"][0] * kwargs["radius"].unit
-    else:
-        separation = 0.0 * kwargs["radius"].unit
-
-    return [Record(survey=survey, catalogue=catalogue, search_pos=target.coords, separation=separation, data=df, correction=target.correction)]
+    return [Record(survey=survey, catalogue=catalogue, search_pos=target.coords, data=df, correction=target.correction)]

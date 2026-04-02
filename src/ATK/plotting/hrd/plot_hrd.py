@@ -53,7 +53,9 @@ def setup_background(colour_str, abs_mag_band, **kwargs):
 
     backdrop_file = files("ATK.plotting.hrd").joinpath("backdrop_hrd_allmags.fits")
 
-    plot = figure(width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="HRD")
+    plot = figure(
+        width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="HRD"
+    )
 
     with fits.open(backdrop_file) as f:
         bg_df = Table(f[1].data).to_pandas()
@@ -139,7 +141,7 @@ def plot(hrds: list[HRD], **kwargs):
     colours = hrds[0].colour_bands
 
     figs = []
-    if not kwargs.get("combine", True):
+    if kwargs.get("split", True):
         for _ in hrds:
             figs.append(setup_background(colours, abs_mag_band, **kwargs))
     else:
@@ -149,7 +151,7 @@ def plot(hrds: list[HRD], **kwargs):
     # Source Overlay
     # --------------
 
-    if kwargs.get("combine", True):
+    if not kwargs.get("split", True):
         hvr = HoverTool(tooltips=[("id", "@identifier"), ("colour", "@colour"), ("abs_mag", "@abs_mag")])
         hvr.renderers = []
         for hrd in hrds:

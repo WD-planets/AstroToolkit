@@ -2,13 +2,15 @@
 ###################
 Timeseries Analysis
 ###################
-Alongside the basic container methods shown in the :doc:`previous tutorial <lightcurve_manipulation>`, :class:`Lightcurves <ATK.Models.Lightcurve>` also support methods to facilitate :class:`Lomb-Scargle <astropy.timeseries.LombScargle>` timeseries analysis.
+Alongside the basic data methods shown in the :doc:`previous tutorial <lightcurve_manipulation>`, :class:`Lightcurves <ATK.Models.Lightcurve>` also support :class:`Lomb-Scargle <astropy.timeseries.LombScargle>` timeseries analysis.
 
 |
 
 Generating Power Spectra
 ========================
-To generate power spectra, we can use the :class:`~ATK.Models.Lightcurve.pspec` method to transform our lightcurves into :class:`~ATK.Models.Powspec` containers. By default, this process combines all bands for each target before computing a combined power spectrum.
+The :class:`~ATK.Models.Lightcurve.pspec` method can be used to generate power spectra (i.e. :class:`~ATK.Models.Powspec` containers) from a set of :class:`Lightcurves <ATK.Models.Lightcurve>`. :class:`~ATK.Models.Lightcurve.pspec` must be provided with a minimum and maximum frequency, and a number of test frequencies in this range.
+
+By default, this process combines all bands for each target before computing a combined power spectrum.
 
 Multi-band Power Spectra
 ------------------------
@@ -33,11 +35,10 @@ pass
 # sphinx_gallery_end_ignore
 
 # %% 
-# A :class:`~ATK.Models.Powspec` contains basic information about the light curve from which it was generated, along with :attr:`~ATK.Models.Powspec.frequency` and :attr:`~ATK.Models.Powspec.power` as numpy :class:`arrays <numpy.ndarray>`. The derived optimal frequency and the corresponding optimal period are stored in :attr:`~ATK.Models.Powspec.fopt` and :attr:`~ATK.Models.Powspec.popt`, respectively.
 # 
 # |
 #
-# We can then plot our power spectrum as with any other kind of data, by using :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
+# A :class:`~ATK.Models.Powspec` can be plotted like any other kind of data, with :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
 
 # sphinx_gallery_start_ignore
 pspec_data.plot()
@@ -51,9 +52,11 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+# 
 # Single-band Power Spectra
 # -------------------------
-# If we instead want to process each band individually, we can pass `multiband=False` to :meth:`~ATK.Models.Lightcurve.pspec`:
+# To instead process each band individually, pass ``multiband = False`` to :meth:`~ATK.Models.Lightcurve.pspec`:
 
 asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
 pspec_data = asassn_query.apply("pspec", min=0, max=60, samples=100000, multiband=False, inplace=False)
@@ -80,9 +83,13 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# Phase-Folding Light Curves
-# ==========================
-# Light curves can be phase folded onto a given period with the :meth:`~ATK.Models.Lightcurve.fold` method:
+# 
+# |
+# |
+#
+# Phase-Folding Light Curves *
+# ============================
+# :class:`Lightcurves <ATK.Models.Lightcurve>` can be phase folded on a given period with the :meth:`~ATK.Models.Lightcurve.fold` method:
 
 asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
 folded_data = asassn_query.apply("fold", min=0, max=60, samples=100000, multiband=False, inplace=False)
@@ -94,8 +101,7 @@ folded_data.show(show_types=True)
 pass
 # sphinx_gallery_end_ignore
 
-# %% 
-# The :meth:`~ATK.Models.Lightcurve.fold` method simply replaces 
+# %%
 
 # sphinx_gallery_start_ignore
 folded_data.plot()

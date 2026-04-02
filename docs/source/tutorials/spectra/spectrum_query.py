@@ -2,16 +2,17 @@
 ####################
 Working with Spectra
 ####################
+Performing a Spectrum Query
+===========================
+To perform a spectrum query and plot the result:
 """
 
 # sphinx_gallery_start_ignore
 from ATK.queries.spectrum._query_info import SURVEY_MAP
 
 with open("../../auto_tutorials/spectra/supported_spectrum_surveys.rst", "w") as f:
-    f.write(".. note::\n")
-    f.write("    ATK supports queries to the following spectra surveys:\n")
     for survey in SURVEY_MAP:
-        f.write(f"        - {survey}\n")
+        f.write(f"    - {survey}\n")
     f.write("\n")
 # fmt: off
 # isort: skip_file
@@ -34,15 +35,19 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# This returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of returned :class:`~ATK.Models.Spectrum` containers.
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Spectrum` containers (**one or multiple per target, subject to data availability**). If multiple :class:`Spectra <ATK.Models.Spectrum>` are returned for a single target, these will be arranged in order of decreasing exposure.
 #
 # |
 #
 # .. note::
 #
-#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#    ATK supports queries to the following spectra surveys:
 #
-# .. include:: supported_spectrum_surveys.rst
+#    .. include:: supported_spectrum_surveys.rst
+#
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+
+# %%
 #
 # |
 # |

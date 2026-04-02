@@ -5,3 +5,4 @@ SEDs
     :maxdepth: 1
 
     ../../auto_tutorials/seds/sed_query
+    ../../auto_tutorials/seds/sed_plotting

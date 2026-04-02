@@ -16,7 +16,7 @@ sphinx_gallery_conf = {
     "filename_pattern": r"\.py$",
     "ignore_pattern": r"^_.*\.py$",
     "reference_url": {"ATK": None},
-    # "run_stale_examples": True,
+    "run_stale_examples": False,
 }
 
 # -------------------

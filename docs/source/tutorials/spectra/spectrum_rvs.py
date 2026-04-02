@@ -1,7 +1,7 @@
 """
-###########################
-Detecting Radial Velocities
-###########################
+#############################
+Detecting Radial Velocities *
+#############################
 """
 
 # sphinx_gallery_start_ignore

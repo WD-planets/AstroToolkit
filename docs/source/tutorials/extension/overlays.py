@@ -1,6 +1,6 @@
 """
-Defining New Detection Overlays
-===============================
+Defining Custom Image Overlays
+==============================
 """
 
 # sphinx_gallery_start_ignore

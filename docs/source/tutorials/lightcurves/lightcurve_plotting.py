@@ -2,14 +2,13 @@
 #########################
 Light Curve Customisation
 #########################
-
-When plotting light curves, :meth:`~ATK.Models.DataSet.plot` accepts a few additional arguments.
+When plotting light curves, :meth:`~ATK.Models.DataSet.plot` - and hence :meth:`~ATK.Models.DataSet.open` - accepts the following additional arguments.
 
 |
 
-Selecting Bands
-===============
-If we only want to plot specific bands of the :class:`Lightcurves <ATK.Models.Lightcurve>` returned by our query, we can pass the ``bands`` parameter to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
+Specifying Bands
+================
+If only certain photometric bands are of interest, the ``bands`` parameter can be passed as a list of bands that should be included in plotting:
 """
 
 # sphinx_gallery_start_ignore
@@ -33,11 +32,15 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# .. note:: 
+# 
+#    For a list of photometric bands supported by each survey, see the :doc:`previous tutorial <lightcurve_query>`.
+#
 # |
 # 
 # Setting Band Colours
 # ====================
-# We can also choose the colour of each band:
+# The colours of each band can also be chosen:
 
 # sphinx_gallery_start_ignore
 asassn_query.plot(bands=["v","g"], colours=["orange","blue"])
@@ -52,21 +55,14 @@ figure
 
 # %%
 # .. note::
-#    The following colours are supported:
-#    
-#    - ``"green"``
-#    - ``"red"``
-#    - ``"blue"``
-#    - ``"orange"``
-#    - ``"purple"``
-#    - ``"black"``
+#    The following colours are supported: ``"green"``, ``"red"``, ``"blue"``, ``"orange"``, ``"purple"``, ``"black"``
 
 # %%
 # |
 #
-# Setting the Colour Map
-# ======================
-# By default the colour map scales with distance from the mean brightness of the photometry in a given band. This can be disabled by setting ``cmap = "flat"`` (default = ``"mean"``):
+# Choosing a Colour Map
+# =====================
+# By default, the colour map scales with distance from the mean brightness of the photometry in each band. This can be disabled by setting ``cmap = "flat"`` (default = ``"mean"``):
 
 # sphinx_gallery_start_ignore
 asassn_query.plot(cmap="flat")
@@ -84,7 +80,7 @@ figure
 #
 # Using Non-Reduced MJD
 # =====================
-# By default, the x-axis is reduced to show the time since the earliest observation (i.e. the minimum MJD is subtracted). If we instead want to plot the MJD as-is, we can pass ``time_format = "original"`` (default = ``"reduced"``):
+# By default, the x-axis is reduced to show the time since the earliest observation in each set of light curves (i.e. the minimum MJD is subtracted from all bands). To instead plot against MJD, pass ``time_format = "original"`` (default = ``"reduced"``):
 
 # sphinx_gallery_start_ignore
 asassn_query.plot(time_format="original")

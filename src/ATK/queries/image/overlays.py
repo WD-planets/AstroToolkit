@@ -10,7 +10,8 @@ from ...configuration.survey_config import SURVEY_CONFIG
 from ...structures.Image import Image
 from ...structures.Target import Target
 from ...Tools.query import query
-from ...utilities.coordinates import correct_radius, correct_skycoord, dataframe_to_skycoord
+from ...utilities.coordinates import (correct_radius, correct_skycoord,
+                                      dataframe_to_skycoord)
 from ...utilities.defaults import RETURNS
 from ..simbad.simbad_query import get_ids
 
@@ -243,7 +244,5 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     final_overlay = pd.concat(overlay_data).reset_index(drop=True)
     if final_overlay.empty:
         return None
-
-    print(final_overlay)
 
     return final_overlay

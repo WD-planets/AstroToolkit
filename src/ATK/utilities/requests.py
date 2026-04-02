@@ -13,7 +13,7 @@ def print_bad_response(survey: str, response: Response):
     Attempts to print the problem(s) encountered with a 'bad' request
     """
 
-    print(f"Note: experiencing issues with {survey} (bad status code {response.status_code}).")
+    warnings.warn(f"Note: experiencing issues with {survey} (bad status code {response.status_code}).")
 
     try:
         for key, val in response.json().items():

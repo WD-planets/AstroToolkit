@@ -106,11 +106,22 @@ def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
 
     # get previous plot parameters if they exist
     # this only really matters if a plot doesn't exist but previously did (e.g. due to using inplace=False in data methods which cannot copy a bokeh figure)
+
     if not kwargs and structure._stored_plot_params:
         kwargs = structure._stored_plot_params
 
-    # plot data if it hasn't been plotted
+    # determine whether to replot
     if not structure.figure:
+        replot = True
+    elif not structure._stored_plot_params:
+        replot = True
+    elif kwargs != structure._stored_plot_params:
+        replot = True
+    else:
+        replot = False
+
+    # plot data if it hasn't been plotted
+    if replot:
         structure.plot(**kwargs)
 
     # if no data for plotting
@@ -130,12 +141,15 @@ def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
 
         output_file(tmp_html, title=structure._title)
     else:
-        output_file(fname, title=structure._title)
+        output_file(str(fname), title=structure._title)
 
     # clear cache directory of any old figures
     for f in glob.glob(os.path.join(tmp_dir, "*.html")):
         if time.time() - os.path.getmtime(f) > BASE_CONFIG._get("plot_settings", "cache_time"):
-            os.remove(f)
+            try:
+                os.remove(f)
+            except PermissionError:
+                pass
 
     show(structure.figure)
 
@@ -156,6 +170,9 @@ def open_basic(plot: figure, prefix: str, title: str, fname=Path | str | None):
     # clear cache directory of any old figures
     for f in glob.glob(os.path.join(tmp_dir, "*.html")):
         if time.time() - os.path.getmtime(f) > BASE_CONFIG._get("plot_settings", "cache_time"):
-            os.remove(f)
+            try:
+                os.remove(f)
+            except PermissionError:
+                pass
 
     show(plot)

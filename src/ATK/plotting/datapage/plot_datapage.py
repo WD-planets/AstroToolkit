@@ -3,7 +3,7 @@ from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
 from ...plotting.datatable.plot_datatable import autosize_table
-from ...structures.DataPage import DataPage
+from ...structures.DataPages import DataPages
 from ...structures.DataSet import DataSet
 from ...structures.methods.apply import unpack_layout
 
@@ -283,6 +283,6 @@ def get_datapage(layout: list[list]):
             if target._key not in existing_keys:
                 targets.append(target)
 
-    datapages = DataPage(targets=targets, figures=dps, _plot_map=plot_map)
+    datapages = DataPages(targets=targets, figures=dps, _plot_map=plot_map)
 
     return datapages

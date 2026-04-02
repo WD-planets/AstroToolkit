@@ -1,7 +1,7 @@
 """
-#################
-Analysing Spectra
-#################
+###################
+Analysing Spectra *
+###################
 
 temp: these methods do not change anything about the containers, just plot things
 

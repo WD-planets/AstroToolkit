@@ -20,3 +20,13 @@
 	box-sizing: border-box;
 	font-family: Roboto Slab,ff-tisa-web-pro,Georgia,Arial,sans-serif;
 }
+
+div.sphx-glr-download-link-note {
+  height: 0px;
+  visibility: hidden;
+}
+
+.bolditalic {
+  font-weight: bold;
+  font-style: italic;
+}

@@ -18,12 +18,6 @@ figure = format_plot(image.figure, 2, 2)
 doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore
-image.open()
-# sphinx_gallery_start_ignore
-figure
-# sphinx_gallery_end_ignore
-
-image.show()
 
 # %%
 #

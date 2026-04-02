@@ -8,7 +8,8 @@ When plotting :class:`images <ATK.Models.Image>`, we can utilise two such argume
 
 .. note::
 
-   Since calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated, :meth:`~ATK.Models.DataSet.open` also accepts these parameters and will pass them to :meth:`~ATK.Models.DataSet.plot` in this case.
+   Calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated. In this case, :meth:`~ATK.Models.DataSet.open` will pass any additional keyword arguments to :meth:`~ATK.Models.DataSet.plot`.
+   A new plot will also be generated if the keyword arguments passed to :meth:`~ATK.Models.DataSet.open` do not match those of the stored figure.
 
 |
 
@@ -46,9 +47,6 @@ figure
 # 
 # 2. ``grey``:
 
-from ATK import query
-
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
 # sphinx_gallery_start_ignore
 ps_query.plot(cmap="grey")
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)
@@ -61,14 +59,11 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# 
+#
 # |
 #
 # 3. ``false_colour``, which maps the wavelength of the image filter into a single RGB colour:
 
-from ATK import query
-
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
 # sphinx_gallery_start_ignore
 ps_query.plot(cmap="false_colour")
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)
@@ -89,9 +84,6 @@ figure
 # ----------------------------
 # So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). If we instead want to use absolute coordinates on the sky, we can pass ``relative_axes = False``:
 
-from ATK import query
-
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
 # sphinx_gallery_start_ignore
 ps_query.plot(relative_axes=False)
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)

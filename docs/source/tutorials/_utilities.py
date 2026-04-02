@@ -75,7 +75,7 @@ def format_plot(plot, width: float, height: float, force_square: bool = False):
     """
 
     def _format_single(fig):
-        if isinstance(fig, (figure, DataTable)):
+        if isinstance(fig, figure):
             fig.sizing_mode = "fixed"
 
             fig.toolbar_location = None
@@ -88,7 +88,7 @@ def format_plot(plot, width: float, height: float, force_square: bool = False):
                 fig.remove_tools(tool)
 
     def _recurse_layout(obj):
-        if isinstance(obj, (figure, DataTable)):
+        if isinstance(obj, (figure)):
             _format_single(obj)
             return obj
 

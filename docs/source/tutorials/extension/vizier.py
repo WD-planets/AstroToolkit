@@ -24,7 +24,6 @@ pass
 #
 #    By default, ATK supports the following aliases to Vizier catalogues:
 #
-#    .. include:: supported_aliases.rst
 #
 # |
 #

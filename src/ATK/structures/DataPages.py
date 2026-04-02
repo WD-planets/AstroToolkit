@@ -12,7 +12,7 @@ from .Target import Target
 
 
 @dataclass
-class DataPage:
+class DataPages:
     targets: list[Target] = field(default_factory=list)
     figures: list[GridBox] = field(default_factory=list)
 

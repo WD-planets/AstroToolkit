@@ -2,7 +2,9 @@
 #################
 Working with HRDs
 #################
-To perform a HRD query and plot the result:
+Performing a HRD Query
+======================
+To perform a Gaia HRD query and plot the result:
 """
 
 # sphinx_gallery_start_ignore
@@ -13,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-hrd_query = query("hrd", targets=[587316166180416640], path="example_hrd.fits")
+hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits")
 hrd_query.show(show_types=True)
 
 # sphinx_gallery_start_ignore
@@ -28,7 +30,7 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# This returns a :class:`~ATK.Models.DataSet` with the :attr:`~ATK.Models.DataSet.data` attribute being a list of returned :class:`~ATK.Models.HRD` containers. <MULTIPLE CONTAINERS>
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.HRD` containers (**one per target, subject to data availability**).
 # |
 #
 # .. note::

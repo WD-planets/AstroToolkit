@@ -2,15 +2,13 @@
 ##################
 Local Data Storage
 ##################
-
-To avoid having to rerun a query every time a script is used, :class:`DataSets <ATK.Models.DataSet>` of any kind can be stored as local fits files. These files can be read by ATK to re-create the original :class:`~ATK.Models.DataSet`.
+:class:`DataSets <ATK.Models.DataSet>` of any kind can be stored as local FITS files. These files can be read by ATK to re-create the original :class:`~ATK.Models.DataSet`.
 
 |
-|
 
-Storing Data Automatically
-==========================
-:func:`~ATK.Tools.query` can be provided with a ``path``:
+Automatic Local Data Storage
+============================
+To store any returned data, :func:`~ATK.Tools.query` can be provided with a ``path``:
 """
 
 # sphinx_gallery_start_ignore
@@ -27,7 +25,7 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# This will automatically save the returned :class:`~ATK.Models.DataSet` to ``path``. Running the script again will read this local file instead of rerunning :func:`~ATK.Tools.query`.
+# This will automatically save the returned :class:`~ATK.Models.DataSet` to ``path``, and **running the script again will read this local file instead of running** :func:`~ATK.Tools.query` **again.**
 #
 # .. note::
 #
@@ -36,9 +34,9 @@ pass
 # |
 # |
 #
-# Storing Data Manually
-# =====================
-# A :class:`~ATK.Models.DataSet` can also be stored manually:
+# Manual Local Data Storage
+# =========================
+# A :class:`~ATK.Models.DataSet` can also be stored manually by calling its :meth:`~ATK.Models.DataSet.store` method:
 
 from ATK import query
 
@@ -50,7 +48,7 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# If stored this way, the query will rerun every time the script is executed. The original :class:`~ATK.Models.DataSet` can be re-created with the :func:`~ATK.Tools.read` tool:
+# The original :class:`~ATK.Models.DataSet` can be re-created with :func:`~ATK.Tools.read`:
 
 from ATK import read
 

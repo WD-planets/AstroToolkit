@@ -9,9 +9,11 @@ from ...utilities.defaults import RETURNS
 
 def query(target: Target, **kwargs):
     bands = kwargs["colour"].split("-")
+
     for band in bands:
         if band not in ["Gmag", "BPmag", "RPmag"]:
             raise ValueError(f"Unknown Gaia band '{band}'.")
+
     if not target.identifier:
         raise ValueError("Targets must be a source ID or list of source IDs.")
 

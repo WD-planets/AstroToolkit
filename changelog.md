@@ -79,6 +79,10 @@ Changes
 
 To-Do Now
 ---------
+- fits compression as config option?
+
+- make local data be overwritten if ATK version doesn't match
+- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
 - relative axes = False in images makes them less square (compare to implementation in datapages to improve?)
 - remove extra whitespace in .show() after __repr__ and .data
 - notifications don't actually do anything, either delete or implement
@@ -94,7 +98,8 @@ To-Do Now
 - powspec needs to be labelled by band(s) in legend
 - implement features from previous version
     - light curve sigma clipping
-    - light curves are sorting in a different order before/after reading
+    - light curves are sorting in a different order before/after reading 
+    - also affecting plotting, bands and colours plotting in wrong order
 - add freq parameter to phase folding
     - check phase folding in docs and finish this section, hopefully once ztf is actually working and above is implemented
 - add docs changes to changelog
@@ -117,10 +122,13 @@ To-Do Now
 - spectrum/sed overlay legend hiding not working
 - let peak fitting work in velocity-space (?)
 - test all types of custom data set
-
+- get rid of object_id hovertool parameter if split=False in light curves
+- figure sizes in docs not scaling with screen resolution
+- change Record.data to Record.table?
 
 To-Do Later
 -----------
+- rich text output option (https://realpython.com/python-rich-package/)
 - calibrating + combining multiple light curves to make one massive light curve
 - decouple from Gaia with a properly implemented astrometric backend system
 - allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...
@@ -138,3 +146,5 @@ To-Do Later
 - sort defaults for kwargs (should be in function definitions/config - or somewhere else, not as default arg in kwargs.get()) (?)
 - used ValueError too much, should only be used for argument errors
 - struct vs ctnr vs etc.
+- option to only return closest photometry from each survey in SED queries
+- recursive show_types=True in .show()

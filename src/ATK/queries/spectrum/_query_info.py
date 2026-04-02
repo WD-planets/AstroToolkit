@@ -1,1 +1,1 @@
-SURVEY_MAP = ["SDSS (``sdss``)", "DESI (``desi``)"]
+SURVEY_MAP = ["SDSS - ``sdss``", "DESI - ``desi``"]

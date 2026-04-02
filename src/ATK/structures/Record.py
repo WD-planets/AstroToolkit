@@ -11,7 +11,6 @@ class Record(Container):
     catalogue: str | None = None
     correction: str | None = None
     search_pos: str | None = None
-    separation: str | None = None
 
     data: pandas.DataFrame | None = None
 

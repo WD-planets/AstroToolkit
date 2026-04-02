@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from ...configuration.survey_config import SURVEY_CONFIG
@@ -15,15 +16,11 @@ def query(target: Target, **kwargs):
 
     data = []
     for survey, cols in rows.items():
+        survey_data = general_query(kind="vizier", targets=target, survey=survey, radius=radius)
         if survey in aliases:
-            survey_data = general_query(kind="vizier", targets=target, survey=survey, radius=radius)
-
             catalogue = aliases[survey]
         else:
-            survey_data = general_query(kind="vizier", targets=target, catalogue=survey, radius=radius)
-
             catalogue = survey
-            survey = None
 
         if survey_data.exception:
             return RETURNS.EXCEPTION
@@ -42,9 +39,16 @@ def query(target: Target, **kwargs):
         df["survey"] = survey
         df["catalogue"] = catalogue
         df["correction"] = survey_data.data[0].correction
-        sep = survey_data.data[0].separation
-        sep_str = f"separation ({sep.unit.to_string('fits')})"
+
+        sep_str = f"separation ({radius.unit.to_string('fits')})"
+        if "_r" in survey_data.data[0].data:
+            sep = np.tile(np.asarray(survey_data.data[0].data["_r"]), len(cols))
+        else:
+            sep = np.nan
         df[sep_str] = sep
+
+        df["parameter"] = pd.Categorical(df["parameter"], categories=cols, ordered=True)
+        df = df.sort_values([sep_str, "parameter"])
 
         front_cols = ["survey", "catalogue", "correction", sep_str]
         df = df[front_cols + [c for c in df.columns if c not in front_cols]]

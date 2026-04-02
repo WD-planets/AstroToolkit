@@ -1,5 +1,5 @@
-Getting Started
-===============
+Vizier Queries
+==============
 
 .. toctree::
     :maxdepth: 1

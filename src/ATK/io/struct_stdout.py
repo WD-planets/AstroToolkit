@@ -85,7 +85,7 @@ def format_skycoord(coord: SkyCoord) -> str:
     return str_rep
 
 
-def format_dict(dct: dict, show_types_override: bool | None = None) -> str:
+def format_dict(dct: dict, show_types_override: bool | None = None, dataframe=False) -> str:
     """
     Format dict recursively into string representation
     """
@@ -103,7 +103,7 @@ def format_dict(dct: dict, show_types_override: bool | None = None) -> str:
     key_pad = get_dict_pad(dct, "key: ")
 
     for key, val in dct.items():
-        if key.startswith("_") and not DEBUG:
+        if key.startswith("_") and not DEBUG and not dataframe:
             continue
 
         if val is None:
@@ -207,7 +207,7 @@ def format_time(time: Time) -> str:
 # Maps to special formatting functions
 SPECIAL_FORMATTERS = {
     dict: format_dict,
-    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df), False),
+    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df), False, dataframe=True),
     np.ndarray: format_array,
     pd.Series: format_array,
     Target: format_target,
@@ -507,5 +507,7 @@ def pprint_structure(structure: any, show_types: bool, **kwargs) -> None:
     OUTPUT = ""
     CURRENT_DEPTH = 0
     COL_WIDTHS = {0: 0}
+
+    formatted += "\n"
 
     print(formatted)

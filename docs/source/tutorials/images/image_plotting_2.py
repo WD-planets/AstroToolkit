@@ -2,9 +2,7 @@
 #########################
 Plotting Multiple Targets
 #########################
-Just as :func:`~ATK.Tools.query` can retrieve data for multiple targets, :meth:`~ATK.Models.DataSet.plot` can process multiple data containers simultaneously.
-
-The following will perform a Pan-STARRS image query for four targets (van Maanen's Star, Hu Leo, AR Sco - a white dwarf pulsar, and Sco X-1 - an X-ray binary), before plotting and combining the returned data into a grid:
+Just like :func:`~ATK.Tools.query`, :meth:`~ATK.Models.DataSet.plot` can process data for multiple targets simultaneously. The following will perform a Pan-STARRS image query for four targets, before plotting and combining the returned data into a grid:
 """
 
 # sphinx_gallery_start_ignore
@@ -25,6 +23,22 @@ doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore
 images.open()
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %% 
+# Plotting Arguments
+# ==================
+# Plotting arguments, such as those seen in the :doc:`previous tutorial <image_plotting>` will be applied to all plots in the grid:
+
+# sphinx_gallery_start_ignore
+images.plot(cmap="grey")
+figure = format_plot(images.figure, 1.5, 1.5, True)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+images.open(cmap="grey")
 # sphinx_gallery_start_ignore
 figure
 # sphinx_gallery_end_ignore

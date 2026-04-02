@@ -1,110 +1,104 @@
+import astropy.units as u
+import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import BinTableHDU, Header
-from astropy.table import Table, hstack
+from astropy.table import Table, hstack, vstack
 from astropy.table.row import Row
 from astropy.time import Time
-from astropy.units import Unit
 
 from ..structures.DataSet import DataSet
 from ..structures.Target import Target
 
-
-def stack_skycoords(coords: list[SkyCoord]):
-    """
-    Combines multiple SkyCoords into a single SkyCoord while retaining all proper motion and frame information
-    """
-
-    frame = coords[0].frame.name
-    obstime = coords[0].obstime
-
-    return SkyCoord(
-        ra=[c.ra for c in coords],
-        dec=[c.dec for c in coords],
-        pm_ra_cosdec=[c.pm_ra_cosdec for c in coords],
-        pm_dec=[c.pm_dec for c in coords],
-        distance=[c.distance for c in coords],
-        frame=frame,
-        obstime=obstime,
-    )
+# ============================================================
+# SKYCOORD → TABLE
+# ============================================================
 
 
 def skycoord_to_table(coord: SkyCoord, prefix: str = ""):
-    table = Table()
+    if coord.data.differentials:
+        pmra = coord.pm_ra_cosdec.to_value(u.mas / u.yr)
+        pmdec = coord.pm_dec.to_value(u.mas / u.yr)
+    else:
+        pmra = np.nan
+        pmdec = np.nan
 
-    table[f"{prefix}ra"] = coord.ra
-    table[f"{prefix}dec"] = coord.dec
-    table[f"{prefix}pm_ra_cosdec"] = coord.pm_ra_cosdec
-    table[f"{prefix}pm_dec"] = coord.pm_dec
-    table[f"{prefix}distance"] = coord.distance
-    table[f"{prefix}frame"] = coord.frame.name
-    table[f"{prefix}epoch"] = coord.obstime.fits
+    if coord.distance != u.one:
+        dist = coord.distance.to_value(u.pc)
+    else:
+        dist = np.nan
+
+    row = {
+        f"{prefix}ra": coord.ra.to_value(u.deg) * u.deg,
+        f"{prefix}dec": coord.dec.to_value(u.deg) * u.deg,
+        f"{prefix}frame": coord.frame.name,
+        f"{prefix}epoch": coord.obstime.fits,
+        f"{prefix}pm_ra_cosdec": pmra * u.mas / u.yr,
+        f"{prefix}pm_dec": pmdec * u.mas / u.yr,
+        f"{prefix}distance": dist * u.pc,
+    }
+
+    table = Table([row])
 
     return table
 
 
 def targets_to_hdu(targets: list[Target]) -> BinTableHDU:
-    """
-    Converts a list of targets to a BinTableHDU
-    """
+    init_coords = [skycoord_to_table(t.initial_coords, "input_") for t in targets]
+    final_coords = [skycoord_to_table(t.coords, "final_") for t in targets]
 
-    # stack all initial Target coords and convert to dataframe
-    init_coords = stack_skycoords([target.initial_coords for target in targets])
-    init_coords_tbl = skycoord_to_table(init_coords, prefix="input_")
+    init_tbl = vstack(init_coords)
+    final_tbl = vstack(final_coords)
+    combined_tbl = hstack([init_tbl, final_tbl])
 
-    # stack all final Target coords and convert to dataframe
-    final_coords = stack_skycoords([target.coords for target in targets])
-    final_coords_tbl = skycoord_to_table(final_coords, prefix="final_")
+    combined_tbl["identifier"] = np.array([str(t.identifier) for t in targets])
+    combined_tbl["survey"] = np.array([str(t.survey) for t in targets])
+    combined_tbl["correction"] = np.array([t.correction for t in targets])
 
-    combined_tbl = hstack([init_coords_tbl, final_coords_tbl])
-
-    # add basic info
-    combined_tbl["identifier"] = [target.identifier for target in targets]
-    combined_tbl["survey"] = [target.survey for target in targets]
-    combined_tbl["correction"] = [target.correction for target in targets]
-
-    combined_tbl.remove_columns(["final_pm_ra_cosdec", "final_pm_dec", "final_distance"])
-    combined_tbl.rename_columns(["input_pm_ra_cosdec", "input_pm_dec", "input_distance"], ["pm_ra_cosdec", "pm_dec", "distance"])
-
-    hdu = BinTableHDU(combined_tbl, header=Header(), name="TARGETING INFO")
-
-    return hdu
-
-
-def get_unit(row: Row, column: str) -> Unit:
-    return row.table[column].unit
+    return BinTableHDU(combined_tbl, header=Header(), name="TARGETING INFO")
 
 
 def read_skycoord(row: Row, prefix: str = ""):
-    ra = row[f"{prefix}ra"] * get_unit(row, f"{prefix}ra")
-    dec = row[f"{prefix}dec"] * get_unit(row, f"{prefix}dec")
-    pmra = row["pm_ra_cosdec"] * get_unit(row, "pm_ra_cosdec")
-    pmdec = row["pm_dec"] * get_unit(row, "pm_dec")
-    distance = row["distance"] * get_unit(row, "distance")
+    ra = row[f"{prefix}ra"] * row.table[f"{prefix}ra"].unit
+    dec = row[f"{prefix}dec"] * row.table[f"{prefix}dec"].unit
     frame = row[f"{prefix}frame"]
-    epoch = row[f"{prefix}epoch"]
+    epoch = Time(row[f"{prefix}epoch"], format="fits")
 
-    coord = SkyCoord(ra=ra, dec=dec, pm_ra_cosdec=pmra, pm_dec=pmdec, distance=distance, frame=frame, obstime=Time(epoch, format="fits"))
+    pmra = row[f"{prefix}pm_ra_cosdec"]
+    pmdec = row[f"{prefix}pm_dec"]
+    dist = row[f"{prefix}distance"]
 
-    return coord
+    kwargs = dict(ra=ra, dec=dec, frame=frame, obstime=epoch)
+
+    if not np.ma.is_masked(pmra) and not np.ma.is_masked(pmdec):
+        kwargs["pm_ra_cosdec"] = pmra * row.table[f"{prefix}pm_ra_cosdec"].unit
+        kwargs["pm_dec"] = pmdec * row.table[f"{prefix}pm_dec"].unit
+
+    if not np.ma.is_masked(dist):
+        kwargs["distance"] = dist * row.table[f"{prefix}distance"].unit
+
+    return SkyCoord(**kwargs)
 
 
-def get_targets_from_hdu(structure: DataSet, primary_hdu: BinTableHDU, target_hdu: BinTableHDU) -> list[Target]:
+def get_targets_from_hdu(structure: DataSet, primary_hdu: BinTableHDU, target_hdu: BinTableHDU):
     primary_header = primary_hdu.header
 
     if primary_header.get("ATK_FRAME") and hasattr(structure, "frame"):
         structure.frame = primary_header["ATK_FRAME"]
+
     if primary_header.get("ATK_EPOCH") and hasattr(structure, "epoch"):
         structure.epoch = primary_header["ATK_EPOCH"]
 
     table = Table.read(target_hdu)
-
     targets = []
+
     for row in table:
         init_coord = read_skycoord(row, prefix="input_")
         final_coord = read_skycoord(row, prefix="final_")
 
-        target = Target(init_coord, final_coord, row["identifier"], row["survey"], row["correction"])
-        targets.append(target)
+        identifier = row["identifier"] if row["identifier"] != "None" else None
+        survey = row["survey"] if row["survey"] != "None" else None
+
+        targets.append(Target(init_coord, final_coord, identifier, survey, row["correction"]))
 
     structure.targets = targets
 

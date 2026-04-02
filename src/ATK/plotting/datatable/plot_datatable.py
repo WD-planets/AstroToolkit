@@ -27,24 +27,38 @@ def autosize_table(table, source, font_size_pt, max_height=None):
 
     table.height = height
 
+    max_col_len = max([len(col) for col in source.data])
+    table.max_width = max_col_len * int(font_px * 3.5)
+
     return table
 
 
-def plot(dt: list[DataTable], **kwargs):
+def get_col_width(col, values, char_px):
+    max_len = max([len(str(v)) for v in values] + [len(col)]) if values is not None else len(col)
+
+    return int(max_len * char_px) + 16
+
+
+def plot(dt: DataTable, **kwargs):
     source = ColumnDataSource(dt.data)
     cols = []
-    for col in dt.data:
-        cols.append(TableColumn(field=col, title=col))
-
-    table = bokeh_DataTable(source=source, columns=cols, width=400, height=400)
-
-    dimensions = PLOT_DIMENSIONS["datatable"]
-    table.width = int(BASE_CONFIG._get("plot_settings", "size")) * dimensions[0]
 
     text_size = str(BASE_CONFIG._get("plot_settings", "font_size"))
     if not text_size.endswith("pt"):
         text_size += "pt"
     text_font = str(BASE_CONFIG._get("plot_settings", "font"))
+
+    font_px = int(float(text_size.replace("pt", "")) * 1.333)
+    char_px = font_px * 0.55
+
+    for col in dt.data:
+        width = get_col_width(col, source.data.get(col), char_px)
+        cols.append(TableColumn(field=col, title=col, width=width))
+
+    dimensions = PLOT_DIMENSIONS["datatable"]
+    width = int(BASE_CONFIG._get("plot_settings", "size")) * dimensions[0]
+
+    table = bokeh_DataTable(source=source, columns=cols, width=width, height=400, autosize_mode="force_fit")
 
     style_sheet = InlineStyleSheet(
         css=f".slick-header-columns {{background-color: #e0e0e0 !important;font-family: {text_font.lower()};font-size: {int(text_size[:-2])}pt; font-weight: normal}}.slick-row {{font-size: {int(text_size[:-2]) - 1}pt; font-weight: normal}}"
