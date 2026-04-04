@@ -24,10 +24,10 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
+asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
 pspec_data = asassn_query.apply("pspec", min=0, max=60, samples=100000, inplace=False)
 # sphinx_gallery_start_ignore
-pspec_data.store("example_pspec.fits")
+pspec_data.store("example_pspec.fits.gz")
 # sphinx_gallery_end_ignore
 pspec_data.show(show_types=True)
 # sphinx_gallery_start_ignore
@@ -58,10 +58,10 @@ figure
 # -------------------------
 # To instead process each band individually, pass ``multiband = False`` to :meth:`~ATK.Models.Lightcurve.pspec`:
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
+asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
 pspec_data = asassn_query.apply("pspec", min=0, max=60, samples=100000, multiband=False, inplace=False)
 # sphinx_gallery_start_ignore
-pspec_data.store("example_pspec.fits")
+pspec_data.store("example_pspec.fits.gz")
 # sphinx_gallery_end_ignore
 pspec_data.show(show_types=True)
 # sphinx_gallery_start_ignore
@@ -91,10 +91,10 @@ figure
 # ============================
 # :class:`Lightcurves <ATK.Models.Lightcurve>` can be phase folded on a given period with the :meth:`~ATK.Models.Lightcurve.fold` method:
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
+asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
 folded_data = asassn_query.apply("fold", min=0, max=60, samples=100000, multiband=False, inplace=False)
 # sphinx_gallery_start_ignore
-folded_data.store("example_folded_lc.fits")
+folded_data.store("example_folded_lc.fits.gz")
 # sphinx_gallery_end_ignore
 folded_data.show(show_types=True)
 # sphinx_gallery_start_ignore

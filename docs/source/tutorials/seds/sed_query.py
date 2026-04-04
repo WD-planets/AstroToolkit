@@ -21,7 +21,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-sed_query = query("sed", targets=587316166180416640, path="example_sed.fits")
+sed_query = query("sed", targets=587316166180416640, path="example_sed.fits.gz")
 sed_query.show(show_types=True)
 
 # sphinx_gallery_start_ignore

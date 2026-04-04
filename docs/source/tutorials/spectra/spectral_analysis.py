@@ -15,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-sdss_query = query("spectrum", targets=587316166180416640, survey="sdss", path="example_spectrum.fits")
+sdss_query = query("spectrum", targets=587316166180416640, survey="sdss", path="example_spectrum.fits.gz")
 sdss_query.apply("fit", smoothing=5)
 sdss_query.show(show_types=True)
 # sphinx_gallery_start_ignore

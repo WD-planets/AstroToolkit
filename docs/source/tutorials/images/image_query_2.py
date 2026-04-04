@@ -28,7 +28,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex"], path="example_image_2.fits")
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex"], path="example_image_2.fits.gz")
 # sphinx_gallery_start_ignore
 ps_query.plot()
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)
@@ -60,7 +60,7 @@ ps_query = query(
     band="g",
     size=120,
     overlays={"galex": ["NUVmag", "FUVmag"]},
-    path="example_image_4.fits",
+    path="example_image_4.fits.gz",
 )
 # sphinx_gallery_start_ignore
 ps_query.plot()

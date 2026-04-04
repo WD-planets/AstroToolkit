@@ -15,7 +15,7 @@ from bokeh.document import Document
 from ATK import query
 
 targets = [2552928187080872832, 587316166180416640, 6050296829033196032, 4328198145165324800]
-images = query("image", targets=targets, survey="panstarrs", size=120, band="g", path="multiple_images.fits")
+images = query("image", targets=targets, survey="panstarrs", size=120, band="g", path="multiple_images.fits.gz")
 # sphinx_gallery_start_ignore
 images.plot()
 figure = format_plot(images.figure, 1.5, 1.5, True)

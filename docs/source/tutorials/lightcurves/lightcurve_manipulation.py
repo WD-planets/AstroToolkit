@@ -19,7 +19,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=1091051096255456384, survey="tess", path="example_lightcurve_2.fits")
+asassn_query = query("lightcurve", targets=1091051096255456384, survey="tess", path="example_lightcurve_2.fits.gz")
 asassn_query.show(show_all=True)
 # sphinx_gallery_start_ignore
 asassn_query.plot(time_format="original")
@@ -90,6 +90,23 @@ doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore
 binned_data.open(time_format="original")
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+# Sigma-Clipping a Light Curve
+# ============================
+# :class:`Lightcurves <ATK.Models.Lightcurve>` can be sigma clipped by applying :meth:`~ATK.Models.Lightcurve.clip`, which sigma clips all array-like attributes to eliminate data points where the brightness is outside a given sigma range:
+
+clipped_data = binned_data.apply("clip", sigma=2, inplace=False)
+# sphinx_gallery_start_ignore
+clipped_data.plot(time_format="original")
+figure = format_plot(clipped_data.figure, 3, 1.5)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+clipped_data.open(time_format="original")
 # sphinx_gallery_start_ignore
 figure
 # sphinx_gallery_end_ignore

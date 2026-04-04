@@ -102,7 +102,7 @@ subprocess.run(
 # sphinx_gallery_end_ignore
 
 ps_query = query(
-    "image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex", "allwise"], path="example_image_3.fits"
+    "image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex", "allwise"], path="example_image_3.fits.gz"
 )
 # sphinx_gallery_start_ignore
 ps_query.plot()

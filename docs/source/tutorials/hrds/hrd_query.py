@@ -15,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits")
+hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits.gz")
 hrd_query.show(show_types=True)
 
 # sphinx_gallery_start_ignore

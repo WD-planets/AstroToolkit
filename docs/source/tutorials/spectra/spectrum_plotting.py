@@ -15,8 +15,8 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-spec_query = query("spectrum", targets=587316166180416640, survey="sdss", path="example_spectrum.fits")
-sed_query = query("sed", targets=587316166180416640, path="example_sed.fits")
+spec_query = query("spectrum", targets=587316166180416640, survey="sdss", path="example_spectrum.fits.gz")
+sed_query = query("sed", targets=587316166180416640, path="example_sed.fits.gz")
 
 # sphinx_gallery_start_ignore
 spec_query.plot(overlay=sed_query)

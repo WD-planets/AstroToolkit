@@ -10,7 +10,7 @@ image = query(
     band="blue",
     size=120,
     overlays=["gaia", "galex"],
-    path="./source/tutorials/intro_image.fits",
+    path="./source/tutorials/intro_image.fits.gz",
 )
 # sphinx_gallery_start_ignore
 image.plot()

@@ -24,6 +24,7 @@ Changes
 - Image queries to DSS1/DSS2 now properly implemented
 - Added support for WISE, 2MASS and SDSS image queries 
 - Improved image plotting
+    - images should now always be near-perfect squares, regardless of plotting options
 - Added an optional parameter "disable_corrections" to query(), which disable all astrometric corrections if True (defaults to False)
 - SEDs now retain all detections in specified radius
 - Added support for DESI DR1 spectral queries
@@ -51,6 +52,7 @@ Changes
     - overlaying multiple spectra for a single source (i.e. if a survey returned multiple spectra for the same source) now produces duplicated SEDs with a separate spectrum overlay for each one
 - 'check_exists' kwarg in queries replaced by 'path' kwarg with same functionality
     - DataSets now use a checksum system -> changes in any query parameters will now automatically re-run the query and overwrite the local file
+    - local file will also be overwritten if working ATK version doesn't match that at time of local file creation
 - light curve binning now much faster
 - usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
     - added method .apply() to DataSet, applies a given method to all stored containers
@@ -76,58 +78,49 @@ Changes
 - Datapages now returned as a DataPages object, with show(), show_by_target(), show_by_id(), and show_by_coords() methods to show all datapages or single out those of individual targets
 - data is now saved via the .store() method, while plots are saved with the .save() method (the latter is also used for DataPages)
 - Made spectral lines hidden by default
+- Rewrote + significantly improved all documentation
+    - Full tutorials added
+    - Tutorials written with sphinx-gallery, now automatically run code and embed bokeh plots/terminal output, etc.
+    - Tutorials now downloadable
+- figure legends now dynamically shrink font size to remain inside bounds
+- local files can now be compressed by providing a compressed file extension (e.g. .fits.gz)
 
 To-Do Now
 ---------
-- fits compression as config option?
-
-- make local data be overwritten if ATK version doesn't match
-- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
-- relative axes = False in images makes them less square (compare to implementation in datapages to improve?)
-- remove extra whitespace in .show() after __repr__ and .data
-- notifications don't actually do anything, either delete or implement
 - add better error messages for bad surveys, query kinds, etc
-- similarly to in lightcurves, add option to scale colour map in phase-folded light curves by distance to the sinusoid model
-- remove class splitting from show()
-- rename tutorial .py files
-- check what happens if saving a data structure that returned no data (needs to be an empty file which gets reconstructed into an empty DataSet)
-- check font of powspec axes labels
-- spectral element labels (h-alpha etc.) show outside spectrum's y range
-- talk to boris about my rv_fit process
-- light curves should choose colour per-band
-- powspec needs to be labelled by band(s) in legend
-- implement features from previous version
-    - light curve sigma clipping
-    - light curves are sorting in a different order before/after reading 
-    - also affecting plotting, bands and colours plotting in wrong order
+
 - add freq parameter to phase folding
     - check phase folding in docs and finish this section, hopefully once ztf is actually working and above is implemented
-- add docs changes to changelog
-- light curve overlays in images as way to show how to recombine data
-- look into using container methods on the containers themselves rather than via .apply on a DataSet
+- similarly to in lightcurves, add option to scale colour map in phase-folded light curves by distance to the sinusoid model
+
+- talk to boris about my rv_fit process
+- ztf light curve API not working
 
 - check effect of bad pm data/distance manually
 - include distances in overlay corrections
 - add survey ID to SED hovertool
-- properly sort warnings/logging (no print statements?)
 - add filter kwarg to light curve queries to disable all unrequired filtering
-- add annotations to ATK keywords in fits headers
-- check docstrings / comments
-- check type hints
-- turn off split = True default for ZTF lightcurves as default, too many "objects"
+
+- test all types of custom data set
 - default units for Quantity arrays
     - needed to make sure .to() etc. doesn't fail
-- store query parameters in data files and make path=... check that the parameters are the same - if not then redo query
-- remove per-survey splitting from light curves, no reason to support this and would need to do it everywhere otherwise
-- spectrum/sed overlay legend hiding not working
-- let peak fitting work in velocity-space (?)
-- test all types of custom data set
+
 - get rid of object_id hovertool parameter if split=False in light curves
-- figure sizes in docs not scaling with screen resolution
 - change Record.data to Record.table?
+
+- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
+- rename tutorial .py files
+- figure sizes in docs need to scale with screen resolution (and font size)? if possible, some html scaling thing and keep rest the same
+- finish docs
+- check docstrings / comments
+- check type hints
+
+- open by id, save by id etc.
 
 To-Do Later
 -----------
+- clean up and improve generalisation of data methods (pass struct instead of arrays)
+- look into using container methods on the containers themselves rather than via .apply on a DataSet
 - rich text output option (https://realpython.com/python-rich-package/)
 - calibrating + combining multiple light curves to make one massive light curve
 - decouple from Gaia with a properly implemented astrometric backend system
@@ -148,3 +141,8 @@ To-Do Later
 - struct vs ctnr vs etc.
 - option to only return closest photometry from each survey in SED queries
 - recursive show_types=True in .show()
+- light curve overlays in images as way to show how to recombine data
+    - more generally, be able to pass any structure to image plotting -> extracts positional data + overlay
+- improve warnings/logging (no print statements?)
+- add annotations to ATK keywords in fits headers
+- let spectral peak fitting work in velocity-space (?)

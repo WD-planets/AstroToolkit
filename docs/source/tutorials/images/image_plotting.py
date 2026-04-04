@@ -29,7 +29,7 @@ from bokeh.document import Document
 
 from ATK import query
 
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits.gz")
 # sphinx_gallery_start_ignore
 ps_query.plot(cmap="viridis")
 figure = format_plot(ps_query.figure, 1.5, 1.5, True)

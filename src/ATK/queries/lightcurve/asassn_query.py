@@ -15,9 +15,7 @@ def query(target: Target, **kwargs: dict):
     radius = kwargs["radius"].to(u.deg).value
 
     try:
-        data = client.cone_search(
-            ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True
-        )
+        data = client.cone_search(ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 
@@ -25,7 +23,11 @@ def query(target: Target, **kwargs: dict):
 
     all_lcs = []
     for id in ids:
-        lc = data[id].data
+        try:
+            lc = data[id].data
+        except AttributeError:
+            continue
+
         catalogue_info = data.catalog_info[data.catalog_info["asas_sn_id"] == id]
         df = lc.rename(columns={"phot_filter": "band", "asas_sn_id": "id"})
         df["mjd"] = Time(lc["jd"], format="jd").mjd
@@ -38,7 +40,11 @@ def query(target: Target, **kwargs: dict):
         df = df[df["mag_err"] < 99]
 
         all_lcs.append(df)
-    combined_lcs = pd.concat(all_lcs)
+
+    if len(all_lcs):
+        combined_lcs = pd.concat(all_lcs)
+    else:
+        return RETURNS.NULL
 
     lcs = get_lightcurves("asassn", target, kwargs["radius"], combined_lcs, kwargs.get("split", False))
 

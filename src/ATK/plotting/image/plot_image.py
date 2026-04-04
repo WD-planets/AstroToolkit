@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 from astropy.time import Time
 from astropy.wcs.utils import proj_plane_pixel_scales
-from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, OpenURL, Range1d, TapTool
+from bokeh.models import (ColumnDataSource, HoverTool, LinearColorMapper,
+                          OpenURL, Range1d, TapTool)
 from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
@@ -21,7 +22,9 @@ def get_simbad_urls(image: Image, overlay_data: pd.DataFrame) -> pd.DataFrame:
     """
 
     # get j2000 coords of detections + add to "simbad_ra" / "simbad_dec" columns
-    overlay_data = correct_dataframe_coords(overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"])
+    overlay_data = correct_dataframe_coords(
+        overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"]
+    )
 
     simbad_radius = BASE_CONFIG._get("overlay_settings", "simbad_radius")
 
@@ -296,4 +299,4 @@ def plot(image: Image, *args: any, **kwargs: any) -> figure:
         plot.xaxis.ticker.desired_num_ticks = 4
         plot.yaxis.ticker.desired_num_ticks = 4
 
-    return format_plot("image", plot)
+    return format_plot("image", plot, force_square=True)

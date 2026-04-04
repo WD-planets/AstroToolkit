@@ -15,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-hrd_query = query("hrd", targets=[587316166180416640, 6050296829033196032], path="example_hrd_2.fits")
+hrd_query = query("hrd", targets=[587316166180416640, 6050296829033196032], path="example_hrd_2.fits.gz")
 
 # sphinx_gallery_start_ignore
 hrd_query.plot(split=False)
@@ -36,7 +36,7 @@ figure
 # =======================
 # Due to the number of background data points, plotted :class:`HRDs <ATK.Models.HRD>` can be expensive in terms of browser performance. This can be avoided by passing ``background`` as a ``float`` between ``0`` and ``1`` (default = ``1``):
 
-hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits")
+hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits.gz")
 
 # sphinx_gallery_start_ignore
 hrd_query.plot(background=0.25)

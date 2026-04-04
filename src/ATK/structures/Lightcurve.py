@@ -21,7 +21,7 @@ class Lightcurve(Container):
 
     _required: list = field(default_factory=list)
 
-    _data_methods: tuple = ("crop", "bin")
+    _data_methods: tuple = ("crop", "bin", "clip")
     _group_data_methods: dict = field(default_factory=lambda: {"fold": fold_lc, "pspec": gen_powspec})
 
     # --- data ---
@@ -170,4 +170,31 @@ class Lightcurve(Container):
     def fold(ctnrs: list[object], min: float, max: float, samples: int):
         return fold_lc(ctnrs, min=min, max=max, samples=samples)
 
+    def clip(self, sigma: float, sigma_lower: float = None, sigma_upper: float = None, inplace: bool = False):
+        from .methods.sigma_clip import do_sigma_clipping
+
+        struct = manage_inplace(self, inplace)
+
+        arrs = [struct.mjd, struct.brightness_err]
+        for attr in ["ra", "dec"]:
+            val = getattr(struct, attr)
+            if val is not None:
+                arrs.append(val)
+
+        y, arrs = do_sigma_clipping(y=struct.brightness, arrs=arrs, sigma=sigma, sigma_lower=sigma_lower, sigma_upper=sigma_upper)
+
+        if len(arrs) > 2:
+            mjd, brightness_err, ra, dec = arrs
+            struct.ra = ra
+            struct.dec = dec
+        else:
+            mjd, brightness_err = arrs
+
+        struct.set_time(mjd)
+        struct.set_brightness(y)
+        struct.set_brightness_err(brightness_err)
+
+        return struct
+
+    # not needed yet, but if/when individual container methods are introduced it might be
     def pspec(self, samples: int): ...

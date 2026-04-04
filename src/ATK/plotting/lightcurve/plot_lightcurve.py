@@ -5,7 +5,7 @@ from bokeh.models.formatters import BasicTickFormatter
 from bokeh.plotting import figure
 
 from ...structures.Lightcurve import Lightcurve
-from ..colours import assign_gradient_palettes
+from ..colours import GRADIENT_MAPS, assign_gradient_palettes, get_gradient
 from ..formatting import format_plot
 
 MEAN_WARP_SCALE = 0.25
@@ -130,13 +130,42 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     return plot
 
 
-def get_band_colours(bands: list, colours: list) -> dict:
-    # colour handling
-    palettes = assign_gradient_palettes(len(bands), colours)
+def assign_band_colours(bands: list[str], colours: list[str] | None = None) -> dict[str, str]:
+    cycle = [c for c in GRADIENT_MAPS if c != "black"]
 
-    palette_map = {band: palette for band, palette in zip(bands, palettes)}
+    result = []
 
-    return palette_map
+    if not colours:
+        result = [cycle[i % len(cycle)] for i in range(len(bands))]
+    else:
+        colours = list(colours)
+
+        # preserve user order FIRST
+        result = colours[:]
+
+        # fill remaining without duplicates
+        used = list(dict.fromkeys(result))
+        remaining = [c for c in cycle if c not in used]
+
+        for c in remaining:
+            if len(result) >= len(bands):
+                break
+            result.append(c)
+
+        i = 0
+        while len(result) < len(bands):
+            result.append(cycle[i % len(cycle)])
+            i += 1
+
+    # 🔑 CRITICAL: zip with bands here
+    return {band: colour for band, colour in zip(bands, result)}
+
+
+def get_band_colours(bands: list[str], colours: list[str] | None = None, gradient_size: int = 256, cycles: int = 1, reverse: bool = False) -> dict[str, list[str]]:
+
+    band_colour_names = assign_band_colours(bands, colours)
+
+    return {band: get_gradient(colour, gradient_size, cycles=cycles, reverse=reverse) for band, colour in band_colour_names.items()}
 
 
 def group_lc_ids(lcs: list[Lightcurve]):
@@ -167,10 +196,17 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     lcs = [lc for lc in lightcurves if lc.brightness_type and (requested_bands is None or lc.band in requested_bands)]
     # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
 
-    bands = list(set(lc.band for lc in lcs))
+    if kwargs.get("bands"):
+        all_bands = kwargs["bands"]
+        for band in kwargs["all_bands"]:
+            if band in all_bands:
+                continue
+            all_bands.append(band)
+    else:
+        all_bands = kwargs["all_bands"]
 
     colours = kwargs.get("colours")
-    palette_map = get_band_colours(bands, colours)
+    palette_map = get_band_colours(all_bands, colours)
 
     # group by object ID
     lc_groups = group_lc_ids(lcs)

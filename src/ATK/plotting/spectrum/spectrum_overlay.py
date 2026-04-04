@@ -66,8 +66,15 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
         if "line_label" in line:
             n_labels = label_counters.get(label_name, 0)
             total_labels = sum(1 for ln in overlay_lines if ln.get("label") == label_name and "line_label" in ln)
-
             y_pos = y_max + (n_labels / max(1, total_labels)) * 0.3 * y_max
+
+            # fix y range so labels aren't outside
+            y_range_span = y_max - y_min
+            if y_range_span == 0:
+                y_range_span = abs(y_max) if y_max != 0 else 1
+            max_label_offset = 0.3 * y_range_span
+            plot.y_range.end = y_max + max_label_offset
+
             lbl = Label(x=xpos, y=y_pos, x_offset=2, text=line["line_label"], text_font_size=text_size, text_font=text_font)
             lbl.visible = False
             plot.add_layout(lbl)
@@ -108,5 +115,4 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
         )
         dummy_renderer.js_on_change("visible", callback)
 
-    plot.legend.click_policy = "hide"
     return plot

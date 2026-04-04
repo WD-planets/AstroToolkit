@@ -17,13 +17,13 @@ from ATK.Models import Target
 
 target = 587316166180416640
 
-lc = query("lightcurve", survey="asassn", targets=target, path="datapage_lc.fits")
+lc = query("lightcurve", survey="asassn", targets=target, path="datapage_lc.fits.gz")
 pspec = lc.apply("pspec", min=0, max=60, samples=100000, inplace=False)
 fold = lc.apply("fold", min=0, max=60, samples=100000, inplace=False)
-image = query("image", survey="panstarrs", band="g", targets=target, overlays=["gaia","galex"], path="datapage_image.fits")
-spec = query("spectrum", survey="sdss", targets=target, path="datapage_spec.fits")
-sed = query("sed", targets=target, path="datapage_sed.fits")
-hrd = query("hrd", targets=target, path="datapage_hrd.fits")
+image = query("image", survey="panstarrs", band="g", targets=target, overlays=["gaia","galex"], path="datapage_image.fits.gz")
+spec = query("spectrum", survey="sdss", targets=target, path="datapage_spec.fits.gz")
+sed = query("sed", targets=target, path="datapage_sed.fits.gz")
+hrd = query("hrd", targets=target, path="datapage_hrd.fits.gz")
 table = query("datatable", rows={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, targets=target, radius=image.data[0].size)
 
 # %%

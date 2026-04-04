@@ -15,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits")
+ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, path="example_image_1.fits.gz")
 ps_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 from ATK.queries.image._query_info import BAND_MAP

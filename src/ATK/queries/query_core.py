@@ -4,6 +4,7 @@ import warnings
 from types import FunctionType
 
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
 
 from ..configuration.base_config import BASE_CONFIG
 from ..structures.DataSet import DataSet
@@ -12,6 +13,7 @@ from ..Tools.read import read
 from ..utilities.coordinates import correct_target, prepare_search
 from ..utilities.defaults import RETURNS
 from ..utilities.mapping import build_map
+from ..utilities.misc import get_package_version
 from .checksum import make_cache_key
 
 
@@ -175,6 +177,13 @@ def single_target_query(kind: str, target: Target, structure: DataSet, **argumen
 
 def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
     structure = read(arguments["path"])
+
+    primary_header = fits.open(arguments["path"])[0].header
+    if not primary_header.get("ATK_VER"):
+        warnings.warn("Could not determine ATK version from local file.")
+    else:
+        if primary_header["ATK_VER"] != get_package_version():
+            warnings.warn(f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten.")
 
     current_key = make_cache_key(kind, targeting, arguments)
 

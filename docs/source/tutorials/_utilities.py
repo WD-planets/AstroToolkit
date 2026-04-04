@@ -1,4 +1,4 @@
-from bokeh.models import DataTable, PanTool
+from bokeh.models import PanTool
 from bokeh.plotting import figure
 
 GRID_SIZE = 300

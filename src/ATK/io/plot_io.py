@@ -19,9 +19,7 @@ from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
 
-def dispatch_plotting(
-    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
-):
+def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -56,6 +54,14 @@ def dispatch_plotting(
     return all_figures
 
 
+def pre_plotting(structure: DataSet, kwargs: dict):
+    if structure.kind == "lightcurve":
+        all_bands = sorted(list(set(lc.band for lc in structure.data)))
+        kwargs["all_bands"] = all_bands
+
+    return kwargs
+
+
 def plot_data(structure: DataSet, **kwargs: any) -> figure:
     """
     Plots the data stored in a DataSet, and saves it to the .figure attribute of the data structure
@@ -74,7 +80,10 @@ def plot_data(structure: DataSet, **kwargs: any) -> figure:
 
     all_figures = []
 
-    # force splitting of all plots by targets
+    # get any additional plotting arguments
+    kwargs = pre_plotting(structure, kwargs)
+
+    # force splitting of all containers by target
     if structure._split_by_target:
         for target, key in zip(structure.targets, target_keys):
             containers = structure._fetch_by_key(key)

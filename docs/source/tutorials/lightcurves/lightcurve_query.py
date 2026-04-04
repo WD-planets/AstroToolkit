@@ -15,7 +15,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
+asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
 asassn_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 from ATK.queries.lightcurve._query_info import BAND_MAP
@@ -69,7 +69,7 @@ figure
 
 import astropy.units as u
 
-asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn", radius = 60 * u.arcsec, path="example_lightcurve_2.fits")
+asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn", radius = 60 * u.arcsec, path="example_lightcurve_2.fits.gz")
 asassn_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 asassn_query.plot()
@@ -87,7 +87,7 @@ figure
 
 import astropy.units as u
 
-asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn",  radius = 60 * u.arcsec, split=True, path="example_lightcurve_3.fits")
+asassn_query = query("lightcurve", targets=587316166180416640, survey="asassn",  radius = 60 * u.arcsec, split=True, path="example_lightcurve_3.fits.gz")
 asassn_query.show(show_all=True)
 # sphinx_gallery_start_ignore
 pass

@@ -19,7 +19,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits")
+asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
 # sphinx_gallery_start_ignore
 asassn_query.plot(bands=["g"])
 figure = format_plot(asassn_query.figure, 3, 1.5)
