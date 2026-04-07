@@ -18,13 +18,19 @@ from .lightcurve_core import get_lightcurves
 warnings.simplefilter("ignore", category=UnitsWarning)
 
 
-def read_tess_data(data: pd.DataFrame, header: Header) -> pd.DataFrame:
+def read_tess_data(data: pd.DataFrame, header: Header, kwargs: dict) -> pd.DataFrame:
     # create quality mask
     snr = data["pdcsap_flux"] / data["pdcsap_flux_err"]
-    mask = np.isfinite(data["time"]) & np.isfinite(data["pdcsap_flux"]) & np.isfinite(data["pdcsap_flux_err"]) & (data["pdcsap_flux"] > 0) & (snr > 3) & (data["quality"] == 0)
-    data = data[mask].copy()
 
-    if not np.any(mask):
+    # necessary
+    mask = np.isfinite(data["time"]) & np.isfinite(data["pdcsap_flux"]) & np.isfinite(data["pdcsap_flux_err"]) & (data["pdcsap_flux"] > 0)
+
+    # optional
+    additional_mask = (snr > 3) & (data["quality"] == 0)
+    final_mask = mask & additional_mask if kwargs.get("filter") else mask
+    data = data[final_mask].copy()
+
+    if not np.any(final_mask):
         return pd.DataFrame()
 
     # convert BTJD → MJD
@@ -84,7 +90,7 @@ def query(target: Target, **kwargs: dict):
         if not all(col in df.columns for col in ["time", "pdcsap_flux", "pdcsap_flux_err", "quality"]):
             continue
 
-        df = read_tess_data(df, header)
+        df = read_tess_data(df, header, kwargs)
 
         if not df.empty:
             rows.append(df)

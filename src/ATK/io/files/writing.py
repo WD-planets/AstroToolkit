@@ -43,8 +43,6 @@ def write_local(structure: any, path: str | Path) -> Path:
     Write an ATK data structure to a local fits file
     """
 
-    path = path or structure._fname
-
     hdul = HDUList()
 
     # .kind handled in structure_io, targets handled below

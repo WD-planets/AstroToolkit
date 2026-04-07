@@ -62,8 +62,44 @@ class DataSet:
 
         return write_local(self, path)
 
+    def plot(self, **kwargs: any):
+        if not self._ctnr_kind:
+            return self
+
+        if self._ctnr_kind not in COMBINE_PLOTS:
+            raise ValueError(f"{self._ctnr_kind} containers do not support plotting.")
+
+        from ..io.plot_io import plot_data
+
+        self.figure = plot_data(self, **kwargs)
+        self._stored_plot_params = kwargs
+
+        return self
+
+    def open(self, path: Path | str | None = None, **kwargs: any):
+        from ..io.plot_io import open as open_html
+
+        open_html(self, fname=path, **kwargs)
+
+        return self
+
+    def save(self, path: Path | str, **kwargs: any):
+        output_file(path)
+        bokeh_save(self.figure, title=self._title)
+
+    # ====================
+    # Multi-Target Methods
+    # ====================
+
     def _fetch_by_key(self, key: str):
         return [ctnr for ctnr in self.data if ctnr._target_key == key]
+
+    def _store_by_key(self, key: str, path: Path | str):
+        struct = manage_inplace(self, inplace=False)
+        struct.data = struct._fetch_by_key(key)
+        return struct.store(path=path)
+
+    def _save_by_key(self, key: str, path: Path | str): ...
 
     def fetch_by_id(self, id: int):
         key = self._alias_map.get(f"id:{id}")
@@ -72,27 +108,35 @@ class DataSet:
         return self._fetch_by_key(key)
 
     def fetch_by_coord(self, coord: SkyCoord, radius: Quantity | None = 3 * u.arcsec):
+        ctnrs = []
         for t in self.targets:
             if coord.separation(t.initial_coords) < radius:
-                return self._fetch_by_key(t._key)
-        return []
+                ctnrs.extend(self._fetch_by_key(t._key))
+
+        return ctnrs
 
     def fetch_by_target(self, target: Target):
         return self._fetch_by_key(target._key)
 
-    @property
-    def _fname(self):
-        if self.targets[0].identifier:
-            fname = f"{self.targets[0].identifier}"
-        else:
-            fname = f"{self.position.ra.value:.3f}_{self.position.dec.value:.3f}"
-        if self.survey:
-            fname += f"_{self.survey}"
-        if len(self.targets) > 1:
-            fname += "_multi"
-        fname += f"_ATK{self.kind}.fits"
+    def store_by_id(self, id: int, path: Path | str):
+        key = self._alias_map.get(f"id:{id}")
+        if key is None:
+            return
+        return self._store_by_key(key, path)
 
-        return fname
+    def store_by_coord(self, coord: SkyCoord, path: Path | str, radius: Quantity | None = 3 * u.arcsec):
+        struct = manage_inplace(self, inplace=False)
+
+        ctnrs = []
+        for t in struct.targets:
+            if coord.separation(t.initial_coords) < radius:
+                ctnrs.extend(struct._fetch_by_key(t._key))
+
+        struct.data = ctnrs
+        return struct.store(path)
+
+    def store_by_target(self, target: Target, path: Path | str):
+        return self._store_by_key(target._key, path)
 
     def apply(self, method: str, *args, inplace=True, **kwargs):
         from .methods.apply import apply_methods
@@ -133,34 +177,6 @@ class DataSet:
             return
 
         return SPLIT_BY_TARGET[self._ctnr_kind]
-
-    def plot(self, **kwargs: any):
-        if not self._ctnr_kind:
-            return self
-
-        if self._ctnr_kind not in COMBINE_PLOTS:
-            raise ValueError(f"{self._ctnr_kind} containers do not support plotting.")
-
-        from ..io.plot_io import plot_data
-
-        self.figure = plot_data(self, **kwargs)
-        self._stored_plot_params = kwargs
-
-        return self
-
-    def open(self, path: Path | str | None = None, **kwargs: any):
-        from ..io.plot_io import open as open_html
-
-        open_html(self, fname=path, **kwargs)
-
-        return self
-
-    def save(self, path: Path | str):
-        if not path.endswith(".html"):
-            fname = f"{path}.html"
-
-        output_file(fname)
-        bokeh_save(self.figure, title=self._title)
 
     @classmethod
     def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None):

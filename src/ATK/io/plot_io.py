@@ -185,3 +185,6 @@ def open_basic(plot: figure, prefix: str, title: str, fname=Path | str | None):
                 pass
 
     show(plot)
+
+
+def save(): ...

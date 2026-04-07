@@ -48,12 +48,13 @@ def query(target: Target, **kwargs: dict):
         flux = lc_data[f"F{band}"]
         flux_err = lc_data[f"e_F{band}"]
         mag_err = np.full(len(flux), np.nan)
+
         mask = (flux > 0) & (flux_err > 0)
         mag_err[mask] = (2.5 / np.log(10)) * (flux_err[mask] / flux[mask])
         band_data["mag_err"] = mag_err
 
         # calculate MJD from per-band time (need to remove nan times first)
-        band_data = band_data.dropna(subset=["time"])
+        band_data = band_data.dropna(subset=["time", "mag"])
         band_data["mjd"] = Time(band_data["time"] + 2455197.5, format="jd").mjd
 
         all_bands.append(band_data)

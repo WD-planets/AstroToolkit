@@ -21,13 +21,9 @@ def query(target: Target, **kwargs: dict):
     url = "https://fallingstar-data.com/forcedphot"
 
     if not kwargs.get("username"):
-        raise ValueError(
-            f"An ATLAS forcedphot ({url}) username is required for ATLAS light curve queries. One should be provided with 'username=...'."
-        )
+        raise ValueError(f"An ATLAS forcedphot ({url}) username is required for ATLAS light curve queries. One should be provided with 'username=...'.")
     if not kwargs.get("password"):
-        raise ValueError(
-            f"An ATLAS forcedphot ({url}) password is required for ATLAS light curve queries. One should be provided with 'password=...'."
-        )
+        raise ValueError(f"An ATLAS forcedphot ({url}) password is required for ATLAS light curve queries. One should be provided with 'password=...'.")
 
     response = send_request(
         "atlas",
@@ -101,29 +97,35 @@ def query(target: Target, **kwargs: dict):
     df = df[df["dm"] > 0]
     """
 
+    filter = kwargs.get("filter")
+
     # basic filtering (as recommended by ATLAS team)
-    mask = (
-        (df["duJy"] < 10000)
-        & (df["err"] == 0)
-        & (df["x"] > 100)
-        & (df["x"] < 10460)
-        & (df["y"] > 100)
-        & (df["y"] < 10460)
-        & (df["maj"] < 5)
-        & (df["maj"] > 1.6)
-        & (df["min"] < 5)
-        & (df["min"] > 1.6)
-        & (df["apfit"] > -1)
-        & (df["apfit"] < -0.1)
-        & (df["mag5sig"] > 17)
-        & (df["Sky"] > 17)
-    )
+    if filter:
+        mask = (
+            (df["duJy"] < 10000)
+            & (df["err"] == 0)
+            & (df["x"] > 100)
+            & (df["x"] < 10460)
+            & (df["y"] > 100)
+            & (df["y"] < 10460)
+            & (df["maj"] < 5)
+            & (df["maj"] > 1.6)
+            & (df["min"] < 5)
+            & (df["min"] > 1.6)
+            & (df["apfit"] > -1)
+            & (df["apfit"] < -0.1)
+            & (df["mag5sig"] > 17)
+            & (df["Sky"] > 17)
+        )
 
-    df = df[mask]
+        df = df[mask]
 
-    # signal to noise + negative flux filtering (magnitudes derived from negative fluxes not physical)
-    snr = df["uJy"] / df["duJy"]
-    df = df[(df["uJy"] > 0) & (snr >= 3)]
+        # signal to noise
+        snr = df["uJy"] / df["duJy"]
+        df = df[snr >= 3]
+
+    # negative flux filtering (magnitudes derived from negative fluxes not physical)
+    df = df[(df["uJy"] > 0)]
 
     df = df.rename(columns={"MJD": "mjd", "m": "mag", "dm": "mag_err", "F": "band", "RA": "ra", "Dec": "dec"})
 
