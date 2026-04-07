@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import pandas
+from astropy.table import Table
 
 from .structures_core import Container
 
@@ -12,7 +12,7 @@ class Record(Container):
     correction: str | None = None
     search_pos: str | None = None
 
-    data: pandas.DataFrame | None = None
+    table: Table | None = None
 
     def __repr__(self):
         if self.survey:

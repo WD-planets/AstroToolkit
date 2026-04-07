@@ -47,7 +47,7 @@ def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure:
             if target.identifier:
                 plot.title.text = f"{target.identifier} {plot.title.text}"
             else:
-                plot.title.text = f"{target.initial_coords.ra.value:.3f}° {target.initial_coords.dec.value:.3f}°"
+                plot.title.text = f"{target.initial_coords.ra.value:.3f}° {target.initial_coords.dec.value:.3f} {plot.title.text}°"
 
     all_figures.extend(figures)
 

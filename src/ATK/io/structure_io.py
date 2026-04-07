@@ -43,9 +43,7 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
         hdr.append((f"ATK_{key.upper()}", str(value)))
         return hdr
     except Exception:
-        raise ValueError(
-            f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'."
-        )
+        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'.")
 
     return hdr
 
@@ -235,6 +233,8 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
     # generate HDU
     extname = structure.__str__().lstrip("<").rstrip(">")
 
+    tbl = normalise_table_strings(tbl)
+
     if hdu_kind == BinTableHDU:
         hdu = BinTableHDU(tbl, header=hdr, name=extname)
     elif hdu_kind == PrimaryHDU:
@@ -248,6 +248,23 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
 # -----------------------
 # SPECIAL TRANSFORMATIONS
 # -----------------------
+
+
+def normalise_table_strings(table: Table):
+    for name in table.colnames:
+        col = table[name]
+
+        if col.dtype.kind in {"U", "S", "O"}:
+            arr = np.array(col, dtype=str)
+
+            # replace masked/null-like values
+            arr[arr == "None"] = ""
+            arr[arr == "masked"] = ""
+
+            maxlen = max(len(x) for x in arr) if len(arr) > 0 else 1
+            table[name] = arr.astype(f"<U{maxlen}")
+
+    return table
 
 
 def image_to_hdu(image: Image):
@@ -279,17 +296,21 @@ def image_to_hdu(image: Image):
 
 
 def simple_to_hdu(entry: Container):
-    table = Table.from_pandas(entry.data)
     hdr = Header()
 
     hdr.append(("ATK_KIND", type(entry).__name__, "ATK container kind"))
-    hdr.append(("ATK_SIMPLE", True, "If True, data is stored as a dataframe"))
+    hdr.append(("ATK_SIMPLE", True, "If True, data originates from as a table"))
 
     for attr, val in entry.__dict__.items():
         if type(val) in WRITE_MAP or type(val) in BASIC_TYPES:
             hdr = WRITE_MAP.get(type(val), write_fallback)(attr=attr, hdr=hdr, key=attr, value=val)
 
     extname = entry.__str__().lstrip("<").rstrip(">")
-    hdu = BinTableHDU(data=table, header=hdr, name=extname)
+
+    # normalise string lengths
+    table = entry.table
+    table = normalise_table_strings(table)
+
+    hdu = BinTableHDU(data=entry.table, header=hdr, name=extname)
 
     return hdu

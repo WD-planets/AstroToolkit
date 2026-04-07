@@ -108,7 +108,7 @@ class DataSet:
 
     @property
     def _title(self):
-        return f"ATK {self.kind.upper()}"
+        return f"ATK {self._ctnr_kind.upper()}"
 
     @property
     def _ctnr_kind(self):

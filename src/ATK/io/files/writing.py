@@ -56,12 +56,7 @@ def write_local(structure: any, path: str | Path) -> Path:
 
     # iterate through .data
     for ctr in structure.data:
-        # write dataframe to hdu (e.g. in Vizier queries)
-        if isinstance(ctr, pd.DataFrame):
-            hdul.append(dataframe_to_hdu(structure, ctr))
-            continue
-
-        # otherwise use .to_hdu() method of ATK container
+        # use .to_hdu() method of ATK container
         hdus = ctr.to_hdu()
         if not isinstance(hdus, (tuple, list)):
             hdul.append(hdus)

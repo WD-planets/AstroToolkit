@@ -36,7 +36,7 @@ def send_request(survey: str, url: str, method: str = "GET", message=None, **kwa
     """
 
     s = Session()
-    retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504], allowed_methods={"GET", "POST"})
+    retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504], allowed_methods={"GET", "POST"})
     # s.mount("http://", HTTPAdapter(max_retries=retries))
     s.mount("https://", HTTPAdapter(max_retries=retries))
 

@@ -1,43 +1,61 @@
 import astropy.units as u
 import numpy as np
 import pandas as pd
+from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.wcs.utils import proj_plane_pixel_scales
-from bokeh.models import (ColumnDataSource, HoverTool, LinearColorMapper,
-                          OpenURL, Range1d, TapTool)
+from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, OpenURL, Range1d, TapTool
 from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
 from ...structures.Image import Image
-from ...utilities.coordinates import correct_dataframe_coords
+from ...utilities.coordinates import correct_coords
 from ..colours import get_palette
 from ..formatting import format_plot
 from .false_colour import get_false_cmap
 
 
 def get_simbad_urls(image: Image, overlay_data: pd.DataFrame) -> pd.DataFrame:
-    """
-    Adds simbad_url (+ simbad_ra/simbad_dec) columns to overlay dataframe
-    """
+    overlay_coords = []
+    for row in overlay_data.itertuples(index=False):
+        ra = row.ra * u.deg
+        dec = row.dec * u.deg
+        pmra = row.pm_ra_cosdec * (u.mas / u.yr)
+        pmdec = row.pm_dec * (u.mas / u.yr)
 
-    # get j2000 coords of detections + add to "simbad_ra" / "simbad_dec" columns
-    overlay_data = correct_dataframe_coords(
-        overlay_data, image.epoch, Time("2000-01-01", format="iso"), output_cols=["simbad_ra", "simbad_dec"]
-    )
+        dist_val = row.dist
+
+        overlay_coords.append(
+            SkyCoord(
+                ra=ra,
+                dec=dec,
+                frame="icrs",
+                pm_ra_cosdec=pmra,
+                pm_dec=pmdec,
+                distance=(dist_val * u.pc) if np.isfinite(dist_val) else None,
+                obstime=image.epoch,
+            )
+        )
+
+    overlay_coords = correct_coords(overlay_coords, Time("2000-01-01", format="iso"))
 
     simbad_radius = BASE_CONFIG._get("overlay_settings", "simbad_radius")
 
-    # add url column
-    overlay_data["simbad_url"] = (
-        "https://simbad.cds.unistra.fr/simbad/sim-coo?Coord="
-        + overlay_data["simbad_ra"].astype(str)
-        + "+"
-        + overlay_data["simbad_dec"].astype(str)
-        + "&CooFrame=icrs&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius="
-        + str(simbad_radius)
-        + "&Radius.unit=arcsec&submit=submit+query"
-    )
+    simbad_urls = []
+    for coord in overlay_coords:
+        # add url column
+        simbad_url = (
+            "https://simbad.cds.unistra.fr/simbad/sim-coo?Coord="
+            + str(coord.ra.value)
+            + "+"
+            + str(coord.dec.value)
+            + "&CooFrame=icrs&CooEpoch=2000&CooEqui=2000&CooDefinedFrames=none&Radius="
+            + str(simbad_radius)
+            + "&Radius.unit=arcsec&submit=submit+query"
+        )
+        simbad_urls.append(simbad_url)
+    overlay_data["simbad_url"] = simbad_urls
 
     return overlay_data
 
@@ -51,7 +69,7 @@ def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: boo
     BASE_RADIUS = 5e-4
     SCALE_FACTOR = 5e-3
     HALF_IMAGE = image.size / 3600
-    POINTER_SIZE_RATIO = 1 / 7.5
+    POINTER_SIZE_RATIO = 1 / 5
 
     # somewhat physically-based scaling relation (compare to magnitude 20, logarithmic scaling with flux)
     flux_multiplier = 10 ** (-0.4 * (overlay_data["mag"] - 20))
@@ -87,7 +105,7 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
             ("mag", "@mag"),
             ("error", "@err"),
             ("simbad_id", "@simbad_id"),
-            ("corrected", "@gaia_match"),
+            ("correction", "@correction"),
         ]
     )
     hvr.renderers = []
@@ -100,7 +118,7 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
     overlay["label"] = overlay["survey"].astype(str)
     overlay.loc[overlay["mag"].isna(), "label"] += " detection"
     overlay.loc[overlay["mag"].notna(), "label"] += " " + overlay.loc[overlay["mag"].notna(), "mag_name"]
-    overlay["gaia_match"] = overlay["gaia_match"].astype(str)
+    overlay["correction"] = overlay["correction"].astype(str)
 
     # get simbad URLs for taptool
     overlay = get_simbad_urls(image, overlay)

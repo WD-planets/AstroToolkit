@@ -152,7 +152,16 @@ def single_target_query(kind: str, target: Target, structure: DataSet, **argumen
     query_map = build_map(module, "query", suffix="_query")
 
     # get specific query function (for given survey if multiple are available)
-    query_function = query_map[arguments.get("survey")] if len(query_map) > 1 else list(query_map.values())[0]
+    if len(query_map) > 1:
+        query_function = query_map.get(arguments.get("survey"))
+        if query_function is None:
+            raise ValueError(f"Invalid {kind} survey '{arguments.get('survey')}'. Valid surveys are: {', '.join(query_map.keys())}.")
+    else:
+        funcs = list(query_map.values())
+        if len(funcs):
+            query_function = funcs[0]
+        else:
+            raise Exception("Unexpected query mapping error.")  # shouldn't happen
 
     # perform query
     query_result = query_function(target, **arguments)

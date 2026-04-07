@@ -160,9 +160,9 @@ pass
 # 
 # |
 #
-# A :class:`~ATK.Models.Record` stores its data as a pandas :class:`~pandas.DataFrame`. Any parameter can therefore be extracted from a catalogue (in this case the GALEX Near-UV magnitude) as follows:
+# A :class:`~ATK.Models.Record` stores its data as an astropy :class:`~astropy.table.Table`. Any parameter can therefore be extracted from a catalogue (in this case the GALEX Near-UV magnitude) as follows:
 
-nuv_mag = galex_entry.data["NUVmag"][0]
+nuv_mag = galex_entry.table["NUVmag"][0]
 
 # sphinx_gallery_start_ignore
 nuv_mag

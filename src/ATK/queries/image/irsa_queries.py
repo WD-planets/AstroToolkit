@@ -54,7 +54,7 @@ def check_inputs(survey: str, band: str, size: int):
     """
 
     if band not in BAND_MAP[survey]:
-        raise ValueError(f"Invalid {survey} band. Supported bands are {list(BAND_MAP[survey].keys())}.")
+        raise ValueError(f"Invalid {survey} band. Supported bands are {', '.join(list(BAND_MAP[survey].keys()))}.")
     if not 6 * u.arcsec < size < 3600 * u.arcsec:
         raise ValueError(f"Size too large. Size of {survey} images must be between 6 and 3600 arcsec.")
 

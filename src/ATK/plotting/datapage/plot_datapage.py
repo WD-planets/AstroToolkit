@@ -16,7 +16,7 @@ TEXT_FONT = str(BASE_CONFIG._get("datapage_settings", "font"))
 def format_datatable(table, height, width):
     grid_size = BASE_CONFIG._get("datapage_settings", "grid_size")
 
-    table.width = grid_size * width
+    table.min_width = 0
     table = autosize_table(table, table.source, TEXT_SIZE, grid_size * height)
 
     style_sheet = InlineStyleSheet(

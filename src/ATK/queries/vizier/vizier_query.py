@@ -18,10 +18,22 @@ ROW_LIMIT = -1
 Vizier.ROW_LIMIT = -1
 
 
+def check_catalogue_exists(catalogue: str) -> bool:
+    v = Vizier()
+    result = v.find_catalogs(catalogue)
+
+    if list(result.keys())[0] is None:
+        raise ValueError(f"Failed to find Vizier catalogue '{catalogue}'.")
+
+    return bool(result)
+
+
 def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.DataFrame | None | int:
     """
     Returns a DataFrame of Vizier catalogue data within a given radius of a given position, sorted by distance to the target
     """
+
+    check_catalogue_exists(catalogue)
 
     v = Vizier(columns=["**"], row_limit=ROW_LIMIT)
     try:
@@ -32,9 +44,11 @@ def query_by_position(position: SkyCoord, radius: float, catalogue: str) -> pd.D
     if not data:
         return RETURNS.NULL
 
-    df = data[0].to_pandas().sort_values(by=["_r"]).reset_index(drop=True)
+    data[0].sort("_r")
 
-    return df
+    tbl = data[0]
+
+    return tbl
 
 
 def gaia_query_by_source(source: int, kind="data") -> pd.DataFrame | RETURNS:
@@ -59,9 +73,9 @@ def gaia_query_by_source(source: int, kind="data") -> pd.DataFrame | RETURNS:
     if not data:
         return RETURNS.NULL
 
-    df = data[0].to_pandas().reset_index(drop=True)
+    tbl = data[0]
 
-    return df
+    return tbl
 
 
 def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
@@ -81,12 +95,14 @@ def query(target: Target, **kwargs) -> pd.DataFrame | RETURNS:
 
     # perform source query if a source was provided
     if target.identifier and catalogue == "I/355/gaiadr3":
-        df = gaia_query_by_source(target.identifier)
+        tbl = gaia_query_by_source(target.identifier)
     else:
         # otherwise perform query by position
-        df = query_by_position(target.coords, kwargs["radius"], catalogue)
+        tbl = query_by_position(target.coords, kwargs["radius"], catalogue)
 
-    if df is RETURNS.NULL or df is RETURNS.EXCEPTION:
-        return df
+    if tbl is RETURNS.NULL or tbl is RETURNS.EXCEPTION:
+        return tbl
 
-    return [Record(survey=survey, catalogue=catalogue, search_pos=target.coords, data=df, correction=target.correction)]
+    ctnr = Record(survey=survey, catalogue=catalogue, search_pos=target.coords, table=tbl, correction=target.correction)
+
+    return [ctnr]

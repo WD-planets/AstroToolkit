@@ -14,11 +14,11 @@ if TYPE_CHECKING:
 np.seterr(divide="ignore")
 
 
-def gen_powspec(lcs: list[Lightcurve], min: float, max: float, samples: int, multiband: bool = True) -> Powspec:
+def gen_powspec(lcs: list[Lightcurve], fmin: float, fmax: float, samples: int, multiband: bool = True) -> Powspec:
     from ....structures.Powspec import Powspec
 
     if multiband:
-        freq, power, fopt = do_ls(lcs, min, max, samples)
+        freq, power, fopt = do_ls(lcs, fmin, fmax, samples)
         band_str = ", ".join(list(set([lc.band for lc in lcs])))
         popt = (1 / fopt).to(u.day)
 
@@ -27,10 +27,22 @@ def gen_powspec(lcs: list[Lightcurve], min: float, max: float, samples: int, mul
     else:
         pspectra = []
         for lc in lcs:
-            freq, power, fopt = do_ls(lc, min, max, samples)
+            freq, power, fopt = do_ls(lc, fmin, fmax, samples)
             band_str = lc.band
             popt = (1 / fopt).to(u.day)
 
-            pspectra.append(Powspec(survey=lcs[0].survey, band=band_str, frequency=freq, power=power, fopt=fopt, popt=popt, _target_key=lc._target_key))
+            pspectra.append(
+                Powspec(
+                    survey=lcs[0].survey,
+                    obj_id=lc.obj_id,
+                    band=band_str,
+                    multiband=multiband,
+                    frequency=freq,
+                    power=power,
+                    fopt=fopt,
+                    popt=popt,
+                    _target_key=lc._target_key,
+                )
+            )
 
         return pspectra

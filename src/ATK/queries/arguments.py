@@ -65,7 +65,9 @@ def get_query_arguments(kind: str, kwargs: dict) -> dict:
     Checks the arguments for a given query kind, filling in from default (i.e. config) values where possible. Returns the updated dict of kwargs.
     """
 
-    defaults = QUERY_ARGUMENTS[kind]
+    defaults = QUERY_ARGUMENTS.get(kind)
+    if defaults is None:
+        raise ValueError(f"Invalid query kind '{kind}'. Accepted query kinds: {', '.join(QUERY_ARGUMENTS.keys())}.")
     for key, val in UNIVERSAL_ARGUMENTS.items():
         defaults[key] = val
 

@@ -1,5 +1,6 @@
+=======
 Changes
--------
+=======
 - Rewrote entire package from the ground up, should be a lot easier to develop in the future
 
 - All coordinate/source handling now done via a central Target class
@@ -8,7 +9,6 @@ Changes
     - Added an "astrometric_backend" config key, which will (in future) select the default astrometry survey (currently only Gaia is supported)
     - Coordinates can be provided in any frame, automatically transformed to ICRS
 - Configuration setup now far more robust
-    - Added ATKoverlay show
     - Improved cross-platform file opening
     - Config files now stored in hidden HOME/.AstroToolkit directory
 - Improved .show() (previously .showdata()), now recursively handles the printing of arbitrarily complex structures in an improved format + can optionally show types via show_all_types = True
@@ -17,7 +17,7 @@ Changes
 - Improved file reading to adaptively generate ATK structures from fits files
 - Opened figures now save to HOME/.AstroToolkit/cached_figures/ temporarily, with a duration given by the config
 - Image bands now correctly supported, and added 2 new colour maps - viridis (default) and false colour. Latter converts filter wavelength to an approximate real colour. Can choose colour map by passing cmap = 'viridis' | 'false_colour' | 'grey' to plot()
-- Image plotting can now use relatives axes (i.e. +- arcsec from the centre)
+- Image plotting can now utilise relatives axes (i.e. +- arcsec from the centre, now default)
 - Unified all structures into a single class DataSet
 - Unified .data attribute - all query types now stored data as a list of ATK data containers
 - SkyMapper image queries updated to SkyMapper DR4, and now sorted by exposure time (desc) and air mass (asc) to return best image
@@ -56,12 +56,10 @@ Changes
 - light curve binning now much faster
 - usability of all data methods (e.g. lightcurve .bin(),.crop() etc.) significantly improved:
     - added method .apply() to DataSet, applies a given method to all stored containers
-    - data methods can also be applied to each container individually
-    - both of the above support a kwarg 'inplace' to modify the structure/container in-place or perform modifications on a copy which is then returned
+    - argument 'inplace' can be used to modify the structure/container in-place or perform modifications on a copy which is then returned
 - powspec ('pspec') and phasefolding ('fold') now done via the .apply() method, allowing this data to be stored rather than being performed at plot-time
-    - added 'multiband' kwarg to both of the above. If True, analyses all bands simultaneously to increase SNR and produce a single period. If False, each band is treated entirely separately
+    - added 'multiband' kwarg to both of the above. If True, analyses all bands simultaneously to increase SNR and produce a single freq/period. If False, each band is treated entirely separately
     - added 'subtract' kwarg to phase folding. If 'median', all bands are median-subtracted. If 'mean', all bands are mean-subtracted. If None, no subtraction is performed.
-    - all bands have individual fits (toggled using 'fit'=True/False, default False). These are placed vertically by the same method as 'subtract' (if subtract is None, align_method is median)
 - crop data method now supported by SEDs, spectra and power spectra
 - bin data method now supported by spectra
 - improved structure of user-accessible imports
@@ -75,6 +73,8 @@ Changes
 - greatly simplified DataTable creation
     - now just takes a dict in form survey: <list of cols> to include, automatically provides survey/catalogue/correction/separation columns and fetches parameter/value columns using Vizier queries
 - DataTables now shrink in height to match table, and will grow in height up to requested size
+- DataTables store data as an astropy Table under the .table attribute
+    - when plotted, DataTables now have a unit column
 - Datapages now returned as a DataPages object, with show(), show_by_target(), show_by_id(), and show_by_coords() methods to show all datapages or single out those of individual targets
 - data is now saved via the .store() method, while plots are saved with the .save() method (the latter is also used for DataPages)
 - Made spectral lines hidden by default
@@ -84,41 +84,65 @@ Changes
     - Tutorials now downloadable
 - figure legends now dynamically shrink font size to remain inside bounds
 - local files can now be compressed by providing a compressed file extension (e.g. .fits.gz)
+- phase folding now uses phase dispersion minimisation to discern between the real frequency and its harmonics
+- folded light curves can now be automatically aligned by passing align = "mean", "median", "max", "min" to align to the mean/median magnitude or a maxima/minima
+- Vizier data containers (Records) now store their data as an astropy Table under the .table attribute
+    - Returned Vizier data now maintains units
 
++ other stuff that I forgot to write down
+
+
+
+=========
 To-Do Now
----------
-- add better error messages for bad surveys, query kinds, etc
+=========
 
-- add freq parameter to phase folding
-    - check phase folding in docs and finish this section, hopefully once ztf is actually working and above is implemented
-- similarly to in lightcurves, add option to scale colour map in phase-folded light curves by distance to the sinusoid model
+Plotting
+--------
 
+Data
+----
 - talk to boris about my rv_fit process
 - ztf light curve API not working
+    - get better light curve sigma clipping example
 
-- check effect of bad pm data/distance manually
 - include distances in overlay corrections
-- add survey ID to SED hovertool
 - add filter kwarg to light curve queries to disable all unrequired filtering
-
 - test all types of custom data set
 - default units for Quantity arrays
     - needed to make sure .to() etc. doesn't fail
 
-- get rid of object_id hovertool parameter if split=False in light curves
-- change Record.data to Record.table?
-
-- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
-- rename tutorial .py files
-- figure sizes in docs need to scale with screen resolution (and font size)? if possible, some html scaling thing and keep rest the same
-- finish docs
-- check docstrings / comments
-- check type hints
-
+- sort container manipulations (to/from dataframe/table/etc), this can maybe wait but needs to at least work internally
 - open by id, save by id etc.
 
+Docs
+====
+- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
+- check phase folding in docs and finish this section, hopefully once ztf is actually working
+- rename tutorial .py files
+- figures in docs need to scale with screen resolution, some html scaling thing and keep rest the same, maybe in plot_formatting under _utilities.py?
+- check docstrings / comments
+- check type hints
+- finish docs
+
+Other
+=====
+- check dependencies -> scipy?
+
+
+
+===========
 To-Do Later
------------
+===========
+- clean up pm correction
+    - main issue is e.g. overlays.py cannot be vectorised -> astropy doesn't let you define non-scalar SkyCoords with varying validity of distance/pm information, so you cannot reliably correct a grouped SkyCoord. Luckily, not used much as usually things are handled as single coordinates anyway
+    - distance and pm ONLY matter for corrections, in searches its fine to lose this information and hence stay vectorised
+- add a way to tell if any significant periodicity was detected in powspec
+- pdm implementation
+    - improve true frequency detection across range of orbital morphologies
+- dataset operations, e.g. merge etc.
+- gui/website (?)
+- providing a SkyCoord with proper motion measurements
 - clean up and improve generalisation of data methods (pass struct instead of arrays)
 - look into using container methods on the containers themselves rather than via .apply on a DataSet
 - rich text output option (https://realpython.com/python-rich-package/)
@@ -129,8 +153,6 @@ To-Do Later
 - add best-epoch separation to light curves?
 - add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)?
 - don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords?
-- try to remove unnecessary dependencies
-    - reproject
 - possibly store metadata, e.g. object IDs from light curve surveys in a .meta attribute
 - add search_pos to SEDs?
 - allow any magnitudes to be used in hrd query - i.e. user searches with Gaia ID to make sure there is a valid distance (if not return no data) -> supplied two bands are fetched from a Vizier query to get the colour?

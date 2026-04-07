@@ -97,7 +97,7 @@ figure
 # %%
 # Sigma-Clipping a Light Curve
 # ============================
-# :class:`Lightcurves <ATK.Models.Lightcurve>` can be sigma clipped by applying :meth:`~ATK.Models.Lightcurve.clip`, which sigma clips all array-like attributes to eliminate data points where the brightness is outside a given sigma range:
+# :class:`Lightcurves <ATK.Models.Lightcurve>` can be sigma clipped by applying :meth:`~ATK.Models.Lightcurve.clip`, which clips all array-like attributes to eliminate data points where the light curve's brightness is outside a given number of standard deviationn from the median:
 
 clipped_data = binned_data.apply("clip", sigma=2, inplace=False)
 # sphinx_gallery_start_ignore

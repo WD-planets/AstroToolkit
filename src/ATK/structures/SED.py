@@ -10,7 +10,7 @@ class SED(Container):
     survey: numpy.ndarray | None = None
     correction: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
-
+    id: numpy.ndarray | None = None
     separation: numpy.ndarray | QuantityArray | None = None
     wavelength: numpy.ndarray | QuantityArray | None = None
     flux: numpy.ndarray | QuantityArray | None = None

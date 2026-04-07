@@ -11,9 +11,10 @@ from .image_core import get_image_data, mjd_to_epoch
 
 def check_inputs(band: str, size: int):
     if size > 600 * u.arcsec:
-        raise ValueError("Size too large. Maximum supported by panstarrs is 1500 arcsec.")
-    if band not in ["g", "r", "i", "z", "u", "v"]:
-        raise ValueError("Invalid panstarrs bands. Supported bands are ['g', 'r', 'i', 'z', 'u', 'v'].")
+        raise ValueError("Size too large. Maximum supported by skymapper is 600 arcsec.")
+    bands = ["g", "r", "i", "z", "u", "v"]
+    if band not in bands:
+        raise ValueError(f"Invalid skymapper bands. Supported bands are {', '.join(bands)}.")
 
 
 # size: int, band: str, overlays: list | dict, search_pos: SkyCoord = None, **kwargs: any

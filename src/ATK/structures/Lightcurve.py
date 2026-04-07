@@ -18,6 +18,7 @@ class Lightcurve(Container):
     separation: Quantity | None = None
     band: str | None = None
     obj_id: str | None = None
+    multiband: bool | None = None
 
     _required: list = field(default_factory=list)
 
@@ -35,8 +36,6 @@ class Lightcurve(Container):
 
     # --- folded data ---
     phase: numpy.ndarray | None = None
-    fit_x: numpy.ndarray | None = None
-    fit_y: numpy.ndarray | None = None
     fopt: Quantity | None = None
     popt: Quantity | None = None
 
@@ -128,13 +127,6 @@ class Lightcurve(Container):
         struct.set_brightness(brightness)
         struct.set_brightness_err(brightness_err)
 
-        if getattr(struct, "fit_x", None) is not None and getattr(struct, "fit_x", None) is not None:
-            ys = [struct.fit_y]
-            x, ys = crop_nd(struct.fit_x, ys=ys, lower_lim=min, upper_lim=max)
-
-            struct.fit_x = x
-            struct.fit_y = ys[0]
-
         return struct
 
     def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
@@ -167,8 +159,8 @@ class Lightcurve(Container):
 
         return struct
 
-    def fold(ctnrs: list[object], min: float, max: float, samples: int):
-        return fold_lc(ctnrs, min=min, max=max, samples=samples)
+    def fold(ctnrs: list[object], fmin: float, fmax: float, samples: int):
+        return fold_lc(ctnrs, fmin=fmin, fmax=fmax, samples=samples)
 
     def clip(self, sigma: float, sigma_lower: float = None, sigma_upper: float = None, inplace: bool = False):
         from .methods.sigma_clip import do_sigma_clipping

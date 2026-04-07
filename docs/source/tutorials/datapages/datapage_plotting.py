@@ -12,14 +12,11 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-from astropy.coordinates import SkyCoord
-from ATK.Models import Target
-
 target = 587316166180416640
 
 lc = query("lightcurve", survey="asassn", targets=target, path="datapage_lc.fits.gz")
-pspec = lc.apply("pspec", min=0, max=60, samples=100000, inplace=False)
-fold = lc.apply("fold", min=0, max=60, samples=100000, inplace=False)
+pspec = lc.apply("pspec", fmin=0, fmax=60, samples=100000, inplace=False)
+fold = lc.apply("fold", fmin=0, fmax=60, samples=100000, inplace=False)
 image = query("image", survey="panstarrs", band="g", targets=target, overlays=["gaia","galex"], path="datapage_image.fits.gz")
 spec = query("spectrum", survey="sdss", targets=target, path="datapage_spec.fits.gz")
 sed = query("sed", targets=target, path="datapage_sed.fits.gz")

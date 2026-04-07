@@ -3,6 +3,7 @@ import pandas as pd
 from bokeh.models import ColumnDataSource, HoverTool, Range1d
 from bokeh.plotting import figure
 
+from ...configuration.base_config import BASE_CONFIG
 from ...structures.Powspec import Powspec
 from ..formatting import format_plot
 from ..plotting_core import get_axis_label
@@ -18,9 +19,13 @@ def plot(pspec: Powspec, *args: tuple, **kwargs: dict):
         tools=("pan,wheel_zoom,box_zoom,reset"),
     )
 
-    hvr = HoverTool(tooltips=[("fopt", f"@fopt {pspec.fopt.unit}"), ("popt", f"@popt {pspec.popt.unit}")])
+    font_size = BASE_CONFIG._get("plot_settings", "font_size")
+    if not str(font_size).endswith("pt"):
+        font_size = f"{font_size}pt"
 
-    df = pd.DataFrame({"freq": pspec.frequency, "power": pspec.power, "fopt": pspec.fopt, "popt": pspec.popt})
+    hvr = HoverTool(tooltips=[("freq", f"@freq {pspec.frequency.unit}")])
+
+    df = pd.DataFrame({"freq": pspec.frequency, "power": pspec.power})
     source = ColumnDataSource(df)
     line = plot.line(x="freq", y="power", source=source, legend_label=f"{pspec.band}-band Power")
     hvr.renderers = [line]

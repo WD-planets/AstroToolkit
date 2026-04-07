@@ -10,9 +10,10 @@ from .image_core import get_image_skycoord, iso_to_epoch, reproject_hdu
 
 def check_inputs(band: str, size: int):
     if size > 500 * u.arcsec:
-        raise ValueError("Size too large. Maximum supported by panstarrs is 1500 arcsec.")
-    if band not in ["u", "g", "r", "i", "z"]:
-        raise ValueError("Invalid panstarrs bands. Supported bands are ['u', 'g', 'r', 'i', 'z'].")
+        raise ValueError("Size too large. Maximum supported by sdss is 1500 arcsec.")
+    bands = ["u", "g", "r", "i", "z"]
+    if band not in bands:
+        raise ValueError(f"Invalid sdss bands. Supported bands are {', '.join(bands)}.")
 
 
 def query(target: Target, **kwargs) -> Image:

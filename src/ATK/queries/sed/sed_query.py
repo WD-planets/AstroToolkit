@@ -20,6 +20,7 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
     mag_cols = info["mag_names"]
     err_cols = info["err_names"]
     wavelengths = info["lambda_ref"]
+    id_col = info["id"]
 
     sed_rows = []
     for i, (mag_col, err_col, wl) in enumerate(zip(mag_cols, err_cols, wavelengths)):
@@ -34,7 +35,7 @@ def get_survey_phot(survey: str, survey_data: pd.DataFrame) -> pd.DataFrame:
             band_df["_r"] = np.nan
 
         band_df = band_df.rename(columns={mag_col: "mag", err_col: "mag_err"})
-
+        band_df["id"] = survey_data[id_col].astype(str)
         band_df["band"] = mag_col
         band_df["wavelength"] = wl
         band_df["survey"] = survey
@@ -84,7 +85,7 @@ def query(target: Target, **kwargs):
             continue
 
         # get SED dataframe for each survey
-        phot = get_survey_phot(survey, data.data[0].data)
+        phot = get_survey_phot(survey, data.data[0].table.to_pandas())
         if not phot.empty:
             sed_tables.append(phot)
 
@@ -107,6 +108,7 @@ def query(target: Target, **kwargs):
         flux=df["flux_mjy"].to_numpy() * u.Unit("mJy"),
         flux_err=df["flux_err_mjy"].to_numpy() * u.Unit("mJy"),
         separation=df["_r"].to_numpy() * kwargs["radius"].unit,
+        id=df["id"].to_numpy(),
     )
 
     return [sed]

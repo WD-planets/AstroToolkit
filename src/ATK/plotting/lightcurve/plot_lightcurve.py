@@ -21,8 +21,12 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     if time_format == "reduced":
         time = [t - time_min for t in time]
 
+    if lc.obj_id is not None:
+        obj_id = str(lc.obj_id)
+    else:
+        obj_id = None
+
     # get brightness and error columns
-    obj_id = str(lc.obj_id)
     y = lc.brightness
     y_err = lc.brightness_err
 
@@ -50,25 +54,25 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     else:
         raise ValueError(f"Invalid cmap '{cmap}'.")
 
-    if hasattr(lc, "fit_x") and hasattr(lc, "fit_y"):
-        if lc.fit_x is None or lc.fit_y is None:
-            pass
-        else:
-            plot.line(x=lc.fit_x, y=lc.fit_y, line_color="black", line_width=2, legend_label=f"{lc.survey} {lc.band}")
+    if lc.time_type == "mjd":
+        legend_str = f"{lc.survey} {lc.band}"
+    elif lc.time_type == "phase":
+        legend_str = f"{lc.survey} {lc.band}\n{lc.fopt.value:.3f} {lc.fopt.unit.to_string('unicode')}"
 
     # plot errors
     err_xs = [[t, t] for t in time]
     err_ys = [[v - e, v + e] for v, e in zip(y, y_err)]
     err_source = ColumnDataSource(data={"xs": err_xs, "ys": err_ys, "y": y, "colour": y_norm})
-    plot.multi_line(xs="xs", ys="ys", source=err_source, color=colour, line_width=0.5, legend_label=f"{lc.survey} {lc.band}")
+    plot.multi_line(xs="xs", ys="ys", source=err_source, color=colour, line_width=0.5, legend_label=legend_str)
 
     # don't show MJD in scientific notation
     plot.xaxis.formatter = BasicTickFormatter(use_scientific=False)
 
-    scatter = plot.scatter(x="time", y="y", source=source, color=colour, marker="circle", legend_label=f"{lc.survey} {lc.band}")
+    scatter = plot.scatter(x="time", y="y", source=source, color=colour, marker="circle", legend_label=legend_str)
 
     hvr.renderers = [scatter]
-    plot.add_tools(hvr)
+    if obj_id is not None:
+        plot.add_tools(hvr)
 
     return plot
 
@@ -99,35 +103,59 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     else:
         x_label = "Time (days)"
 
-    # create per-survey plot
+    # create plot(s)
     survey = lcs[0].survey
-    plot = figure(
-        width=400,
-        height=400,
-        title=f"{survey} {band_names} lightcurve(s)",
-        x_axis_label=x_label,
-        y_axis_label=brightness_type,
-        tools=("pan,wheel_zoom,box_zoom,reset"),
-    )
+
+    multiband = list(set([lc.multiband for lc in lcs]))
+    if len(multiband) > 1:
+        raise ValueError("Plotting received mix of multiband and non-multiband data.")
 
     # get MJD at start of data
     if lcs[0].time_type == "mjd":
         all_times = [t for lc in lcs for t in lc.mjd]
         if not all_times:
-            return None
+            raise Exception("No time data found.")
         time_min = min(all_times)
     else:
         all_times = None
         time_min = None
 
-    # Plot each band independently
-    for lc in lcs:
-        plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+    if multiband[0] is True or multiband[0] is None:
+        plot = figure(
+            width=400,
+            height=400,
+            title=f"{survey} {band_names} lightcurve(s)",
+            x_axis_label=x_label,
+            y_axis_label=brightness_type,
+            tools=("pan,wheel_zoom,box_zoom,reset"),
+        )
 
-    if "flux" in brightness_type:
-        plot.y_range.flipped = True
+        # Plot each band independently
+        for lc in lcs:
+            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+        plots = [plot]
 
-    return plot
+    elif multiband[0] is False:
+        plots = []
+
+        # Plot each band independently
+        for lc in lcs:
+            plot = figure(
+                width=400,
+                height=400,
+                title=f"{survey} {band_names} lightcurve(s)",
+                x_axis_label=x_label,
+                y_axis_label=brightness_type,
+                tools=("pan,wheel_zoom,box_zoom,reset"),
+            )
+            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+            plots.append(plot)
+
+    if brightness_type != "flux":
+        for plot in plots:
+            plot.y_range.flipped = True
+
+    return plots
 
 
 def assign_band_colours(bands: list[str], colours: list[str] | None = None) -> dict[str, str]:
@@ -157,7 +185,6 @@ def assign_band_colours(bands: list[str], colours: list[str] | None = None) -> d
             result.append(cycle[i % len(cycle)])
             i += 1
 
-    # 🔑 CRITICAL: zip with bands here
     return {band: colour for band, colour in zip(bands, result)}
 
 
@@ -218,11 +245,14 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
             kwargs["time_format"] = "original"
             kwargs["cmap"] = "flat"
 
-        per_id_plot = dispatch_groups(per_id_lcs, palette_map, **kwargs)
-        if plot:
-            plots.append(per_id_plot)
+        per_id_plots = dispatch_groups(per_id_lcs, palette_map, **kwargs)
+        plots.extend(per_id_plots)
 
-        for lc in per_id_lcs:
-            lc._plot_id = per_id_plot.id
+        if len(per_id_plots) == 1:
+            for lc in per_id_lcs:
+                lc._plot_id = per_id_plots[0].id
+        else:
+            for lc, plot in zip(per_id_lcs, per_id_plots):
+                lc._plot_id = plot.id
 
     return [format_plot("lightcurve", p) for p in plots]

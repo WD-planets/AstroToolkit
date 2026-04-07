@@ -16,8 +16,8 @@ targets = [2552928187080872832, 587316166180416640]
 galex_query = query("vizier", targets=targets, survey="gaia")
 # sphinx_gallery_start_ignore
 for ctnr in galex_query.data:
-    df = ctnr.data
-    ctnr.data = df[df.columns[:5]]
+    tbl = ctnr.table
+    ctnr.table = tbl[tbl.colnames[:5]]
 # sphinx_gallery_end_ignore
 galex_query.show()
 # sphinx_gallery_start_ignore
@@ -90,8 +90,8 @@ targets = [Target.from_coord(coord_1), Target.from_coord(coord_2)]
 gaia_query = query("vizier", targets=targets, survey="gaia")
 # sphinx_gallery_start_ignore
 for ctnr in gaia_query.data:
-    df = ctnr.data
-    ctnr.data = df[df.columns[:9]]
+    tbl = ctnr.table
+    ctnr.table = tbl[tbl.colnames[:9]]
 # sphinx_gallery_end_ignore
 
 hu_leo = gaia_query.fetch_by_target(targets[1])[0]

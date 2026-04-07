@@ -7,7 +7,7 @@ from .structures_core import Container
 
 @dataclass(repr=False)
 class DataTable(Container):
-    data: pandas.DataFrame | None = None
+    table: pandas.DataFrame | None = None
 
     def __repr__(self):
         return f"<{type(self).__name__}>"

@@ -43,6 +43,50 @@ def check_correction(coord: SkyCoord) -> str:
         return "full"
 
 
+def correct_coords(coords: list[SkyCoord], target_epoch: Time, get_correction: bool = False):
+    """
+    Not vectorised, but can't do this since astropy doesn't allow nan + non-nan distance/pm information in a non-scalar SkyCoord
+    """
+
+    if not isinstance(coords, list):
+        coords = [coords]
+
+    correction = []
+    out_coords = []
+    for c in coords:
+        dt = (target_epoch - c.obstime).to_value(u.yr) * u.yr
+        pm_valid = np.isfinite(c.pm_ra_cosdec.to_value(u.mas / u.yr)) and np.isfinite(c.pm_dec.to_value(u.mas / u.yr))
+        dist_valid = c.distance.unit.physical_type == "length" and np.isfinite(c.distance.value)
+
+        if not pm_valid:
+            out_coords.append(c)
+            correction.append("none")
+            continue
+
+        if dist_valid:
+            new_c = c.apply_space_motion(target_epoch)
+            correction.append("full")
+        else:
+            dec_rad = np.deg2rad(c.dec.to_value(u.deg))
+            new_ra = c.ra.to(u.deg) + (c.pm_ra_cosdec.to(u.deg / u.yr) * dt / np.cos(dec_rad))
+            new_dec = c.dec.to(u.deg) + (c.pm_dec.to(u.deg / u.yr) * dt)
+
+            new_c = SkyCoord(ra=new_ra, dec=new_dec, pm_ra_cosdec=c.pm_ra_cosdec, pm_dec=c.pm_dec, frame=c.frame, obstime=target_epoch)
+
+            correction.append("partial")
+
+        out_coords.append(new_c)
+
+        # if not np.isfinite(new_c.pm_ra_cosdec.value):
+        #     print("IN:\n", c)
+        #     print("OUT:\n", new_c, "\n\n\n")
+
+    if get_correction:
+        return out_coords, correction
+    else:
+        return out_coords
+
+
 def get_gaia_target(source: int) -> Target:
     """
     Generates a SkyCoord using Gaia astrometry
@@ -105,7 +149,7 @@ def correct_target(target: Target, survey: str = None, epoch: Time = None, query
         survey_epoch = epoch
 
     # correct coordinates to survey
-    new_coords = target.coords.apply_space_motion(survey_epoch)
+    new_coords = correct_coords(target.coords, survey_epoch)[0]
 
     if not make_copy:
         target.coords = new_coords
@@ -151,90 +195,12 @@ def correct_radius(target: Target, radius: Quantity, query_kind: str, survey: st
     separation = corrected_target.coords.separation(target.coords)
     expanded_radius = radius + separation.to(radius.unit)
 
+    def correction(self):
+        import math
+
+        self.ra += (self.year_delta * self.pmra / 3600000 + self.month_delta * self.pmra / 43200000) * 1 / math.cos(self.dec / 360 * 2 * math.pi)
+        self.dec += self.year_delta * self.pmdec / 3600000 + self.month_delta * self.pmdec / 43200000
+
+        return [self.ra, self.dec]
+
     return expanded_radius
-
-
-def dataframe_to_skycoord(data: pd.DataFrame, epoch: Time):
-    """
-    Converts a DataFrame containing any 'ra', 'dec', 'pm_ra_cosdec', and 'pm_dec' columns to a single SkyCoord
-    """
-
-    coords = SkyCoord(
-        ra=data["ra"].to_numpy() * u.deg,
-        dec=data["dec"].to_numpy() * u.deg,
-        pm_ra_cosdec=data["pm_ra_cosdec"].to_numpy() * (u.mas / u.yr),
-        pm_dec=data["pm_dec"].to_numpy() * (u.mas / u.yr),
-        frame="icrs",
-        obstime=epoch,
-    )
-
-    return coords
-
-
-def skycoord_to_dataframe(coord: SkyCoord):
-    """
-    Converts a SkyCoord containing any number of positions to a DataFrame with 'ra', 'dec', 'pm_ra_cosdec' and 'pm_dec' columns
-    """
-
-    df = pd.DataFrame()
-
-    df["ra"] = coord.ra.deg
-    df["dec"] = coord.dec.deg
-
-    if coord.data.differentials:
-        df["pm_ra_cosdec"] = coord.pm_ra_cosdec.to(u.mas / u.yr).value
-        df["pm_dec"] = coord.pm_dec.to(u.mas / u.yr).value
-    if coord.distance != u.one:
-        df["distance"] = coord.distance
-
-    df["frame"] = coord.frame.name
-    df["epoch"] = coord.obstime.fits
-
-    return df
-
-
-def correct_skycoord(coord: SkyCoord, input_epoch: Time, target_epoch: Time):
-    """
-    Corrects the positions in a SkyCoord for proprer motion
-    """
-
-    df = skycoord_to_dataframe(coord)
-    df = correct_dataframe_coords(df, input_epoch, target_epoch)
-    corrected_coord = dataframe_to_skycoord(df, input_epoch)
-
-    return corrected_coord
-
-
-def correct_dataframe_coords(data: pd.DataFrame, input_epoch: Time, target_epoch: Time, output_cols: list = []):
-    """
-    Corrects the coordinates in the 'ra' and 'dec' columns of a dataframe for proper motion in corresponding 'pm_ra_cosdec' and 'pm_dec' columns.
-    Optionally saves the resulting coordinates to two new output columns (output_cols)
-    """
-
-    for col in REQUIRED_COLS:
-        if col not in data:
-            raise ValueError(f"DataFrame missing required column '{col}'.")
-
-    # get mask of values with invalid PM information
-    bad_pm_mask = data["pm_ra_cosdec"].isna() & data["pm_dec"].isna()
-
-    # create output ra and dec columns if needed
-    if output_cols:
-        data[output_cols[0]] = data["ra"]
-        data[output_cols[1]] = data["dec"]
-    else:
-        output_cols = ["ra", "dec"]
-
-    good_pm_data = data.loc[~bad_pm_mask]
-    if not good_pm_data.empty:
-        # convert dataframe coordinates to skycoord
-        coord = dataframe_to_skycoord(good_pm_data, input_epoch)
-
-        # apply correction
-        coord = coord.apply_space_motion(target_epoch)
-
-        # update output ra and dec columns (only in rows where a correction occurred)
-        data.loc[good_pm_data.index, output_cols[0]] = coord.ra.deg
-        data.loc[good_pm_data.index, output_cols[1]] = coord.dec.deg
-
-    return data

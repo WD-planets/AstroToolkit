@@ -1,19 +1,17 @@
 import warnings
-from io import BytesIO
+
+warnings.filterwarnings("ignore", message=".*tpfmodel submodule is not available.*", category=UserWarning)
 
 import astropy.units as u
+import lightkurve as lk
 import numpy as np
 import pandas as pd
-from astropy.io import fits
 from astropy.io.fits import Header
-from astropy.table import Table
+from astropy.time import Time
 from astropy.units import UnitsWarning
-from astroquery.mast import Observations
 
 from ...structures.Target import Target
-from ...utilities.defaults import CONNECTION_ERRORS, RETURNS
-from ...utilities.misc import suppress_stdout
-from ...utilities.requests import send_request
+from ...utilities.defaults import RETURNS
 from .lightcurve_core import get_lightcurves
 
 # ignore units warning when reading fits table
@@ -22,27 +20,19 @@ warnings.simplefilter("ignore", category=UnitsWarning)
 
 def read_tess_data(data: pd.DataFrame, header: Header) -> pd.DataFrame:
     # create quality mask
-    snr = data["PDCSAP_FLUX"] / data["PDCSAP_FLUX_ERR"]
-    mask = (
-        np.isfinite(data["TIME"])
-        & np.isfinite(data["PDCSAP_FLUX"])
-        & np.isfinite(data["PDCSAP_FLUX_ERR"])
-        & (data["PDCSAP_FLUX"] > 0)
-        & (snr > 3)
-        & (data["QUALITY"] == 0)
-    )
+    snr = data["pdcsap_flux"] / data["pdcsap_flux_err"]
+    mask = np.isfinite(data["time"]) & np.isfinite(data["pdcsap_flux"]) & np.isfinite(data["pdcsap_flux_err"]) & (data["pdcsap_flux"] > 0) & (snr > 3) & (data["quality"] == 0)
     data = data[mask].copy()
 
     if not np.any(mask):
         return pd.DataFrame()
 
     # convert BTJD → MJD
-    data["TIME"] += 2457000.0 - 2400000.5
+    data["time"] = Time(data["time"]).mjd.astype("float")
 
     # calculate mag and mag_err
-    data["mag"] = -2.5 * np.log10(data["PDCSAP_FLUX"]) + 20.44
-    # 2.5/ln(10)
-    data["mag_err"] = 1.085736 * (data["PDCSAP_FLUX_ERR"] / data["PDCSAP_FLUX"])
+    data["mag"] = -2.5 * np.log10(data["pdcsap_flux"]) + 20.44
+    data["mag_err"] = 1.085736 * (data["pdcsap_flux_err"] / data["pdcsap_flux"])
 
     # add band, ra, and dec columns
     data["band"] = "Tmag"
@@ -50,63 +40,54 @@ def read_tess_data(data: pd.DataFrame, header: Header) -> pd.DataFrame:
     data["dec"] = header.get("DEC_OBJ")
     data["id"] = header.get("TICID")
 
-    data = data.rename(columns={"TIME": "mjd"})
+    data = data.rename(columns={"time": "mjd"})
 
     return data
 
 
 def query(target: Target, **kwargs: dict):
     """
-    Performs a TESS light curve query
+    Performs a TESS light curve query using lightkurve
     """
-
-    base_url = "https://mast.stsci.edu/api/v0.1/Download/file?uri="
 
     radius = kwargs["radius"].to(u.deg)
 
-    # query region around target
+    # ======================
+    # SEARCH (lightkurve)
+    # ======================
+
     try:
-        obs = Observations.query_region(target.coords, radius=radius)
-    except CONNECTION_ERRORS:
+        search = lk.search_lightcurve(target.coords.to_string("hmsdms"), mission="TESS", radius=radius)
+    except Exception:
         return RETURNS.EXCEPTION
-    if not len(obs):
+
+    search = search[search.author == "TESS-SPOC"]
+
+    if len(search) == 0:
         return RETURNS.NULL
 
-    # keep only TESS observations
-    obs = obs[obs["obs_collection"] == "TESS"]
-    if not len(obs):
-        return RETURNS.NULL
+    lcs = search.download_all()
 
-    # get all products for found objects, need to suppress a logger-level warning here and some additional output
-    with suppress_stdout():
-        products_list = Observations.get_unique_product_list(obs)
-
-    # get fits light curves for found objects
-    lc_product_list = Observations.filter_products(products_list, productSubGroupDescription="LC", extension="fits")
-    if not len(lc_product_list):
+    if lcs is None or len(lcs) == 0:
         return RETURNS.NULL
 
     rows = []
-    for row in lc_product_list:
-        # get mast URI
-        mast_uri = row.get("dataURI")
-        if not mast_uri:
+
+    for lc in lcs:
+        # convert to table to pandas
+        tab = lc.to_table()[["time", "flux", "flux_err", "pdcsap_flux", "pdcsap_flux_err", "quality"]]
+        df = tab.to_pandas()
+
+        header = lc.meta
+
+        # ensure required columns exist
+        if not all(col in df.columns for col in ["time", "pdcsap_flux", "pdcsap_flux_err", "quality"]):
             continue
 
-        # construct URL and send request
-        url = f"{base_url}{mast_uri}"
-        response = send_request("tess", url)
-        if response is RETURNS.EXCEPTION:
-            continue
+        df = read_tess_data(df, header)
 
-        # read response
-        hdul = fits.open(BytesIO(response.content))
-        lc_data = Table.read(hdul[1]).to_pandas()
-        lc_header = hdul[0].header
-
-        df = read_tess_data(lc_data, lc_header)
-
-        rows.append(df)
+        if not df.empty:
+            rows.append(df)
 
     if not rows:
         return None

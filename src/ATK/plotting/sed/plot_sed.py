@@ -63,6 +63,7 @@ def plot_sed(sed: SED, **kwargs: any):
     hvr = HoverTool(
         tooltips=[
             ("survey", "@survey"),
+            ("id", "@id"),
             ("band", "@band"),
             ("wavelength", "@wavelength \u212b"),
             ("flux", f"@flux {sed.flux.unit.to_string('unicode')}"),

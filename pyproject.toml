@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.black]
-line-length=120
+line-length=240
 skip-magic-trailing-comma = true
 
 [tool.ruff]
@@ -14,7 +14,7 @@ line-length = 240
 
 [project]
 name = "AstroToolkit"
-version = "1.8"
+version = "1.8.0"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
@@ -29,15 +29,15 @@ classifiers = [
 dependencies = [
 	"astropy",
 	"astroquery",
-	"pandas",
 	"bokeh",
-	"numpy",
-	"pandas",
-	"PyYAML",
 	"matplotlib",
+	"pandas",
+	"numpy",
+	"PyYAML",
 	"reproject",
 	"sparclclient",
 	"skypatrol",
+	"lightkurve",
 ]
 
 [project.urls]

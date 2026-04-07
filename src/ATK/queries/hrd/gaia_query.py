@@ -21,7 +21,7 @@ def query(target: Target, **kwargs):
     if not gaia_data.data or gaia_data.exception:
         return RETURNS.EXCEPTION
 
-    data = gaia_data.data[0].data
+    data = gaia_data.data[0].table.to_pandas()
     plx = data["Plx"][0]
     distance = 1 / (plx * 1e-3)
     if np.isnan(plx):

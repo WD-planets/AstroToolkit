@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
+from astropy.table import Table
 from astropy.time import Time
 from astropy.units import Quantity
 from astropy.wcs import WCS
@@ -37,7 +38,7 @@ ROUND = 3  # decimal places of float elements
 MAX_DISPLAY = 4  # max entries in an array before truncation occurs
 
 # Headers are printed for containers that need to be expanded (ATK containers are handled separately using MAP
-CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>"}
+CONTAINER_HEADERS = {pd.DataFrame: lambda x: "<pandas.DataFrame>", dict: lambda x: "<dict>", Table: "<astropy.Table>"}
 
 # ------------------
 # SPECIAL FORMATTERS
@@ -85,7 +86,7 @@ def format_skycoord(coord: SkyCoord) -> str:
     return str_rep
 
 
-def format_dict(dct: dict, show_types_override: bool | None = None, dataframe=False) -> str:
+def format_dict(dct: dict, show_types_override: bool | None = None, origin_type=dict) -> str:
     """
     Format dict recursively into string representation
     """
@@ -103,7 +104,7 @@ def format_dict(dct: dict, show_types_override: bool | None = None, dataframe=Fa
     key_pad = get_dict_pad(dct, "key: ")
 
     for key, val in dct.items():
-        if key.startswith("_") and not DEBUG and not dataframe:
+        if key.startswith("_") and not DEBUG and origin_type is not pd.DataFrame:
             continue
 
         if val is None:
@@ -207,7 +208,8 @@ def format_time(time: Time) -> str:
 # Maps to special formatting functions
 SPECIAL_FORMATTERS = {
     dict: format_dict,
-    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df), False, dataframe=True),
+    pd.DataFrame: lambda df: format_dict(dataframe_to_np_dict(df), False, pd.DataFrame),
+    Table: lambda tbl: format_dict(table_to_dict(tbl), False, Table),
     np.ndarray: format_array,
     pd.Series: format_array,
     Target: format_target,
@@ -323,6 +325,44 @@ def dataframe_to_np_dict(df: pd.DataFrame) -> dict:
             dct[key] = np.asarray(val)
 
     return dct
+
+
+def table_to_dict(tbl: Table) -> dict:
+    """
+    Converts an astropy Table into a dict with all columns converted to numpy arrays
+    """
+
+    out = {}
+
+    out = {}
+
+    for name in tbl.colnames:
+        col = tbl[name]
+
+        # Get plain array (handles MaskedColumn safely)
+        arr = np.array(col)
+
+        # If masked, replace mask in a dtype-safe way
+        if hasattr(col, "mask") and np.any(col.mask):
+            mask = col.mask
+
+            if np.issubdtype(col.dtype, np.number):
+                # numeric → safe float representation
+                arr = arr.astype(float)
+                arr[mask] = np.nan
+            else:
+                # strings / objects → keep as object, fill None
+                arr = arr.astype(object)
+                arr[mask] = None
+
+        # Attach units if present
+        unit = getattr(col, "unit", None)
+        if unit is not None:
+            out[name] = Quantity(arr, unit=unit)
+        else:
+            out[name] = arr
+
+    return out
 
 
 def safe_representation(obj: any) -> str:

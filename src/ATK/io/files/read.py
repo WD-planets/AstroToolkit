@@ -157,13 +157,13 @@ def parse_generic_bintable(structure: DataSet, path: str | Path, hdu: BinTableHD
     # get container constructor
     ctnr_constr = structure_map.get(hdr.get("ATK_KIND"))
 
-    # if no container exists (e.g. in overlay data), just set .data = dataframe
+    # if no container exists (e.g. in overlay data), just return dataframe
     if not ctnr_constr:
         return tbl.to_pandas()
 
     ctnr_data = {}
     if hdr.get("ATK_SIMPLE"):
-        ctnr_data["data"] = tbl.to_pandas()
+        ctnr_data["table"] = tbl
     else:
         # populate dict with dataframe columns as arrays
         for col_name in tbl.colnames:

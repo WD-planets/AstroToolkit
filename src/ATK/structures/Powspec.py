@@ -12,6 +12,7 @@ class Powspec(Container):
     band: str | None = None
 
     obj_id: str | None = None
+    multiband: bool | None = None
     frequency: QuantityArray | None = None
     power: numpy.ndarray | None = None
     fopt: Quantity | None = None

@@ -13,8 +13,9 @@ from .image_core import get_image_data, mjd_to_epoch
 def check_inputs(band: str, size: int):
     if size > 1500 * u.arcsec:
         raise ValueError("Size too large. Maximum supported by panstarrs is 1500 arcsec.")
-    if band not in ["g", "r", "i", "z", "y"]:
-        raise ValueError("Invalid panstarrs bands. Supported bands are ['g', 'r', 'i', 'z', 'y'].")
+    bands = ["g", "r", "i", "z", "y"]
+    if band not in bands:
+        raise ValueError(f"Invalid panstarrs bands. Supported bands are: {', '.join(bands)}.")
 
 
 # size: int, band: str, overlays: list | dict, search_pos: SkyCoord = None, **kwargs: any
