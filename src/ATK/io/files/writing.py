@@ -74,5 +74,3 @@ def write_local(structure: any, path: str | Path) -> Path:
         hdr.append(("ATK_EXT", True, "If True, this is a fits file from ATK"))
 
     hdul.writeto(path, overwrite=True)
-
-    return path

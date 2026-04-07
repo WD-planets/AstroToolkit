@@ -42,11 +42,11 @@ def manage_inplace(structure: any, inplace: bool):
     if inplace:
         return structure
     else:
-        if hasattr(structure, "figure") and structure.figure:
+        if hasattr(structure, "figure") and structure.figure is not None:
             figure = structure.figure
             structure.figure = None
             struct_copy = copy.deepcopy(structure)
-            structure.figure = figure
+            struct_copy.figure = figure
 
             return struct_copy
         return copy.deepcopy(structure)

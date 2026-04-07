@@ -1,11 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ....structures.Lightcurve import Lightcurve
+
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
-from bokeh.io import output_file
-from bokeh.io import save as bokeh_save
 from bokeh.plotting import figure as Figure
 
 from .structures_core import COMBINE_PLOTS, SPLIT_BY_TARGET, Container, manage_inplace
@@ -24,6 +28,7 @@ class DataSet:
     figure: Figure | None = None
 
     _stored_plot_params: dict = field(default_factory=dict)
+    _plotted_keys: list = field(default_factory=list)
 
     # maps per-Target key to Target
     _key_map: dict[str, Target] = field(init=False, default_factory=dict)
@@ -60,7 +65,9 @@ class DataSet:
     def store(self, path: str | Path = None) -> Path:
         from ..io.files.writing import write_local
 
-        return write_local(self, path)
+        write_local(self, path)
+
+        return self
 
     def plot(self, **kwargs: any):
         if not self._ctnr_kind:
@@ -71,72 +78,37 @@ class DataSet:
 
         from ..io.plot_io import plot_data
 
+        keys = []
+        for target in self.targets:
+            keys.append(target._key)
+
         self.figure = plot_data(self, **kwargs)
         self._stored_plot_params = kwargs
+        self._plotted_keys = keys
 
         return self
 
     def open(self, path: Path | str | None = None, **kwargs: any):
         from ..io.plot_io import open as open_html
 
-        open_html(self, fname=path, **kwargs)
+        keys = []
+        for target in self.targets:
+            keys.append(target._key)
+
+        open_html(self, fname=path, keys=keys, **kwargs)
 
         return self
 
     def save(self, path: Path | str, **kwargs: any):
-        output_file(path)
-        bokeh_save(self.figure, title=self._title)
+        from ..io.plot_io import save
 
-    # ====================
-    # Multi-Target Methods
-    # ====================
+        keys = []
+        for target in self.targets:
+            keys.append(target._key)
 
-    def _fetch_by_key(self, key: str):
-        return [ctnr for ctnr in self.data if ctnr._target_key == key]
+        save(self, fname=path, keys=keys, **kwargs)
 
-    def _store_by_key(self, key: str, path: Path | str):
-        struct = manage_inplace(self, inplace=False)
-        struct.data = struct._fetch_by_key(key)
-        return struct.store(path=path)
-
-    def _save_by_key(self, key: str, path: Path | str): ...
-
-    def fetch_by_id(self, id: int):
-        key = self._alias_map.get(f"id:{id}")
-        if key is None:
-            return []
-        return self._fetch_by_key(key)
-
-    def fetch_by_coord(self, coord: SkyCoord, radius: Quantity | None = 3 * u.arcsec):
-        ctnrs = []
-        for t in self.targets:
-            if coord.separation(t.initial_coords) < radius:
-                ctnrs.extend(self._fetch_by_key(t._key))
-
-        return ctnrs
-
-    def fetch_by_target(self, target: Target):
-        return self._fetch_by_key(target._key)
-
-    def store_by_id(self, id: int, path: Path | str):
-        key = self._alias_map.get(f"id:{id}")
-        if key is None:
-            return
-        return self._store_by_key(key, path)
-
-    def store_by_coord(self, coord: SkyCoord, path: Path | str, radius: Quantity | None = 3 * u.arcsec):
-        struct = manage_inplace(self, inplace=False)
-
-        ctnrs = []
-        for t in struct.targets:
-            if coord.separation(t.initial_coords) < radius:
-                ctnrs.extend(struct._fetch_by_key(t._key))
-
-        struct.data = ctnrs
-        return struct.store(path)
-
-    def store_by_target(self, target: Target, path: Path | str):
-        return self._store_by_key(target._key, path)
+        return self
 
     def apply(self, method: str, *args, inplace=True, **kwargs):
         from .methods.apply import apply_methods
@@ -149,6 +121,44 @@ class DataSet:
         struct = apply_methods(struct, method, *args, **kwargs)
 
         return struct
+
+    # ====================
+    # Multi-Target Methods
+    # ====================
+
+    def _fetch_by_key(self, key: str):
+        return [ctnr for ctnr in self.data if ctnr._target_key == key].copy()
+
+    def split(self, targets: any, inplace: bool = True) -> DataSet:
+        from ..queries.query_core import setup_targeting
+
+        targets = setup_targeting(targets)
+        struct = manage_inplace(self, inplace)
+
+        ctnrs, out_targets = [], []
+        for t in targets:
+            ctnrs.extend(struct._fetch_by_key(t._key))
+            out_targets.append(t)
+
+        struct.data = ctnrs
+        struct.targets = out_targets
+
+        struct._build_target_maps()
+
+        return struct
+
+    def merge(self, dataset: DataSet, inplace: bool = True) -> DataSet:
+        struct = manage_inplace(self, inplace)
+
+        struct.data = struct.data + dataset.data
+        struct.targets = struct.targets + dataset.targets
+
+        struct._build_target_maps()
+
+        return struct
+
+    # Other Stuff
+    # ===========
 
     @property
     def _title(self):

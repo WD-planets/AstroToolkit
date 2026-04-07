@@ -140,7 +140,7 @@ To-Do Later
 - add a way to tell if any significant periodicity was detected in powspec
 - pdm implementation
     - improve true frequency detection across range of orbital morphologies
-- dataset operations, e.g. merge etc.
+- dataset operations, e.g. merge, split - easy enough to implement, but need to then support some additional things like plotting for multiple surveys?
 - gui/website (?)
 - providing a SkyCoord with proper motion measurements
 - clean up and improve generalisation of data methods (pass struct instead of arrays)

@@ -9,6 +9,7 @@ from types import FunctionType
 
 import numpy as np
 from bokeh.io import output_file
+from bokeh.io import save as bokeh_save
 from bokeh.models import Column, Row
 from bokeh.plotting import figure, show
 
@@ -19,7 +20,9 @@ from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
 
-def dispatch_plotting(all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs):
+def dispatch_plotting(
+    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
+):
     # plot .data containers individually (e.g. images)
     if structure._plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -108,21 +111,31 @@ def plot_data(structure: DataSet, **kwargs: any) -> figure:
     return Row(*rows)
 
 
-def open(structure: DataSet, fname=Path | str | None, **kwargs: dict):
+def check_plotted_keys(structure: DataSet, keys: list):
+    if not structure._plotted_keys:
+        return False
+
+    prev_keys = sorted(structure._plotted_keys)
+    if prev_keys != keys:
+        return False
+    else:
+        return True
+
+
+def open(structure: DataSet, keys: list, fname=Path | str | None, **kwargs: dict):
     """
     Opens the Bokeh plot in the .figure attribute of a DataSet in the default browser
     """
 
     # get previous plot parameters if they exist
     # this only really matters if a plot doesn't exist but previously did (e.g. due to using inplace=False in data methods which cannot copy a bokeh figure)
-
     if not kwargs and structure._stored_plot_params:
         kwargs = structure._stored_plot_params
 
     # determine whether to replot
     if not structure.figure:
         replot = True
-    elif not structure._stored_plot_params:
+    elif not check_plotted_keys(structure, keys):
         replot = True
     elif kwargs != structure._stored_plot_params:
         replot = True
@@ -187,4 +200,27 @@ def open_basic(plot: figure, prefix: str, title: str, fname=Path | str | None):
     show(plot)
 
 
-def save(): ...
+def save(structure: DataSet, keys: list, fname=Path | str | None, **kwargs: dict):
+    if not kwargs and structure._stored_plot_params:
+        kwargs = structure._stored_plot_params
+
+    # determine whether to replot
+    if not structure.figure:
+        replot = True
+    elif not check_plotted_keys(structure, keys):
+        replot = True
+    elif kwargs != structure._stored_plot_params:
+        replot = True
+    else:
+        replot = False
+
+    # plot data if it hasn't been plotted
+    if replot:
+        structure.plot(**kwargs)
+
+    # if no data for plotting
+    if not structure.figure:
+        return
+
+    output_file(fname)
+    bokeh_save(structure.figure, title=structure._title)
