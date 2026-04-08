@@ -89,6 +89,7 @@ Changes
 - Vizier data containers (Records) now store their data as an astropy Table under the .table attribute
     - Returned Vizier data now maintains units
 - old 'raw' argument in light curve queries is now 'filter', disables all non-required filtering if False (default=True)
+- DataSets can be merged with DataSet_1.merge(DataSet_2), and split with DataSet.split(<targeting info>)
 
 + other stuff that I forgot to write down
 
@@ -107,15 +108,18 @@ Data
 - ztf light curve API not working
     - get better light curve sigma clipping example
 
+- add survey split to apply
+- ignore path if exception
 - test all types of custom data set
 - default units for Quantity arrays
     - needed to make sure .to() etc. doesn't fail
 
 - sort container manipulations (to/from dataframe/table/etc), this can maybe wait but needs to at least work internally
-- open by id, save by id etc.
 
 Docs
 ====
+- make multiple targets a separate section, just show the basics after Vizier but then more in-depth after Images
+
 - add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
 - check phase folding in docs and finish this section, hopefully once ztf is actually working
 - add note about TESS and ATLAS light curve filtering toggle

@@ -53,6 +53,7 @@ def targets_to_hdu(targets: list[Target]) -> BinTableHDU:
     combined_tbl["identifier"] = np.array([str(t.identifier) for t in targets])
     combined_tbl["survey"] = np.array([str(t.survey) for t in targets])
     combined_tbl["correction"] = np.array([t.correction for t in targets])
+    combined_tbl["radius"] = [t.radius if t.radius is not None else np.nan for t in targets]
 
     return BinTableHDU(combined_tbl, header=Header(), name="TARGETING INFO")
 
@@ -97,8 +98,18 @@ def get_targets_from_hdu(structure: DataSet, primary_hdu: BinTableHDU, target_hd
 
         identifier = row["identifier"] if row["identifier"] != "None" else None
         survey = row["survey"] if row["survey"] != "None" else None
+        radius = row["radius"] * row.table["radius"].unit if not np.ma.is_masked(row["radius"]) else None
 
-        targets.append(Target(init_coord, final_coord, identifier, survey, row["correction"]))
+        targets.append(
+            Target(
+                initial_coords=init_coord,
+                coords=final_coord,
+                radius=radius,
+                identifier=identifier,
+                survey=survey,
+                correction=row["correction"],
+            )
+        )
 
     structure.targets = targets
 

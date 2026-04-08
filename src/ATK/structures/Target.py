@@ -5,6 +5,7 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+from astropy.units import Quantity
 
 
 def skycoord_equality_check(self, other):
@@ -20,6 +21,7 @@ def skycoord_equality_check(self, other):
 class Target:
     initial_coords: SkyCoord
     coords: SkyCoord
+    radius: Quantity | None = None
 
     identifier: int | None = None
     survey: str | None = None
@@ -94,4 +96,4 @@ class Target:
 
         icrs_pos = position.transform_to("icrs")
 
-        return cls(copy.deepcopy(icrs_pos), copy.deepcopy(icrs_pos), None, None, "none")
+        return cls(copy.deepcopy(icrs_pos), copy.deepcopy(icrs_pos), None, None, None, "none")

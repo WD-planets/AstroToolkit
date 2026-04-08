@@ -20,11 +20,11 @@ from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
 
-def dispatch_plotting(
-    all_figures: list, plotting_func: FunctionType, structure: DataSet, containers: list[Container], target: Target | None = None, **kwargs
+def do_plotting(
+    all_figures: list, plotting_func: FunctionType, plot_method: str, containers: list[Container], target: Target | None = None, **kwargs
 ):
     # plot .data containers individually (e.g. images)
-    if structure._plot_method == "individual":
+    if plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
         # flatten list if e.g. SED plotting with spectral overlay returned multiple SED plots due to having to overlay multiple spectra
         try:
@@ -33,7 +33,7 @@ def dispatch_plotting(
             pass
 
     # combine multiple .data containers into single plots (e.g. light curves)
-    elif structure._plot_method == "combined":
+    elif plot_method == "combined":
         figures = plotting_func(containers, **kwargs)
 
     # e.g. if no data was returned and plotting was attempted
@@ -53,6 +53,28 @@ def dispatch_plotting(
                 plot.title.text = f"{target.initial_coords.ra.value:.3f}° {target.initial_coords.dec.value:.3f} {plot.title.text}°"
 
     all_figures.extend(figures)
+
+    return all_figures
+
+
+def dispatch_plotting(
+    all_figures: list,
+    plotting_func: FunctionType,
+    survey_split: bool,
+    plot_method: str,
+    containers: list[Container],
+    target: Target | None = None,
+    **kwargs,
+):
+    if not survey_split:
+        all_figures = do_plotting(all_figures, plotting_func, plot_method, containers, target, **kwargs)
+
+    else:
+        surveys = list(set(ctnr.survey for ctnr in containers))
+
+        for survey in surveys:
+            survey_containers = [ctnr for ctnr in containers if ctnr.survey == survey]
+            all_figures = do_plotting(all_figures, plotting_func, plot_method, survey_containers, target, **kwargs)
 
     return all_figures
 
@@ -88,13 +110,23 @@ def plot_data(structure: DataSet, **kwargs: any) -> figure:
 
     # force splitting of all containers by target
     if structure._split_by_target:
+        completed_keys = []
+
         for target, key in zip(structure.targets, target_keys):
+            if key in completed_keys:
+                continue
+
             containers = structure._fetch_by_key(key)
-            all_figures = dispatch_plotting(all_figures, plotting_func, structure, containers, target, **kwargs)
+            all_figures = dispatch_plotting(
+                all_figures, plotting_func, structure._split_by_survey, structure._plot_method, containers, target, **kwargs
+            )
+            completed_keys.append(key)
 
     # don't split by target
     else:
-        all_figures = dispatch_plotting(all_figures, plotting_func, structure, structure.data, **kwargs)
+        all_figures = dispatch_plotting(
+            all_figures, plotting_func, structure._split_by_survey, structure._plot_method, structure.data, **kwargs
+        )
 
     if not all_figures:
         return None
@@ -156,7 +188,7 @@ def open(structure: DataSet, keys: list, fname=Path | str | None, **kwargs: dict
     if not fname:
         os.makedirs(tmp_dir, exist_ok=True)
 
-        fname_prefix = f"{structure.survey}_{structure.kind}_" if structure.survey else f"{structure.kind}_"
+        fname_prefix = f"{structure.kind}_"
 
         with tempfile.NamedTemporaryFile(suffix=".html", prefix=fname_prefix, dir=tmp_dir, delete=False) as tmpfile:
             tmp_html = tmpfile.name

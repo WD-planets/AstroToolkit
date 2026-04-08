@@ -29,6 +29,8 @@ def query(kind: str, **arguments) -> DataSet:
 
     # get flattened list of targets
     targets = setup_targeting(targets)
+    for target in targets:
+        target.radius = arguments.get("radius")
 
     if targets is RETURNS.NULL:
         raise ValueError("Query received no targets.")

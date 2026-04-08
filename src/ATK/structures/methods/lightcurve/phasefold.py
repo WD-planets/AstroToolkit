@@ -275,7 +275,6 @@ def fold_lc(
     samples: int,
     multiband: bool = True,
     subtract: str | None = "median",
-    fit: bool = False,
     repeat: int = 2,
     align: str = "median",
     freq: float | Quantity | None = None,

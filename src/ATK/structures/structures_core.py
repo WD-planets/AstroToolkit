@@ -34,6 +34,18 @@ SPLIT_BY_TARGET = {
     "datatable": True,
 }
 
+SPLIT_BY_SURVEY = {
+    "image": True,
+    "lightcurve": True,
+    "spectrum": True,
+    "sed": False,
+    "hrd": True,
+    "powspec": True,
+    "phasefold": True,
+    "datatable": True,
+}
+
+
 # type hint for arrays of astropy Quantities
 QuantityArray = numpy.ndarray[Quantity]
 

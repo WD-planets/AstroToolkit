@@ -15,9 +15,14 @@ def query(target: Target, **kwargs: dict):
     radius = kwargs["radius"].to(u.deg).value
 
     try:
-        data = client.cone_search(ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True)
+        data = client.cone_search(
+            ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True
+        )
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
+
+    if data is None:
+        return RETURNS.NULL
 
     ids = data.catalog_info["asas_sn_id"]
 

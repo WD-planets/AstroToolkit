@@ -19,10 +19,10 @@ def query(target: Target, **kwargs: dict):
         if lc_data is RETURNS.NULL or lc_data is RETURNS.EXCEPTION:
             return lc_data
     else:
-        lc_data = general_query(kind="vizier", targets=target, catalogue="I/355/epphot", radius=kwargs["radius"])
+        lc_data = general_query(kind="vizier", targets=target, survey="I/355/epphot", radius=kwargs["radius"])
         # data returned
         if lc_data.data:
-            lc_data = lc_data.data[0]
+            lc_data = lc_data.data[0].table.to_pandas()
         # no data returned, exception encountered
         elif lc_data.exception:
             return RETURNS.EXCEPTION

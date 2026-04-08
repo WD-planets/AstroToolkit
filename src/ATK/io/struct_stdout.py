@@ -66,6 +66,9 @@ def format_target(target: Target) -> str:
 
     str_rep += format_skycoord(target.initial_coords)
 
+    if target.radius is not None:
+        str_rep = f"{str_rep[:-1]}, {target.radius.value}{UNITS[target.radius.unit]})"
+
     return str_rep
 
 

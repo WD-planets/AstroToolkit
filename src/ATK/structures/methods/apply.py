@@ -22,10 +22,10 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
     if not struct.data:
         return struct
 
-    data_methods = struct.data[0]._data_methods
-    data_group_methods = struct.data[0]._group_data_methods
-    plot_methods = struct.data[0]._plot_methods
-    plot_group_methods = struct.data[0]._group_plot_methods
+    data_methods = getattr(struct.data[0], "_data_methods", [])
+    data_group_methods = getattr(struct.data[0], "_group_data_methods", [])
+    plot_methods = getattr(struct.data[0], "_plot_methods", [])
+    plot_group_methods = getattr(struct.data[0], "_group_plot_methods", [])
 
     all_methods = []
     for arr in [data_methods, data_group_methods, plot_methods, plot_group_methods]:
@@ -53,15 +53,19 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
         # collect by target key
         data = []
         keys = list(set([ctnr._target_key for ctnr in struct.data]))
-        for key in keys:
-            ctnrs = [ctnr for ctnr in struct.data if ctnr._target_key == key]
-            if not ctnrs:
-                continue
-            returned_ctnrs = data_group_methods[method](ctnrs, *args, **kwargs)
-            if isinstance(returned_ctnrs, list):
-                data += returned_ctnrs
-            else:
-                data.append(returned_ctnrs)
+        surveys = list(set([ctnr.survey for ctnr in struct.data]))
+
+        for survey in surveys:
+            survey_containers = [ctnr for ctnr in struct.data if ctnr.survey == survey]
+            for key in keys:
+                ctnrs = [ctnr for ctnr in survey_containers if ctnr._target_key == key]
+                if not ctnrs:
+                    continue
+                returned_ctnrs = data_group_methods[method](ctnrs, *args, **kwargs)
+                if isinstance(returned_ctnrs, list):
+                    data += returned_ctnrs
+                else:
+                    data.append(returned_ctnrs)
         struct.data = data
 
         return struct

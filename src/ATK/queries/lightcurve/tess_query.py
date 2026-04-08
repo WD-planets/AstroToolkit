@@ -67,6 +67,9 @@ def query(target: Target, **kwargs: dict):
     except Exception:
         return RETURNS.EXCEPTION
 
+    if not len(search):
+        return RETURNS.NULL
+
     search = search[search.author == "TESS-SPOC"]
 
     if len(search) == 0:

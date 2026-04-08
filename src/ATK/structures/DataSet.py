@@ -12,16 +12,14 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
-from .structures_core import COMBINE_PLOTS, SPLIT_BY_TARGET, Container, manage_inplace
+from .structures_core import COMBINE_PLOTS, SPLIT_BY_SURVEY, SPLIT_BY_TARGET, Container, manage_inplace
 from .Target import Target
 
 
 @dataclass
 class DataSet:
     kind: str | None = None
-    survey: str | None = None
     targets: list[Target] | None = field(default_factory=list)
-    radius: Quantity | None = None
     exception: bool | None = False
 
     data: list = field(default_factory=list)
@@ -41,8 +39,6 @@ class DataSet:
         self._build_target_maps()
 
     def __repr__(self):
-        if self.survey:
-            return f"<{self.survey} {self.kind} DataSet>"
         return f"<{self.kind} DataSet>"
 
     def __str__(self):
@@ -138,7 +134,11 @@ class DataSet:
         ctnrs, out_targets = [], []
         for t in targets:
             ctnrs.extend(struct._fetch_by_key(t._key))
-            out_targets.append(t)
+
+        for t in targets:
+            for s_t in struct.targets:
+                if t._key == s_t._key:
+                    out_targets.append(s_t)
 
         struct.data = ctnrs
         struct.targets = out_targets
@@ -151,7 +151,10 @@ class DataSet:
         struct = manage_inplace(self, inplace)
 
         struct.data = struct.data + dataset.data
-        struct.targets = struct.targets + dataset.targets
+        for target in dataset.targets:
+            struct_keys = [t._key for t in struct.targets]
+            if target._key not in struct_keys:
+                struct.targets.append(target)
 
         struct._build_target_maps()
 
@@ -187,6 +190,13 @@ class DataSet:
             return
 
         return SPLIT_BY_TARGET[self._ctnr_kind]
+
+    @property
+    def _split_by_survey(self):
+        if self._ctnr_kind not in SPLIT_BY_SURVEY:
+            return
+
+        return SPLIT_BY_SURVEY[self._ctnr_kind]
 
     @classmethod
     def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None):

@@ -121,7 +121,7 @@ def get_gaia_target(source: int) -> Target:
 
     correction = check_correction(coord)
 
-    return Target(copy.deepcopy(coord), copy.deepcopy(coord), source, "gaia", correction)
+    return Target(copy.deepcopy(coord), copy.deepcopy(coord), None, source, "gaia", correction)
 
 
 def correct_target(target: Target, survey: str = None, epoch: Time = None, query_kind: str = None, make_copy=False) -> Target:
@@ -177,7 +177,7 @@ def prepare_search(targets: list[Target], query_kind: str, survey: str = None, e
         corrected_targets.append(corrected_target)
 
     # create requested structure
-    structure = DataSet(kind=query_kind, survey=survey, targets=targets, radius=kwargs.get("radius", None), exception=False)
+    structure = DataSet(kind=query_kind, targets=targets, exception=False)
 
     return corrected_targets, structure
 
@@ -198,7 +198,9 @@ def correct_radius(target: Target, radius: Quantity, query_kind: str, survey: st
     def correction(self):
         import math
 
-        self.ra += (self.year_delta * self.pmra / 3600000 + self.month_delta * self.pmra / 43200000) * 1 / math.cos(self.dec / 360 * 2 * math.pi)
+        self.ra += (
+            (self.year_delta * self.pmra / 3600000 + self.month_delta * self.pmra / 43200000) * 1 / math.cos(self.dec / 360 * 2 * math.pi)
+        )
         self.dec += self.year_delta * self.pmdec / 3600000 + self.month_delta * self.pmdec / 43200000
 
         return [self.ra, self.dec]
