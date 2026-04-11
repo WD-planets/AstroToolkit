@@ -15,7 +15,7 @@ def plot(pspec: Powspec, *args: tuple, **kwargs: dict):
         height=400,
         x_axis_label=get_axis_label(pspec, "frequency"),
         y_axis_label="Lomb-Scargle Power",
-        title=f"{pspec.survey} {pspec.band} L-S Power Spectrum",
+        title=f"{pspec.survey.upper()} {pspec.band} L-S Power Spectrum",
         tools=("pan,wheel_zoom,box_zoom,reset"),
     )
 

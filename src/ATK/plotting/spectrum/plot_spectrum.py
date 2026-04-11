@@ -52,7 +52,7 @@ def plot(spectrum: Spectrum, *args: any, **kwargs: any):
         plot = figure(
             width=400,
             height=400,
-            title=f"{spectrum.survey} Spectrum",
+            title=f"{spectrum.survey.upper()} Spectrum",
             x_axis_label=get_axis_label(spectrum, x),
             y_axis_label=get_axis_label(spectrum, "flux"),
             tools=("pan,wheel_zoom,box_zoom,reset"),

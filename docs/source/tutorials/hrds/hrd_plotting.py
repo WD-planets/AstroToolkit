@@ -29,6 +29,10 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# 
+# .. note:: 
+# 
+#    The above is an example of a multi-target query. For more information, see the :doc:`next section <../multiple_targets/multi_target_query>`.
 #
 # |
 #

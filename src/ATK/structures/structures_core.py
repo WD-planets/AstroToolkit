@@ -42,7 +42,7 @@ SPLIT_BY_SURVEY = {
     "hrd": True,
     "powspec": True,
     "phasefold": True,
-    "datatable": True,
+    "datatable": False,
 }
 
 

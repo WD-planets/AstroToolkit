@@ -22,6 +22,9 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
     if not struct.data:
         return struct
 
+    # clear figure
+    struct.figure = None
+
     data_methods = getattr(struct.data[0], "_data_methods", [])
     data_group_methods = getattr(struct.data[0], "_group_data_methods", [])
     plot_methods = getattr(struct.data[0], "_plot_methods", [])

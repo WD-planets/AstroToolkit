@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
@@ -125,20 +126,47 @@ class DataSet:
     def _fetch_by_key(self, key: str):
         return [ctnr for ctnr in self.data if ctnr._target_key == key].copy()
 
-    def split(self, targets: any, inplace: bool = True) -> DataSet:
-        from ..queries.query_core import setup_targeting
+    def _fetch_by_id(self, id: int):
+        key = self._alias_map.get(f"id:{id}")
+        if key is None:
+            return []
+        return self._fetch_by_key(key)
 
+    def _fetch_by_coord(self, coord: SkyCoord, radius: Quantity | None = 3 * u.arcsec):
+        for t in self.targets:
+            if coord.separation(t.initial_coords) < radius:
+                return self._fetch_by_key(t._key)
+        return []
+
+    def _fetch_by_target(self, target: Target):
+        return self._fetch_by_key(target._key)
+
+    def split(self, targets: any, radius: Quantity = 3 * u.arcsec, inplace: bool = True) -> DataSet:
+        from ..queries.query_core import _normalise_targeting_input, setup_targeting
+
+        input_targets = _normalise_targeting_input(targets)
         targets = setup_targeting(targets)
         struct = manage_inplace(self, inplace)
 
-        ctnrs, out_targets = [], []
-        for t in targets:
-            ctnrs.extend(struct._fetch_by_key(t._key))
+        ctnrs = []
+        for target in input_targets:
+            # already a Target
+            if isinstance(target, Target):
+                ctnrs.extend(struct._fetch_by_target(target))
+            # SkyCoord -> Target
+            elif isinstance(target, SkyCoord):
+                ctnrs.extend(struct._fetch_by_coord(target))
+            # id -> Target
+            elif isinstance(target, int):
+                ctnrs.extend(struct._fetch_by_id(target))
+            else:
+                raise TypeError(f"Unsupported target type: {type(target)}")
 
-        for t in targets:
-            for s_t in struct.targets:
-                if t._key == s_t._key:
-                    out_targets.append(s_t)
+        out_keys = []
+        for ctnr in ctnrs:
+            if ctnr._target_key not in out_keys:
+                out_keys.append(ctnr._target_key)
+        out_targets = [struct._key_map[key] for key in out_keys]
 
         struct.data = ctnrs
         struct.targets = out_targets

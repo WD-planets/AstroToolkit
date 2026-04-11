@@ -1,7 +1,7 @@
 """
-#########################
-Plotting Multiple Targets
-#########################
+#####################
+Multi-Target Plotting
+#####################
 Just like :func:`~ATK.Tools.query`, :meth:`~ATK.Models.DataSet.plot` can process data for multiple targets simultaneously. The following will perform a Pan-STARRS image query for four targets, before plotting and combining the returned data into a grid:
 """
 
@@ -30,7 +30,7 @@ figure
 # %% 
 # Plotting Arguments
 # ==================
-# Plotting arguments, such as those seen in the :doc:`previous tutorial <image_plotting>` will be applied to all plots in the grid:
+# Plotting arguments will be applied to all plots in the grid:
 
 # sphinx_gallery_start_ignore
 images.plot(cmap="grey")
@@ -50,3 +50,4 @@ figure
 # |
 #
 # .. rubric:: Download this Tutorial
+

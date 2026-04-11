@@ -46,29 +46,8 @@ class DataPages:
 
         return self
 
-    def open(self, fname: Path | str | None = None):
-        from ..io.plot_io import open_basic as open_html
-
-        if not fname.endswith(".html"):
-            fname = f"{fname}.html"
-
-        for index, plot in enumerate(self.figures):
-            if fname:
-                out_name = f"{fname[:-5]}_{index + 1}.html"
-            else:
-                out_name = None
-
-            open_html(plot, fname=out_name, title="ATK DATAPAGE")
-
-    def save(self, fname: Path | str):
-        if not fname.endswith(".html"):
-            fname = f"{fname}.html"
-
-        for index, plot in enumerate(self.figures):
-            out_name = f"{fname[:-5]}_{index + 1}.html"
-
-            output_file(out_name)
-            bokeh_save(plot, title="ATK DATAPAGE")
+    # save
+    # ====
 
     def _open_by_key(self, key: str, fname: Path | str | None = None):
         from ..io.plot_io import open_basic as open_html
@@ -88,6 +67,9 @@ class DataPages:
         for t in self.targets:
             if coord.separation(t.initial_coords) < radius:
                 self._open_by_key(t._key, fname)
+
+    # open
+    # ====
 
     def open_by_target(self, target: Target, fname: Path | str | None = None):
         self._open_by_key(target._key, fname)

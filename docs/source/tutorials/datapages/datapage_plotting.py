@@ -43,6 +43,8 @@ from ATK import grid
 datapages = grid(layout)
 datapages.show()
 
+# test
+
 
 # %%
 # |
@@ -50,7 +52,7 @@ datapages.show()
 #
 # Opening a Datapage 
 # ==================
-# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.structures.DataPage.DataPage>` are designed to work with multiple targets. A **datapage** for a specific target can therefore be openened via one of the :class:`~ATK.structures.DataPage.DataPages` object's open methods (these work in much the same way as the fetch methods of :class:`DataSets <ATK.Models.DataSet>` - see :doc:`here <../getting_started/data_query_3>`).
+# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.structures.DataPage.DataPage>` are designed to work with multiple targets. A **datapage** for a specific target can therefore be openened via one of the :class:`~ATK.structures.DataPage.DataPages` object's open methods.
 #
 # Opening a Datapage by ID 
 # ----------------------------
@@ -70,7 +72,7 @@ datapages.figures[0]
 #
 # Opening a Datapage by Coordinates
 # ---------------------------------
-# Just like the :doc:`fetch methods <../getting_started/data_query_3>` of :class:`DataSets <~ATK.Models.DataSet>`, :meth:`~ATK.Models.DataPages.open_by_coord` is an equivalent methods for fetching by coordinates. This opens any **datapages** that target stars within a given ``radius``:
+# :meth:`~ATK.Models.DataPages.open_by_coord` is an equivalent methods for fetching by coordinates. This opens any **datapages** that target stars within a given ``radius``:
 #
 # .. code-block:: python
 #

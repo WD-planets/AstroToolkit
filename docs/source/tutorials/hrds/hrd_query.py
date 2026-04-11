@@ -31,6 +31,7 @@ figure
 
 # %%
 # The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.HRD` containers (**one per target, subject to data availability**).
+#
 # |
 #
 # .. note::

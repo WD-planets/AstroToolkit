@@ -9,15 +9,16 @@ from .lightcurve_core import get_lightcurves
 
 
 def query(target: Target, **kwargs: dict):
-    client = SkyPatrolClient(verbose=False)
+    try:
+        client = SkyPatrolClient(verbose=False)
+    except CONNECTION_ERRORS:
+        return RETURNS.EXCEPTION
 
     # radius in deg
     radius = kwargs["radius"].to(u.deg).value
 
     try:
-        data = client.cone_search(
-            ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True
-        )
+        data = client.cone_search(ra_deg=target.coords.ra.value, dec_deg=target.coords.dec.value, radius=radius, catalog="master_list", download=True)
     except CONNECTION_ERRORS:
         return RETURNS.EXCEPTION
 

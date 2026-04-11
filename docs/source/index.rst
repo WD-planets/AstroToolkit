@@ -24,14 +24,17 @@ This project has received funding from the European Research Council (ERC) under
     tutorials/spectra/custom_index
     tutorials/seds/custom_index
     tutorials/hrds/custom_index
-   
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Datapages
-    
+
+.. toctree:: 
+   :maxdepth: 2 
+   :hidden: 
+   :caption: Additional Tutorials
+
+   tutorials/multiple_targets/custom_index
+   tutorials/merging/custom_index
    tutorials/datatables/custom_index
    tutorials/datapages/custom_index
+   tutorials/workflows/custom_index
 
 .. toctree::
     :maxdepth: 2

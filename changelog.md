@@ -90,6 +90,7 @@ Changes
     - Returned Vizier data now maintains units
 - old 'raw' argument in light curve queries is now 'filter', disables all non-required filtering if False (default=True)
 - DataSets can be merged with DataSet_1.merge(DataSet_2), and split with DataSet.split(<targeting info>)
+- Datapages now automatically generate tabs so that if multiple plots are present in an included DataSet (e.g. if multiple data products are returned from a query or if DataSet.merge() was used to combine multiple surveys), user can now freely switch between them
 
 + other stuff that I forgot to write down
 
@@ -108,7 +109,6 @@ Data
 - ztf light curve API not working
     - get better light curve sigma clipping example
 
-- add survey split to apply
 - ignore path if exception
 - test all types of custom data set
 - default units for Quantity arrays
@@ -119,6 +119,8 @@ Data
 Docs
 ====
 - make multiple targets a separate section, just show the basics after Vizier but then more in-depth after Images
+- add note to early tutorials that multi-target queries and operations are supported
+- replace 'star' with e.g. system, source, etc.
 
 - add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
 - check phase folding in docs and finish this section, hopefully once ztf is actually working
@@ -128,6 +130,8 @@ Docs
 - check docstrings / comments
 - check type hints
 - finish docs
+- function/docs links in code examples (like for external libraries)?
+- make homepage like Lightkurve with timelapse code
 
 Other
 =====

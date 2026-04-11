@@ -9,7 +9,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.time import Time
-from astropy.units import Quantity
+from astropy.units import Quantity, UnrecognizedUnit
 from astropy.wcs import WCS
 from bokeh.layouts import GridBox
 from bokeh.models import Column, Row
@@ -185,13 +185,14 @@ def format_quantity(val: Quantity) -> str:
 
     if val.shape:
         val_arr = format_value(val.value)
-        if val.unit in UNITS:
-            val_arr += " "
     else:
         val_arr = f"{round(val.value, ROUND)}"
 
+    if isinstance(val.unit, UnrecognizedUnit):
+        return f"{val_arr} {val.unit.to_string('unicode')}"
+
     if val.unit in UNITS:
-        str_rep = f"{val_arr}{UNITS[val.unit]}"
+        str_rep = f"{val_arr}{' ' if val.shape else ''}{UNITS[val.unit]}"
     elif unit_format == "text":
         str_rep = f"{val_arr} {val.unit.to_string()}"
     elif unit_format == "symbol":

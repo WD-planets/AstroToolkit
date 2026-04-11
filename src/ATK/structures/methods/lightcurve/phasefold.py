@@ -274,6 +274,7 @@ def fold_lc(
     fmax: float,
     samples: int,
     multiband: bool = True,
+    optimise: bool = True,
     subtract: str | None = "median",
     repeat: int = 2,
     align: str = "median",
@@ -301,7 +302,8 @@ def fold_lc(
     else:
         if multiband:
             _, _, fopt, ls = do_ls(lcs, fmin, fmax, samples, return_model=True)
-            fopt = optimise_freq(lcs, fopt)
+            if optimise:
+                fopt = optimise_freq(lcs, fopt)
 
             for lc in lcs:
                 fopts[lc.band] = fopt
@@ -311,9 +313,10 @@ def fold_lc(
 
             for lc in lcs:
                 _, _, fopt, ls = do_ls(lc, fmin, fmax, samples, return_model=True)
-                opt_freq = optimise_freq([lc], fopt)
+                if optimise:
+                    fopt = optimise_freq([lc], fopt)
 
-                fopts[lc.band] = opt_freq
+                fopts[lc.band] = fopt
                 ls_models[lc.band] = ls
 
     if multiband:

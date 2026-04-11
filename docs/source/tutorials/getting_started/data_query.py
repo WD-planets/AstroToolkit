@@ -73,7 +73,7 @@ target = Target.from_coord(coord)
 # %%
 # .. note::
 #
-#    Passing a :class:`~ATK.Models.Target` explicitly may seem unnecessary at first, but it offers a key advantage in queries that target multiple stars. This is covered in the :doc:`next tutorial <data_query_3>`.
+#    Passing a :class:`~ATK.Models.Target` explicitly may seem unnecessary at first, but it offers a key advantage in queries that simultaneously target :doc:`multiple stars <../multiple_targets/multi_target_query>`.
 
 # %%
 # 

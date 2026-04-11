@@ -7,4 +7,3 @@ Images
     ../../auto_tutorials/images/image_query
     ../../auto_tutorials/images/image_query_2
     ../../auto_tutorials/images/image_plotting
-    ../../auto_tutorials/images/image_plotting_2

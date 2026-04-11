@@ -124,7 +124,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
         plot = figure(
             width=400,
             height=400,
-            title=f"{survey} {band_names} lightcurve(s)",
+            title=f"{survey.upper()} {band_names} lightcurve(s)",
             x_axis_label=x_label,
             y_axis_label=brightness_type,
             tools=("pan,wheel_zoom,box_zoom,reset"),
@@ -143,7 +143,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
             plot = figure(
                 width=400,
                 height=400,
-                title=f"{survey} {band_names} lightcurve(s)",
+                title=f"{survey.upper()} {band_names} lightcurve(s)",
                 x_axis_label=x_label,
                 y_axis_label=brightness_type,
                 tools=("pan,wheel_zoom,box_zoom,reset"),
@@ -189,7 +189,6 @@ def assign_band_colours(bands: list[str], colours: list[str] | None = None) -> d
 
 
 def get_band_colours(bands: list[str], colours: list[str] | None = None, gradient_size: int = 256, cycles: int = 1, reverse: bool = False) -> dict[str, list[str]]:
-
     band_colour_names = assign_band_colours(bands, colours)
 
     return {band: get_gradient(colour, gradient_size, cycles=cycles, reverse=reverse) for band, colour in band_colour_names.items()}

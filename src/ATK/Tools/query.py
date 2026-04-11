@@ -29,31 +29,27 @@ def query(kind: str, **arguments) -> DataSet:
 
     # get flattened list of targets
     targets = setup_targeting(targets)
-    for target in targets:
-        target.radius = arguments.get("radius")
-
     if targets is RETURNS.NULL:
-        raise ValueError("Query received no targets.")
+        raise ValueError("Query received no targets, likely due to no valid targets being provided.")
 
     if targets is RETURNS.EXCEPTION:
         raise Exception("Failed to generate requested targets, this is likely due to a Vizier fault.")
+
+    for target in targets:
+        target.radius = arguments.get("radius")
 
     # targets may return exception if Vizier is down
     if any(target is RETURNS.EXCEPTION for target in targets):
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
-        structure = DataSet[kind](
-            kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True
-        )
+        structure = DataSet[kind](kind=kind, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
         return structure
 
     # disable proper motion correction
     if arguments.get("disable_correction", False):
         for target in targets:
             initial_coords = target.initial_coords
-            target.initial_coords = SkyCoord(
-                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
-            )
+            target.initial_coords = SkyCoord(ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime)
             target.coords = initial_coords
             target.identifier = None
             target.survey = None

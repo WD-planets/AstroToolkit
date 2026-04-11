@@ -1,4 +1,4 @@
-from bokeh.models import GridBox, InlineStyleSheet, Label, Range1d
+from bokeh.models import GridBox, InlineStyleSheet, Label, Range1d, TabPanel, Tabs
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
@@ -18,6 +18,10 @@ def format_datatable(table, height, width):
 
     table.min_width = 0
     table = autosize_table(table, table.source, TEXT_SIZE, grid_size * height)
+    table.width = grid_size * width
+    table.height = grid_size * height
+
+    table.sizing_mode = "fixed"
 
     style_sheet = InlineStyleSheet(
         css=f".slick-header-columns {{background-color: #e0e0e0 !important;font-family: {TEXT_FONT.lower()};font-size: {int(TEXT_SIZE[:-2])}pt; font-weight: normal}}.slick-row {{font-size: {int(TEXT_SIZE[:-2]) - 1}pt; font-weight: normal}}"
@@ -40,7 +44,7 @@ def compute_borders(max_tick_chars: int = 9, tick_length: int = 6, tick_standoff
     left = tick_width + tick_length + tick_standoff + text_size + axis_standoff
 
     # bottom border estimate
-    bottom = (3 * text_size) + tick_length + tick_standoff + text_size + axis_standoff
+    bottom = (1 * text_size) + tick_length + tick_standoff + text_size + axis_standoff
 
     return int(left), int(bottom)
 
@@ -210,26 +214,54 @@ def validate_layout(layout: list[list[DataSet]]):
 
 
 def prepare_datasets(key: str, datasets: list[DataSet]):
-    plot_dict = {}
+    plot_dict, ctnr_dict, plot_ctnr_map = {}, {}, {}
     for dataset in datasets:
         ctnrs = [ctnr for ctnr in dataset.data if ctnr._target_key == key]
         if not dataset.figure:
-            if dataset.kind == "hrd":
-                dataset.plot(combine=False)
-            else:
-                dataset.plot()
+            # if dataset.kind == "hrd":
+            # dataset.plot(combine=)
+            # else:
+            dataset.plot()
         plot_ids = [ctnr._plot_id for ctnr in ctnrs]
 
         plots = unpack_layout(dataset.figure)
         plots = [plot for plot in plots if plot.id in plot_ids]
+        ctnrs = [ctnr for ctnr in ctnrs if ctnr._plot_id in plot_ids]
 
-        # need to come up with a proper solution for this
-        if len(plots) > 1:
-            plots = plots[0:1]
+        mapping = {plot.id: [] for plot in plots}
+        for ctnr in ctnrs:
+            mapping[ctnr._plot_id].append(ctnr)
 
         plot_dict[id(dataset)] = plots
+        ctnr_dict[id(dataset)] = ctnrs
+        plot_ctnr_map[id(dataset)] = mapping
 
-    return plot_dict
+    return plot_dict, ctnr_dict, plot_ctnr_map
+
+
+def get_tab_title(ctnrs):
+    tab_comps = []
+    for c in ctnrs:
+        if getattr(c, "survey", None) is not None:
+            if isinstance(c.survey, str):
+                tab_comp = c.survey
+            else:
+                tab_comp = type(c).__name__
+        else:
+            tab_comp = type(c).__name__
+
+        if tab_comp not in tab_comps:
+            tab_comps.append(tab_comp)
+
+    if not tab_comps:
+        return None
+
+    tab_comps = [x.upper() for x in tab_comps]
+
+    if len(tab_comps) == 1:
+        return tab_comps[0]
+
+    return ", ".join(tab_comps)
 
 
 def get_datapage(layout: list[list]):
@@ -242,7 +274,7 @@ def get_datapage(layout: list[list]):
     dps = []
     plot_map = {}
     for index, key in enumerate(target_keys):
-        plots = prepare_datasets(key, datasets)
+        plots, ctnrs, plot_ctnr_map = prepare_datasets(key, datasets)
 
         grid_children = []
 
@@ -260,14 +292,41 @@ def get_datapage(layout: list[list]):
                     plot = get_missing_panel(region["object"], region["rowspan"], region["colspan"])
                     shift_outline = True
                 else:
-                    plot = plots[obj_id][0]
+                    plot_list = plots[obj_id]
+
+                    if False:
+                        plot = plot_list[0]
+                    else:
+                        tabs = []
+                        mapping = plot_ctnr_map[obj_id]
+
+                        tabs, titles = [], {}
+                        for i, p in enumerate(plot_list):
+                            ctnrs_for_plot = mapping.get(p.id, [])
+                            title = get_tab_title(ctnrs_for_plot)
+                            if title in titles:
+                                title = f"{title} {titles[title] + 1}"
+                            elif title is None:
+                                title = str(i)
+                            titles[title] = 1
+
+                            tab_list = TabPanel(child=p, title=title)
+                            tabs.append(tab_list)
+
+                        plot = Tabs(tabs=tabs)
+
                     force_square = True if kind in ["image"] else False
 
-            if kind not in ["datatable"]:
-                plot = set_panel_size(plot, force_square, region["rowspan"], region["colspan"], shift_outline)
-                plot = set_font_sizes(plot)
-            else:
-                plot = format_datatable(plot, region["rowspan"], region["colspan"])
+            for tab in plot.tabs:
+                p = tab.child
+
+                if kind == "datatable":
+                    p = format_datatable(p, region["rowspan"], region["colspan"])
+                else:
+                    p = set_panel_size(p, force_square, region["rowspan"], region["colspan"], shift_outline)
+                    p = set_font_sizes(p)
+
+                tab.child = p
 
             grid_children.append((plot, region["row"], region["col"], region["rowspan"], region["colspan"]))
 
