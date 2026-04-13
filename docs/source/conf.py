@@ -28,6 +28,7 @@ copyright = "2026, Ethan Moorfield"
 author = "Ethan Moorfield"
 release = "1.8.0"
 
+html_favicon = "_static/logo/icon.png"
 
 # ---------------------
 # General Configuration
@@ -49,11 +50,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
+    "sphinxcontrib.video",
     "bokeh.sphinxext.bokeh_plot",
+    "sphinx.ext.mathjax",
 ]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
 
 # ------------
 # HTML Options

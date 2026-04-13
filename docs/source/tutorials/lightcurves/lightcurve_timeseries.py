@@ -8,12 +8,11 @@ Alongside the basic data methods shown in the :doc:`previous tutorial <lightcurv
 
 Generating Power Spectra
 ========================
-The :class:`~ATK.Models.Lightcurve.pspec` method can be used to generate power spectra (i.e. :class:`~ATK.Models.Powspec` containers) from a set of :class:`Lightcurves <ATK.Models.Lightcurve>`. :class:`~ATK.Models.Lightcurve.pspec` must be provided with a minimum and maximum frequency, and a number of test frequencies in this range.
-
-By default, this process combines all bands for each target before computing a combined power spectrum.
+The :class:`~ATK.Models.Lightcurve.pspec` method can be used to generate power spectra (i.e. :class:`~ATK.Models.Powspec` containers) from a set of :class:`Lightcurves <ATK.Models.Lightcurve>`. A minimum and maximum frequency must be provided, along with a number of test frequencies in this range. **If no units are given, values are assumed to be in** :math:`\mathrm{days}^{-1}`.
 
 Multi-band Power Spectra
 ------------------------
+By default, this process combines all bands for each target before computing a combined power spectrum.
 """
 
 # sphinx_gallery_start_ignore
@@ -24,8 +23,8 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
-pspec_data = asassn_query.apply("pspec", fmin=0, fmax=60, samples=100000, inplace=False)
+asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
+pspec_data = asassn_query.apply("pspec", fmin=0, fmax=10, samples=10000, inplace=False)
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits.gz")
 # sphinx_gallery_end_ignore
@@ -56,10 +55,10 @@ figure
 # 
 # Single-band Power Spectra
 # -------------------------
-# To instead process each band individually, pass ``multiband = False`` to :meth:`~ATK.Models.Lightcurve.pspec`:
+# To instead process each band individually, pass ``multiband = False`` to :meth:`~ATK.Models.Lightcurve.pspec`. This treats each band as being entirely separate:
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
-pspec_data = asassn_query.apply("pspec", fmin=0, fmax=60, samples=100000, multiband=False, inplace=False)
+asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
+pspec_data = asassn_query.apply("pspec", fmin=0, fmax=10, samples=10000, multiband=False, inplace=False)
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits.gz")
 # sphinx_gallery_end_ignore
@@ -87,25 +86,67 @@ figure
 # |
 # |
 #
-# Phase-Folding Light Curves *
-# ============================
-# :class:`Lightcurves <ATK.Models.Lightcurve>` can be phase folded on a given period with the :meth:`~ATK.Models.Lightcurve.fold` method:
+# Phase-Folding Light Curves
+# ==========================
+# :class:`Lightcurves <ATK.Models.Lightcurve>` can be phase folded with the :meth:`~ATK.Models.Lightcurve.fold` method. **By default,** :meth:`~ATK.Models.Lightcurve.fold` **will first generate a power spectrum (as above), and use this to find an optimal frequency.** :meth:`~ATK.Models.Lightcurve.fold` **therefore accepts all parameters that can be passed to** :meth:`~ATK.Models.Lightcurve.pspec`. A multiband phase-folded light curve can be generated and plotted as follows:
 
-asassn_query = query("lightcurve", targets=6050296829033196032, survey="asassn", path="example_lightcurve.fits.gz")
-folded_data = asassn_query.apply("fold", fmin=0, fmax=60, samples=100000, multiband=False, inplace=False)
+asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
+folded_data = asassn_query.apply("fold", fmin=0, fmax=10, samples=10000, inplace=False)
 # sphinx_gallery_start_ignore
 folded_data.store("example_folded_lc.fits.gz")
 # sphinx_gallery_end_ignore
 folded_data.show(show_types=True)
 # sphinx_gallery_start_ignore
-pass
+folded_data.plot()
+figure = format_plot(folded_data.figure, 3, 1.5)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+folded_data.open()
+# sphinx_gallery_start_ignore
+figure
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+# 
+# Frequency Optimisation
+# ----------------------
+# Despite the underlying power spectrum being the same, the photometry in the above example has been folded on a different peak frequency - in this case the first subharmonic (i.e. ``0.5 * fopt``). **By default, a phase-dispersion metric is calculated for each candidate** :class:`Lomb-Scargle <astropy.timeseries.LombScargle>` **frequency and the best is chosen. This can help to preserve real periodic structure, especially if the modulation is asymmetric as seen here.** 
+# 
+# This behaviour can be disabled by passing ``optimise=False`` - in this case losing the true orbital frequency in favour of the peak frequency in the power spectrum:
 
+folded_data = asassn_query.apply("fold", fmin=0, fmax=10, samples=10000, optimise=False, inplace=False)
+# sphinx_gallery_start_ignore
+folded_data.store("example_folded_lc.fits.gz")
+# sphinx_gallery_end_ignore
+folded_data.show(show_types=True)
 # sphinx_gallery_start_ignore
 folded_data.plot()
-figure = format_plot(folded_data.figure, 1.5, 1.5)
+figure = format_plot(folded_data.figure, 3, 1.5)
+doc = Document()
+doc.add_root(figure)
+# sphinx_gallery_end_ignore
+folded_data.open()
+# sphinx_gallery_start_ignore
+figure
+# sphinx_gallery_end_ignore
+
+# %%
+# |
+#
+# Frequency Overriding
+# --------------------
+# To avoid the derivation of an optimal frequency entirely, a frequency can be passed via the ``freq`` parameter:
+
+folded_data = asassn_query.apply("fold", freq=2.773227732277323, inplace=False)
+# sphinx_gallery_start_ignore
+folded_data.store("example_folded_lc.fits.gz")
+# sphinx_gallery_end_ignore
+folded_data.show(show_types=True)
+# sphinx_gallery_start_ignore
+folded_data.plot()
+figure = format_plot(folded_data.figure, 3, 1.5)
 doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore

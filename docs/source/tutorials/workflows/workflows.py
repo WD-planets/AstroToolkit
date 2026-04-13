@@ -1,7 +1,7 @@
 """
 Putting Everything Together
 ===========================
-Putting :doc:`multi-target operations <../multiple_targets/multi_target_query>`, :meth:`~ATK.Models.DataSet.split`, and :meth:`~ATK.Models.DataSet.merge` together allows for more complex workflows.
+Putting :doc:`multi-target operations <../multiple_targets/multi_target_query>`, :meth:`~ATK.Models.DataSet.split`, :meth:`~ATK.Models.DataSet.merge`, and :doc:`datapage generation <../datapages/datapage_plotting>` together allows for sophisticated workflows.
 
 The following example shows a set of 2-target light curve queries to ASAS-SN and TESS:
 """
@@ -26,26 +26,34 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+#
 # The resulting :class:`DataSets <ATK.Models.DataSet>` can then be combined into a single :class:`~ATK.Models.DataSet`:
 
 all_lcs = asassn_data.merge(tess_data)
 all_lcs.show()
 
 # %%
+# |
+#
 # Power spectra can be generated across the merged data set, with all survey/band/target management being performed internally:
 
-all_pspec = all_lcs.apply("pspec", fmin=0, fmax=60, samples=50000, inplace=False)
+all_pspec = all_lcs.apply("pspec", fmin=0, fmax=10, samples=50000, inplace=False)
 all_pspec.show()
 
 # %%
+# |
+#
 # The light curves in the merged :class:`~ATK.Models.DataSet` can also be phase-folded and binned:
 
-all_fold = all_lcs.apply("fold", fmin=0, fmax=60, samples=50000, inplace=False, align="max")
+all_fold = all_lcs.apply("fold", fmin=0, fmax=10, samples=50000, inplace=False, align="max")
 all_fold.apply("bin", bins=200)
 all_fold.show()
 
 # %%
-# Finally, the acquired light curve, power spectrum and phase-folded light curve :class:`DataSets <ATK.Models.DataSet>` can be combined into **datapages** (in this case the page for only one of the input targets will be shown for clarity):
+# |
+# 
+# Finally, the acquired light curve, power spectrum and phase-folded light curve :class:`DataSets <ATK.Models.DataSet>` can be combined into **datapages**:
 
 layout = [[all_lcs,   all_lcs,   all_lcs,  all_lcs,  all_lcs],
           [all_lcs,   all_lcs,   all_lcs,  all_lcs,  all_lcs],

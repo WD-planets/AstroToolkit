@@ -265,8 +265,15 @@ def get_tab_title(ctnrs):
 
 
 def get_datapage(layout: list[list]):
-    datasets = list({id(ds): ds for row in layout for ds in row if ds is not None}.values())
-    target_keys = list({target._key for ds in datasets for target in ds.targets})
+    seen = set()
+    datasets = []
+    for row in layout:
+        for ds in row:
+            if ds is not None and id(ds) not in seen:
+                seen.add(id(ds))
+                datasets.append(ds)
+
+    target_keys = list(dict.fromkeys(target._key for ds in datasets for target in ds.targets))
 
     validate_layout(layout)
     regions = parse_layout(layout)
@@ -304,11 +311,12 @@ def get_datapage(layout: list[list]):
                         for i, p in enumerate(plot_list):
                             ctnrs_for_plot = mapping.get(p.id, [])
                             title = get_tab_title(ctnrs_for_plot)
-                            if title in titles:
-                                title = f"{title} {titles[title] + 1}"
-                            elif title is None:
+                            if title is None:
                                 title = str(i)
-                            titles[title] = 1
+                            count = titles.get(title, 0) + 1
+                            titles[title] = count
+                            if count > 1:
+                                title = f"{title} {count}"
 
                             tab_list = TabPanel(child=p, title=title)
                             tabs.append(tab_list)

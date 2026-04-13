@@ -190,7 +190,7 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
     PDM theta statistic (lower = better period), Stellingwerf
     """
 
-    # 1. phase fold
+    # phase fold
     phase = (lc.mjd * freq) % 1
     flux = lc.brightness
 
@@ -202,21 +202,21 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
 
     global_var = weighted_var(flux, weights)
 
-    # 2. sort by phase
+    # sort by phase
     idx = np.argsort(phase)
     phase = phase[idx]
     flux = flux[idx]
 
-    # 3. global variance (normalization)
+    # global variance (normalisation)
     global_var = np.var(flux)
     if global_var == 0:
         return np.inf
 
-    # 4. bin edges
+    # bin edges
     bins = np.linspace(0, 1, nbins + 1)
     digitized = np.digitize(phase, bins)
 
-    # 5. within-bin variance
+    # bin variance
     within_var = 0.0
     total_weight = 0
 
@@ -237,7 +237,7 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
 
     within_var /= total_weight
 
-    # 6. theta statistic
+    # theta statistic
     theta = within_var / global_var
 
     return theta
@@ -270,9 +270,9 @@ def optimise_freq(lcs, fopt, n_harmonics=5):
 
 def fold_lc(
     lcs: list[Lightcurve],
-    fmin: float,
-    fmax: float,
-    samples: int,
+    fmin: float | Quantity | None = None,
+    fmax: float | Quantity | None = None,
+    samples: int | None = None,
     multiband: bool = True,
     optimise: bool = True,
     subtract: str | None = "median",
@@ -281,6 +281,12 @@ def fold_lc(
     freq: float | Quantity | None = None,
 ):
     from ....structures.Lightcurve import Lightcurve
+
+    has_grid = (fmin is not None) and (fmax is not None) and (samples is not None)
+    has_freq = freq is not None
+
+    if not has_grid and not has_freq:
+        raise ValueError("fold must be provided with (fmin, fmax, samples) or freq.")
 
     align_method = "mean" if subtract == "mean" else "median"
 

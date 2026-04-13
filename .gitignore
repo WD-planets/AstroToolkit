@@ -11,3 +11,10 @@ testing/
 
 !src/ATK/plotting/hrd/backdrop_hrd_allmags.fits
 !docs/source/**/*.fits
+
+docs/source/_static/animations/media/*
+!docs/source/_static/animations/media/videos/
+!docs/source/_static/animations/media/videos/*/
+!docs/source/_static/animations/media/videos/*/1080p60/
+!docs/source/_static/animations/media/videos/*/1080p60/*.mp4
+docs/source/_static/animations/media/videos/*/1080p60/partial_movie_files/
