@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import pandas as pd
 from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper
@@ -5,18 +7,23 @@ from bokeh.models.formatters import BasicTickFormatter
 from bokeh.plotting import figure
 
 from ...structures.Lightcurve import Lightcurve
-from ..colours import GRADIENT_MAPS, assign_gradient_palettes, get_gradient
+from ..colours import GRADIENT_MAPS, get_gradient
 from ..formatting import format_plot
+from .folded_params import compute_band_offsets, compute_phase_offsets, handle_fold_arguments
 
 MEAN_WARP_SCALE = 0.25
 
 
-def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float, time_format: str, cmap: str):
+def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float, **kwargs):
     """
     Plots a single light curves in a given band to an existing figure
     """
 
+    if lc.time_type == "phase":
+        lc = handle_fold_arguments(lc, **kwargs)
+
     # time handling
+    time_format = kwargs.get("time_format", "reduced")
     time = lc.time
     if time_format == "reduced":
         time = [t - time_min for t in time]
@@ -47,6 +54,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     hvr = HoverTool(tooltips=[("obj_id", "@obj_id")])
 
     #  final colours
+    cmap = kwargs.get("cmap", "mean")
     if cmap == "mean":
         colour = {"field": "colour", "transform": colour_mapper}
     elif cmap == "flat":
@@ -117,8 +125,20 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
             raise Exception("No time data found.")
         time_min = min(all_times)
     else:
+        # Set up phase-folded light curve parameters
         all_times = None
         time_min = None
+
+        # basic params
+        kwargs["time_format"] = "original"
+        kwargs["cmap"] = "flat"
+
+        # brightness offsets
+        kwargs["offsets"] = compute_band_offsets(lcs, kwargs.get("align", "median"))
+
+        # phase offsets
+        align_phase = kwargs.get("align_phase", "max")
+        kwargs["phase_offsets"] = compute_phase_offsets(lcs, multiband, align_phase)
 
     if multiband[0] is True or multiband[0] is None:
         plot = figure(
@@ -132,7 +152,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
 
         # Plot each band independently
         for lc in lcs:
-            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, **kwargs)
         plots = [plot]
 
     elif multiband[0] is False:
@@ -148,7 +168,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
                 y_axis_label=brightness_type,
                 tools=("pan,wheel_zoom,box_zoom,reset"),
             )
-            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, time_format=time_format, cmap=kwargs.get("cmap", "mean"))
+            plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, **kwargs)
             plots.append(plot)
 
     if brightness_type != "flux":
@@ -239,10 +259,6 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     for per_id_lcs in lc_groups:
         if len(set(lc.time_type for lc in per_id_lcs)) > 1:
             raise ValueError("Detected multiple time formats 'mjd' and 'phase' in Lightcurve plotting.")
-
-        if per_id_lcs[0].time_type == "phase":
-            kwargs["time_format"] = "original"
-            kwargs["cmap"] = "flat"
 
         per_id_plots = dispatch_groups(per_id_lcs, palette_map, **kwargs)
         plots.extend(per_id_plots)
