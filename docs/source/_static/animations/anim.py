@@ -30,7 +30,9 @@ def get_char_speed(char):
 class Anim(MovingCameraScene):
     def render_frame(self, cursor_pos=None):
         code_str = self.displayed if self.displayed.strip() else ""
-        displayed_code = Code(code_string=code_str, language="python", background="rectangle", tab_width=4, paragraph_config={"font": "Ubuntu Sans Mono"})
+        displayed_code = Code(
+            code_string=code_str, language="python", background="rectangle", tab_width=4, paragraph_config={"font": "Ubuntu Sans Mono"}
+        )
         displayed_code.scale(SCALE)
 
         bg = displayed_code.submobjects[0]
@@ -347,7 +349,7 @@ class Anim(MovingCameraScene):
         self.type_code("\nspec = query('spectrum', targets=HuLeo, survey='sdss')")
         self.type_code("\nspec.open()")
         self.show_png("spec.png", 4.5)
-        self.replace_code("spec.open()", "fitted = spec.apply('fit', inplace=False)")
+        self.replace_code("spec.open()", "fitted = spec.apply('fit', inplace=False, smoothing=3.5, prominence=3)")
         self.type_code("\nfitted.open()")
         self.show_png("fitted_spec.png", 4.5)
         self.delete_line(-1)
@@ -372,7 +374,5 @@ class Anim(MovingCameraScene):
 """
 add a small buffer in height so that entering e.g. a "g" or a "y" doesn't change the size?
 stop cursor from going up a line when at the zero position?
-change spectral fitting params to fit H-alpha
-fix hrd
 look into file size of mp4 file
 """

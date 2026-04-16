@@ -23,6 +23,12 @@ def repeat_arrs(x: np.ndarray, *ys: np.ndarray, repeat: int = 2):
 def compute_band_offsets(lcs, align_method="median"):
     ref_lc = lcs[0]
 
+    if align_method is None:
+        band_offsets = {}
+        for lc in lcs:
+            band_offsets[lc.band] = 0.0
+        return band_offsets
+
     if align_method not in ["mean", "median"]:
         raise ValueError(f"Unexpected align method '{align_method}'. Accepted methods: 'mean', 'median'.")
 
@@ -218,16 +224,12 @@ def compute_phase_offsets(lcs: list[Lightcurve], multiband: bool, align_mode):
 def handle_fold_arguments(lc: Lightcurve, **kwargs):
     lc = copy.deepcopy(lc)
 
-    # align bands in brightness
-    aligned_brightness = lc.brightness + kwargs["offsets"][lc.band]
-    setattr(lc, lc.brightness_type, aligned_brightness)
-
     # align bands in phase
     aligned_phase = (lc.phase - kwargs["phase_offsets"][lc.band]) % 1
     setattr(lc, "phase", aligned_phase)
 
     # zero-align magnitudes
-    subtract = kwargs.get("subtract")
+    subtract = kwargs.get("subtract", "median")
     if subtract == "mean":
         weights = 1 / np.power(lc.brightness_err, 2)
         brightness = lc.brightness - np.average(lc.brightness, weights=weights)

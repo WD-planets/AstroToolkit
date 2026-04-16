@@ -21,8 +21,6 @@ if TYPE_CHECKING:
 
 warnings.simplefilter("ignore", category=OptimizeWarning)
 
-DEBUG = False
-
 C_KMS = 299792.458
 GAUSS_PARAMS = ("h", "a", "mu", "sigma")
 

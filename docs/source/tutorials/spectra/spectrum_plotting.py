@@ -34,7 +34,7 @@ figure
 #
 # .. note::
 #
-#    :class:`Spectra <ATK.Models.Spectrum>` and their corresponding :class:`SEDs <ATK.Models.SED>` are automatically matched by :class:`~ATK.Models.Target` (i.e. by input search position or Gaia source ID) before they are overlayed.
+#    :class:`Spectra <ATK.Models.Spectrum>` and their corresponding :class:`SEDs <ATK.Models.SED>` are automatically matched by :class:`~ATK.Models.Target` (i.e. by input search position or Gaia source ID) before being overlayed.
 
 # %%
 #

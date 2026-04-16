@@ -9,7 +9,8 @@ from bokeh.plotting import figure
 from ...structures.Lightcurve import Lightcurve
 from ..colours import GRADIENT_MAPS, get_gradient
 from ..formatting import format_plot
-from .folded_params import compute_band_offsets, compute_phase_offsets, handle_fold_arguments
+from .folded_params import (compute_band_offsets, compute_phase_offsets,
+                            handle_fold_arguments)
 
 MEAN_WARP_SCALE = 0.25
 
@@ -124,6 +125,8 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
         if not all_times:
             raise Exception("No time data found.")
         time_min = min(all_times)
+
+        y_label = brightness_type
     else:
         # Set up phase-folded light curve parameters
         all_times = None
@@ -133,12 +136,14 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
         kwargs["time_format"] = "original"
         kwargs["cmap"] = "flat"
 
-        # brightness offsets
-        kwargs["offsets"] = compute_band_offsets(lcs, kwargs.get("align", "median"))
-
         # phase offsets
-        align_phase = kwargs.get("align_phase", "max")
+        align_phase = kwargs.get("align", "max")
         kwargs["phase_offsets"] = compute_phase_offsets(lcs, multiband, align_phase)
+
+        if kwargs.get("subtract", "median"):
+            y_label = f"Relative {brightness_type}"
+        else:
+            y_label = brightness_type
 
     if multiband[0] is True or multiband[0] is None:
         plot = figure(
@@ -146,7 +151,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
             height=400,
             title=f"{survey.upper()} {band_names} lightcurve(s)",
             x_axis_label=x_label,
-            y_axis_label=brightness_type,
+            y_axis_label=y_label,
             tools=("pan,wheel_zoom,box_zoom,reset"),
         )
 
@@ -165,7 +170,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
                 height=400,
                 title=f"{survey.upper()} {band_names} lightcurve(s)",
                 x_axis_label=x_label,
-                y_axis_label=brightness_type,
+                y_axis_label=y_label,
                 tools=("pan,wheel_zoom,box_zoom,reset"),
             )
             plot = plot_band(plot=plot, lc=lc, palette=palette_map[lc.band], time_min=time_min, **kwargs)
@@ -208,7 +213,9 @@ def assign_band_colours(bands: list[str], colours: list[str] | None = None) -> d
     return {band: colour for band, colour in zip(bands, result)}
 
 
-def get_band_colours(bands: list[str], colours: list[str] | None = None, gradient_size: int = 256, cycles: int = 1, reverse: bool = False) -> dict[str, list[str]]:
+def get_band_colours(
+    bands: list[str], colours: list[str] | None = None, gradient_size: int = 256, cycles: int = 1, reverse: bool = False
+) -> dict[str, list[str]]:
     band_colour_names = assign_band_colours(bands, colours)
 
     return {band: get_gradient(colour, gradient_size, cycles=cycles, reverse=reverse) for band, colour in band_colour_names.items()}

@@ -62,7 +62,7 @@ spec.plot()
 spec.figure = format_plot(spec.figure, 2, 1)
 export_png(spec.figure, filename="spec.png")
 
-fitted = spec.apply("fit")
+fitted = spec.apply("fit", smoothing=3.5, prominence=3)
 fitted.figure = format_plot(fitted.figure, 2, 1)
 export_png(fitted.figure, filename="fitted_spec.png")
 
@@ -73,5 +73,5 @@ export_png(sed.figure, filename="sed.png")
 
 hrd = query("hrd", targets=HuLeo, path="hrd.fits.gz")
 hrd.plot()
-hrd.figure = format_plot(hrd.figure, 1, 1, True)
+hrd.figure = format_plot(hrd.figure, 2, 2, True)
 export_png(hrd.figure, filename="hrd.png")
