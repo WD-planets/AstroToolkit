@@ -16,20 +16,14 @@ AstroToolkit Docs
 
 |
 
-.. centered:: **AstroToolkit** (**ATK**) is a set of tools for fetching, plotting, and analysing astronomical data. The package is in active development - please report any issues/suggestions/contributions on `GitHub <https://github.com/WD-planets/AstroToolkit>`_.
+.. centered:: **AstroToolkit** (**ATK**) is a set of tools for fetching, plotting, and analysing astronomical data, all while correcting for proper motion with state of the art photometry. The package is in active development - please report any issues/suggestions/contributions on `GitHub <https://github.com/WD-planets/AstroToolkit>`_.
 
 .. video:: _static/animations/media/videos/anim/1080p60/Anim.mp4
    :align: center
-   :width: 500
-   :height: 300
    :loop:
    :autoplay:
    :nocontrols:
 
-|
-|
-|
-|
 |
 
 .. raw:: html

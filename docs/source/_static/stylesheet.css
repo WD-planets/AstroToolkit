@@ -64,3 +64,11 @@ video {
   text-align: center;
   font-weight: normal;
 }
+
+video {
+    width: 100%;
+    max-width: 800px;   /* 👈 prevents huge videos on wide screens */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}

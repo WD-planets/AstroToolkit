@@ -115,6 +115,7 @@ Data
     - needed to make sure .to() etc. doesn't fail
 
 - sort container manipulations (to/from dataframe/table/etc), this can maybe wait but needs to at least work internally
+- fix show() having too much whitespace (e.g. in teaser animation)
 
 Docs
 ====

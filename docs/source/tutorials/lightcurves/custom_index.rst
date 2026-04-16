@@ -8,3 +8,4 @@ Lightcurves
     ../../auto_tutorials/lightcurves/lightcurve_plotting
     ../../auto_tutorials/lightcurves/lightcurve_manipulation
     ../../auto_tutorials/lightcurves/lightcurve_timeseries
+    ../../auto_tutorials/lightcurves/folded_plotting
