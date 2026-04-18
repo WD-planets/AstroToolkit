@@ -78,7 +78,7 @@ class SurveyConfig(YAMLConfig):
     def _get_overlays(self):
         self._load()
 
-        positional_keys = ["lon_column", "lat_column", "frame"]
+        positional_keys = ["lon", "lat", "frame"]
         photometric_keys = positional_keys + ["mags", "errors"]
 
         overlays = {"photometric": {}, "positional": {}}

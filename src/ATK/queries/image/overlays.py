@@ -46,8 +46,8 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     gaia_epoch = vizier_epochs["gaia"]
     non_gaia_epoch = vizier_epochs[survey]
 
-    lat_col = survey_info["lat_column"]
-    lon_col = survey_info["lon_column"]
+    lat_col = survey_info["lat"]
+    lon_col = survey_info["lon"]
 
     ra_unit = _get_unit(non_gaia_data[lon_col])
     dec_unit = _get_unit(non_gaia_data[lat_col])
@@ -103,9 +103,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
             # if rng < 0.5:
             #     dist_val = None
 
-            gaia_coords.append(
-                SkyCoord(ra=ra, dec=dec, frame="icrs", pm_ra_cosdec=pmra, pm_dec=pmdec, distance=dist_val, obstime=gaia_epoch)
-            )
+            gaia_coords.append(SkyCoord(ra=ra, dec=dec, frame="icrs", pm_ra_cosdec=pmra, pm_dec=pmdec, distance=dist_val, obstime=gaia_epoch))
 
         non_gaia_coords = [c.transform_to("icrs") for c in non_gaia_coords]
         gaia_coords = correct_coords(gaia_coords, non_gaia_epoch)
@@ -132,10 +130,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
         if len(matched_index):
             pm_ra[matched_index] = [gaia_coords[i].pm_ra_cosdec.to_value(u.mas / u.yr) for i in index[matched_index]]
             pm_dec[matched_index] = [gaia_coords[i].pm_dec.to_value(u.mas / u.yr) for i in index[matched_index]]
-            dist[matched_index] = [
-                gaia_coords[i].distance.to_value(u.pc) if gaia_coords[i].distance.unit is not u.one else np.nan
-                for i in index[matched_index]
-            ]
+            dist[matched_index] = [gaia_coords[i].distance.to_value(u.pc) if gaia_coords[i].distance.unit is not u.one else np.nan for i in index[matched_index]]
 
         new_coords = []
 
@@ -150,9 +145,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
             elif np.isnan(dist_val):
                 raise ValueError("Bad distance.")
 
-            new_coords.append(
-                SkyCoord(ra=c.ra, dec=c.dec, frame="icrs", obstime=c.obstime, pm_ra_cosdec=pmra_val, pm_dec=pmdec_val, distance=dist_val)
-            )
+            new_coords.append(SkyCoord(ra=c.ra, dec=c.dec, frame="icrs", obstime=c.obstime, pm_ra_cosdec=pmra_val, pm_dec=pmdec_val, distance=dist_val))
 
         non_gaia_coords = new_coords
         non_gaia_coords, correction = correct_coords(non_gaia_coords, image.epoch, get_correction=True)
@@ -172,18 +165,25 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
         }
     )
 
-    per_mag_dfs = []
+    if "mags" in survey_info and "errors" in survey_info:
+        per_mag_dfs = []
 
-    for mag, err in zip(survey_info["mags"], survey_info["errors"]):
-        tmp = df.copy()
-        tmp["mag_name"] = mag
-        tmp["mag"] = np.asarray(non_gaia_data[mag])
-        tmp["err_name"] = err
-        tmp["err"] = np.asarray(non_gaia_data[err])
+        for mag, err in zip(survey_info["mags"], survey_info["errors"]):
+            tmp = df.copy()
+            tmp["mag_name"] = mag
+            tmp["mag"] = np.asarray(non_gaia_data[mag])
+            tmp["err_name"] = err
+            tmp["err"] = np.asarray(non_gaia_data[err])
 
-        per_mag_dfs.append(tmp)
+            per_mag_dfs.append(tmp)
 
-    final_df = pd.concat(per_mag_dfs).reset_index(drop=True)
+        final_df = pd.concat(per_mag_dfs).reset_index(drop=True)
+    else:
+        df["mag_name"] = "n/a"
+        df["mag"] = np.nan
+        df["err"] = "n/a"
+        df["err_name"] = np.nan
+        final_df = df
 
     n_pixels = (image.hdu.data.shape[1], image.hdu.data.shape[0])
     pixel_scales = proj_plane_pixel_scales(image.wcs)

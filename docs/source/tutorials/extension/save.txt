@@ -1,0 +1,92 @@
+"""
+# %%
+#
+# |
+# |
+#
+# Adding a New Catalogue Alias
+# ============================
+# If a Vizier catalogue is being used regularly it may become tedious to remember its ID. Additionally, and perhaps more importantly, **the above does not benefit from proper motion correction as ATK doesn't know AllWISE's epoch.** Both of these can be solved by adding the catalogue's information the **survey file**.
+#
+#
+# .. code-block:: console
+#
+#    $ ATKsurvey show
+#
+# or from inside a script:
+
+from ATK.Config import SURVEY_CONFIG
+
+SURVEY_CONFIG.show()
+
+# %%
+# |
+#
+# Editing the Alias File
+# ----------------------
+# The easiest way to edit the **survey file** is to open it in the default text editor:
+#
+# .. code-block:: console
+#
+#    $ ATKsurvey open
+#
+# .. code-block:: python
+#
+#    from ATK.Config import SURVEY_CONFIG
+#
+#    SURVEY_CONFIG.open()
+#
+# |
+#
+# After adding ``allwise = II/328/allwise`` to the alias file, ``allwise`` can now be used as an alias in Vizier queries:
+
+# sphinx_gallery_start_ignore
+SURVEY_CONFIG._set("vizier", "allwise", id="II/328/allwise")
+# sphinx_gallery_end_ignore
+
+allwise_query = query("vizier", targets=target, survey="allwise")
+allwise_query.show()
+# sphinx_gallery_start_ignore
+pass
+# sphinx_gallery_end_ignore
+
+
+# %%
+#
+# |
+# |
+#
+# Setting Survey Epochs
+# =====================
+# An alias to AllWISE has now been added, but we are still getting no data. This is because ATK does not know AllWISE's epoch, and so no correction can be performed. ATK stores the epochs of all surveys in an epoch file, which can be accessed in the same way as the alias file:
+
+# An epoch can be set for AllWISE by adding ``allwise = 2010-06-01T00:00:00.000`` under the category ``vizier_aliases``.
+#
+# |
+#
+# Rerunning the Query
+# -------------------
+# Running the same query as above now utilises proper motion correction to retrieve AllWISE data for van Maanen's Star:
+
+# sphinx_gallery_start_ignore
+SURVEY_CONFIG._set("vizier", "allwise", epoch="2010-05-01T00:00:00.000")
+# sphinx_gallery_end_ignore
+
+# %%
+# test
+
+target = 2552928187080872832
+allwise_query = query("vizier", targets=target, survey="allwise")
+allwise_query.show()
+# sphinx_gallery_start_ignore
+pass
+# sphinx_gallery_end_ignore
+
+# %%
+#
+# |
+# |
+# |
+#
+# .. rubric:: Download this Tutorial
+"""

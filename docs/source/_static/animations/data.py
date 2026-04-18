@@ -62,7 +62,7 @@ spec.plot()
 spec.figure = format_plot(spec.figure, 2, 1)
 export_png(spec.figure, filename="spec.png")
 
-fitted = spec.apply("fit", smoothing=3.5, prominence=3)
+fitted = spec.apply("fit", smooth=3.5, prom=3)
 fitted.figure = format_plot(fitted.figure, 2, 1)
 export_png(fitted.figure, filename="fitted_spec.png")
 

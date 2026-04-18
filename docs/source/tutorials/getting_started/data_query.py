@@ -90,11 +90,11 @@ galex_query = query("vizier", targets=target, survey="galex")
 # %%
 # .. note::
 #
-#    By default, ATK supports queries to the following `Vizier <https://vizier.cds.unistra.fr/>`_ catalogues:
+#    By default, ATK supports queries via aliases to the following `Vizier <https://vizier.cds.unistra.fr/>`_ catalogues:
 #
 #    .. include:: supported_aliases.rst
 # 
-#    A tutorial on extending :func:`~ATK.Tools.query` to work with any `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue (including automatic proper motion correction) can be found :doc:`here <../extension/vizier>`.
+#    To utilise any other :doc:`Vizier <../extension/vizier>` catalogue, enter its catalogue ID (e.g. ``"I/355/gaiadr3"`` for Gaia DR3). A full tutorial on extending :func:`~ATK.Tools.query` to work with any `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue (including automatic proper motion correction) can be found :doc:`here <../extension/vizier>`.
 # 
 # |
 #

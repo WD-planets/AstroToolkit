@@ -67,7 +67,7 @@ video {
 
 video {
     width: 100%;
-    max-width: 800px;   /* 👈 prevents huge videos on wide screens */
+    max-width: 800px;
     height: auto;
     display: block;
     margin: 0 auto;

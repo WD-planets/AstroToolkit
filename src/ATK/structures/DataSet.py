@@ -13,7 +13,8 @@ from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
-from .structures_core import COMBINE_PLOTS, SPLIT_BY_SURVEY, SPLIT_BY_TARGET, Container, manage_inplace
+from .structures_core import (COMBINE_PLOTS, SPLIT_BY_SURVEY, SPLIT_BY_TARGET,
+                              Container, manage_inplace)
 from .Target import Target
 
 
@@ -142,7 +143,8 @@ class DataSet:
         return self._fetch_by_key(target._key)
 
     def split(self, targets: any, radius: Quantity = 3 * u.arcsec, inplace: bool = True) -> DataSet:
-        from ..queries.query_core import _normalise_targeting_input, setup_targeting
+        from ..queries.query_core import (_normalise_targeting_input,
+                                          setup_targeting)
 
         input_targets = _normalise_targeting_input(targets)
         targets = setup_targeting(targets)
@@ -227,14 +229,14 @@ class DataSet:
         return SPLIT_BY_SURVEY[self._ctnr_kind]
 
     @classmethod
-    def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None, survey: str = None):
+    def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None):
         from ..queries.query_core import setup_targeting
 
         # kind, targets, survey, radius, exception, data, figure
 
         targets = setup_targeting(target)
 
-        return cls(kind=kind, targets=targets, survey=survey, radius=radius, exception=False)
+        return cls(kind=kind, targets=targets, exception=False)
 
     def add(self, data: Container):
         if self.data and self._ctnr_kind != type(data).__name__.lower():

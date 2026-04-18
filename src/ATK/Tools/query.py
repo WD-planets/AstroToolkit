@@ -9,18 +9,39 @@ from ..structures.DataSet import DataSet
 from ..utilities.defaults import RETURNS
 
 
-def query(kind: str, **arguments) -> DataSet:
+def query(kind: str, **kwargs) -> DataSet:
     """
-    Perform a query.
+    Performs a query to retrieve astronomical data.
+
+    Parameters
+    ----------
+    kind : {``'vizier'``, ``'image'``, ``'lightcurve'``, ``'spectrum'``, ``'sed'``, ``'hrd'``}, optional
+        Type of query to perform.
+    **kwargs
+        Arguments specific to each ``kind``. See below.
+
+    Notes
+    -----
+    .. rubric:: For ``kind='vizier'``
+
+    radius : float or :class:`~astropy.units.Quantity`, optional
+        Search radius around each target.
+
+        Default taken from ``query_settings.query_radius`` config key
+        (see :doc:`here </auto_tutorials/configuration/config>`).
+
+    .. rubric:: For ``kind='image'``
+
+    size : float or :class:`~astropy.units.Quantity`, optional
+        Image size.
 
     Returns
     -------
-    DataSet
-        Container holding query metadata and results.
+    :class:`~ATK.Models.DataSet`
+        Dataset containing data matching ``kind``.
     """
 
-    # get necessary parameters from config if not given
-    arguments = get_query_arguments(kind, arguments)
+    arguments = get_query_arguments(kind, kwargs)
 
     targets = arguments.pop("targets", None)
 

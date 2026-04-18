@@ -181,7 +181,9 @@ def plot_rv(
 
         # Invisible hover lines
         hover_line = plot.multi_line(xs="xs", ys="ys", source=source, line_width=20, alpha=0, legend_label=f"RV = {rv_val:.1f} km/s")
-        plot.add_tools(HoverTool(renderers=[hover_line], tooltips=[("rest λ", "@lab_rest Å"), ("shifted λ", "@obs_shift Å"), ("RV", "@rv km/s")]))
+        plot.add_tools(
+            HoverTool(renderers=[hover_line], tooltips=[("rest λ", "@lab_rest Å"), ("shifted λ", "@obs_shift Å"), ("RV", "@rv km/s")])
+        )
 
         head = OpenHead(line_color=color, line_width=2, size=6)
 
@@ -212,7 +214,7 @@ def plot_rv(
             plot.add_layout(arrow)
 
 
-def get_rvs(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs):
+def get_rvs(plot: figure, spectrum: Spectrum, prom: float = 2, smooth: int = 3, snr: float = 3, **kwargs):
     """
     Calculates and plots multi-component radial velocities of spectral features
     """
@@ -220,11 +222,20 @@ def get_rvs(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothing: 
     from ....plotting.spectrum.spectrum_overlay import OVERLAY_LINES
 
     # get wavelengths and peak values of spectral features
-    features, peak_vals = do_fitting(plot, spectrum, prominence, smoothing, snr, get_features=True, **kwargs)
+    features, peak_vals = do_fitting(plot, spectrum, prom, smooth, snr, get_features=True, **kwargs)
 
     # extract wavelengths
     wav_obs = features * u.AA
-    wav_lab = np.array([line["wavelength"] for line in OVERLAY_LINES if min(spectrum.wavelength.value) <= line["wavelength"] <= max(spectrum.wavelength.value)]) * u.AA
+    wav_lab = (
+        np.array(
+            [
+                line["wavelength"]
+                for line in OVERLAY_LINES
+                if min(spectrum.wavelength.value) <= line["wavelength"] <= max(spectrum.wavelength.value)
+            ]
+        )
+        * u.AA
+    )
 
     # find radial velocities
     rv_components, matched_lines, rvs, scores = find_rv_components(wav_obs, wav_lab)

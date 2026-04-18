@@ -42,6 +42,7 @@ AstroToolkit Docs
     :maxdepth: 2
     :hidden:
     :caption: Getting Started
+    :name: getting-started
     
     rst/introduction
     tutorials/getting_started/custom_index
@@ -68,7 +69,6 @@ AstroToolkit Docs
     :caption: Extending ATK
     
     ../auto_tutorials/extension/vizier
-    ../auto_tutorials/extension/overlays
     ../auto_tutorials/extension/external_data
 
 .. toctree::
@@ -83,4 +83,5 @@ AstroToolkit Docs
     :hidden:
     :caption: Modules
     
-    rst/modules/index.rst
+    rst/modules/tools.rst
+    rst/modules/models.rst

@@ -10,7 +10,7 @@ To aid the matching of positional data, image queries support detection overlays
 
    .. include:: ../getting_started/supported_aliases.rst
 
-   A tutorial on defining detection overlays for any Vizier catalogue can be found :doc:`here <../extension/overlays>`.
+   A tutorial on defining detection overlays for any Vizier catalogue can be found :doc:`here <../extension/vizier>`.
 
 |
 |
@@ -51,7 +51,7 @@ figure
 #
 # Overlay Configuration
 # =====================
-# By default, a detection overlay uses whichever band is listed first in the catalogue's overlay definition (see :doc:`here <../extension/overlays>`). If a different band is required, or perhaps multiple bands from the same catalogue need to be overlayed simultaneously, ``overlays`` can instead be passed as a ``dict``:
+# By default, a detection overlay uses whichever band is listed first in the catalogue's overlay definition (see :doc:`here <../extension/vizier>`). If a different band is required, or perhaps multiple bands from the same catalogue need to be overlayed simultaneously, ``overlays`` can instead be passed as a ``dict``:
 
 ps_query = query(
     "image",

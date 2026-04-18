@@ -86,8 +86,8 @@ figure
 # %%
 # |
 # 
-# Repetitions
-# ===========
+# Setting Repetitions
+# ===================
 # By default, folded light curves are repeated to show two complete modulations in brightness. This can be changed by passing ``repeat`` with a number of repetitions:
 
 # sphinx_gallery_start_ignore

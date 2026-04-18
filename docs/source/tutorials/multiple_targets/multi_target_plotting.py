@@ -50,4 +50,3 @@ figure
 # |
 #
 # .. rubric:: Download this Tutorial
-

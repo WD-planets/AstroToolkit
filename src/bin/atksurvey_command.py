@@ -8,8 +8,7 @@ def validate_specific_args(parser, section, args):
     ignore_args = ["job", "section", "name", "func", "epoch"]
 
     if section == "vizier":
-        if args.id is None:
-            raise ValueError("Vizier catalogue aliases require a corresponding vizier --id.")
+        pass
     else:
         additional_args = list(arg for arg in args.__dict__.keys() if arg not in ignore_args and args.__dict__[arg] is not None)
         for arg in additional_args:
@@ -29,8 +28,8 @@ def handle_set(parser, args):
         epoch=args.epoch,
         mags=args.mags,
         errors=args.errors,
-        lon_column=args.lon,
-        lat_column=args.lat,
+        lon=args.lon,
+        lat=args.lat,
         frame=args.frame,
     )
 

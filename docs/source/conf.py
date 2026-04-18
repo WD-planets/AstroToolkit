@@ -47,8 +47,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
+    "numpydoc",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
     "sphinxcontrib.video",
     "bokeh.sphinxext.bokeh_plot",
@@ -56,6 +56,10 @@ extensions = [
 ]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False
+numpydoc_xref_param_type = True
 
 # ------------
 # HTML Options
@@ -73,6 +77,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "astropy": ("https://docs.astropy.org/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
 }
 

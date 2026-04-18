@@ -96,18 +96,7 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
     overlay = image.overlay.copy()
 
     # set up hovertool
-    hvr = HoverTool(
-        tooltips=[
-            ("survey", "@survey"),
-            ("ra", "@ra"),
-            ("dec", "@dec"),
-            ("band", "@mag_name"),
-            ("mag", "@mag"),
-            ("error", "@err"),
-            ("simbad_id", "@simbad_id"),
-            ("correction", "@correction"),
-        ]
-    )
+    hvr = HoverTool()
     hvr.renderers = []
 
     # set up taptool
@@ -148,6 +137,17 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
 
     # magnitude-scaled detections
     for (survey, label), group in non_nan_mag.groupby(["survey", "label"]):
+        hvr.tooltips = [
+            ("survey", "@survey"),
+            ("ra", "@ra"),
+            ("dec", "@dec"),
+            ("band", "@mag_name"),
+            ("mag", "@mag"),
+            ("error", "@err"),
+            ("simbad_id", "@simbad_id"),
+            ("correction", "@correction"),
+        ]
+
         plot.circle(
             source=ColumnDataSource(group),
             x="marker_ra",
@@ -175,6 +175,8 @@ def plot_overlay(plot: figure, image: Image, relative_axes: bool) -> figure:
 
     # non-scaled detections
     for (survey, label), group in nan_mag.groupby(["survey", "label"]):
+        hvr.tooltips = [("survey", "@survey"), ("ra", "@ra"), ("dec", "@dec"), ("simbad_id", "@simbad_id"), ("correction", "@correction")]
+
         scatter = plot.scatter(
             source=ColumnDataSource(group),
             x="marker_ra",

@@ -116,15 +116,13 @@ Data
 
 - sort container manipulations (to/from dataframe/table/etc), this can maybe wait but needs to at least work internally
 - fix show() having too much whitespace (e.g. in teaser animation)
+- get full set of spectral lines from NIST for rv fitting?
 
 Docs
 ====
-- make multiple targets a separate section, just show the basics after Vizier but then more in-depth after Images
 - add note to early tutorials that multi-target queries and operations are supported
 - replace 'star' with e.g. system, source, etc.
 
-- add a general note to the docs about how ATK implicitly converts SkyCoords and IDs to Target objects, and uses these to link data
-- check phase folding in docs and finish this section, hopefully once ztf is actually working
 - add note about TESS and ATLAS light curve filtering toggle
 - rename tutorial .py files
 - figures in docs need to scale with screen resolution, some html scaling thing and keep rest the same, maybe in plot_formatting under _utilities.py?
@@ -132,7 +130,6 @@ Docs
 - check type hints
 - finish docs
 - function/docs links in code examples (like for external libraries)?
-- make homepage like Lightkurve with timelapse code
 
 Other
 =====

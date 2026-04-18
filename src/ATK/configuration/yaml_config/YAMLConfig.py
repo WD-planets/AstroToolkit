@@ -27,6 +27,11 @@ class _SectionProxy:
     def __setitem__(self, key, value):
         self._parent._load()
 
+        # treat None as delete
+        if value is None:
+            self._parent._del(self._section, key)
+            return
+
         self._parent._raw.setdefault(self._section, {})
         self._parent._config.setdefault(self._section, {})
 

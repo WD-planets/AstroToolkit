@@ -302,7 +302,7 @@ def remove_false_features(plot, spectrum, fits):
     return keep
 
 
-def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothing: int = 3, snr: float = 3, **kwargs) -> figure | Quantity:
+def do_fitting(plot: figure, spectrum: Spectrum, prom: float = 2, smooth: int = 3, snr: float = 3, **kwargs) -> figure | Quantity:
     """
     Identifies and fits any number of spectral absorption and emission features
     """
@@ -321,9 +321,9 @@ def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothin
         plot = figure(width=1000, height=500, x_axis_label=f"Wavelength / {wavelength_unit.to_string('unicode')}", y_axis_label="Flux")
 
     # get features
-    peak_data = detect_features(plot, spectrum_copy, prominence, smoothing)
+    peak_data = detect_features(plot, spectrum_copy, prom, smooth)
 
-    flux_smooth = gaussian_filter1d(spectrum_copy.flux, sigma=smoothing)
+    flux_smooth = gaussian_filter1d(spectrum_copy.flux, sigma=smooth)
 
     # loop through returned peaks
     fits, responses, filtering = [], [], []
@@ -345,13 +345,31 @@ def do_fitting(plot: figure, spectrum: Spectrum, prominence: float = 2, smoothin
     # remove fake features that result from two close real features
     fits = remove_false_features(plot, spectrum_copy, fits)
 
+    """
+    final_mus = np.asarray([fit["mu"] for fit in fits])
+    final_signs = np.asarray([fit["sign"] for fit in fits])
+    fits = []
+    for mu, sign in zip(final_mus, final_signs):
+        p0 = {}
+        p0["mu"] = mu
+        p0["sign"] = sign
+
+        fit, response, filter = fit_gaussian(plot, spectrum_copy, p0, snr_limit=snr)
+        print(fit)
+        fits.append(fit)
+    """
+
     # plot peaks
-    features, peaks = [], []
+    features, peaks, renderers = [], [], []
     for fit in fits:
-        plot.line(fit["model_x"], fit["model_y"], line_color="limegreen", line_width=2, legend_label="Detected Peaks")
+        source = ColumnDataSource({"x": fit["model_x"], "y": fit["model_y"], "wav": [fit["mu"]] * len(fit["model_x"])})
+        line = plot.line(x="x", y="y", source=source, line_color="limegreen", line_width=2, legend_label="Detected Peaks")
+
         features.append(fit["mu"])
         peak_val = fit["model_y"].max() if fit["sign"] == 1 else fit["model_y"].min()
         peaks.append(peak_val)
+        renderers.append(line)
+    plot.add_tools(HoverTool(renderers=renderers, tooltips=[("Peak λ", "@wav{0.000} Å")]))
 
     if kwargs.get("get_features"):
         return np.asarray(features), peaks
