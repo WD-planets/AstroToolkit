@@ -1,3 +1,5 @@
+:html_theme.sidebar_secondary.remove:
+
 .. raw:: html
 
    <div style="height: 0; visibility: hidden;">
@@ -35,53 +37,14 @@ AstroToolkit Docs
 .. centered:: This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement `No. 101020057 <https://cordis.europa.eu/project/id/101020057>`_).
 
 .. image:: _static/erc_logo_light.png
-    :scale: 15%
+    :scale: 25%
     :align: center
 
 .. toctree::
-    :maxdepth: 2
     :hidden:
-    :caption: Getting Started
-    :name: getting-started
-    
-    rst/introduction
-    tutorials/getting_started/custom_index
-    tutorials/images/custom_index
-    tutorials/lightcurves/custom_index
-    tutorials/spectra/custom_index
-    tutorials/seds/custom_index
-    tutorials/hrds/custom_index
 
-.. toctree:: 
-   :maxdepth: 2 
-   :hidden: 
-   :caption: Additional Tutorials
-
-   tutorials/multiple_targets/custom_index
-   tutorials/merging/custom_index
-   tutorials/datatables/custom_index
-   tutorials/datapages/custom_index
-   tutorials/workflows/custom_index
-
-.. toctree::
-    :maxdepth: 2
-    :hidden:
-    :caption: Extending ATK
-    
-    ../auto_tutorials/extension/vizier
-    ../auto_tutorials/extension/external_data
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: Configuration
-
-    auto_tutorials/configuration/config
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: Modules
-    
-    rst/modules/tools.rst
-    rst/modules/models.rst
+    getting_started
+    additional_tutorials
+    extending_atk
+    configuration
+    modules

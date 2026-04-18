@@ -65,9 +65,12 @@ numpydoc_xref_param_type = True
 # HTML Options
 # ------------
 
-html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
-html_theme_options = {"collapse_navigation": False}
+html_theme = "pydata_sphinx_theme"
+html_js_files = ["force_light.js"]
+
+html_context = {"default_mode": "light"}
+html_theme_options = {"navbar_end": ["navbar-icon-links"]}
 
 # -------------------
 # InterSphinx Options

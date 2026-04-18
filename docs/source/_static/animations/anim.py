@@ -5,7 +5,7 @@ from manim import *
 config.background_color = "#ffffff"
 config.max_files_cached = 500
 config.disable_caching = True
-config.pixel_width = 1080
+config.pixel_width = 1350
 config.pixel_height = 1080
 
 MIN_WIDTH = 4
@@ -30,9 +30,7 @@ def get_char_speed(char):
 class Anim(MovingCameraScene):
     def render_frame(self, cursor_pos=None):
         code_str = self.displayed if self.displayed.strip() else ""
-        displayed_code = Code(
-            code_string=code_str, language="python", background="rectangle", tab_width=4, paragraph_config={"font": "Ubuntu Sans Mono"}
-        )
+        displayed_code = Code(code_string=code_str, language="python", background="rectangle", tab_width=4, paragraph_config={"font": "Ubuntu Sans Mono"})
         displayed_code.scale(SCALE)
 
         bg = displayed_code.submobjects[0]

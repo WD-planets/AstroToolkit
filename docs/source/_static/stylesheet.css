@@ -1,3 +1,25 @@
+.bd-main .bd-content .bd-article-container {
+  max-width: 100%;
+}
+
+.bd-page-width {
+  max-width: 100%;
+}
+
+.bd-sidebar-primary {
+    width: fit-content;
+    min-width: 0;
+    max-width: 20rem;
+    flex-shrink: 0;
+    padding-left: 1rem;
+    padding-right: 3rem;
+}
+
+div.sphx-glr-download-link-note {
+  height: 0px;
+  visibility: hidden;
+}
+
 body {
   font-family: "Inter", sans-serif;
 }
@@ -10,20 +32,6 @@ h1, h2, h3, h4 {
   font-family: "Inter", sans-serif;
 }
 
-.wy-nav-content {
-    background-color: #ffffff;
-}
-
-.document {
-    background-color: #ffffff;
-}
-
-.wy-nav-content {
-    max-width: none;
-    padding-left: 8rem;
-    padding-right: 8rem;
-}
-
 .rubric {
     font-size: 175%;
     font-weight: 700;
@@ -33,36 +41,15 @@ h1, h2, h3, h4 {
 	font-family: "Inter", "Lato", "Helvetica Neue", Arial, sans-serif;
 }
 
-div.sphx-glr-download-link-note {
-  height: 0px;
-  visibility: hidden;
-}
-
 .bolditalic {
   font-weight: bold;
   font-style: italic;
-}
-
-video {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.wy-nav-content h1:first-of-type {
-  font-size: 2.5em;
 }
 
 .big-centred {
   font-size: 3.5em;
   font-weight: 800;
   text-align: center;
-}
-
-.center {
-  display: block;
-  text-align: center;
-  font-weight: normal;
 }
 
 video {

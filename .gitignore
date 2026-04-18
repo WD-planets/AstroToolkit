@@ -10,8 +10,9 @@ docs/source/auto_tutorials/
 testing/
 
 !src/ATK/plotting/hrd/backdrop_hrd_allmags.fits
-!docs/source/**/*.fits
 
+!docs/source/**/*.fits
+!docs/_templates/*
 docs/source/_static/animations/media/*
 !docs/source/_static/animations/media/videos/
 !docs/source/_static/animations/media/videos/*/

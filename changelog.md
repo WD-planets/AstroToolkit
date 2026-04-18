@@ -91,6 +91,7 @@ Changes
 - old 'raw' argument in light curve queries is now 'filter', disables all non-required filtering if False (default=True)
 - DataSets can be merged with DataSet_1.merge(DataSet_2), and split with DataSet.split(<targeting info>)
 - Datapages now automatically generate tabs so that if multiple plots are present in an included DataSet (e.g. if multiple data products are returned from a query or if DataSet.merge() was used to combine multiple surveys), user can now freely switch between them
+- migrated docs from ReadTheDocs theme to PyData
 
 + other stuff that I forgot to write down
 
