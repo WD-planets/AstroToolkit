@@ -7,7 +7,7 @@ from astropy.units import Quantity
 
 from .methods.spectrum.fitting import do_fitting
 from .methods.spectrum.radial_velocities import get_rvs
-from .structures_core import Container, QuantityArray, manage_inplace
+from .structures_core import Container, manage_inplace
 
 
 @dataclass(repr=False)
@@ -19,15 +19,13 @@ class Spectrum(Container):
     separation: Quantity | None = None
     exposure: Quantity | None = None
     wav_ref: Quantity | None = None
-    snr: numpy.ndarray | None = None
-    features: Quantity | None = None
 
     # --- data ---
-    wavelength: numpy.ndarray | QuantityArray | None = None
-    velocity: numpy.ndarray | QuantityArray | None = None
-    flux: numpy.ndarray | QuantityArray | None = None
+    wavelength: numpy.ndarray | Quantity | None = None
+    velocity: numpy.ndarray | Quantity | None = None
+    flux: numpy.ndarray | Quantity | None = None
 
-    _required: tuple[str] = ("flux",)
+    _required = ["survey"]
 
     _data_methods: tuple = ("crop", "bin", "vspec")
     _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "rv_fit": get_rvs})

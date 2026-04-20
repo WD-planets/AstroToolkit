@@ -20,6 +20,15 @@ from .Target import Target
 
 @dataclass
 class DataSet:
+    """
+    DataSet()
+
+    Methods
+    -------
+    apply()
+        test
+    """
+
     kind: str | None = None
     targets: list[Target] | None = field(default_factory=list)
     exception: bool | None = False
@@ -37,11 +46,21 @@ class DataSet:
 
     _cache_key: str | None = None
 
+    @property
+    def empty(self) -> bool:
+        if not self.data:
+            return True
+        else:
+            return False
+
     def __post_init__(self):
         self._build_target_maps()
 
     def __repr__(self):
-        return f"<{self.kind} DataSet>"
+        if not self.data:
+            return "<Empty DataSet>"
+        else:
+            return f"<{self.kind} DataSet>"
 
     def __str__(self):
         return self.__repr__()
@@ -53,12 +72,26 @@ class DataSet:
             for alias in t._aliases:
                 self._alias_map[alias] = t._key
 
-    def show(self, show_types=False, **kwargs) -> None:
+    def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> None:
+        """show(self, show_types = False, show_all = False)
+        Prints structure to stdout in a human-readable format.
+
+        Parameters
+        ----------
+        show_types : bool, optional
+            If True, print data types of structure attributes.
+
+            Default is ``False``
+
+        show_all : bool, optional
+            If True, do not truncate printing of large iterables.
+
+            Default is ``False``.
+        """
+
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_types, **kwargs)
-
-        return self
+        pprint_structure(self, show_types, show_all, **kwargs)
 
     def store(self, path: str | Path = None) -> Path:
         from ..io.files.writing import write_local
@@ -229,17 +262,20 @@ class DataSet:
         return SPLIT_BY_SURVEY[self._ctnr_kind]
 
     @classmethod
-    def from_target(cls, kind: str, target: Target | int | SkyCoord, radius: float | Quantity | None = None):
+    def from_target(cls, target: Target | int | SkyCoord):
         from ..queries.query_core import setup_targeting
 
         # kind, targets, survey, radius, exception, data, figure
 
         targets = setup_targeting(target)
 
-        return cls(kind=kind, targets=targets, exception=False)
+        return cls(kind=None, targets=targets, exception=False)
 
     def add(self, data: Container):
         if self.data and self._ctnr_kind != type(data).__name__.lower():
             raise ValueError(f"Cannot add container of type '{type(data).__name__.lower()}' to DataSet containing {self._ctnr_kind} data.")
+
+        if not self.kind:
+            self.kind = type(data).__name__
 
         self.data.append(data)

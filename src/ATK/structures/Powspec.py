@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy
 from astropy.units import Quantity
 
-from .structures_core import Container, QuantityArray, manage_inplace
+from .structures_core import Container, manage_inplace
 
 
 @dataclass(repr=False)
@@ -12,8 +12,8 @@ class Powspec(Container):
     band: str | None = None
 
     obj_id: str | None = None
-    multiband: bool | None = None
-    frequency: QuantityArray | None = None
+    _multiband: bool | None = None
+    frequency: Quantity | None = None
     power: numpy.ndarray | None = None
     fopt: Quantity | None = None
     popt: Quantity | None = None

@@ -16,12 +16,12 @@ warnings.simplefilter("ignore", MergeConflictWarning)
 
 def query(target: Target, **kwargs):
     radius = kwargs["radius"]
-    rows = kwargs["rows"]
+    cols = kwargs["columns"]
 
     aliases = SURVEY_CONFIG._get_aliases()
 
     data = []
-    for survey, cols in rows.items():
+    for survey, cols in cols.items():
         survey_data = general_query(kind="vizier", targets=target, survey=survey, radius=radius)
         if survey in aliases:
             catalogue = aliases[survey]

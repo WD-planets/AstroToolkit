@@ -35,7 +35,7 @@ QUERY_ARGUMENTS = {
     # correction needs to be deferred as SED queries use data queries under-the-hood
     "sed": {"radius": BASE_CONFIG._get("query_settings", "query_radius"), "defer_correction": True},
     "hrd": {"survey": "gaia", "colour": "BPmag-RPmag", "mag": "Gmag", "defer_correction": True},
-    "datatable": {"rows": REQUIRED.NOW, "radius": BASE_CONFIG._get("query_settings", "query_radius"), "defer_correction": True},
+    "datatable": {"columns": REQUIRED.NOW, "radius": BASE_CONFIG._get("query_settings", "query_radius"), "defer_correction": True},
 }
 
 UNIVERSAL_ARGUMENTS = {"path": None}
@@ -85,10 +85,14 @@ def get_query_arguments(kind: str, kwargs: dict) -> dict:
         # ATLAS doesn't take a radius
         if out_args.get("survey") == "atlas":
             if out_args.get("radius"):
-                warnings.warn("ATLAS light curves are provided as forced photometry at an exact position, and hence setting the radius will have no effect.")
+                warnings.warn(
+                    "ATLAS light curves are provided as forced photometry at an exact position, and hence setting the radius will have no effect."
+                )
             # ATLAS doesn't have object IDs
             if out_args.get("split"):
-                warnings.warn("ATLAS light curves are provided as forced photometry, and hence object IDs to not apply and no splitting will be performed.")
+                warnings.warn(
+                    "ATLAS light curves are provided as forced photometry, and hence object IDs to not apply and no splitting will be performed."
+                )
 
             # ATLAS does its own proper motion correction
             out_args["defer_correction"] = True

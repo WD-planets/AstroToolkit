@@ -14,6 +14,8 @@ from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.units import Quantity
 
+from ..structures.Target import Target
+
 if TYPE_CHECKING:
     from ..structures.Image import Image
     from ..structures.structures_core import Container
@@ -43,7 +45,9 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
         hdr.append((f"ATK_{key.upper()}", str(value)))
         return hdr
     except Exception:
-        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'.")
+        raise ValueError(
+            f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'."
+        )
 
     return hdr
 
@@ -170,12 +174,17 @@ def struct_to_table(structure: any) -> Table:
         if not isinstance(val, COLUMN_TYPES):
             val = [val]
 
-        table[col] = val
+        if isinstance(val, Quantity):
+            table[col] = val
+        else:
+            table[col] = val
 
     return table
 
 
-def struct_from_table(ctnr: any, data: Table, **kwargs: dict) -> any:
+def struct_from_table(ctnr: any, target: Target | int | SkyCoord, data: Table, **kwargs: dict) -> any:
+    from ..queries.query_core import setup_targeting
+
     ctnr_cols = get_cols(ctnr)
 
     relevant_data = {}
@@ -193,7 +202,68 @@ def struct_from_table(ctnr: any, data: Table, **kwargs: dict) -> any:
         if hasattr(ctnr, arg) and arg not in ctnr_cols:
             relevant_data[arg] = val
 
-    return ctnr(**relevant_data)
+    missing = [f"'{param}'" for param in ctnr._required if param not in kwargs]
+    if missing:
+        raise ValueError(f"Missing required arguments(s) for {ctnr.__name__} construction: {', '.join(missing)}")
+
+    ctnr = ctnr(**relevant_data)
+
+    targets = setup_targeting(target)
+    if len(targets) > 1:
+        raise ValueError("Only one target may be provided per data container.")
+
+    ctnr._target_key = targets[0]._key
+
+    return ctnr
+
+
+def struct_to_dataframe(structure: any) -> pd.DataFrame:
+    """
+    Combines the array-like attributes of a data structure into a single pandas DataFrame
+    """
+
+    cols = get_cols(structure)
+
+    data = {}
+    for col in cols:
+        val = getattr(structure, col)
+        if val is None:
+            continue
+
+        if not isinstance(val, COLUMN_TYPES):
+            val = [val]
+        data[col] = val
+
+    return pd.DataFrame.from_dict(data)
+
+
+def struct_from_dataframe(ctnr: any, target: Target | int | SkyCoord, data: pd.DataFrame, **kwargs) -> any:
+    from ..queries.query_core import setup_targeting
+
+    ctnr_cols = get_cols(ctnr)
+
+    relevant_data = {}
+    for col in data.columns.values.tolist():
+        if hasattr(ctnr, col) and col in ctnr_cols:
+            relevant_data[col] = data[col].to_numpy()
+
+    for arg, val in kwargs.items():
+        if hasattr(ctnr, arg) and arg not in ctnr_cols:
+            relevant_data[arg] = val
+
+    missing = [f"'{param}'" for param in ctnr._required if param not in kwargs]
+    if missing:
+        raise ValueError(f"Missing required arguments(s) for {ctnr.__name__} construction: {', '.join(missing)}")
+
+    ctnr = ctnr(**relevant_data)
+
+    targets = setup_targeting(target)
+    if len(targets) > 1:
+        raise ValueError("Only one target may be provided per data container.")
+
+    ctnr._target_key = targets[0]._key
+
+    return ctnr
 
 
 def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU | PrimaryHDU = BinTableHDU) -> BinTableHDU:

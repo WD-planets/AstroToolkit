@@ -1,7 +1,10 @@
 Tools
 =====
 
-.. automodule:: ATK.Tools
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :recursive:
+
+   ATK.Tools.query
+   ATK.Tools.read

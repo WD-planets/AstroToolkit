@@ -25,7 +25,7 @@ def _get_unit(column):
     return getattr(column, "unit", None) or u.deg
 
 
-def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, disable_corrections=False) -> pd.DataFrame:
+def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, corrections=True) -> pd.DataFrame:
     radius = correct_radius(target, image.size, "vizier", survey) * 1.25
     piggyback_radius = BASE_CONFIG._get("overlay_settings", "piggyback_radius")
 
@@ -52,7 +52,7 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
     ra_unit = _get_unit(non_gaia_data[lon_col])
     dec_unit = _get_unit(non_gaia_data[lat_col])
 
-    if disable_corrections:
+    if not corrections:
         gaia_data = Table()
 
     non_gaia_coords = [
@@ -103,7 +103,9 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
             # if rng < 0.5:
             #     dist_val = None
 
-            gaia_coords.append(SkyCoord(ra=ra, dec=dec, frame="icrs", pm_ra_cosdec=pmra, pm_dec=pmdec, distance=dist_val, obstime=gaia_epoch))
+            gaia_coords.append(
+                SkyCoord(ra=ra, dec=dec, frame="icrs", pm_ra_cosdec=pmra, pm_dec=pmdec, distance=dist_val, obstime=gaia_epoch)
+            )
 
         non_gaia_coords = [c.transform_to("icrs") for c in non_gaia_coords]
         gaia_coords = correct_coords(gaia_coords, non_gaia_epoch)
@@ -130,7 +132,10 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
         if len(matched_index):
             pm_ra[matched_index] = [gaia_coords[i].pm_ra_cosdec.to_value(u.mas / u.yr) for i in index[matched_index]]
             pm_dec[matched_index] = [gaia_coords[i].pm_dec.to_value(u.mas / u.yr) for i in index[matched_index]]
-            dist[matched_index] = [gaia_coords[i].distance.to_value(u.pc) if gaia_coords[i].distance.unit is not u.one else np.nan for i in index[matched_index]]
+            dist[matched_index] = [
+                gaia_coords[i].distance.to_value(u.pc) if gaia_coords[i].distance.unit is not u.one else np.nan
+                for i in index[matched_index]
+            ]
 
         new_coords = []
 
@@ -145,7 +150,9 @@ def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_i
             elif np.isnan(dist_val):
                 raise ValueError("Bad distance.")
 
-            new_coords.append(SkyCoord(ra=c.ra, dec=c.dec, frame="icrs", obstime=c.obstime, pm_ra_cosdec=pmra_val, pm_dec=pmdec_val, distance=dist_val))
+            new_coords.append(
+                SkyCoord(ra=c.ra, dec=c.dec, frame="icrs", obstime=c.obstime, pm_ra_cosdec=pmra_val, pm_dec=pmdec_val, distance=dist_val)
+            )
 
         non_gaia_coords = new_coords
         non_gaia_coords, correction = correct_coords(non_gaia_coords, image.epoch, get_correction=True)
@@ -250,7 +257,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
     """
 
     overlay_dict = SURVEY_CONFIG._get_overlays()
-    disable_corrections = kwargs.get("disable_correction", False)
+    corrections = kwargs.get("corrections", True)
 
     overlays = kwargs.get("overlays")
     if not overlays:
@@ -296,7 +303,7 @@ def get_overlay(target: Target, image: Image, **kwargs: dict):
 
     overlay_data = []
     for survey, info in overlay_info.items():
-        data = get_overlay_data(image, target, survey, info, disable_corrections)
+        data = get_overlay_data(image, target, survey, info, corrections)
         # if an exception is encountered, return EXCEPTION and set overlay=None, exception=True in structure
         if data is RETURNS.EXCEPTION:
             return data

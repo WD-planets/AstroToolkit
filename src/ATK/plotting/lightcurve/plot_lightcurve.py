@@ -20,12 +20,12 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     Plots a single light curves in a given band to an existing figure
     """
 
-    if lc.time_type == "phase":
+    if lc._time_type == "phase":
         lc = handle_fold_arguments(lc, **kwargs)
 
     # time handling
     time_format = kwargs.get("time_format", "reduced")
-    time = lc.time
+    time = lc._time.value
     if time_format == "reduced":
         time = [t - time_min for t in time]
 
@@ -35,8 +35,8 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
         obj_id = None
 
     # get brightness and error columns
-    y = lc.brightness
-    y_err = lc.brightness_err
+    y = lc._brightness.value
+    y_err = lc._brightness_err.value
 
     # calculate mean colour mapping
     mean_mag = np.nanmean(y)
@@ -63,9 +63,9 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     else:
         raise ValueError(f"Invalid cmap '{cmap}'.")
 
-    if lc.time_type == "mjd":
+    if lc._time_type == "mjd":
         legend_str = f"{lc.survey} {lc.band}"
-    elif lc.time_type == "phase":
+    elif lc._time_type == "phase":
         legend_str = f"{lc.survey} {lc.band}\n{lc.fopt.value:.3f} {lc.fopt.unit.to_string('unicode')}"
 
     # plot errors
@@ -94,7 +94,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     time_format = kwargs.get("time_format", "reduced")
 
     # check that all light curves share the same brightness type
-    brightness_types = [lc.brightness_type for lc in lcs]
+    brightness_types = [lc._brightness_type for lc in lcs]
     if len(set(brightness_types)) > 1:
         raise ValueError("Invalid combination of lighcurve brightness types. Must be all 'flux' or all 'mag'.")
 
@@ -115,13 +115,13 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     # create plot(s)
     survey = lcs[0].survey
 
-    multiband = list(set([lc.multiband for lc in lcs]))
+    multiband = list(set([lc._multiband for lc in lcs]))
     if len(multiband) > 1:
         raise ValueError("Plotting received mix of multiband and non-multiband data.")
 
     # get MJD at start of data
-    if lcs[0].time_type == "mjd":
-        all_times = [t for lc in lcs for t in lc.mjd]
+    if lcs[0]._time_type == "mjd":
+        all_times = [t for lc in lcs for t in lc.mjd.value]
         if not all_times:
             raise Exception("No time data found.")
         time_min = min(all_times)
@@ -246,7 +246,7 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     # loop through surveys (will be removed)
     requested_bands = kwargs.get("bands")
     # filter data to only keep requested (and valid) light curves
-    lcs = [lc for lc in lightcurves if lc.brightness_type and (requested_bands is None or lc.band in requested_bands)]
+    lcs = [lc for lc in lightcurves if lc._brightness_type and (requested_bands is None or lc.band in requested_bands)]
     # per_survey_lcs.sort(key=lambda lc: lc.obj_id)
 
     if kwargs.get("bands"):
@@ -264,7 +264,7 @@ def plot(lightcurves: list[Lightcurve], *args: tuple, **kwargs: dict):
     # group by object ID
     lc_groups = group_lc_ids(lcs)
     for per_id_lcs in lc_groups:
-        if len(set(lc.time_type for lc in per_id_lcs)) > 1:
+        if len(set(lc._time_type for lc in per_id_lcs)) > 1:
             raise ValueError("Detected multiple time formats 'mjd' and 'phase' in Lightcurve plotting.")
 
         per_id_plots = dispatch_groups(per_id_lcs, palette_map, **kwargs)

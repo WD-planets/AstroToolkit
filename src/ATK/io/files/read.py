@@ -7,8 +7,9 @@ from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.io.fits import Header
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU
+from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
-from astropy.units import Quantity, Unit
+from astropy.units import Quantity, Unit, UnitsWarning
 from astropy.wcs import WCS, FITSFixedWarning
 
 from ...configuration.base_config import translator
@@ -22,6 +23,9 @@ SKYCOORD_KEYS = ("ATK_RA", "ATK_DEC", "ATK_PMRA", "ATK_PMDEC", "ATK_DISTANCE", "
 
 # ignore fits warning
 warnings.filterwarnings("ignore", category=FITSFixedWarning)
+warnings.filterwarnings("ignore", category=UnitsWarning)
+warnings.filterwarnings("ignore", category=VerifyWarning)
+
 
 # ---------
 # UTILITIES

@@ -20,10 +20,16 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
     """
 
     # phase fold
-    phase = (lc.mjd * freq) % 1
-    flux = lc.brightness
+    t = lc.mjd if isinstance(lc.mjd, Quantity) else lc.mjd * u.day
 
-    weights = 1 / (lc.brightness_err**2 + 1e-8)
+    f = freq if isinstance(freq, Quantity) else freq * 1 / u.day
+
+    phase = (t * f).to_value(1) % 1
+
+    flux = lc._brightness.value if hasattr(lc._brightness, "value") else lc._brightness
+    err = lc._brightness_err.value if hasattr(lc._brightness_err, "value") else lc._brightness_err
+
+    weights = 1 / (err**2 + 1e-8)
 
     def weighted_var(x, w):
         mu = np.average(x, weights=w)
@@ -35,11 +41,6 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
     idx = np.argsort(phase)
     phase = phase[idx]
     flux = flux[idx]
-
-    # global variance (normalisation)
-    global_var = np.var(flux)
-    if global_var == 0:
-        return np.inf
 
     # bin edges
     bins = np.linspace(0, 1, nbins + 1)
@@ -73,10 +74,7 @@ def phase_dispersion_pdm(lc, freq, nbins=10, min_per_bin=5):
 
 
 def optimise_freq(lcs, fopt, n_harmonics=5):
-    if isinstance(fopt, Quantity):
-        f0 = fopt.to_value(1 / u.day)
-    else:
-        f0 = fopt
+    f0 = fopt if isinstance(fopt, Quantity) else fopt * 1 / u.day
 
     candidates = []
 
@@ -85,8 +83,14 @@ def optimise_freq(lcs, fopt, n_harmonics=5):
         candidates.append(f0 / k)
 
     # remove duplicate / invalid candidate frequencies
-    candidates = np.unique(np.array(candidates))
-    candidates = candidates[candidates > 0]
+    candidates = u.Quantity(candidates)
+
+    # remove duplicates
+    vals = np.unique(candidates.to_value(candidates.unit))
+    candidates = vals * candidates.unit
+
+    # filter positive frequencies
+    candidates = candidates[candidates > 0 * candidates.unit]
 
     scores = []
     for f in candidates:
@@ -94,7 +98,7 @@ def optimise_freq(lcs, fopt, n_harmonics=5):
 
     best_freq = candidates[np.argmin(scores)]
 
-    return best_freq * (1 / u.day)
+    return best_freq
 
 
 def fold_lc(
@@ -121,7 +125,7 @@ def fold_lc(
         if isinstance(freq, Quantity):
             f_user = freq
         else:
-            f_user = freq * (1 / u.day)
+            f_user = freq * (1 / lcs[0].mjd.unit)
 
         for lc in lcs:
             fopt = f_user
@@ -152,21 +156,24 @@ def fold_lc(
         fopt = fopts[lc.band]
 
         # phase
-        phase = (lc.mjd * fopt.value) % 1
+        t = lc.mjd if isinstance(lc.mjd, Quantity) else lc.mjd * u.day
+        f = fopt if isinstance(fopt, Quantity) else fopt * 1 / u.day
+
+        phase = (t * f).to_value(1) % 1
 
         # data
-        brightness = lc.brightness
+        brightness = lc._brightness
 
-        brightness_data = {f"{lc.brightness_type}": brightness, f"{lc.brightness_type}_err": lc.brightness_err}
+        brightness_data = {f"{lc._brightness_type}": brightness, f"{lc._brightness_type}_err": lc._brightness_err}
 
         f_lc = Lightcurve(
             survey=lc.survey,
             band=lc.band,
             obj_id=lc.obj_id,
-            multiband=multiband,
+            _multiband=multiband,
             phase=phase,
             fopt=fopts[lc.band],
-            popt=1 / fopts[lc.band],
+            popt=(1 / fopts[lc.band]).to(u.day),
             _target_key=lc._target_key,
             **brightness_data,
         )

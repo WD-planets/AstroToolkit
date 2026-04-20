@@ -1,5 +1,6 @@
 import inspect
 import re
+import warnings
 from enum import Enum
 
 import astropy.units as u
@@ -9,7 +10,7 @@ from astropy.coordinates import SkyCoord
 from astropy.io.fits.hdu import BinTableHDU, ImageHDU, PrimaryHDU
 from astropy.table import Table
 from astropy.time import Time
-from astropy.units import Quantity, UnrecognizedUnit
+from astropy.units import Quantity, UnitsWarning, UnrecognizedUnit
 from astropy.wcs import WCS
 from bokeh.layouts import GridBox
 from bokeh.models import Column, Row
@@ -18,6 +19,9 @@ from bokeh.plotting import figure
 from ..configuration.base_config import BASE_CONFIG
 from ..structures.Target import Target
 from ..utilities.mapping import build_structure_map
+
+warnings.filterwarnings("ignore", category=UnitsWarning)
+
 
 # this should be left to False, kwarg 'debug' can be used to set it locally
 DEBUG = False
@@ -491,7 +495,7 @@ def print_methods(cls: any) -> str:
     return "\nAvailable Methods: " + ", ".join(f".{m}()" for m in methods)
 
 
-def pprint_structure(structure: any, show_types: bool, **kwargs) -> None:
+def pprint_structure(structure: any, show_types: bool, show_all: bool, **kwargs) -> None:
     """
     Prints a structure's attributes and methods in a human-readable format. Optionally also prints the types of attributes.
     """
@@ -499,7 +503,7 @@ def pprint_structure(structure: any, show_types: bool, **kwargs) -> None:
     global CURRENT_DEPTH, OUTPUT, COL_WIDTHS, DEBUG, SHOW_ALL, SHOW_TYPES
 
     DEBUG = kwargs.get("debug", False)
-    SHOW_ALL = kwargs.get("show_all", False)
+    SHOW_ALL = show_all
     SHOW_TYPES = show_types
 
     # get structure attrs

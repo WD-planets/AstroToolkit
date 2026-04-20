@@ -10,13 +10,14 @@ from .structures_core import Container
 class HRD(Container):
     survey: str | None = None
     identifier: int | None = None
-    correction: str | None = None
     abs_mag_band: str | None = None
     colour_bands: str | None = None
 
     colour: numpy.ndarray | None = None
     abs_mag: numpy.ndarray | None = None
     distance: Quantity | None = None
+
+    _required = ["survey"]
 
     def __repr__(self):
         return f"<{self.survey} {self.abs_mag_band} vs {self.colour_bands} HRD>"

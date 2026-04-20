@@ -47,7 +47,7 @@ def apply_methods(struct: DataSet, method: str, *args, **kwargs):
                 returned_ctnr = getattr(ctnr, method)(*args, **kwargs)
                 data.append(returned_ctnr)
             else:
-                raise ValueError(f"{type(ctnr).__name__} data does not support the method '{method}'.")
+                raise ValueError(f"{type(ctnr).__name__} does not support the method '{method}'.")
         struct.data = data
 
         return struct

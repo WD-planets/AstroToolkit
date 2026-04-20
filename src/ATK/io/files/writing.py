@@ -6,12 +6,15 @@ from astropy.io.fits import HDUList, Header
 from astropy.io.fits.hdu import BinTableHDU, PrimaryHDU
 from astropy.io.fits.verify import VerifyWarning
 from astropy.table import Table
+from astropy.units import UnitsWarning
 
 from ...io.structure_io import struct_to_hdu
 from ...utilities.misc import get_package_version
 from ..target_io import targets_to_hdu
 
 warnings.simplefilter("ignore", category=VerifyWarning)
+warnings.filterwarnings("ignore", category=UnitsWarning)
+
 
 WRITE_MAP = {}
 

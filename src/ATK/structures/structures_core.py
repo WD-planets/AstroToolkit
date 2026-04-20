@@ -5,9 +5,9 @@ import numpy
 import pandas
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import BinTableHDU
+from astropy.table import Table
 from astropy.units import Quantity, Unit
 
-from ..io.structure_io import COLUMN_TYPES, get_cols
 from .Target import Target
 
 # whether to combine data structures into combined plots
@@ -46,10 +46,6 @@ SPLIT_BY_SURVEY = {
 }
 
 
-# type hint for arrays of astropy Quantities
-QuantityArray = numpy.ndarray[Quantity]
-
-
 def manage_inplace(structure: any, inplace: bool):
     if inplace:
         return structure
@@ -74,10 +70,22 @@ class Container:
     _plot_methods: dict = field(default_factory=dict)
     _group_plot_methods: dict = field(default_factory=dict)
 
-    def show(self, show_types=False, **kwargs) -> None:
+    def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> None:
+        """show(self, show_types = False, show_all = False)
+        Prints structure to stdout in a human-readable format.
+
+        Parameters
+        ----------
+        show_types : bool, optional
+            If True, print data types of structure attributes.
+
+        show_all : bool, optional
+            If True, do not truncate printing of large iterables.
+        """
+
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_types, **kwargs)
+        pprint_structure(self, show_types, show_all, **kwargs)
 
     def __repr__(self):
         survey_str = f"{self.survey} " if self.survey else ""
@@ -111,58 +119,40 @@ class Container:
         return get_cols(self)
 
     def to_dataframe(self) -> pandas.DataFrame:
+        """
+        Combines all array-like attributes of a structure into a :class:`~pandas.DataFrame`.
+        """
+
+        from ..io.structure_io import struct_to_dataframe
+
         return struct_to_dataframe(self)
 
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs: any):
-        return struct_from_dataframe(cls, target, data, **kwargs)
+    def to_table(self) -> Table:
+        from ..io.structure_io import struct_to_table
+
+        return struct_to_table(self)
 
     def to_hdu(self) -> BinTableHDU:
         from ..io.structure_io import struct_to_hdu
 
         return struct_to_hdu(self)
 
+    @classmethod
+    def from_dataframe(cls, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs):
+        """
+        Generates structure from a :class:`~pandas.DataFrame`.
+        """
 
-def struct_from_dataframe(ctnr: any, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs: dict) -> any:
-    from ..queries.query_core import setup_targeting
+        from ..io.structure_io import struct_from_dataframe
 
-    ctnr_cols = get_cols(ctnr)
+        return struct_from_dataframe(cls, target, data, **kwargs)
 
-    relevant_data = {}
-    for col in data.columns.values.tolist():
-        if hasattr(ctnr, col) and col in ctnr_cols:
-            relevant_data[col] = data[col].to_numpy()
+    @classmethod
+    def from_table(cls, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs):
+        """
+        Generates structure from a :class:`~astropy.table.Table`.
+        """
 
-    for arg, val in kwargs.items():
-        if hasattr(ctnr, arg) and arg not in ctnr_cols:
-            relevant_data[arg] = val
+        from ..io.structure_io import struct_from_table
 
-    ctnr = ctnr(**relevant_data)
-
-    targets = setup_targeting(target)
-    if len(targets) > 1:
-        raise ValueError("Only one target may be provided per data container.")
-
-    ctnr._target_key = targets[0]._key
-
-    return ctnr
-
-
-def struct_to_dataframe(structure: any) -> pandas.DataFrame:
-    """
-    Combines the array-like attributes of a data structure into a single pandas DataFrame
-    """
-
-    cols = get_cols(structure)
-
-    data = {}
-    for col in cols:
-        val = getattr(structure, col)
-        if val is None:
-            continue
-
-        if not isinstance(val, COLUMN_TYPES):
-            val = [val]
-        data[col] = val
-
-    return pandas.DataFrame.from_dict(data)
+        return struct_from_table(cls, target, data, **kwargs)

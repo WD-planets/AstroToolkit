@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
 
 import numpy
+from astropy.units import Quantity
 
-from .structures_core import Container, QuantityArray, manage_inplace
+from .structures_core import Container, manage_inplace
 
 
 @dataclass(repr=False)
@@ -11,10 +12,10 @@ class SED(Container):
     correction: numpy.ndarray | None = None
     band: numpy.ndarray | None = None
     id: numpy.ndarray | None = None
-    separation: numpy.ndarray | QuantityArray | None = None
-    wavelength: numpy.ndarray | QuantityArray | None = None
-    flux: numpy.ndarray | QuantityArray | None = None
-    flux_err: numpy.ndarray | QuantityArray | None = None
+    separation: numpy.ndarray | Quantity | None = None
+    wavelength: numpy.ndarray | Quantity | None = None
+    flux: numpy.ndarray | Quantity | None = None
+    flux_err: numpy.ndarray | Quantity | None = None
 
     _data_methods: tuple = ("crop", "bin")
 
