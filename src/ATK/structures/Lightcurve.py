@@ -61,27 +61,27 @@ class Lightcurve(Container):
 
     #: Modified Julian Day values.
     #: Mutually exclusive with ``phase``.
-    mjd: numpy.ndarray | None = None
+    mjd: Quantity | None = None
     #: Flux values.
     #: Mutually exclusive with ``mag``.
-    flux: numpy.ndarray | Quantity | None = None
+    flux: Quantity | None = None
     #: Flux error values.
     #: Mutually exclusive with ``mag_err``.
-    flux_err: numpy.ndarray | Quantity | None = None
+    flux_err: Quantity | None = None
     #: Magnitude values.
     #: Mutually exclusive with ``flux``.
-    mag: numpy.ndarray | None = None
+    mag: Quantity | None = None
     #: Magnitude error values.
     #: Mutually exclusive with ``flux_err``.
-    mag_err: numpy.ndarray | None = None
+    mag_err: Quantity | None = None
     #: Right ascension values.
-    ra: numpy.ndarray | None = None
+    ra: Quantity | None = None
     #: Declination values.
-    dec: numpy.ndarray | None = None
+    dec: Quantity | None = None
 
     #: Phase values.
     #: Mutually exclusive with ``mjd``.
-    phase: numpy.ndarray | None = None
+    phase: Quantity | None = None
     #: Fold frequency.
     #:
     #: Only relevant in folded light curves (i.e. when ``phase`` is not ``None``).
@@ -93,7 +93,16 @@ class Lightcurve(Container):
 
     _required = ["survey", "band"]
 
-    _units = {"mjd": u.day, "mag": u.mag, "mag_err": u.mag, "flux": u.count / u.s, "flux_err": u.count / u.s, "ra": u.deg, "dec": u.deg}
+    _units = {
+        "mjd": u.day,
+        "mag": u.mag,
+        "mag_err": u.mag,
+        "flux": u.count / u.s,
+        "flux_err": u.count / u.s,
+        "ra": u.deg,
+        "dec": u.deg,
+        "phase": u.one,
+    }
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"

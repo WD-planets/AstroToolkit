@@ -15,6 +15,7 @@
       ~HRD.abs_mag_band
       ~HRD.colour
       ~HRD.colour_bands
+      ~HRD.correction
       ~HRD.distance
       ~HRD.identifier
       ~HRD.survey
@@ -48,6 +49,7 @@
    .. autoattribute:: HRD.abs_mag_band
    .. autoattribute:: HRD.colour
    .. autoattribute:: HRD.colour_bands
+   .. autoattribute:: HRD.correction
    .. autoattribute:: HRD.distance
    .. autoattribute:: HRD.identifier
    .. autoattribute:: HRD.survey

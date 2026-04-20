@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import astropy.units as u
 import numpy
 from astropy.units import Quantity
 
@@ -19,6 +20,17 @@ class Powspec(Container):
     popt: Quantity | None = None
 
     _data_methods: tuple = ("crop",)
+
+    _units = {"fopt": 1 / u.day, "popt": u.day, "frequency": 1 / u.day}
+
+    def __post_init__(self):
+        for attr, unit in self._units.items():
+            val = getattr(self, attr, None)
+            if val is None:
+                continue
+
+            if not isinstance(val, Quantity):
+                setattr(self, attr, val * unit)
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"

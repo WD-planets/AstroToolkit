@@ -30,6 +30,14 @@ class Spectrum(Container):
     _data_methods: tuple = ("crop", "bin", "vspec")
     _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "rv_fit": get_rvs})
 
+    _units = {
+        "exposure": u.s,
+        "wav_ref": u.angstrom,
+        "wavelength": u.angstrom,
+        "velocity": u.km / u.s,
+        "flux": u.Unit(1e-17) * u.erg / (u.s * u.cm**2 * u.AA),
+    }
+
     def __post_init__(self):
         # check for a valid input combination
         if (self.wavelength is None) == (self.velocity is None):
@@ -48,6 +56,14 @@ class Spectrum(Container):
 
         if not isinstance(self.flux, Quantity):
             self.flux = self.flux * u.Unit("1e-17 erg cm-2 s-1 Angstrom-1")
+
+        for attr, unit in self._units.items():
+            val = getattr(self, attr, None)
+            if val is None:
+                continue
+
+            if not isinstance(val, Quantity):
+                setattr(self, attr, val * unit)
 
     @property
     def x_type(self):

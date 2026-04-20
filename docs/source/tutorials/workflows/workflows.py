@@ -46,7 +46,7 @@ all_pspec.show()
 #
 # The light curves in the merged :class:`~ATK.Models.DataSet` can also be phase-folded and binned:
 
-all_fold = all_lcs.apply("fold", fmin=0, fmax=10, samples=50000, inplace=False, align="max")
+all_fold = all_lcs.apply("fold", fmin=0, fmax=10, samples=50000, inplace=False)
 all_fold.apply("bin", bins=200)
 all_fold.show()
 

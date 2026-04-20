@@ -19,7 +19,7 @@ def gen_powspec(lcs: list[Lightcurve], fmin: float, fmax: float, samples: int, m
     from ....structures.Powspec import Powspec
 
     _, mjd_unit = _strip_unit(lcs[0].mjd)
-    freq_unit = (1 / mjd_unit) if mjd_unit is not None else None
+    freq_unit = 1 / mjd_unit
     fmin = _align_to_unit(fmin, freq_unit, "fmin", "lcs.mjd")
     fmax = _align_to_unit(fmax, freq_unit, "fmax", "lcs.mjd")
 

@@ -21,7 +21,7 @@ image = query("image", survey="panstarrs", band="g", targets=target, overlays=["
 spec = query("spectrum", survey="sdss", targets=target, path="datapage_spec.fits.gz")
 sed = query("sed", targets=target, path="datapage_sed.fits.gz")
 hrd = query("hrd", targets=target, path="datapage_hrd.fits.gz")
-table = query("datatable", rows={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, targets=target, radius=image.data[0].size)
+table = query("datatable", columns={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, targets=target, radius=image.data[0].size)
 
 # %%
 # The only other requirement is to define the **datapage's** layout. The easiest way to do this is by passing a list of rows of :class:`DataSets <ATK.Models.DataSet>`:

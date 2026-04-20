@@ -1,21 +1,31 @@
 import copy
 
+import astropy.units as u
 import numpy as np
-
-from ...structures.Lightcurve import Lightcurve
 
 
 def repeat_arrs(x, *ys, repeat=2):
+    x_unit = getattr(x, "unit", None)
+    y_units = [getattr(y, "unit", None) for y in ys]
+
+    x_val = x.to_value() if x_unit else x
+    ys_val = [y.to_value() if getattr(y, "unit", None) else y for y in ys]
+
     xs = []
     ys_out = [[] for _ in ys]
 
     for k in range(repeat):
-        xs.append(x + k)
-        for i, y in enumerate(ys):
+        xs.append(x_val + k)
+        for i, y in enumerate(ys_val):
             ys_out[i].append(y)
 
     x_rep = np.concatenate(xs)
-    ys_rep = tuple(np.concatenate(ylist) for ylist in ys_out)
+    ys_rep = [np.concatenate(ylist) for ylist in ys_out]
+
+    # reattach units
+    if x_unit:
+        x_rep = x_rep * x_unit
+    ys_rep = [y * unit if unit else y for y, unit in zip(ys_rep, y_units)]
 
     return (x_rep, *ys_rep)
 
@@ -48,23 +58,11 @@ def compute_band_offsets(lcs, align_method="median"):
 
 
 def compute_phase_offset_midpoint(lcs, freq, align_method="median", nbins=50):
-    all_phase = []
-    all_flux = []
+    phase = np.concatenate([lc.phase.to_value(1) for lc in lcs])
+    flux = np.concatenate([lc._brightness.value for lc in lcs])
 
-    for lc in lcs:
-        phase = lc.phase
-        all_phase.append(phase)
-        all_flux.append(lc._brightness)
+    midpoint = np.mean(flux) if align_method == "mean" else np.median(flux)
 
-    phase = np.concatenate(all_phase)
-    flux = np.concatenate(all_flux)
-
-    if align_method == "mean":
-        midpoint = np.mean(flux)
-    else:
-        midpoint = np.median(flux)
-
-    # binning
     bins = np.linspace(0, 1, nbins + 1)
     digitized = np.digitize(phase, bins)
 
@@ -73,34 +71,26 @@ def compute_phase_offset_midpoint(lcs, freq, align_method="median", nbins=50):
 
     for i in range(1, nbins + 1):
         vals = flux[digitized == i]
-        if len(vals) > 0:
+        if len(vals):
             bin_means[i - 1] = np.nanmean(vals)
 
     valid = ~np.isnan(bin_means)
     if not np.any(valid):
         return 0.0
 
-    # choose bin closest to midpoint
     idx = np.where(valid)[0][np.argmin(np.abs(bin_means[valid] - midpoint))]
-    return bin_centers[idx]
+
+    return float(bin_centers[idx])
 
 
 def compute_phase_offset_extrema(lcs, freq, mode="max"):
-    all_phase = []
-    all_flux = []
-
-    brightness_type = list(set([lc._brightness_type for lc in lcs]))
+    brightness_type = list(set(lc._brightness_type for lc in lcs))
     if len(brightness_type) > 1:
-        raise ValueError("Invalid combination of lighcurve brightness types. Must be all 'flux' or all 'mag'.")
+        raise ValueError("Mixed brightness types.")
     brightness_type = brightness_type[0]
 
-    for lc in lcs:
-        phase = lc.phase
-        all_phase.append(phase)
-        all_flux.append(lc._brightness)
-
-    phase = np.concatenate(all_phase)
-    flux = np.concatenate(all_flux)
+    phase = np.concatenate([lc.phase.to_value(1) for lc in lcs])
+    flux = np.concatenate([lc._brightness.value for lc in lcs])
 
     bins = np.linspace(0, 1, 50)
     digitized = np.digitize(phase, bins)
@@ -112,50 +102,35 @@ def compute_phase_offset_extrema(lcs, freq, mode="max"):
     phase = bin_centers[valid]
     flux = bin_means[valid]
 
-    # sort
     idx = np.argsort(phase)
-    phase = phase[idx]
-    flux = flux[idx]
+    phase, flux = phase[idx], flux[idx]
 
-    # wrap phase for circular smoothing
     phase_ext = np.concatenate([phase - 1, phase, phase + 1])
     flux_ext = np.tile(flux, 3)
 
-    # sort again (important after wrapping)
     idx = np.argsort(phase_ext)
-    phase_ext = phase_ext[idx]
-    flux_ext = flux_ext[idx]
+    phase_ext, flux_ext = phase_ext[idx], flux_ext[idx]
 
-    # smooth
     window = max(5, len(flux) // 20)
     kernel = np.ones(window) / window
-    smooth_ext = np.convolve(flux_ext, kernel, mode="same")
+    smooth = np.convolve(flux_ext, kernel, mode="same")
 
-    # restrict back to central region
     mask = (phase_ext >= 0) & (phase_ext < 1)
+    phase, smooth = phase_ext[mask], smooth[mask]
 
-    phase = phase_ext[mask]
-    smooth = smooth_ext[mask]
-
-    # decide extrema direction
     if mode == "max":
-        if brightness_type == "mag":
-            i = np.argmin(smooth)
-        else:
-            i = np.argmax(smooth)
+        i = np.argmin(smooth) if brightness_type == "mag" else np.argmax(smooth)
     elif mode == "min":
-        if brightness_type == "mag":
-            i = np.argmax(smooth)
-        else:
-            i = np.argmin(smooth)
+        i = np.argmax(smooth) if brightness_type == "mag" else np.argmin(smooth)
     else:
         raise ValueError(f"Unknown mode: {mode}")
 
-    return phase[i]
+    return float(phase[i])
 
 
 def estimate_slope(phase, flux, window=0.1):
-    # unwrap around 0 for continuity
+    flux = flux.value
+
     phase_ext = np.concatenate([phase - 1, phase, phase + 1])
     flux_ext = np.tile(flux, 3)
 
@@ -164,13 +139,9 @@ def estimate_slope(phase, flux, window=0.1):
     if np.sum(mask) < 5:
         return 0.0
 
-    p = phase_ext[mask]
-    f = flux_ext[mask]
+    coeffs = np.polyfit(phase_ext[mask], flux_ext[mask], 1)
 
-    # simple linear fit
-    coeffs = np.polyfit(p, f, 1)
-
-    return coeffs[0]
+    return float(coeffs[0])
 
 
 def dispatch_phase_offsets(lcs, freq, align="median"):
@@ -182,67 +153,59 @@ def dispatch_phase_offsets(lcs, freq, align="median"):
         raise ValueError(f"Unknown align mode: {align}")
 
 
-def compute_phase_offsets(lcs: list[Lightcurve], multiband: bool, align_mode):
+def compute_phase_offsets(lcs, multiband, align_mode):
     phase_offsets = {}
 
     if multiband:
-        offset = dispatch_phase_offsets(lcs, lcs[0].fopt.value, align_mode)
+        offset = dispatch_phase_offsets(lcs, lcs[0].fopt, align_mode)
         for lc in lcs:
             phase_offsets[lc.band] = offset
     else:
         for lc in lcs:
-            phase_offsets[lc.band] = dispatch_phase_offsets([lc], lc.fopt.value, align_mode)
+            phase_offsets[lc.band] = dispatch_phase_offsets([lc], lc.fopt, align_mode)
 
     if align_mode in ["mean", "median"]:
-        # choose reference band
         ref_band = lcs[0].band
-
-        # compute reference slope
         ref_lc = next(lc for lc in lcs if lc.band == ref_band)
 
-        phase_ref = ref_lc.phase
-        phase_ref = (phase_ref - phase_offsets[ref_band]) % 1
-
+        phase_ref = (ref_lc.phase.to_value(1) - phase_offsets[ref_band]) % 1
         slope_ref = estimate_slope(phase_ref, ref_lc._brightness)
 
         for lc in lcs:
-            band = lc.band
-            phase = (lc.phase - phase_offsets[band]) % 1
-
+            phase = (lc.phase.to_value(1) - phase_offsets[lc.band]) % 1
             slope = estimate_slope(phase, lc._brightness)
 
-            # flip if opposite orientation
             if slope * slope_ref < 0:
-                phase_offsets[band] = (phase_offsets[band] + 0.5) % 1
+                phase_offsets[lc.band] = (phase_offsets[lc.band] + 0.5) % 1
 
     return phase_offsets
 
 
-def handle_fold_arguments(lc: Lightcurve, **kwargs):
+def handle_fold_arguments(lc, **kwargs):
     lc = copy.deepcopy(lc)
 
-    # align bands in phase
-    aligned_phase = (lc.phase - kwargs["phase_offsets"][lc.band]) % 1
-    setattr(lc, "phase", aligned_phase)
+    offset = kwargs["phase_offsets"][lc.band]
 
-    # zero-align magnitudes
+    phase = lc.phase - offset * u.one
+    phase = (phase.to_value(u.one) % 1) * u.one
+
+    flux = lc._brightness
+    err = lc._brightness_err
+
     subtract = kwargs.get("subtract", "median")
+
     if subtract == "mean":
-        weights = 1 / np.power(lc._brightness_err, 2)
-        brightness = lc._brightness - np.average(lc._brightness, weights=weights)
-        setattr(lc, lc._brightness_type, brightness)
+        weights = 1 / err**2
+        flux = flux - np.average(flux, weights=weights)
     elif subtract == "median":
-        brightness = lc._brightness - np.median(lc._brightness)
-        setattr(lc, lc._brightness_type, brightness)
-    elif subtract is None:
-        pass
-    else:
+        flux = flux - np.median(flux)
+    elif subtract is not None:
         raise ValueError(f"Unexpected subtract mode '{subtract}'.")
 
-    # repeat light curve
-    phase, brightness, brightness_err = repeat_arrs(lc.phase, lc._brightness, lc._brightness_err, repeat=kwargs.get("repeat", 2))
+    phase, flux, err = repeat_arrs(phase, flux, err, repeat=kwargs.get("repeat", 2))
+
     lc.phase = phase
-    setattr(lc, lc._brightness_type, brightness)
-    setattr(lc, f"{lc._brightness_type}_err", brightness_err)
+    setattr(lc, lc._brightness_type, flux)
+    setattr(lc, f"{lc._brightness_type}_err", err)
 
     return lc

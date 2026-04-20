@@ -1,4 +1,5 @@
-from bokeh.models import GridBox, InlineStyleSheet, Label, Range1d, TabPanel, Tabs
+from bokeh.models import (GridBox, InlineStyleSheet, Label, Range1d, TabPanel,
+                          Tabs)
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
@@ -328,7 +329,7 @@ def get_datapage(layout: list[list]):
             for tab in plot.tabs:
                 p = tab.child
 
-                if kind == "datatable":
+                if kind == "DataTable":
                     p = format_datatable(p, region["rowspan"], region["colspan"])
                 else:
                     p = set_panel_size(p, force_square, region["rowspan"], region["colspan"], shift_outline)

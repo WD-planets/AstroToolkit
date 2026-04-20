@@ -122,10 +122,7 @@ def fold_lc(
 
     if freq is not None:
         # user-specified frequency
-        if isinstance(freq, Quantity):
-            f_user = freq
-        else:
-            f_user = freq * (1 / lcs[0].mjd.unit)
+        f_user = freq if isinstance(freq, Quantity) else freq * 1 / lcs[0].mjd.unit
 
         for lc in lcs:
             fopt = f_user
@@ -156,10 +153,12 @@ def fold_lc(
         fopt = fopts[lc.band]
 
         # phase
-        t = lc.mjd if isinstance(lc.mjd, Quantity) else lc.mjd * u.day
-        f = fopt if isinstance(fopt, Quantity) else fopt * 1 / u.day
+        t = lc.mjd
+        f = fopt
 
-        phase = (t * f).to_value(1) % 1
+        phase = (t * f).to_value(1) % 1 * u.one
+
+        print(type(phase))
 
         # data
         brightness = lc._brightness

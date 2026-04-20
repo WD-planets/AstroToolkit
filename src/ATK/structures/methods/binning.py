@@ -69,4 +69,5 @@ def bin_nd(
         out_x, out_ys, out_y_errs = bin_by_size(x, ys, errs, size)
     else:
         out_x, out_ys, out_y_errs = do_binning(x, ys, errs, bins)
+
     return out_x, out_ys, out_y_errs

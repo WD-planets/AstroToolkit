@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from ..structures.structures_core import Container
 
 # types (in typehints) that should be considered as being columns of a dataframe
-COLUMN_TYPES = (np.ndarray, pd.Series, Quantity)
+COLUMN_TYPES = (np.ndarray, pd.Series)
 
 BASIC_TYPES = (int, float, str, bool, NoneType)
 
@@ -158,28 +158,6 @@ def get_cols(structure: any) -> tuple[str]:
     return cols
 
 
-def get_runtime_cols(structure: any) -> list[str]:
-    """
-    Returns attributes that contain array-like data by inspecting runtime values.
-    Handles Quantities by checking if they are scalar or array-like.
-    """
-
-    cols = []
-    for field in fields(structure):
-        val = getattr(structure, field.name, None)
-        if val is None:
-            continue
-
-        if isinstance(val, (np.ndarray, pd.Series)) and not isinstance(val, Quantity):
-            cols.append(field.name)
-        elif isinstance(val, Quantity):
-            # Only include if array-like
-            if not is_scalar_quantity(val):
-                cols.append(field.name)
-
-    return cols
-
-
 # -----------------------
 # GENERAL TRANSFORMATIONS
 # -----------------------
@@ -190,17 +168,21 @@ def struct_to_table(structure: any) -> Table:
     Combines array-like attributes of a data structure into a single astropy Table
     """
 
-    cols = get_runtime_cols(structure)
+    cols = get_cols(structure)
 
     table = Table()
     for col in cols:
         val = getattr(structure, col)
         if val is None:
             continue
+
         if not isinstance(val, COLUMN_TYPES):
             val = [val]
 
-        table[col] = val
+        if isinstance(val, Quantity) and is_scalar_quantity(val):
+            table[col] = val
+        else:
+            table[col] = val
 
     return table
 
@@ -208,7 +190,7 @@ def struct_to_table(structure: any) -> Table:
 def struct_from_table(ctnr: any, target: Target | int | SkyCoord, data: Table, **kwargs: dict) -> any:
     from ..queries.query_core import setup_targeting
 
-    ctnr_cols = get_runtime_cols(ctnr) if not isinstance(ctnr, type) else get_cols(ctnr)
+    ctnr_cols = get_cols(ctnr)
 
     relevant_data = {}
     for col_name in data.colnames:
@@ -245,12 +227,22 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
     Combines the array-like attributes of a data structure into a single pandas DataFrame
     """
 
-    cols = get_runtime_cols(structure)  # Excludes scalar Quantities
+    cols = get_cols(structure)
+
     data = {}
     for col in cols:
         val = getattr(structure, col)
+        if val is None:
+            continue
 
-        # No need to check for scalar - already excluded
+        if not isinstance(val, COLUMN_TYPES):
+            val = [val]
+
+        print(col, val)
+        if isinstance(val, Quantity) and val.isscalar:
+            print("skipped")
+            continue
+
         data[col] = val
 
     return pd.DataFrame.from_dict(data)
@@ -259,7 +251,7 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
 def struct_from_dataframe(ctnr: any, target: Target | int | SkyCoord, data: pd.DataFrame, **kwargs) -> any:
     from ..queries.query_core import setup_targeting
 
-    ctnr_cols = get_runtime_cols(ctnr) if not isinstance(ctnr, type) else get_cols(ctnr)
+    ctnr_cols = get_cols(ctnr)
 
     relevant_data = {}
     for col in data.columns.values.tolist():
@@ -293,7 +285,7 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
     hdr = Header()
 
     # combine array-like attributes into a dataframe
-    cols = get_runtime_cols(structure)
+    cols = get_cols(structure)
     tbl = struct_to_table(structure)
 
     # PrimaryHDU stores query kind, extensions store data container kind
@@ -318,12 +310,10 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
             continue
 
         if isinstance(val, Quantity):
-            print(attr, val, type(val))
-            if is_scalar_quantity(val):
-                hdr = WRITE_MAP[Quantity](attr=attr, hdr=hdr, key=attr, value=val)
+            if val.isscalar:
+                hdr = write_quantity(attr, hdr, attr, val)
             else:
                 tbl[attr] = val
-
         elif type(val) in WRITE_MAP:
             hdr = WRITE_MAP[type(val)](attr=attr, hdr=hdr, key=attr, value=val)
         else:

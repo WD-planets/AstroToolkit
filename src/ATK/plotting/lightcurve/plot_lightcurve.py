@@ -1,5 +1,4 @@
-import copy
-
+import astropy.units as u
 import numpy as np
 import pandas as pd
 from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper
@@ -9,8 +8,7 @@ from bokeh.plotting import figure
 from ...structures.Lightcurve import Lightcurve
 from ..colours import GRADIENT_MAPS, get_gradient
 from ..formatting import format_plot
-from .folded_params import (compute_band_offsets, compute_phase_offsets,
-                            handle_fold_arguments)
+from .folded_params import compute_phase_offsets, handle_fold_arguments
 
 MEAN_WARP_SCALE = 0.25
 
@@ -25,9 +23,10 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
 
     # time handling
     time_format = kwargs.get("time_format", "reduced")
-    time = lc._time.value
+    # print(lc._time, type(lc._time), lc._time_type)
+    time = lc._time.to_value()
     if time_format == "reduced":
-        time = [t - time_min for t in time]
+        time = time - time_min
 
     if lc.obj_id is not None:
         obj_id = str(lc.obj_id)
@@ -66,7 +65,7 @@ def plot_band(plot: figure, lc: Lightcurve, palette: list[str], time_min: float,
     if lc._time_type == "mjd":
         legend_str = f"{lc.survey} {lc.band}"
     elif lc._time_type == "phase":
-        legend_str = f"{lc.survey} {lc.band}\n{lc.fopt.value:.3f} {lc.fopt.unit.to_string('unicode')}"
+        legend_str = f"{lc.survey} {lc.band}\n{lc.fopt.to_value(1 / u.day):.3f} {lc.fopt.unit.to_string('unicode')}"
 
     # plot errors
     err_xs = [[t, t] for t in time]
@@ -105,7 +104,7 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
     band_names = ", ".join(d.band for d in lcs)
 
     # get x-axis label
-    if getattr(lcs[0], "phase") is not None:
+    if lcs[0]._time_type == "phase":
         x_label = "Phase"
     elif time_format == "original":
         x_label = "MJD"
@@ -121,15 +120,12 @@ def dispatch_groups(lcs: list[Lightcurve], palette_map: dict, **kwargs: dict):
 
     # get MJD at start of data
     if lcs[0]._time_type == "mjd":
-        all_times = [t for lc in lcs for t in lc.mjd.value]
-        if not all_times:
-            raise Exception("No time data found.")
+        all_times = np.concatenate([lc.mjd.to_value() for lc in lcs])
         time_min = min(all_times)
 
         y_label = brightness_type
     else:
         # Set up phase-folded light curve parameters
-        all_times = None
         time_min = None
 
         # basic params

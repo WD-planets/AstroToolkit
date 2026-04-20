@@ -1,6 +1,8 @@
 import numpy as np
 from astropy.units import Quantity
 
+from ...utilities.units import _align_to_unit, _strip_unit
+
 
 def crop_nd(x: np.ndarray, ys: list[np.ndarray], lower_lim: float | None, upper_lim: float | None):
     if lower_lim is None and upper_lim is None:
@@ -8,10 +10,9 @@ def crop_nd(x: np.ndarray, ys: list[np.ndarray], lower_lim: float | None, upper_
 
     mask = np.ones(x.shape, dtype=bool)
 
-    x_unit = None
-    if isinstance(x, Quantity):
-        x_unit = x.unit
-        x = x.value
+    x, x_unit = _strip_unit(x)
+    lower_lim = _align_to_unit(lower_lim, x_unit, "lower_lim", "x_arr")
+    upper_lim = _align_to_unit(upper_lim, x_unit, "upper_lim", "x_arr")
 
     y_units = []
     for i, y in enumerate(ys):

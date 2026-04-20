@@ -1,9 +1,17 @@
 from dataclasses import dataclass, field
 
+import astropy.units as u
 import numpy
 from astropy.units import Quantity
 
+from ..configuration.base_config import BASE_CONFIG
 from .structures_core import Container, manage_inplace
+
+default_scale = BASE_CONFIG._get("query_settings", "default_scale")
+try:
+    default_unit = u.Unit(default_scale)
+except ValueError:
+    raise Exception(f"Invalid default_unit in config '{default_scale}'.")
 
 
 @dataclass(repr=False)
@@ -18,6 +26,17 @@ class SED(Container):
     flux_err: numpy.ndarray | Quantity | None = None
 
     _data_methods: tuple = ("crop", "bin")
+
+    _units = {"flux": u.mJy, "flux_err": u.mJy, "separation": default_scale, "wavelength": u.angstrom}
+
+    def __post_init__(self):
+        for attr, unit in self._units.items():
+            val = getattr(self, attr, None)
+            if val is None:
+                continue
+
+            if not isinstance(val, Quantity):
+                setattr(self, attr, val * unit)
 
     def __repr__(self):
         return "<Spectral Energy Distribution>"

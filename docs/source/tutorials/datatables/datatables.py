@@ -16,7 +16,7 @@ from ATK import query
 
 target = 587316166180416640
 
-table = query("datatable", targets=target, rows={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, path="example_table.fits.gz")
+table = query("datatable", targets=target, columns={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, path="example_table.fits.gz")
 table.show(show_types=True)
 
 # %%

@@ -39,12 +39,26 @@ class DataPages:
             for alias in t._aliases:
                 self._alias_map[alias] = t._key
 
-    def show(self, show_types=False, **kwargs) -> None:
+    def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> None:
+        """show(self, show_types = False, show_all = False)
+        Prints structure to stdout in a human-readable format.
+
+        Parameters
+        ----------
+        show_types : bool, optional
+            If True, print data types of structure attributes.
+
+            Default is ``False``
+
+        show_all : bool, optional
+            If True, do not truncate printing of large iterables.
+
+            Default is ``False``.
+        """
+
         from ..io.struct_stdout import pprint_structure
 
-        pprint_structure(self, show_types, **kwargs)
-
-        return self
+        pprint_structure(self, show_types, show_all, **kwargs)
 
     # save
     # ====
