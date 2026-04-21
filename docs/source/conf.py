@@ -1,10 +1,13 @@
 import os
 import sys
 
+import astropy.units as u
 from bokeh.embed import file_html
 from bokeh.layouts import Column, GridBox, Row
 from bokeh.plotting import figure
 from bokeh.resources import CDN
+
+from ATK.utilities.docstrings import ATTR_DOCSTRINGS
 
 sys.path.insert(0, os.path.abspath("./tutorials"))
 sys.path.insert(0, os.path.abspath("../../src"))
@@ -55,35 +58,81 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     return skip
 
 
-def process_docstring(app, what, name, obj, options, lines):
-    """
-    Adds required parameters from _required attr for object initialisation via from_table() and from_dataframe()
-    """
-
-    # Only act on methods
-    if what != "method":
+def attach_units(app, what, name, obj, options, lines):
+    if what != "class":
         return
 
-    # Get method name
-    method_name = name.split(".")[-1]
-
-    if method_name not in {"from_dataframe", "from_table"}:
+    if not hasattr(obj, "_units"):
         return
 
-    # Get the owning class
-    owner = getattr(obj, "__self__", None)
+    units_override = {u.deg: "deg", u.arcsec: "arcsec", u.arcmin: "arcmin"}
 
-    if owner and hasattr(owner, "_required"):
+    lines.append("")
+    lines.append(".. rubric:: Units")
+    # not in use currently but doesn't hurt to leave
+    lines.append(f".. _{obj.__name__}_Units:")
+    lines.append("")
+    lines.append(
+        "The following attributes are automatically converted to :class:`~astropy.units.Quantity` with a default unit unless one is explictly provided:"
+    )
+
+    for attr, unit in obj._units.items():
         lines.append("")
-        lines.append("The following parameters are required as keyword arguments:")
-        for item in owner._required:
-            lines.append("")
-            lines.append(f"- {item}")
+        u_unit = u.Unit(unit)
+
+        unit_str = None
+        for k, v in units_override.items():
+            if u_unit == k:
+                unit_str = v
+                break
+
+        if unit_str is None:
+            if u_unit == u.one:
+                unit_str = "dimensionless"
+            else:
+                unit_str = u_unit.to_string("unicode")
+
+        lines.append(f"- ``{attr}`` - {unit_str}")
+
+    lines.append("")
+    lines.append("|")
+
+
+def remove_self_from_signature(app, what, name, obj, options, signature, return_annotation):
+    if what == "method" and signature:
+        if signature.startswith("(self, "):
+            signature = "(" + signature[len("(self, ") :]
+        elif signature == "(self)":
+            signature = "()"
+    return signature, return_annotation
+
+
+def common_attr_docstrings(app, what, name, obj, options, lines):
+    """
+    Replaces attribute docstring 'DOC_OVERRIDE' with a pre-existing docstring
+    """
+
+    if what != "attribute":
+        return
+
+    attr_name = name.split(".")[-1]
+
+    if attr_name not in ATTR_DOCSTRINGS:
+        return
+
+    content = [l.strip() for l in lines if l.strip()]
+    if "DOC_OVERRIDE" not in content:
+        return
+
+    doc = ATTR_DOCSTRINGS[attr_name].strip("\n")
+    lines[:] = doc.splitlines()
 
 
 def setup(app):
+    app.connect("autodoc-process-docstring", attach_units)
     app.connect("autodoc-skip-member", autodoc_skip_member)
-    app.connect("autodoc-process-docstring", process_docstring)
+    app.connect("autodoc-process-signature", remove_self_from_signature)
+    app.connect("autodoc-process-docstring", common_attr_docstrings)
     app.add_css_file("stylesheet.css")
 
 
@@ -100,6 +149,8 @@ extensions = [
     "bokeh.sphinxext.bokeh_plot",
     "sphinx.ext.mathjax",
 ]
+
+nitpicky = False
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

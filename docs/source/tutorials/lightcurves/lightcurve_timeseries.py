@@ -112,7 +112,7 @@ figure
 # 
 # Frequency Optimisation
 # ----------------------
-# Despite the underlying power spectrum being the same, the photometry in the above example has been folded on a different peak frequency - in this case the first subharmonic (i.e. ``0.5 * fopt``). **By default, a phase-dispersion metric is calculated for each candidate** :class:`Lomb-Scargle <astropy.timeseries.LombScargle>` **frequency and the best is chosen. This can help to preserve real periodic structure, especially if the modulation is asymmetric as seen here.** 
+# Despite the underlying power spectrum being the same, the photometry in the above example has been folded on a different peak frequency - in this case the first subharmonic (i.e. ``0.5 * fopt``). **By default, a phase-dispersion metric is calculated for a set of harmonics either side of the peak frequency** and the best is chosen. This can help to preserve real periodic structure, especially if the modulation is asymmetric as seen here.** 
 # 
 # This behaviour can be disabled by passing ``optimise=False`` - in this case losing the true orbital frequency in favour of the peak frequency in the power spectrum:
 

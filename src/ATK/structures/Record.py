@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Self
 
 import pandas as pd
 from astropy.coordinates import SkyCoord
@@ -6,6 +7,7 @@ from astropy.io.fits import BinTableHDU
 from astropy.table import Table
 from pandas import DataFrame
 
+from ..utilities.docstrings import get_docstring
 from .structures_core import Container
 from .Target import Target
 
@@ -23,13 +25,9 @@ class Record(Container):
     survey: str | None = None
     #: `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue ID.
     catalogue: str | None = None
-    #: Achieved degree of proper motion correction.
-    #:
-    #: - ``'full'`` = complete 3-dimensional projection on the sky.
-    #: - ``'partial'`` = 2-dimensional plane projection.
-    #: - ``'none'`` = no correction.
+    #: DOC_OVERRIDE
     correction: str | None = None
-    #: Position of search at time of execution (i.e. post-correction).
+    #: DOC_OVERRIDE
     search_pos: SkyCoord | None = None
     #: Returned `Vizier <https://vizier.cds.unistra.fr/>`_ table.
     table: Table | None = None
@@ -43,14 +41,12 @@ class Record(Container):
             return f"<{self.catalogue} Record>"
 
     def to_hdu(self) -> BinTableHDU:
-        """
-        Converts structure into a :class:`~astropy.io.fits.BinTableHDU`.
-        """
-
         # overwrites the default to_hdu method due to simplicity
         from ..io.structure_io import simple_to_hdu
 
         return simple_to_hdu(self)
+
+    to_hdu.__doc__ = get_docstring("to_hdu", hdu_type="BinTableHDU")
 
     def to_table(self) -> Table:
         """
@@ -75,7 +71,7 @@ class Record(Container):
             return DataFrame()
 
     @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: Table, **kwargs):
+    def from_table(cls, target: Target | int | SkyCoord, data: Table, **kwargs) -> Self:
         from ..io.structure_io import struct_from_table
 
         ctnr = struct_from_table(cls, target, data, **kwargs)
@@ -87,8 +83,10 @@ class Record(Container):
 
         return ctnr
 
+    from_table.__func__.__doc__ = get_docstring("from_table", obj="Record", args=", ".join(f"``{p}``" for p in _required))
+
     @classmethod
-    def from_dataframe(cls: any, target: Target | int | SkyCoord, data: pd.DataFrame, **kwargs):
+    def from_dataframe(cls: any, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
         from ..io.structure_io import struct_from_dataframe
 
         ctnr = struct_from_dataframe(cls, target, data, **kwargs)
@@ -99,3 +97,5 @@ class Record(Container):
         ctnr.table = Table.from_pandas(data)
 
         return ctnr
+
+    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="Record", args=", ".join(f"``{p}``" for p in _required))

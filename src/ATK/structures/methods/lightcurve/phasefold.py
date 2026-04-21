@@ -158,8 +158,6 @@ def fold_lc(
 
         phase = (t * f).to_value(1) % 1 * u.one
 
-        print(type(phase))
-
         # data
         brightness = lc._brightness
 

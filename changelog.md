@@ -175,3 +175,4 @@ To-Do Later
 - improve warnings/logging (no print statements?)
 - add annotations to ATK keywords in fits headers
 - let spectral peak fitting work in velocity-space (?)
+- image overlay DataFrame -> Table

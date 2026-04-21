@@ -10,6 +10,7 @@ Models
     ATK.Models.Record
     ATK.Models.Image
     ATK.Models.Lightcurve
+    ATK.Models.Powspec
     ATK.Models.Spectrum
     ATK.Models.SED
     ATK.Models.HRD

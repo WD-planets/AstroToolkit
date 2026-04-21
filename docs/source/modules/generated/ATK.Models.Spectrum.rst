@@ -20,8 +20,6 @@
       ~Spectrum.velocity
       ~Spectrum.wav_ref
       ~Spectrum.wavelength
-      ~Spectrum.x_arr
-      ~Spectrum.x_type
    
    
 
@@ -36,7 +34,6 @@
       ~Spectrum.crop
       ~Spectrum.from_dataframe
       ~Spectrum.from_table
-      ~Spectrum.set_x
       ~Spectrum.show
       ~Spectrum.to_dataframe
       ~Spectrum.to_hdu
@@ -61,8 +58,6 @@
    .. autoattribute:: Spectrum.velocity
    .. autoattribute:: Spectrum.wav_ref
    .. autoattribute:: Spectrum.wavelength
-   .. autoattribute:: Spectrum.x_arr
-   .. autoattribute:: Spectrum.x_type
    
 
    |
@@ -75,7 +70,6 @@
    .. automethod:: Spectrum.crop
    .. automethod:: Spectrum.from_dataframe
    .. automethod:: Spectrum.from_table
-   .. automethod:: Spectrum.set_x
    .. automethod:: Spectrum.show
    .. automethod:: Spectrum.to_dataframe
    .. automethod:: Spectrum.to_hdu

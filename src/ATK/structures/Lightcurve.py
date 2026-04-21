@@ -1,24 +1,30 @@
 from dataclasses import dataclass, field
+from typing import Self
 
 import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 from astropy.units import Quantity
+from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
 from .methods.lightcurve.phasefold import fold_lc
 from .methods.lightcurve.powspec import gen_powspec
+from .Powspec import Powspec
 from .structures_core import Container, manage_inplace
+from .Target import Target
 
 
 @dataclass(repr=False)
 class Lightcurve(Container):
     """
-    Container for storing time-series photometry. This object stores both data and relevant metadata. test
+    Container for storing time-series photometry. This object stores both data and relevant metadata.
 
-    .. rubric:: Valid Combinations
+    |
 
-    A :class:`~ATK.Models.Lightcurve` must be initialized with one of the following mutually exclusive forms:
+    .. rubric:: Valid Configurations
+
+    A :class:`~ATK.Models.Lightcurve` must be initialised with one of the following mutually exclusive forms:
 
     **Photometry:**
 
@@ -36,19 +42,15 @@ class Lightcurve(Container):
 
     """
 
-    #: Survey from which light curve originates.
+    #: DOC_OVERRIDE
     survey: str | None = None
-    #: Photometric band of stored data.
+    #: DOC_OVERRIDE
     band: str | None = None
-    #: Achieved degree of proper motion correction.
-    #:
-    #: - ``'full'`` = complete 3-dimensional projection on the sky.
-    #: - ``'partial'`` = 2-dimensional plane projection.
-    #: - ``'none'`` = no correction.
+    #: DOC_OVERRIDE
     correction: str | None = None
-    #: Position of search at time of execution (i.e. post-correction).
+    #: DOC_OVERRIDE
     search_pos: SkyCoord | None = None
-    #: Separation between position of the search and the returned data.
+    #: DOC_OVERRIDE
     separation: Quantity | None = None
     #: Survey-specific object ID.
     #:
@@ -75,8 +77,12 @@ class Lightcurve(Container):
     #: Mutually exclusive with ``flux_err``.
     mag_err: Quantity | None = None
     #: Right ascension values.
+    #:
+    #: ``None`` unless light curve has been folded with :meth:`~ATK.Models.Lightcurve.fold`.
     ra: Quantity | None = None
     #: Declination values.
+    #:
+    #: ``None`` unless light curve has been folded with :meth:`~ATK.Models.Lightcurve.fold`.
     dec: Quantity | None = None
 
     #: Phase values.
@@ -183,7 +189,7 @@ class Lightcurve(Container):
     def _set_time(self, val: numpy.ndarray):
         setattr(self, self._time_type, val)
 
-    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
+    def crop(self, min: float | Quantity | None = None, max: float | Quantity | None = None, inplace: bool = True) -> Self:
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
@@ -209,9 +215,9 @@ class Lightcurve(Container):
 
         return struct
 
-    crop.__doc__ = get_docstring("crop", x="mjd", name="Lightcurve")
+    crop.__doc__ = get_docstring("crop", x="``mjd`` or ``phase``", name="Lightcurve")
 
-    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True):
+    def bin(self, bins: int | None = None, size: Quantity | float | None = None, inplace=True) -> Self:
         from .methods.binning import bin_nd
 
         struct = manage_inplace(self, inplace)
@@ -238,9 +244,9 @@ class Lightcurve(Container):
 
         return struct
 
-    bin.__doc__ = get_docstring("bin", x="mjd", name="Lightcurve")
+    bin.__doc__ = get_docstring("bin", x="``mjd`` or ``phase``", name="Lightcurve")
 
-    def clip(self, sigma: float, sigma_lower: float | None = None, sigma_upper: float | None = None, inplace: bool = False):
+    def clip(self, sigma: float, sigma_lower: float | None = None, sigma_upper: float | None = None, inplace: bool = False) -> Self:
         from .methods.sigma_clip import do_sigma_clipping
 
         struct = manage_inplace(self, inplace)
@@ -266,15 +272,30 @@ class Lightcurve(Container):
 
         return struct
 
-    clip.__doc__ = get_docstring("clip", name="Lightcurve")
+    clip.__doc__ = get_docstring("clip", y="``mag`` or ``flux``", name="Lightcurve")
 
-    def pspec(self, fmin: float, fmax: float, samples: int):
+    def pspec(self, fmin: float | Quantity, fmax: float | Quantity, samples: int) -> Powspec:
         """
-        Generates a :class:`~ATK.Models.Powspec` using :class:`astropy.timeseries.LombScargle`.
+        Generates a :class:`~ATK.Models.Powspec` (power spectrum) using :class:`astropy.timeseries.LombScargle` over a range of trial frequencies.
 
         Parameters
         ----------
-        fmin : float
+        fmin : float | Quantity
+            Minimum frequency.
+
+            If a :class:`~astropy.units.Unit` is not provided, ``fmin`` is assumed to be in :math:`\mathrm{days}^{-1}`.
+
+        fmax : float | Quantity
+            Maximum frequency.
+
+            If a :class:`~astropy.units.Unit` is not provided, ``fmax`` is assumed to be in :math:`\mathrm{days}^{-1}`.
+
+        samples: int
+            Number of samples in frequency range defined by ``fmin`` and ``fmax``.
+
+        Returns
+        -------
+        :class:`~ATK.Models.Powspec`
         """
 
         struct = gen_powspec([self], fmin, fmax, samples)[0]
@@ -282,8 +303,52 @@ class Lightcurve(Container):
         return struct
 
     def fold(
-        self, fmin: float, fmax: float, samples: int, optimise: bool = True, freq: float | Quantity | None = None, inplace: bool = True
-    ):
+        self,
+        fmin: float | Quantity,
+        fmax: float | Quantity,
+        samples: int,
+        optimise: bool = True,
+        freq: float | Quantity | None = None,
+        inplace: bool = True,
+    ) -> Self:
+        """
+        Phase-folds the :class:`~ATK.Models.Lightcurve` curve onto the best frequency over a range of trial frequencies, or a fixed frequency.
+
+        Parameters
+        ----------
+        fmin : float or :class:`~astropy.units.Quantity`, optional
+            Minimum frequency.
+
+            If a :class:`~astropy.units.Quantity` is not provided, ``fmin`` is assumed
+            to be in :math:`\mathrm{days}^{-1}`.
+
+        fmax : float or :class:`~astropy.units.Quantity`, optional
+            Maximum frequency.
+
+            If a :class:`~astropy.units.Quantity` is not provided, ``fmax`` is assumed
+            to be in :math:`\mathrm{days}^{-1}`.
+
+        samples : int, optional
+            Number of samples in the frequency range defined by ``fmin`` and ``fmax``.
+
+        optimise : bool, optional
+            If True, a phase-dispersion metric is calculated for a set of harmonics either side of the peak frequency, and the best is chosen. This can help to preserve real periodic structure, especially in the case of asymmetric modulation.
+
+        freq : float or :class:`~astropy.units.Quantity`, optional
+            Specific frequency on which to fold the :class:`~ATK.Models.Lightcurve`. If provided, this overrides ``fmin``, ``fmax``, and ``samples``.
+
+            If a :class:`~astropy.units.Quantity` is not provided, ``freq`` is assumed
+            to be in :math:`\mathrm{days}^{-1}`.
+
+        inplace : bool, optional
+            If ``True``, modify the current :class:`~ATK.Models.Lightcurve` in place - leaving the original unchanged. If ``False``, operate on and return a copy.
+
+        Returns
+        -------
+        ``Self``
+            The folded :class:`~ATK.Models.Lightcurve`, with ``fopt`` and ``popt`` set to the folded frequency and folded period, respectively. Returns ``self`` if ``inplace=True``, otherwise returns a new instance.
+        """
+
         struct = manage_inplace(self, inplace)
         struct = fold_lc([struct], fmin=fmin, fmax=fmax, samples=samples, multiband=False, optimise=optimise, freq=freq)[0]
 
@@ -295,3 +360,15 @@ class Lightcurve(Container):
             return self
 
         return struct
+
+    @classmethod
+    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
+        return super().from_dataframe(target, data, **kwargs)
+
+    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="Lightcurve", args=", ".join(f"``{p}``" for p in _required))
+
+    @classmethod
+    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
+        return super().from_table(target, data, **kwargs)
+
+    from_table.__func__.__doc__ = get_docstring("from_table", obj="Lightcurve", args=", ".join(f"``{p}``" for p in _required))

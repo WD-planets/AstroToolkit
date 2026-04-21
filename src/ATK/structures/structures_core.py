@@ -1,13 +1,15 @@
 import copy
 from dataclasses import dataclass, field
+from typing import Self
 
 import numpy
-import pandas
 from astropy.coordinates import SkyCoord
 from astropy.io.fits import BinTableHDU
 from astropy.table import Table
 from astropy.units import Quantity, Unit
+from pandas import DataFrame
 
+from ..utilities.docstrings import get_docstring
 from .Target import Target
 
 # whether to combine data structures into combined plots
@@ -70,7 +72,7 @@ class Container:
     _plot_methods: dict = field(default_factory=dict)
     _group_plot_methods: dict = field(default_factory=dict)
 
-    def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> None:
+    def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> Self:
         """show(self, show_types = False, show_all = False)
         Prints structure to stdout in a human-readable format.
 
@@ -81,11 +83,17 @@ class Container:
 
         show_all : bool, optional
             If True, do not truncate printing of large iterables.
+
+        Returns
+        -------
+        ``self``
         """
 
         from ..io.struct_stdout import pprint_structure
 
         pprint_structure(self, show_types, show_all, **kwargs)
+
+        return self
 
     def __repr__(self):
         survey_str = f"{self.survey} " if self.survey else ""
@@ -118,9 +126,15 @@ class Container:
 
         return get_cols(self)
 
-    def to_dataframe(self) -> pandas.DataFrame:
+    def to_dataframe(self) -> DataFrame:
         """
         Combines all array-like attributes of a structure into a :class:`~pandas.DataFrame`.
+
+        Units are not preserved.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
         """
 
         from ..io.structure_io import struct_to_dataframe
@@ -128,6 +142,14 @@ class Container:
         return struct_to_dataframe(self)
 
     def to_table(self) -> Table:
+        """
+        Combines all array-like attributes of a structure into a :class:`~astropy.table.Table`, preserving units.
+
+        Returns
+        -------
+        :class:`~astropy.table.Table`
+        """
+
         from ..io.structure_io import struct_to_table
 
         return struct_to_table(self)
@@ -137,22 +159,16 @@ class Container:
 
         return struct_to_hdu(self)
 
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs):
-        """
-        Generates structure from a :class:`~pandas.DataFrame`.
-        """
+    to_hdu.__doc__ = get_docstring("to_hdu", hdu_type="BinTableHDU")
 
+    @classmethod
+    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs):
         from ..io.structure_io import struct_from_dataframe
 
         return struct_from_dataframe(cls, target, data, **kwargs)
 
     @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: pandas.DataFrame, **kwargs):
-        """
-        Generates structure from a :class:`~astropy.table.Table`.
-        """
-
+    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs):
         from ..io.structure_io import struct_from_table
 
         return struct_from_table(cls, target, data, **kwargs)

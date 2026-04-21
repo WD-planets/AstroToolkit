@@ -34,9 +34,9 @@ def query(target: Target, **kwargs):
         survey="gaia",
         abs_mag_band=kwargs["mag"],
         colour_bands=kwargs["colour"],
-        colour=np.asarray([colour]),
+        colour=np.asarray([colour]) * u.mag,
         distance=np.asarray([distance]) * u.pc,
-        abs_mag=np.asarray([abs_mag]),
+        abs_mag=np.asarray([abs_mag]) * u.mag,
         correction="n/a",
         identifier=target.identifier,
     )

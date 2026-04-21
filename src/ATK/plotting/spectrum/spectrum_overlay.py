@@ -27,11 +27,11 @@ OVERLAY_LINES = [
 
 def plot_overlay(plot: figure, spectrum: Spectrum):
     flux = spectrum._get_attr_value("flux")
-    x = spectrum._get_attr_value(spectrum.x_type)
+    x = spectrum._get_attr_value(spectrum._x_type)
 
     overlay_lines = OVERLAY_LINES
 
-    if spectrum.x_type == "velocity":
+    if spectrum._x_type == "velocity":
         for line in overlay_lines:
             line["velocity"] = get_velocities(line["wavelength"], spectrum.wav_ref.to(u.angstrom).value).value
 
@@ -50,7 +50,7 @@ def plot_overlay(plot: figure, spectrum: Spectrum):
     y_max = float(np.max(flux))
 
     for line in overlay_lines:
-        xpos = line[spectrum.x_type]
+        xpos = line[spectrum._x_type]
 
         if not (np.min(x) < xpos < np.max(x)):
             continue
