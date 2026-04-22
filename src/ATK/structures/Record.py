@@ -40,6 +40,9 @@ class Record(Container):
         else:
             return f"<{self.catalogue} Record>"
 
+    # IO STUFF
+    # --------
+
     def to_hdu(self) -> BinTableHDU:
         # overwrites the default to_hdu method due to simplicity
         from ..io.structure_io import simple_to_hdu
@@ -71,7 +74,7 @@ class Record(Container):
             return DataFrame()
 
     @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: Table, **kwargs) -> Self:
+    def from_table(cls, target: Target | SkyCoord | int, data: Table, **kwargs) -> Self:
         from ..io.structure_io import struct_from_table
 
         ctnr = struct_from_table(cls, target, data, **kwargs)
@@ -86,7 +89,7 @@ class Record(Container):
     from_table.__func__.__doc__ = get_docstring("from_table", obj="Record", args=", ".join(f"``{p}``" for p in _required))
 
     @classmethod
-    def from_dataframe(cls: any, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
+    def from_dataframe(cls: any, target: Target | SkyCoord | int, data: DataFrame, **kwargs) -> Self:
         from ..io.structure_io import struct_from_dataframe
 
         ctnr = struct_from_dataframe(cls, target, data, **kwargs)

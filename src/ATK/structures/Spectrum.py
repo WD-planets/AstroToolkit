@@ -10,12 +10,13 @@ from pandas import DataFrame
 from ..utilities.docstrings import get_docstring
 from .methods.spectrum.fitting import do_fitting
 from .methods.spectrum.radial_velocities import get_rvs
-from .structures_core import Container, manage_inplace
+from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
+                              TableIOMixin, manage_inplace)
 from .Target import Target
 
 
 @dataclass(repr=False)
-class Spectrum(Container):
+class Spectrum(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     """
     Container for storing spectral data. This object stores both data and relevant metadata.
 
@@ -168,15 +169,3 @@ class Spectrum(Container):
         struct.wavelength = None
 
         return struct
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_dataframe(target, data, **kwargs)
-
-    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="Spectrum", args=", ".join(f"``{p}``" for p in _required))
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_table(target, data, **kwargs)
-
-    from_table.__func__.__doc__ = get_docstring("from_table", obj="Spectrum", args=", ".join(f"``{p}``" for p in _required))

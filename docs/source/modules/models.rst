@@ -5,7 +5,8 @@ Models
     :toctree: generated
     :nosignatures:
     :recursive:
-
+    
+    ATK.Models.Target
     ATK.Models.DataSet
     ATK.Models.Record
     ATK.Models.Image
@@ -15,3 +16,4 @@ Models
     ATK.Models.SED
     ATK.Models.HRD
     ATK.Models.DataTable
+    ATK.Models.DataPages

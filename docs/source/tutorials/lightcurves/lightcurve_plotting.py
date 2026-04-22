@@ -32,9 +32,11 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# .. note:: 
-# 
-#    For a list of photometric bands supported by each survey, see the :doc:`previous tutorial <lightcurve_query>`.
+# .. note::
+#
+#    ATK supports the following lightcurve surveys and bands:
+#
+#    .. include:: supported_lightcurve_surveys.rst
 #
 # |
 # 

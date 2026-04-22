@@ -8,12 +8,13 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container
+from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
+                              TableIOMixin)
 from .Target import Target
 
 
 @dataclass(repr=False)
-class HRD(Container):
+class HRD(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     """
     Container for storing the location of sources on the Hertzsprung-Russell Diagram. This object stores both data and relevant metadata.
     """
@@ -55,15 +56,3 @@ class HRD(Container):
 
     def __repr__(self):
         return f"<{self.survey} {self.abs_mag_band} vs {self.colour_bands} HRD>"
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_dataframe(target, data, **kwargs)
-
-    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="HRD", args=", ".join(f"``{p}``" for p in _required))
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_table(target, data, **kwargs)
-
-    from_table.__func__.__doc__ = get_docstring("from_table", obj="HRD", args=", ".join(f"``{p}``" for p in _required))

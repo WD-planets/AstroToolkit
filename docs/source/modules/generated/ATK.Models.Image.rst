@@ -30,12 +30,8 @@
 
    .. autosummary::
    
-      ~Image.from_dataframe
-      ~Image.from_table
       ~Image.show
-      ~Image.to_dataframe
       ~Image.to_hdu
-      ~Image.to_table
    
    
     
@@ -63,10 +59,6 @@
    .. rubric:: Method Descriptions
 
    
-   .. automethod:: Image.from_dataframe
-   .. automethod:: Image.from_table
    .. automethod:: Image.show
-   .. automethod:: Image.to_dataframe
    .. automethod:: Image.to_hdu
-   .. automethod:: Image.to_table
    

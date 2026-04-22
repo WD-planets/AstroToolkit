@@ -72,9 +72,7 @@ def attach_units(app, what, name, obj, options, lines):
     # not in use currently but doesn't hurt to leave
     lines.append(f".. _{obj.__name__}_Units:")
     lines.append("")
-    lines.append(
-        "The following attributes are automatically converted to :class:`~astropy.units.Quantity` with a default unit unless one is explictly provided:"
-    )
+    lines.append("The following attributes are automatically converted to :class:`~astropy.units.Quantity` with a default unit unless one is explictly provided:")
 
     for attr, unit in obj._units.items():
         lines.append("")
@@ -93,6 +91,33 @@ def attach_units(app, what, name, obj, options, lines):
                 unit_str = u_unit.to_string("unicode")
 
         lines.append(f"- ``{attr}`` - {unit_str}")
+
+    lines.append("")
+    lines.append("|")
+
+
+def attach_plotting_params(app, what, name, obj, options, lines):
+    if what != "class":
+        return
+
+    if not hasattr(obj, "_plot_params"):
+        return
+
+    lines.append("")
+    lines.append(".. rubric:: Plotting Arguments")
+    # not in use currently but doesn't hurt to leave
+    lines.append(f".. _{obj.__name__}_Plotting_Arguments:")
+    lines.append("")
+    lines.append("The following keyword arguments are accepted when plotting via :meth:`~ATK.Models.DataSet.plot()` or :meth:`~ATK.Models.DataSet.open`.")
+
+    for param, info in obj._plot_params.items():
+        lines.append("")
+        lines.append(f"{param} : {info[0]}")
+        print(f"{param}: {info[0]}")
+        info[1] = info[1].lstrip()
+        for line in info[1].split("\n"):
+            print(f"   {line.lstrip().rstrip()}")
+            lines.append(f"   {line.lstrip().rstrip()}")
 
     lines.append("")
     lines.append("|")
@@ -130,6 +155,7 @@ def common_attr_docstrings(app, what, name, obj, options, lines):
 
 def setup(app):
     app.connect("autodoc-process-docstring", attach_units)
+    app.connect("autodoc-process-docstring", attach_plotting_params)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", remove_self_from_signature)
     app.connect("autodoc-process-docstring", common_attr_docstrings)

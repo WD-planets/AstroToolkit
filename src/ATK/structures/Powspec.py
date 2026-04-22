@@ -8,12 +8,13 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container, manage_inplace
+from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
+                              TableIOMixin, manage_inplace)
 from .Target import Target
 
 
 @dataclass(repr=False)
-class Powspec(Container):
+class Powspec(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     """
     Container for storing a Lomb-Scargle periodogram. This object stores both data and relevant metadata.
     """
@@ -69,15 +70,3 @@ class Powspec(Container):
         return struct
 
     crop.__doc__ = get_docstring("crop", x="``frequency``", name="Powspec")
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_dataframe(target, data, **kwargs)
-
-    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="Powspec", args=", ".join(f"``{p}``" for p in _required))
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_table(target, data, **kwargs)
-
-    from_table.__func__.__doc__ = get_docstring("from_table", obj="Powspec", args=", ".join(f"``{p}``" for p in _required))

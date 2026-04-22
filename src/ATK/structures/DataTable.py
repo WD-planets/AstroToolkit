@@ -30,8 +30,30 @@ class DataTable(Container):
 
     to_hdu.__doc__ = get_docstring("to_hdu", hdu_type="BinTableHDU")
 
+    def to_table(self) -> Table:
+        """
+        Converts structure into a :class:`~astropy.table.Table`.
+        """
+
+        # overwrites the default to_table method due to simplicity
+        if self.table:
+            return self.table
+        else:
+            return Table()
+
+    def to_dataframe(self) -> DataFrame:
+        """
+        Converts structure into a :class:`~pandas.DataFrame`.
+        """
+
+        # overwrites the default to_dataframe method due to simplicity
+        if self.table:
+            return self.table.to_pandas()
+        else:
+            return DataFrame()
+
     @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: Table, **kwargs) -> Self:
+    def from_table(cls, target: Target | SkyCoord | int, data: Table, **kwargs) -> Self:
         from ..io.structure_io import struct_from_table
 
         ctnr = struct_from_table(cls, target, data, **kwargs)
@@ -46,7 +68,7 @@ class DataTable(Container):
     from_table.__func__.__doc__ = get_docstring("from_table", obj="DataTable", args="None")
 
     @classmethod
-    def from_dataframe(cls: any, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
+    def from_dataframe(cls: any, target: Target | SkyCoord | int, data: DataFrame, **kwargs) -> Self:
         from ..io.structure_io import struct_from_dataframe
 
         ctnr = struct_from_dataframe(cls, target, data, **kwargs)

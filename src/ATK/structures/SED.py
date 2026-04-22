@@ -9,7 +9,8 @@ from pandas import DataFrame
 
 from ..configuration.base_config import BASE_CONFIG
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container, manage_inplace
+from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
+                              TableIOMixin, manage_inplace)
 from .Target import Target
 
 default_scale = BASE_CONFIG._get("query_settings", "default_scale")
@@ -20,7 +21,7 @@ except ValueError:
 
 
 @dataclass(repr=False)
-class SED(Container):
+class SED(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     """
     Container for storing spectral energy distribution data. This object stores both data and relevant metadata.
     """
@@ -82,15 +83,3 @@ class SED(Container):
         return struct
 
     crop.__doc__ = get_docstring("bin", x="``wavelength``", name="SED")
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_dataframe(target, data, **kwargs)
-
-    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="SED", args=", ".join(f"``{p}``" for p in _required))
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_table(target, data, **kwargs)
-
-    from_table.__func__.__doc__ = get_docstring("from_table", obj="SED", args=", ".join(f"``{p}``" for p in _required))

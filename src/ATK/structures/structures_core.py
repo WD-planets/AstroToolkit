@@ -1,4 +1,5 @@
 import copy
+import types
 from dataclasses import dataclass, field
 from typing import Self
 
@@ -73,27 +74,13 @@ class Container:
     _group_plot_methods: dict = field(default_factory=dict)
 
     def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> Self:
-        """show(self, show_types = False, show_all = False)
-        Prints structure to stdout in a human-readable format.
-
-        Parameters
-        ----------
-        show_types : bool, optional
-            If True, print data types of structure attributes.
-
-        show_all : bool, optional
-            If True, do not truncate printing of large iterables.
-
-        Returns
-        -------
-        ``self``
-        """
-
         from ..io.struct_stdout import pprint_structure
 
         pprint_structure(self, show_types, show_all, **kwargs)
 
         return self
+
+    show.__doc__ = get_docstring("show")
 
     def __repr__(self):
         survey_str = f"{self.survey} " if self.survey else ""
@@ -126,6 +113,23 @@ class Container:
 
         return get_cols(self)
 
+
+# IO Stuff
+# --------
+
+
+def _clone_classmethod(method):
+    func = method.__func__
+    return types.FunctionType(func.__code__, func.__globals__, name=func.__name__, argdefs=func.__defaults__, closure=func.__closure__)
+
+
+class DataFrameIOMixin:
+    @classmethod
+    def from_dataframe(cls, target: Target | SkyCoord | int, data: DataFrame, **kwargs):
+        from ..io.structure_io import struct_from_dataframe
+
+        return struct_from_dataframe(cls, target, data, **kwargs)
+
     def to_dataframe(self) -> DataFrame:
         """
         Combines all array-like attributes of a structure into a :class:`~pandas.DataFrame`.
@@ -141,6 +145,21 @@ class Container:
 
         return struct_to_dataframe(self)
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        new_func = _clone_classmethod(DataFrameIOMixin.from_dataframe)
+        new_func.__doc__ = get_docstring("from_dataframe", obj=cls.__name__, args=", ".join(f"``{p}``" for p in cls._required))
+        cls.from_dataframe = classmethod(new_func)
+
+
+class TableIOMixin:
+    @classmethod
+    def from_table(cls, target: Target | SkyCoord | int, data: DataFrame, **kwargs):
+        from ..io.structure_io import struct_from_table
+
+        return struct_from_table(cls, target, data, **kwargs)
+
     def to_table(self) -> Table:
         """
         Combines all array-like attributes of a structure into a :class:`~astropy.table.Table`, preserving units.
@@ -154,21 +173,18 @@ class Container:
 
         return struct_to_table(self)
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        new_func = _clone_classmethod(TableIOMixin.from_table)
+        new_func.__doc__ = get_docstring("from_table", obj=cls.__name__, args=", ".join(f"``{p}``" for p in cls._required))
+        cls.from_table = classmethod(new_func)
+
+
+class FITSIOMixin:
     def to_hdu(self) -> BinTableHDU:
         from ..io.structure_io import struct_to_hdu
 
         return struct_to_hdu(self)
 
     to_hdu.__doc__ = get_docstring("to_hdu", hdu_type="BinTableHDU")
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs):
-        from ..io.structure_io import struct_from_dataframe
-
-        return struct_from_dataframe(cls, target, data, **kwargs)
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs):
-        from ..io.structure_io import struct_from_table
-
-        return struct_from_table(cls, target, data, **kwargs)

@@ -139,8 +139,28 @@ DOCSTRINGS = {
         Returns
         -------
         :class:`~ATK.Models.{obj}`
-        """
+        """,
 
+    "show":
+        """show(self, show_types = False, show_all = False)
+        Prints structure to stdout in a human-readable format.
+
+        Parameters
+        ----------
+        show_types : bool, optional
+            If True, print data types of structure attributes.
+
+            Default is ``False``
+
+        show_all : bool, optional
+            If True, do not truncate printing of large iterables.
+
+            Default is ``False``.
+
+        Returns
+        -------
+        ``self``
+        """
 }
 
 attr_docstrings = {
@@ -225,7 +245,7 @@ attr_docstrings = {
 
         - ``separation`` : float
             Separation between position of the search and the returned `Vizier <https://vizier.cds.unistra.fr/>`_ row.
-        """
+        """,
 }
 
 # Remove leading and trailing whitespace (allows indentation for clarity when updating docstrings)

@@ -11,12 +11,23 @@ from ..utilities.docstrings import get_docstring
 from .methods.lightcurve.phasefold import fold_lc
 from .methods.lightcurve.powspec import gen_powspec
 from .Powspec import Powspec
-from .structures_core import Container, manage_inplace
+from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
+
+PLOT_PARAMS = {
+    "bands": [
+        "list of str",
+        """
+        Bands to process and include in figure.
+        
+        See :doc:`here </auto_tutorials/lightcurves/lightcurve_plotting>` for a list of supported bands in default surveys.
+        """,
+    ]
+}
 
 
 @dataclass(repr=False)
-class Lightcurve(Container):
+class Lightcurve(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     """
     Container for storing time-series photometry. This object stores both data and relevant metadata.
 
@@ -109,6 +120,8 @@ class Lightcurve(Container):
         "dec": u.deg,
         "phase": u.one,
     }
+
+    _plot_params = PLOT_PARAMS
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
@@ -360,15 +373,3 @@ class Lightcurve(Container):
             return self
 
         return struct
-
-    @classmethod
-    def from_dataframe(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_dataframe(target, data, **kwargs)
-
-    from_dataframe.__func__.__doc__ = get_docstring("from_dataframe", obj="Lightcurve", args=", ".join(f"``{p}``" for p in _required))
-
-    @classmethod
-    def from_table(cls, target: Target | int | SkyCoord, data: DataFrame, **kwargs) -> Self:
-        return super().from_table(target, data, **kwargs)
-
-    from_table.__func__.__doc__ = get_docstring("from_table", obj="Lightcurve", args=", ".join(f"``{p}``" for p in _required))

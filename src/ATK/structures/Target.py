@@ -7,6 +7,8 @@ from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
 
+from ..utilities.docstrings import get_docstring
+
 
 def skycoord_equality_check(self, other):
     same_position = (
@@ -19,12 +21,26 @@ def skycoord_equality_check(self, other):
 
 @dataclass
 class Target:
+    #: Initial (i.e. uncorrected) coordinates of target source.
+    #:
+    #: If an ``identifier`` is provided, a :class:`~astropy.coordinates.SkyCoord` is generated in the frame and epoch of the chosen astrometric backend survey. Otherwise the input :class:`~astropy.coordinates.SkyCoord` is used directly.
     initial_coords: SkyCoord
+    #: Coordinates of target source, corrected for proper motion. Updated with each stage of astrometric correction.
     coords: SkyCoord
+    #: Radius of search in which the Target is being utilised.
     radius: Quantity | None = None
 
+    #: Unique identifier from a supported astrometric backend survey (if provided, otherwise ``None``).
+    #:
+    #: (e.g. a Gaia Source ID).
     identifier: int | None = None
+    #: Survey from which ``identifier`` originates (if one was provided, otherwise ``None``).
     survey: str | None = None
+    #: Degree of proper motion correction that the :class:`~ATK.Models.Target` can support.
+    #:
+    #:     - ``'full'`` = complete 3-dimensional projection on the sky.
+    #:     - ``'partial'`` = 2-dimensional plane projection.
+    #:     - ``'none'`` = no correction.
     correction: str = "none"
 
     _key: str = field(init=False)
@@ -57,44 +73,52 @@ class Target:
         return all(matches)
 
     @property
-    def frame(self):
+    def _frame(self):
         return self.coords.frame.name
 
     @property
-    def epoch(self):
+    def _epoch(self):
         return self.coords.obstime.fits
 
     @property
-    def initial_frame(self):
+    def _initial_frame(self):
         return self.initial_coords.frame.name
 
     @property
-    def initial_epoch(self):
+    def _initial_epoch(self):
         return self.initial_coords.obstime.fits
 
     def show(self, show_types: bool = False, show_all: bool = False, **kwargs) -> None:
-        """show(self, show_types = False, show_all = False)
-        Prints structure to stdout in a human-readable format.
-
-        Parameters
-        ----------
-        show_types : bool, optional
-            If True, print data types of structure attributes.
-
-            Default is ``False``
-
-        show_all : bool, optional
-            If True, do not truncate printing of large iterables.
-
-            Default is ``False``.
-        """
-
         from ..io.struct_stdout import pprint_structure
 
         pprint_structure(self, show_types, show_all, **kwargs)
 
+    show.__doc__ = get_docstring("show")
+
     @classmethod
     def from_id(cls, id: int, survey="gaia"):
+        """
+        Construct a :class:`~ATK.Models.Target` using a unique identifier from a supported astrometric backend survey.
+
+        The resulting :class:`~ATK.Models.Target` is initialised using the coordinate frame and reference epoch of the selected ``survey``. All astrometric parameters (e.g. position and proper motion) are retrieved from the survey’s `VizieR <https://vizier.cds.unistra.fr/>`_ catalogue.
+
+        Parameters
+        ----------
+        id: int
+            Unique source identifier from a supported astrometric backend survey.
+
+            E.g. a Gaia DR3 Source ID
+
+        survey: {'gaia'}, optional
+            Survey to use as an astrometric backend.
+
+            Currently only Gaia DR3 (``gaia``) is supported.
+
+        Returns
+        -------
+        ``Self``
+        """
+
         if survey == "gaia":
             from ..utilities.coordinates import get_gaia_target
 
@@ -104,6 +128,28 @@ class Target:
 
     @classmethod
     def from_coord(cls, position: SkyCoord):
+        """
+        Construct a :class:`~ATK.Models.Target` from a position on the sky.
+
+        The provided :class:`~astropy.coordinates.SkyCoord` is transformed to the ICRS
+        frame and used to initialise the target. If no observation epoch is defined
+        (``obstime``), an epoch of J2000 is assumed.
+
+        Astrometric correction (i.e. propagation between epochs) is only possible
+        if the input coordinate includes proper motion information (and optionally
+        distance). If these are not provided, no correction can be applied.
+
+        Parameters
+        ----------
+        position : :class:`~astropy.coordinates.SkyCoord`
+            Input sky coordinate defining the target position. May optionally include
+            proper motion and distance information.
+
+        Returns
+        -------
+        ``Self``
+        """
+
         # if no epoch was set, assume J2000
         if not position.obstime:
             j2000 = Time("2000-01-01T00:00:00.000", format="fits")

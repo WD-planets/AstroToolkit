@@ -31,7 +31,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
         Default is ``True``.
 
     **kwargs
-        Arguments specific to each ``kind``. See below.
+        Accepted keyword arguments are specific to each ``kind`` (see below).
 
 
     Returns
@@ -184,9 +184,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
     if any(target is RETURNS.EXCEPTION for target in targets):
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
-        structure = DataSet[kind](
-            kind=None, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True
-        )
+        structure = DataSet[kind](kind=None, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
 
         return structure
 
@@ -194,9 +192,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
     if not arguments.get("corrections", True):
         for target in targets:
             initial_coords = target.initial_coords
-            target.initial_coords = SkyCoord(
-                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
-            )
+            target.initial_coords = SkyCoord(ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime)
             target.coords = initial_coords
             target.identifier = None
             target.survey = None
