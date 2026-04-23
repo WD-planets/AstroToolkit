@@ -8,9 +8,27 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
-                              TableIOMixin)
+from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin
 from .Target import Target
+
+PLOT_PARAMS = {
+    "split": [
+        "bool, optional",
+        """
+        If True, multiple HRDs in a :class:`~ATK.Models.DataSet` are plotted independently. Otherwise, combine into a single HRD plot."
+
+        Default is ``True``.
+        """,
+    ],
+    "background": [
+        "float, optional",
+        """
+        Sets the fraction of the background sample that is rendered, from ``0.0`` for no background to ``1.0`` for the full background sample.
+
+        Default is ``1.0``.
+        """,
+    ],
+}
 
 
 @dataclass(repr=False)
@@ -44,6 +62,8 @@ class HRD(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     _required = ["survey"]
 
     _units = {"colour": u.mag, "abs_mag": u.mag, "distance": u.pc}
+
+    _plot_params = PLOT_PARAMS
 
     def __post_init__(self):
         for attr, unit in self._units.items():

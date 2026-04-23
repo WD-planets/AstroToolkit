@@ -4,9 +4,13 @@
 .. currentmodule:: ATK.Models
 
 .. autoclass:: SED
+    
+   
+   
 
-   
-   
+   |
+   |
+
    .. rubric:: Attributes
 
    .. autosummary::

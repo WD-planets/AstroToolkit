@@ -4,9 +4,13 @@
 .. currentmodule:: ATK.Models
 
 .. autoclass:: DataTable
+    
+   
+   
 
-   
-   
+   |
+   |
+
    .. rubric:: Attributes
 
    .. autosummary::

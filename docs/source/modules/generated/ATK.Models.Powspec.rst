@@ -4,9 +4,13 @@
 .. currentmodule:: ATK.Models
 
 .. autoclass:: Powspec
+    
+   
+   
 
-   
-   
+   |
+   |
+
    .. rubric:: Attributes
 
    .. autosummary::

@@ -4,9 +4,13 @@
 .. currentmodule:: ATK.Models
 
 .. autoclass:: Spectrum
+    
+   
+   
 
-   
-   
+   |
+   |
+
    .. rubric:: Attributes
 
    .. autosummary::

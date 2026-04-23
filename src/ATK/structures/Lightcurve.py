@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Self
+from typing import ClassVar, Self
 
 import astropy.units as u
 import numpy
@@ -16,13 +16,83 @@ from .Target import Target
 
 PLOT_PARAMS = {
     "bands": [
-        "list of str",
+        "list of str, optional",
         """
-        Bands to process and include in figure.
+        Bands to process and include in figure. Only used 
         
-        See :doc:`here </auto_tutorials/lightcurves/lightcurve_plotting>` for a list of supported bands in default surveys.
+        If not provided, all bands are plotted. See :doc:`here </auto_tutorials/lightcurves/lightcurve_plotting>` for a list of supported bands in default surveys.
         """,
-    ]
+    ],
+    "colours": [
+        "list of str, optional",
+        """
+    Colour to give to each band.
+
+    If not provided, a default set of colours are used. The following colours are supported: ``"green"``, ``"red"``, ``"blue"``, ``"orange"``, ``"purple"``, ``"black"``. 
+
+    If ``bands`` is ``None``, colours are automatically assigned among all available bands.
+    """,
+    ],
+    "cmap": [
+        "{'mean', 'flat'}, optional",
+        """
+        Sets the colour map. Only used in unfolded :class:`~ATK.Models.Lightcurve`\ s, i.e. when ``phase`` is ``None``.
+
+        ``'mean'``: colour scales with distance from the centre.
+
+        ``'flat'``: no colour scaling.
+
+        Default is ``'mean'``.
+    """,
+    ],
+    "time_format": [
+        "{'reduced', 'original'}, optional",
+        """
+        Sets the format of the time axis. Only used in unfolded :class:`~ATK.Models.Lightcurve`\ s, i.e. when ``phase`` is ``None``.
+
+        ``'reduced'``: minimum MJD across all available photometry is subtracted. Time axis starts at date of first observation.
+
+        ``'original'``: time axis is MJD.
+
+        Default is ``'reduced'``.
+        """,
+    ],
+    "subtract": [
+        "{'mean', 'mean', None}, optional",
+        """
+        Sets metric used in subtracting (and hence aligning) photometry. E.g. if ``'median``, y-axis represents change in brightness relative to median. Only used in folded :class:`~ATK.Models.Lightcurve`\ s, i.e. when ``phase`` is not ``None``.
+
+        If ``None``, no photometry subtraction/alignment is performed.
+         
+        Default is ``'median'``.
+        """,
+    ],
+    "align": [
+        "{'max', 'min', 'median', 'mean', None}, optional",
+        """
+        Aligns photometry to a chosen feature.
+
+        ``'max'``: photometry is aligned to begin at a local maximum in modulation.
+
+        ``'min'``: photometry is aligned to begin at a local minimum in modulation.
+
+        ``'median'``: photometry is aligned to begin at the median.
+
+        ``'mean'``: photometry is aligned to begin at the mean.
+        
+        If ``None``, no phase-alignment is performed.
+
+        Default is ``'max'``.
+        """,
+    ],
+    "repeat": [
+        "int, optional",
+        """
+        Sets the number of modulations in brightness to display.
+
+        Default is ``2``.
+        """,
+    ],
 }
 
 
@@ -71,6 +141,7 @@ class Lightcurve(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
 
     _data_methods: tuple = ("crop", "bin", "clip")
     _group_data_methods: dict = field(default_factory=lambda: {"fold": fold_lc, "pspec": gen_powspec})
+    _group_data_methods_doc: ClassVar[dict] = {"fold": fold_lc, "pspec": gen_powspec}
 
     #: Modified Julian Day values.
     #: Mutually exclusive with ``phase``.

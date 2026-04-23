@@ -4,9 +4,13 @@
 .. currentmodule:: ATK.Models
 
 .. autoclass:: Target
+    
+   
+   
 
-   
-   
+   |
+   |
+
    .. rubric:: Attributes
 
    .. autosummary::

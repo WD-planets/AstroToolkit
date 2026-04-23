@@ -18,6 +18,31 @@ try:
 except ValueError:
     raise Exception(f"Invalid default_unit in config '{default_scale}'.")
 
+PLOT_PARAMS = {
+    "cmap": [
+        "{'viridis', 'grey', 'false_colour'}, optional",
+        """
+Sets the image colour map.
+
+``false_colour`` maps the wavelength of the image filter into a single RGB colour.
+
+Default is ``'viridis'``.
+""",
+    ],
+    "relative_axes": [
+        "bool, optional",
+        """
+Sets the format of the coordinate axes.
+
+``True``: coordinate axes display distance from the image centre.
+
+``False``: coordinate axes display positions on the sky.
+
+Default is ``True``.
+""",
+    ],
+}
+
 
 @dataclass(repr=False)
 class Image(Container):
@@ -46,6 +71,8 @@ class Image(Container):
     overlay: DataFrame | None = None
 
     _units = {"size": default_scale}
+
+    _plot_params = PLOT_PARAMS
 
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"

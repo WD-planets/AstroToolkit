@@ -106,6 +106,7 @@ Plotting
 
 Data
 ----
+- remove "plot methods", these should just be included in plot()
 - talk to boris about my rv_fit process
 - ztf light curve API not working
     - get better light curve sigma clipping example

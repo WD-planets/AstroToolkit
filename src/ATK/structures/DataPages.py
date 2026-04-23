@@ -79,6 +79,8 @@ class DataPages:
         """
         Matches a **datapage** from ``figures`` to a specific target before opening it in the default browser.
 
+        Optionally, the **datapage** can also be saved to local files.
+
         Parameters
         ----------
         target : :class:`~ATK.Models.Target` or int

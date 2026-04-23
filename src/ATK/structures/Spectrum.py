@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Self
+from typing import ClassVar, Self
 
 import astropy.units as u
 import numpy
@@ -10,9 +10,19 @@ from pandas import DataFrame
 from ..utilities.docstrings import get_docstring
 from .methods.spectrum.fitting import do_fitting
 from .methods.spectrum.radial_velocities import get_rvs
-from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
-                              TableIOMixin, manage_inplace)
+from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
+
+PLOT_PARAMS = {
+    "overlay": [
+        ":class:`~ATK.Models.SED`, optional",
+        """
+        Overlays a spectral energy distribution.
+
+        By default, no SED is overlayed.
+        """,
+    ]
+}
 
 
 @dataclass(repr=False)
@@ -57,6 +67,10 @@ class Spectrum(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
 
     _data_methods: tuple = ("crop", "bin", "vspec")
     _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "rv_fit": get_rvs})
+    _plot_methods_doc: ClassVar[dict] = {
+        "fit": "/auto_tutorials/spectra/spectral_analysis",
+        "rv_fit": "/auto_tutorials/spectra/spectral_analysis",
+    }
 
     _units = {
         "exposure": u.s,
@@ -65,6 +79,8 @@ class Spectrum(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
         "velocity": u.km / u.s,
         "flux": u.Unit(1e-17) * u.erg / (u.s * u.cm**2 * u.AA),
     }
+
+    _plot_params = PLOT_PARAMS
 
     def __post_init__(self):
         # check for a valid input combination

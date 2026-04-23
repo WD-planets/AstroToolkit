@@ -113,12 +113,60 @@ def attach_plotting_params(app, what, name, obj, options, lines):
     for param, info in obj._plot_params.items():
         lines.append("")
         lines.append(f"{param} : {info[0]}")
-        print(f"{param}: {info[0]}")
         info[1] = info[1].lstrip()
         for line in info[1].split("\n"):
-            print(f"   {line.lstrip().rstrip()}")
             lines.append(f"   {line.lstrip().rstrip()}")
 
+    lines.append("")
+    lines.append("|")
+
+
+def attach_data_methods(app, what, name, obj, options, lines):
+    if what != "class":
+        return
+
+    if not hasattr(obj, "_data_methods") and not hasattr(obj, "_group_data_methods_doc"):
+        return
+
+    lines.append("")
+    lines.append(".. rubric:: Data Methods")
+    # not in use currently but doesn't hurt to leave
+    lines.append(f".. _{obj.__name__}_Data_Methods:")
+    lines.append("")
+    lines.append(f"The following **Data Methods** are supported by :class:`~ATK.Models.{obj.__name__}` - either individually or through :meth:`DataSet.apply() <ATK.Models.DataSet.apply>`:")
+
+    data_methods = getattr(obj, "_data_methods", ())
+    group_data_methods = getattr(obj, "_group_data_methods_doc", {})
+    all_data_methods = list(data_methods) + list(group_data_methods.keys())
+
+    for method in all_data_methods:
+        lines.append("")
+        lines.append(f"- :meth:`~ATK.Models.{obj.__name__}.{method}`")
+    lines.append("")
+    lines.append("|")
+
+
+def attach_plot_methods(app, what, name, obj, options, lines):
+    if what != "class":
+        return
+
+    if not hasattr(obj, "_plot_methods_doc") and not hasattr(obj, "_group_plot_methods_doc"):
+        return
+
+    lines.append("")
+    lines.append(".. rubric:: Plot Methods")
+    # not in use currently but doesn't hurt to leave
+    lines.append(f".. _{obj.__name__}_Plot_Methods:")
+    lines.append("")
+    lines.append(f"The following **Plot Methods** are supported by :class:`~ATK.Models.{obj.__name__}` through :meth:`DataSet.apply() <ATK.Models.DataSet.apply>`:")
+
+    plot_methods = getattr(obj, "_plot_methods_doc", {})
+    group_plot_methods = getattr(obj, "_group_plot_methods_doc", {})
+    all_plot_methods = plot_methods | group_plot_methods
+
+    for method, link in all_plot_methods.items():
+        lines.append("")
+        lines.append(f"- ``{method}`` (see :doc:`here <{link}>`)")
     lines.append("")
     lines.append("|")
 
@@ -155,6 +203,8 @@ def common_attr_docstrings(app, what, name, obj, options, lines):
 
 def setup(app):
     app.connect("autodoc-process-docstring", attach_units)
+    app.connect("autodoc-process-docstring", attach_data_methods)
+    app.connect("autodoc-process-docstring", attach_plot_methods)
     app.connect("autodoc-process-docstring", attach_plotting_params)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", remove_self_from_signature)

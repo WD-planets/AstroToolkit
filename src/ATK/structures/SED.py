@@ -9,8 +9,7 @@ from pandas import DataFrame
 
 from ..configuration.base_config import BASE_CONFIG
 from ..utilities.docstrings import get_docstring
-from .structures_core import (Container, DataFrameIOMixin, FITSIOMixin,
-                              TableIOMixin, manage_inplace)
+from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
 
 default_scale = BASE_CONFIG._get("query_settings", "default_scale")
@@ -18,6 +17,17 @@ try:
     default_unit = u.Unit(default_scale)
 except ValueError:
     raise Exception(f"Invalid default_unit in config '{default_scale}'.")
+
+PLOT_PARAMS = {
+    "overlay": [
+        ":class:`~ATK.Models.Spectrum`, optional",
+        """
+        Overlays a spectrum.
+
+        By default, no spectrum is overlayed.
+        """,
+    ]
+}
 
 
 @dataclass(repr=False)
@@ -48,6 +58,8 @@ class SED(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     _required = ["survey"]
 
     _units = {"flux": u.mJy, "flux_err": u.mJy, "separation": default_scale, "wavelength": u.angstrom}
+
+    _plot_params = PLOT_PARAMS
 
     def __post_init__(self):
         for attr, unit in self._units.items():

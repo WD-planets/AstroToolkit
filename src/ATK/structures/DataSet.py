@@ -21,15 +21,6 @@ from .Target import Target
 
 @dataclass
 class DataSet:
-    """
-    DataSet()
-
-    Methods
-    -------
-    apply()
-        test
-    """
-
     #: Kind of data container that is being stored.
     kind: str | None = None
     #: :class:`~ATK.Models.Target`\ s for which data is stored.
@@ -107,16 +98,18 @@ class DataSet:
 
         return self
 
-    def plot(self, **kwargs: any):
+    def plot(self, **kwargs) -> Self:
         """
-        Plots all stored data containers into a single grid.
+        Plots all stored data containers in a grid.
 
-        The resulting :class:`~bokeh.plotting.figure` is stored in the :attr:`~ATK.Models.DataSet.figure` attribute.
+        The resulting figure is stored in the :attr:`~ATK.Models.DataSet.figure` attribute.
 
         Parameters
         ----------
         **kwargs
             Accepted keyword arguments depend on the ``kind`` of data being plotted.
+
+            See the documentation of the data container that is being plotted for more information.
         """
 
         if not self._ctnr_kind:
@@ -137,7 +130,27 @@ class DataSet:
 
         return self
 
-    def open(self, path: Path | str | None = None, **kwargs: any):
+    def open(self, path: Path | str | None = None, **kwargs):
+        """
+        Opens the figure from the :attr:`~ATK.Models.DataSet.figure` attribute in the default browser.
+
+        If a figure has not yet been generated when :meth:`ATK.Models.DataSet.open` is called, one will be generated with :meth:`~ATK.Models.DataSet.plot`.
+
+        Optionally, the figure can also be saved to local files.
+
+        Parameters
+        ----------
+        path: Path | str, optional
+            Path to which the figure should be saved.
+
+            If not provided, figures are saved to the ``~/.AstroToolkit/cached_figures`` directory.
+
+        **kwargs
+            If a plot needs to be generated (see above), additional keyword arguments are passed to :meth:`~ATK.Models.DataSet.plot`.
+
+            Accepted keyword arguments depend on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+        """
+
         from ..io.plot_io import open as open_html
 
         keys = []
@@ -148,7 +161,23 @@ class DataSet:
 
         return self
 
-    def save(self, path: Path | str, **kwargs: any):
+    def save(self, path: Path | str, **kwargs) -> Self:
+        """
+        Saves the figure from the :attr:`~ATK.Models.DataSet.figure` attribute to local files.
+
+        If a figure has not yet been generated when :meth:`ATK.Models.DataSet.open` is called, one will be generated with :meth:`~ATK.Models.DataSet.plot`.
+
+        Parameters
+        ----------
+        path: Path | str, optional
+            Path to which the figure should be saved.
+
+        **kwargs
+            If a plot needs to be generated (see above), additional keyword arguments are passed to :meth:`~ATK.Models.DataSet.plot`.
+
+            Accepted keyword arguments depend on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+        """
+
         from ..io.plot_io import save
 
         keys = []
@@ -160,6 +189,12 @@ class DataSet:
         return self
 
     def apply(self, method: str, *args, inplace=True, **kwargs):
+        """
+        Applies **data methods** to all stored containers.
+
+        The set of available **data methods** depends on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+        """
+
         from .methods.apply import apply_methods
 
         struct = manage_inplace(self, inplace)
