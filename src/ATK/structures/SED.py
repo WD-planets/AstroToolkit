@@ -9,7 +9,7 @@ from pandas import DataFrame
 
 from ..configuration.base_config import BASE_CONFIG
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
+from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
 
 default_scale = BASE_CONFIG._get("query_settings", "default_scale")
@@ -53,7 +53,7 @@ class SED(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     #: Flux error values.
     flux_err: Quantity | None = None
 
-    _data_methods: tuple = ("crop", "bin")
+    _data_methods: tuple = ("crop",)
 
     _required = ["survey"]
 

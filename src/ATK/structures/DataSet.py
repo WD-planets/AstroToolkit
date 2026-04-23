@@ -15,7 +15,7 @@ from astropy.units import Quantity
 from bokeh.plotting import figure as Figure
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import COMBINE_PLOTS, SPLIT_BY_SURVEY, SPLIT_BY_TARGET, Container, manage_inplace
+from .Base import COMBINE_PLOTS, SPLIT_BY_SURVEY, SPLIT_BY_TARGET, Container, manage_inplace
 from .Target import Target
 
 
@@ -89,7 +89,11 @@ class DataSet:
         path: Path | str
             Path to which local FITS file should be saved.
 
-            The resulting local FITS file can be used to recreate the original structure with :func:`~ATK.Toolos.read`.
+            The resulting local FITS file can be used to recreate the original structure with :func:`~ATK.Tools.read`.
+
+        Returns
+        -------
+        ``self``
         """
 
         from ..io.files.writing import write_local
@@ -110,6 +114,10 @@ class DataSet:
             Accepted keyword arguments depend on the ``kind`` of data being plotted.
 
             See the documentation of the data container that is being plotted for more information.
+
+        Returns
+        -------
+        ``self``
         """
 
         if not self._ctnr_kind:
@@ -130,7 +138,7 @@ class DataSet:
 
         return self
 
-    def open(self, path: Path | str | None = None, **kwargs):
+    def open(self, path: Path | str | None = None, **kwargs) -> Self:
         """
         Opens the figure from the :attr:`~ATK.Models.DataSet.figure` attribute in the default browser.
 
@@ -149,6 +157,10 @@ class DataSet:
             If a plot needs to be generated (see above), additional keyword arguments are passed to :meth:`~ATK.Models.DataSet.plot`.
 
             Accepted keyword arguments depend on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+
+        Returns
+        -------
+        ``self``
         """
 
         from ..io.plot_io import open as open_html
@@ -176,6 +188,10 @@ class DataSet:
             If a plot needs to be generated (see above), additional keyword arguments are passed to :meth:`~ATK.Models.DataSet.plot`.
 
             Accepted keyword arguments depend on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+
+        Returns
+        -------
+        ``self``
         """
 
         from ..io.plot_io import save
@@ -188,11 +204,27 @@ class DataSet:
 
         return self
 
-    def apply(self, method: str, *args, inplace=True, **kwargs):
+    def apply(self, method: str, *args, inplace=True, **kwargs) -> Self:
         """
-        Applies **data methods** to all stored containers.
+        Applies a **data method** to all stored containers.
 
-        The set of available **data methods** depends on the ``kind`` of data being plotted. See the documentation of the data container that is being plotted for more information.
+        The set of available **data methods** depends on the ``kind`` of data that is stored. See the documentation of the stored data container for more information.
+
+        Parameters
+        ----------
+        method: str
+            Name of **data method** that should be applied.
+
+        inplace : bool, optional
+            If ``True``, modify the current :class:`~ATK.Models.DataSet` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
+
+        **kwargs
+            Accepted keyword arguments depend on the chosen **data method**. See the documentation of the **data method** for more information.
+
+        Returns
+        -------
+        ``Self``
+            :class:`~ATK.Models.DataSet` with modified data containers. Returns ``self`` if ``inplace=True``, otherwise returns a new instance.
         """
 
         from .methods.apply import apply_methods
@@ -228,7 +260,34 @@ class DataSet:
     def _fetch_by_target(self, target: Target):
         return self._fetch_by_key(target._key)
 
-    def split(self, targets: any, radius: Quantity = 3 * u.arcsec, inplace: bool = True) -> DataSet:
+    def split(
+        self,
+        targets: int | SkyCoord | Target | list[int | SkyCoord | Target],
+        radius: Quantity | float = 3 * u.arcsec,
+        inplace: bool = True,
+    ) -> DataSet:
+        """
+        Generates a :class:`~ATK.Models.DataSet` which only contains data from specified targets.
+
+        Parameters
+        ----------
+        targets: int, :class:`~astropy.coordinates.SkyCoord`, :class:`~ATK.Models.Target`, or iterable of these
+            Targets that should be included in the returned :class:`~ATK.Models.DataSet`.
+
+        radius: :class:`~astropy.units.Quantity`, optional
+            Sets the radius that is used when matching input :class:`~astropy.coordinates.SkyCoord`\ s to :class:`~ATK.Models.DataSet` :class:`~ATK.Models.Target`\ s (this form of matching is not exact).
+
+            Only relevant if one ore more input ``targets`` is a :class:`~astropy.coordinates.SkyCoord`.
+
+        inplace : bool, optional
+            If ``True``, modify the current :class:`~ATK.Models.DataSet` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
+
+        Returns
+        -------
+        ``Self``
+            The split :class:`~ATK.Models.DataSet`. Returns ``self`` if ``inplace=True``, otherwise returns a new instance.
+        """
+
         from ..queries.query_core import _normalise_targeting_input, setup_targeting
 
         input_targets = _normalise_targeting_input(targets)
@@ -263,6 +322,25 @@ class DataSet:
         return struct
 
     def merge(self, dataset: DataSet, inplace: bool = True) -> DataSet:
+        """
+        Merges this :class:`~ATK.Models.DataSet` with another.
+
+        Parameters
+        ----------
+        dataset: :class:`~ATK.Models.DataSet`
+            The :class:`~ATK.Models.DataSet` to be merged into this one.
+
+            Both :class:`~ATK.Models.DataSet`\ s must store the same ``kind`` of data.
+
+        inplace : bool, optional
+            If ``True``, modify the current :class:`~ATK.Models.DataSet` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
+
+        Returns
+        -------
+        ``Self``
+            The merged :class:`~ATK.Models.DataSet`. Returns ``self`` if ``inplace=True``, otherwise returns a new instance.
+        """
+
         struct = manage_inplace(self, inplace)
 
         struct.data = struct.data + dataset.data
@@ -314,7 +392,21 @@ class DataSet:
         return SPLIT_BY_SURVEY[self._ctnr_kind]
 
     @classmethod
-    def from_target(cls, target: Target | int | SkyCoord):
+    def from_target(cls, target: Target | int | SkyCoord) -> Self:
+        """
+        Initialises an empty :class:`~ATK.Models.DataSet` for a given target.
+
+        Parameters
+        ----------
+        target: Target, int or :class:`~astropy.coordinates.SkyCoord`
+            Target for which a :class:`~ATK.Models.DataSet` should be initialised.
+
+        Returns
+        -------
+        ``Self``
+            :class:`~ATK.Models.DataSet` with ``data = []``.
+        """
+
         from ..queries.query_core import setup_targeting
 
         # kind, targets, survey, radius, exception, data, figure
@@ -323,7 +415,23 @@ class DataSet:
 
         return cls(kind=None, targets=targets, exception=False)
 
-    def add(self, data: Container):
+    def add(self, data: Container) -> Self:
+        """
+        Adds a data container to a :class:`~ATK.Models.DataSet`.
+
+        The container must be of the same type as the currently stored data (unless the :class:`~ATK.Models.DataSet` is empty).
+
+        Parameters
+        ----------
+        data: :class:`~ATK.base.Container`
+            Container to append to the :class:`~ATK.Models.DataSet`
+
+        Returns
+        -------
+        ``Self``
+            :class:`~ATK.Models.DataSet` with an additional data container.
+        """
+
         if self.data and self._ctnr_kind != type(data).__name__.lower():
             raise ValueError(f"Cannot add container of type '{type(data).__name__.lower()}' to DataSet containing {self._ctnr_kind} data.")
 

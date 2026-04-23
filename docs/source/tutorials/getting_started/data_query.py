@@ -195,8 +195,6 @@ pass
 
 # %%
 #
-# **This automatically converts all structure attributes to match the requested spatial scale (in this case,** :attr:`~ATK.Models.Record.separation` **is now given in arcminutes).**
-#
 # |
 #
 # .. note::

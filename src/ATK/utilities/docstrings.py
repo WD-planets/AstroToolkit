@@ -18,7 +18,7 @@ DOCSTRINGS = {
             Size of each bin in which to bin data. If a :class:`~astropy.units.Unit` is not provided, ``size`` is assumed to be in the same unit as x.
 
         inplace : bool, optional
-            If ``True``, modify the current :class:`~ATK.Models.{name}` in place - leaving the original unchanged. If ``False``, operate on and return a copy.
+            If ``True``, modify the current :class:`~ATK.Models.{name}` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
 
         Returns
         -------
@@ -44,7 +44,7 @@ DOCSTRINGS = {
             Upper bound for clipping. If ``None``, defaults to ``sigma``.
 
         inplace : bool, optional
-            If ``True``, modify the current :class:`~ATK.Models.{name}` in place - leaving the original unchanged. If ``False``, operate on and return a copy.
+            If ``True``, modify the current :class:`~ATK.Models.{name}` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
 
         Returns
         -------
@@ -72,7 +72,7 @@ DOCSTRINGS = {
 
 
         inplace : bool, optional
-            If ``True``, modify the current :class:`~ATK.Models.{name}` in place - leaving the original unchanged. If ``False``, operate on and return a copy.
+            If ``True``, modify the current :class:`~ATK.Models.{name}` inplace. If ``False``, operate on and return a copy - leaving the original unchanged.
 
         Returns
         -------
@@ -139,6 +139,26 @@ DOCSTRINGS = {
         Returns
         -------
         :class:`~ATK.Models.{obj}`
+        """,
+
+    "to_table": 
+        """
+        Combines all array-like attributes of a structure into a :class:`~astropy.table.Table`, preserving units.
+
+        Returns
+        -------
+        :class:`~astropy.table.Table`
+        """,
+
+    "to_dataframe":
+        """
+        Combines all array-like attributes of a structure into a :class:`~pandas.DataFrame`.
+
+        Units are not preserved.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
         """,
 
     "show":

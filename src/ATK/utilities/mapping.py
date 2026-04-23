@@ -4,8 +4,8 @@ import pkgutil
 from enum import EnumType
 from types import ModuleType
 
+from ..structures.Base import Container
 from ..structures.DataSet import DataSet
-from ..structures.structures_core import Container
 
 
 def build_map(root_module: ModuleType, function_name: str, **kwargs):

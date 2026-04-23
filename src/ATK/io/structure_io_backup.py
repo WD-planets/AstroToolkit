@@ -17,8 +17,8 @@ from astropy.units import Quantity
 from ..structures.Target import Target
 
 if TYPE_CHECKING:
+    from ..structures.Base import Container
     from ..structures.Image import Image
-    from ..structures.structures_core import Container
 
 # types (in typehints) that should be considered as being columns of a dataframe
 COLUMN_TYPES = (np.ndarray, pd.Series)
@@ -50,9 +50,7 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
         hdr.append((f"ATK_{key.upper()}", str(value)))
         return hdr
     except Exception:
-        raise ValueError(
-            f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'."
-        )
+        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'.")
 
     return hdr
 
@@ -238,7 +236,6 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
         if not isinstance(val, COLUMN_TYPES):
             val = [val]
 
-        print(col, val)
         if isinstance(val, Quantity) and val.isscalar:
             print("skipped")
             continue

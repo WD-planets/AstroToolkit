@@ -27,7 +27,7 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 # sphinx_gallery_end_ignore
 
 # %%
-# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Lightcurves` (**one per photometric band per target, subject to data availability**).
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`Lightcurves <ATK.Models.Lightcurve>` (**one per photometric band per target, subject to data availability**).
 #
 # .. note::
 # 

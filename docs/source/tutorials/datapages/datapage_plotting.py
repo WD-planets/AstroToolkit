@@ -36,7 +36,7 @@ layout = [[image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
           [table, table, table, table, table, table, table, table]]
 
 # %%
-# This defines a **datapage** where the first row contains a 2x2 image in the top-left corner, followed by a 2x2 HRD and a 4x2 light curve, etc. Passing this to :func:`~ATK.Visualisation.grid` returns a :class:`~ATK.structures.DataPage.DataPages` object, which contains one datapage per target:
+# This defines a **datapage** where the first row contains a 2x2 image in the top-left corner, followed by a 2x2 HRD and a 4x2 light curve, etc. Passing this to :func:`~ATK.Visualisation.grid` returns a :class:`~ATK.Models.DataPages` object, which contains one datapage per target:
 
 from ATK import grid
 
@@ -49,17 +49,17 @@ datapages.show()
 #
 # Opening a Datapage 
 # ==================
-# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.structures.DataPage.DataPage>` are designed to work with multiple targets. A **datapage** for a specific target can therefore be openened via one of the :class:`~ATK.structures.DataPage.DataPages` object's open methods.
+# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.Models.DataPages>` are designed to work with multiple targets. A **datapage** for a specific target can therefore be openened via one of the :class:`~ATK.Models.DataPages` object's open methods.
 #
 # Opening a Datapage by ID 
 # ----------------------------
-# Since a Gaia Source ID was used for targeting, the :meth:`~ATK.structures.DataPage.DataPage.open_by_id` method of the returned :class:`~ATK.structures.DataPage.DataPage` can be used:
+# Since a Gaia Source ID was used for targeting, the :meth:`~ATK.Models.DataPages.open_by_id` method of the returned :class:`~ATK.Models.DataPages` can be used:
 
 # sphinx_gallery_start_ignore
 doc = Document()
 doc.add_root(datapages.figures[0])
 # sphinx_gallery_end_ignore
-datapages.open_by_id(target)
+datapages.open(target)
 # sphinx_gallery_start_ignore
 datapages.figures[0]
 # sphinx_gallery_end_ignore

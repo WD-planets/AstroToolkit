@@ -30,7 +30,7 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 
 # %%
 # 
-# As in any :func:`~ATK.Tools.query`, this returns a :class:`~ATK.Models.DataSet`. In this case, the :class:`~ATK.Model.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Images` (**one per target, subject to data availability**).
+# As in any :func:`~ATK.Tools.query`, this returns a :class:`~ATK.Models.DataSet`. In this case, the :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`Images <ATK.Models.Image>` (**one per target, subject to data availability**).
 #
 # | 
 #

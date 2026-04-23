@@ -4,6 +4,8 @@ import astropy.units as u
 from bokeh.plotting import figure
 
 from ...structures.DataSet import DataSet
+from ...structures.methods.spectrum.fitting import do_fitting
+from ...structures.methods.spectrum.radial_velocities import get_rvs
 from ...structures.SED import SED
 from ...structures.Spectrum import Spectrum
 from ..formatting import format_plot
@@ -70,5 +72,18 @@ def plot(spectrum: Spectrum, *args: any, **kwargs: any):
     plot = plot_overlay(plot, spectrum)
 
     spectrum._plot_id = plot.id
+
+    # Fitting
+    # -------
+
+    if kwargs.get("fit") or kwargs.get("rv_fit"):
+        if spectrum.wavelength is None and spectrum.velocity is not None:
+            raise Exception("Fitting is not supported for velocity spectra.")
+
+    if kwargs.get("fit"):
+        plot = do_fitting(plot, spectrum, **kwargs)
+
+    if kwargs.get("rv_fit"):
+        plot = get_rvs(plot, spectrum, **kwargs)
 
     return format_plot("spectrum", plot)

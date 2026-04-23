@@ -106,7 +106,7 @@ Plotting
 
 Data
 ----
-- remove "plot methods", these should just be included in plot()
+- fix plotting legend getting too long, e.g. in test_spec
 - talk to boris about my rv_fit process
 - ztf light curve API not working
     - get better light curve sigma clipping example
@@ -122,6 +122,7 @@ Data
 
 Docs
 ====
+- fix datapage opening section
 - add note to early tutorials that multi-target queries and operations are supported
 - replace 'star' with e.g. system, source, etc.
 

@@ -1,6 +1,8 @@
 Models
 ======
 
+This module contains full definitions of all ATK data structures.
+
 .. autosummary::
     :toctree: generated
     :nosignatures:

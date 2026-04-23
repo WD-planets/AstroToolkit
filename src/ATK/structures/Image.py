@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 from ..configuration.base_config import BASE_CONFIG
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container
+from .Base import Container
 
 default_scale = BASE_CONFIG._get("query_settings", "default_scale")
 try:

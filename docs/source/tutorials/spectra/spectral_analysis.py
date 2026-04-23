@@ -35,15 +35,11 @@ figure
 # 
 # Fitting Spectral Features
 # =========================
-# :class:`Spectra <ATK.Models.DataSet>` also support two **plot methods**. These do not modify the :class:`~ATK.Models.Spectrum` containers themselves, but instead add additional elements to plots.
+# :class:`Spectra <ATK.Models.DataSet>` also support two further plotting modes for performing spectral analysis.
 #
-# .. note:: 
-# 
-#    If a plot has not been generated at the time a **plot method** is called, one will be automatically generated with default parameters.
-# 
 # |
 #
-# Spectral features can be detected and fitted with :meth:`~ATK.Models.Spectrum.fit`. To aid in detecting features while reducing false positives, :meth:`~ATK.Models.Spectrum.fit` supports the following arguments:
+# Spectral features can be detected and fitted by passing ``fit=True`` to :meth:`~ATK.Models.DataSet.plot`. To aid in detecting features while reducing false positives, the following additional arguments are also supported when using ``fit=True``:
 # 
 # - ``prominence`` sets the minimum **prominence** of spectral features (see :func:`here <scipy.signal.find_peaks>` for details, default = ``2.0``)
 # 
@@ -53,7 +49,7 @@ figure
 # 
 # |
 
-sdss_query.apply("fit", smooth=5.0)
+sdss_query.plot(fit=True, smooth=5.0)
 # sphinx_gallery_start_ignore
 figure = format_plot(sdss_query.figure, 3, 1.5)
 doc = Document()
@@ -70,9 +66,9 @@ figure
 #
 # Detecting Radial Velocities
 # ===========================
-# :class:`Spectra <ATK.Models.Spectrum>` also support multi-component radial velocity fitting via :meth:`~ATK.Models.Spectrum.rv_fit`. As peaks must first be detected, :meth:`~ATK.Models.Spectrum.rv_fit` accepts the same parameters as :meth:`~ATK.Models.Spectrum.fit`:
+# :class:`Spectra <ATK.Models.Spectrum>` plotting also supports multi-component radial velocity fitting by passing ``rv_fit=True``. As peaks must first be detected, the same additional parameters are accepted as when using ``fit=True``:
 
-sdss_query.apply("rv_fit", smooth=5.0)
+sdss_query.plot(rv_fit=True, smooth=5.0)
 # sphinx_gallery_start_ignore
 figure = format_plot(sdss_query.figure, 3, 1.5)
 doc = Document()

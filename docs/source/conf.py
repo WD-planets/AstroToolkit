@@ -146,31 +146,6 @@ def attach_data_methods(app, what, name, obj, options, lines):
     lines.append("|")
 
 
-def attach_plot_methods(app, what, name, obj, options, lines):
-    if what != "class":
-        return
-
-    if not hasattr(obj, "_plot_methods_doc") and not hasattr(obj, "_group_plot_methods_doc"):
-        return
-
-    lines.append("")
-    lines.append(".. rubric:: Plot Methods")
-    # not in use currently but doesn't hurt to leave
-    lines.append(f".. _{obj.__name__}_Plot_Methods:")
-    lines.append("")
-    lines.append(f"The following **Plot Methods** are supported by :class:`~ATK.Models.{obj.__name__}` through :meth:`DataSet.apply() <ATK.Models.DataSet.apply>`:")
-
-    plot_methods = getattr(obj, "_plot_methods_doc", {})
-    group_plot_methods = getattr(obj, "_group_plot_methods_doc", {})
-    all_plot_methods = plot_methods | group_plot_methods
-
-    for method, link in all_plot_methods.items():
-        lines.append("")
-        lines.append(f"- ``{method}`` (see :doc:`here <{link}>`)")
-    lines.append("")
-    lines.append("|")
-
-
 def remove_self_from_signature(app, what, name, obj, options, signature, return_annotation):
     if what == "method" and signature:
         if signature.startswith("(self, "):
@@ -193,7 +168,7 @@ def common_attr_docstrings(app, what, name, obj, options, lines):
     if attr_name not in ATTR_DOCSTRINGS:
         return
 
-    content = [l.strip() for l in lines if l.strip()]
+    content = [line.strip() for line in lines if line.strip()]
     if "DOC_OVERRIDE" not in content:
         return
 
@@ -204,7 +179,6 @@ def common_attr_docstrings(app, what, name, obj, options, lines):
 def setup(app):
     app.connect("autodoc-process-docstring", attach_units)
     app.connect("autodoc-process-docstring", attach_data_methods)
-    app.connect("autodoc-process-docstring", attach_plot_methods)
     app.connect("autodoc-process-docstring", attach_plotting_params)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", remove_self_from_signature)
@@ -226,7 +200,7 @@ extensions = [
     "sphinx.ext.mathjax",
 ]
 
-nitpicky = False
+nitpicky = True
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

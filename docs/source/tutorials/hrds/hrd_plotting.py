@@ -4,7 +4,7 @@ HRD Customisation
 #################
 Combining Multiple HRDs
 =======================
-By default, plotting a :class:`~ATK.Models.DataSet` with multiple :class:`HRDs <ATK.Models.ATK>` generates multiple plots. To instead combine all sources into a single plot, pass ``split = False`` to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
+By default, plotting a :class:`~ATK.Models.DataSet` with multiple :class:`HRDs <ATK.Models.HRD>` generates multiple plots. To instead combine all sources into a single plot, pass ``split = False`` to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
 """
 
 # sphinx_gallery_start_ignore

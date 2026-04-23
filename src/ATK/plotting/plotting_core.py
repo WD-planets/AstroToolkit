@@ -1,4 +1,4 @@
-from ..structures.structures_core import Container
+from ..structures.Base import Container
 
 
 def get_axis_label(ctnr: Container, attr: str):

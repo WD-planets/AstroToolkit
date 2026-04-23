@@ -8,10 +8,10 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
+from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .methods.lightcurve.phasefold import fold_lc
 from .methods.lightcurve.powspec import gen_powspec
 from .Powspec import Powspec
-from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
 
 PLOT_PARAMS = {

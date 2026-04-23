@@ -6,7 +6,7 @@ from astropy.table import Table
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container
+from .Base import Container
 from .Target import Target
 
 

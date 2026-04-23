@@ -8,9 +8,9 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
+from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .methods.spectrum.fitting import do_fitting
 from .methods.spectrum.radial_velocities import get_rvs
-from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
 from .Target import Target
 
 PLOT_PARAMS = {
@@ -66,11 +66,6 @@ class Spectrum(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     _required = ["survey"]
 
     _data_methods: tuple = ("crop", "bin", "vspec")
-    _plot_methods: dict = field(default_factory=lambda: {"fit": do_fitting, "rv_fit": get_rvs})
-    _plot_methods_doc: ClassVar[dict] = {
-        "fit": "/auto_tutorials/spectra/spectral_analysis",
-        "rv_fit": "/auto_tutorials/spectra/spectral_analysis",
-    }
 
     _units = {
         "exposure": u.s,

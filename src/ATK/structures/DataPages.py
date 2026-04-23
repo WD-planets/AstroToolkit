@@ -99,7 +99,7 @@ class DataPages:
             self._open_by_target(target)
         # id -> Target
         elif isinstance(target, int):
-            self.open_by_id(target)
+            self._open_by_id(target)
         else:
             raise TypeError(f"Unsupported target type: {type(target)}")
 
@@ -146,7 +146,7 @@ class DataPages:
             self._save_by_target(target)
         # id -> Target
         elif isinstance(target, int):
-            self.save_by_id(target)
+            self._save_by_id(target)
         else:
             raise TypeError(f"Unsupported target type: {type(target)}")
 

@@ -8,7 +8,7 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .structures_core import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin
+from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin
 from .Target import Target
 
 PLOT_PARAMS = {

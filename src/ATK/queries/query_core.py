@@ -199,9 +199,10 @@ def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
         warnings.warn("Could not determine ATK version from local file.")
     else:
         if primary_header["ATK_VER"] != get_package_version():
-            warnings.warn(
-                f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten."
-            )
+            warnings.warn(f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten.")
+            return None
+
+        print(primary_header["ATK_EXCEPTION"])
 
     current_key = make_cache_key(kind, targeting, arguments)
 

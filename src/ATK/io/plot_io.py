@@ -14,15 +14,13 @@ from bokeh.models import Column, Row
 from bokeh.plotting import figure, show
 
 from ..configuration.base_config import BASE_CONFIG
+from ..structures.Base import Container
 from ..structures.DataSet import DataSet
-from ..structures.structures_core import Container
 from ..structures.Target import Target
 from ..utilities.mapping import build_map
 
 
-def do_plotting(
-    all_figures: list, plotting_func: FunctionType, plot_method: str, containers: list[Container], target: Target | None = None, **kwargs
-):
+def do_plotting(all_figures: list, plotting_func: FunctionType, plot_method: str, containers: list[Container], target: Target | None = None, **kwargs):
     # plot .data containers individually (e.g. images)
     if plot_method == "individual":
         figures = [plotting_func(ctnr, **kwargs) for ctnr in containers]
@@ -117,16 +115,12 @@ def plot_data(structure: DataSet, **kwargs: any) -> figure:
                 continue
 
             containers = structure._fetch_by_key(key)
-            all_figures = dispatch_plotting(
-                all_figures, plotting_func, structure._split_by_survey, structure._plot_method, containers, target, **kwargs
-            )
+            all_figures = dispatch_plotting(all_figures, plotting_func, structure._split_by_survey, structure._plot_method, containers, target, **kwargs)
             completed_keys.append(key)
 
     # don't split by target
     else:
-        all_figures = dispatch_plotting(
-            all_figures, plotting_func, structure._split_by_survey, structure._plot_method, structure.data, **kwargs
-        )
+        all_figures = dispatch_plotting(all_figures, plotting_func, structure._split_by_survey, structure._plot_method, structure.data, **kwargs)
 
     if not all_figures:
         return None
