@@ -57,10 +57,6 @@ def query(target: Target, **kwargs: dict):
     Perform a CRTS light curve query
     """
 
-    raise NotImplementedError(
-        "The API that was previously used for CRTS queries appears to have stopped working, and hence your query is not currently possible."
-    )
-
     radius = kwargs["radius"].to(u.arcmin).value
 
     rate_limit()
@@ -79,11 +75,8 @@ def query(target: Target, **kwargs: dict):
     if df.empty:
         return RETURNS.NULL
 
-    exit()
-
-    # coords = SkyCoord(df["RA"], df["Dec"], unit="deg", frame="icrs")
-    # sep = target.separation(coords).arcsecond
-    # return df.loc[sep < radius].reset_index(drop=True)
+    df = df.rename(columns={"MasterID": "id", "Mag": "mag", "Magerr": "mag_err", "RA": "ra", "Dec": "dec", "MJD": "mjd"})
+    df["band"] = ["v"] * len(df)
 
     lcs = get_lightcurves("crts", target, kwargs["radius"], df, kwargs.get("split", False))
 

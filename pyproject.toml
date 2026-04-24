@@ -29,15 +29,17 @@ classifiers = [
 dependencies = [
 	"astropy",
 	"astroquery",
+	"beautifulsoup4"
 	"bokeh",
+	"lightkurve",
 	"matplotlib",
-	"pandas",
 	"numpy",
+	"pandas",
 	"PyYAML",
 	"reproject",
-	"sparclclient",
+	"scipy",
 	"skypatrol",
-	"lightkurve",
+	"sparclclient",
 ]
 
 [project.urls]

@@ -94,6 +94,8 @@ def format_plot(kind: str, plot: figure, force_square: bool = False):
     # toolbar/grid/titles
     if not BASE_CONFIG._get("plot_settings", "toolbars"):
         plot.toolbar_location = None
+    else:
+        plot.toolbar.autohide = True
     if not BASE_CONFIG._get("plot_settings", "grids"):
         plot.grid.grid_line_color = None
     if not BASE_CONFIG._get("plot_settings", "titles"):

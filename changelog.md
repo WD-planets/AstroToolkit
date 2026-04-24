@@ -112,9 +112,12 @@ Data
 - ztf light curve API not working
     - get better light curve sigma clipping example
 
+atk version mismatch running when it shouldn't?
+square images
+- maybe use max() ?
+
 Docs
 ====
-- fix datapage opening section
 - read through docs
     - replace 'star' with e.g. system, source, etc.
     - check docstrings / comments
@@ -169,3 +172,8 @@ improved testing
 - add annotations to ATK keywords in fits headers
 - let spectral peak fitting work in velocity-space (?)
 - image overlay DataFrame -> Table
+
+background on project
+4th is closer
+
+

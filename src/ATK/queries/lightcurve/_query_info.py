@@ -4,4 +4,5 @@ BAND_MAP = {
     "ATLAS - ``atlas``": ["``c``", "``o``"],
     "ASAS-SN - ``asassn``": ["``g``", "``v``"],
     "TESS - ``tess``": ["``Tmag``"],
+    "CRTS - ``crts``": ["``v``"],
 }

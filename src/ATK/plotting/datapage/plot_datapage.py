@@ -12,8 +12,6 @@ if not TEXT_SIZE.endswith("pt"):
     TEXT_SIZE = f"{TEXT_SIZE}pt"
 TEXT_FONT = str(BASE_CONFIG._get("datapage_settings", "font"))
 
-print(TEXT_SIZE)
-
 
 def format_datatable(table, height, width):
     grid_size = BASE_CONFIG._get("datapage_settings", "grid_size")
@@ -220,9 +218,6 @@ def prepare_datasets(key: str, datasets: list[DataSet]):
     for dataset in datasets:
         ctnrs = [ctnr for ctnr in dataset.data if ctnr._target_key == key]
         if not dataset.figure:
-            # if dataset.kind == "hrd":
-            # dataset.plot(combine=)
-            # else:
             dataset.plot()
         plot_ids = [ctnr._plot_id for ctnr in ctnrs]
 

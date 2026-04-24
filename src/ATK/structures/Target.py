@@ -10,13 +10,17 @@ from astropy.units import Quantity
 from ..utilities.docstrings import get_docstring
 
 
-def skycoord_equality_check(self, other):
-    same_position = (
-        self.frame.name == other.frame.name and np.isclose(self.ra.deg, other.ra.deg) and np.isclose(self.dec.deg, other.dec.deg)
-    )
-    same_time = abs(self.obstime - other.obstime) < 1e-9 * u.day
+def skycoord_equality_check(coords, other):
+    same_position = False
+    if coords.separation(other) < 1 * u.arcsec:
+        same_position = True
 
-    return same_time and same_position
+    if hasattr(other, "obstime") and other.obstime is not None:
+        same_time = abs(coords.obstime - other.obstime) < 1e-9 * u.day
+
+        return same_time and same_position
+
+    return same_position
 
 
 @dataclass
@@ -63,14 +67,20 @@ class Target:
         self._aliases.add(coord_key)
 
     def __eq__(self, other):
-        init_coords_match = skycoord_equality_check(self.initial_coords, other.initial_coords)
-        identifier_match = self.identifier == other.identifier
-        survey_match = self.survey == other.survey
-        correction_match = self.correction == other.correction
+        if isinstance(other, SkyCoord):
+            init_coords_match = skycoord_equality_check(self.initial_coords, other)
+        else:
+            init_coords_match = skycoord_equality_check(self.initial_coords, other.initial_coords)
 
-        matches = [init_coords_match, identifier_match, survey_match, correction_match]
+            identifier_match = self.identifier == other.identifier
+            survey_match = self.survey == other.survey
+            correction_match = self.correction == other.correction
 
-        return all(matches)
+            matches = [init_coords_match, identifier_match, survey_match, correction_match]
+
+            return all(matches)
+
+        return init_coords_match
 
     @property
     def _frame(self):

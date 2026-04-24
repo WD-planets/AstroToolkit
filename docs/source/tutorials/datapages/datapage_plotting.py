@@ -28,6 +28,8 @@ hrd = query("hrd", targets=target, path="datapage_hrd.fits.gz")
 table = query("datatable", columns={"gaia": ["Gmag", "BPmag", "RPmag"], "galex": ["NUVmag", "FUVmag"]}, targets=target, radius=image.data[0].size)
 
 # %%
+# |
+#
 # The only other requirement is to define the **datapage's** layout. The easiest way to do this is by passing a list of rows of :class:`DataSets <ATK.Models.DataSet>`:
 
 layout = [[image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
@@ -40,6 +42,8 @@ layout = [[image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
           [table, table, table, table, table, table, table, table]]
 
 # %%
+# |
+# 
 # This defines a **datapage** where the first row contains a 2x2 image in the top-left corner, followed by a 2x2 HRD and a 4x2 light curve, etc. Passing this to :func:`~ATK.Visualisation.grid` returns a :class:`~ATK.Models.DataPages` object, which contains one datapage per target:
 
 from ATK import grid
@@ -53,7 +57,9 @@ datapages.show()
 #
 # Opening a Datapage 
 # ==================
-# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.Models.DataPages>` are designed to work with multiple targets. A **datapage** for a specific target can be opened by passing any valid target to (i.e. a Gaia source ID, a :class:`~ATK.Models.Target`, or an astropy :class:`~astropy.coordinates.SkyCoord`) to :meth:`~ATK.Models.DataPages.open`. For example, to open the above **datapage**:
+# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.Models.DataPages>` are designed to work with multiple targets. A **datapage** for a specific target can be opened by passing a Gaia source ID or :class:`~ATK.Models.Target` to :meth:`~ATK.Models.DataPages.open`. 
+#
+# For example, to open the above **datapage**:
 
 # sphinx_gallery_start_ignore
 doc = Document()
@@ -68,7 +74,7 @@ datapages.figures[0]
 #
 # .. note::
 #
-#    As with :meth:`~ATK.Models.DataSet.split`, matching a **datapage** to a :class:`~astropy.coordinates.SkyCoord` also requires a ``radius``.
+#    Since matching by :class:`~astropy.coordinates.SkyCoord` is inexact, this is not supported by :meth:`~ATK.Models.DataPages.open` and :meth:`~ATK.Models.DataPages.save`. A :class:`~ATK.Models.Target` should therefore be used for exact matching if a Source ID is not available (see :doc:`here <../getting_started/data_query>`).
 #
 # |
 # |

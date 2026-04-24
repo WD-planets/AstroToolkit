@@ -301,7 +301,7 @@ class DataSet:
                 ctnrs.extend(struct._fetch_by_target(target))
             # SkyCoord -> Target
             elif isinstance(target, SkyCoord):
-                ctnrs.extend(struct._fetch_by_coord(target))
+                ctnrs.extend(struct._fetch_by_coord(target, radius=radius))
             # id -> Target
             elif isinstance(target, int):
                 ctnrs.extend(struct._fetch_by_id(target))
