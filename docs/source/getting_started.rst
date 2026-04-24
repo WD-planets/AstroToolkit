@@ -1,3 +1,7 @@
+.. raw:: html
+
+    <div style="text-align: center;">
+
 ###############
 Getting Started
 ###############
@@ -71,3 +75,7 @@ Technical Details
 Detailed technical documentation can be found :doc:`here <modules>`.
 
 |
+
+.. raw:: html
+
+    </div>

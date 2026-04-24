@@ -6,7 +6,9 @@
 #########################
 Performing a Vizier Query
 #########################
-The most simple example of a query in ATK is a `Vizier <https://vizier.cds.unistra.fr/>`_ query. In this tutorial, data will be retrieved from GALEX. Queries of any kind use the :func:`~ATK.Tools.query` tool, which can be imported as follows:
+The most simple example of a query in ATK is a `Vizier <https://vizier.cds.unistra.fr/>`_ query. In this tutorial, data will be retrieved from GALEX for a single target (for guidance on working with multiple targets simultaneously, see :doc:`here <../multiple_targets/multi_target_query>` after following these tutorials).
+
+Queries of any kind use the :func:`~ATK.Tools.query` tool, which can be imported as follows:
 """
 
 # sphinx_gallery_start_ignore
@@ -19,7 +21,7 @@ SURVEY_CONFIG.reset()
 
 with open("../../auto_tutorials/getting_started/supported_aliases.rst", "w") as f:
     for alias in SUPPORTED_SURVEYS:
-        f.write(f"    - {alias}\n")
+        f.write(f"- {alias}\n")
 # sphinx_gallery_end_ignore
 
 from ATK import query

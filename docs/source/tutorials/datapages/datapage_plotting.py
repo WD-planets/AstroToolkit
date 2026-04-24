@@ -9,6 +9,10 @@ ATK supports the creation of **datapages** as a means of neatly combining plots 
 # fmt: off
 # isort: skip_file
 from bokeh.document import Document
+from ATK.Config import CONFIG
+CONFIG.reset()
+CONFIG.datapage_settings.grid_size = 150
+CONFIG.datapage_settings.font_size = 6
 # sphinx_gallery_end_ignore
 from ATK import query
 
@@ -49,11 +53,7 @@ datapages.show()
 #
 # Opening a Datapage 
 # ==================
-# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.Models.DataPages>` are designed to work with multiple targets. A **datapage** for a specific target can therefore be openened via one of the :class:`~ATK.Models.DataPages` object's open methods.
-#
-# Opening a Datapage by ID 
-# ----------------------------
-# Since a Gaia Source ID was used for targeting, the :meth:`~ATK.Models.DataPages.open_by_id` method of the returned :class:`~ATK.Models.DataPages` can be used:
+# The only remaining step is to open or save the **datapage**. Like everything in ATK, :class:`DataPages <ATK.Models.DataPages>` are designed to work with multiple targets. A **datapage** for a specific target can be opened by passing any valid target to (i.e. a Gaia source ID, a :class:`~ATK.Models.Target`, or an astropy :class:`~astropy.coordinates.SkyCoord`) to :meth:`~ATK.Models.DataPages.open`. For example, to open the above **datapage**:
 
 # sphinx_gallery_start_ignore
 doc = Document()
@@ -65,42 +65,10 @@ datapages.figures[0]
 # sphinx_gallery_end_ignore
 
 # %%
-# |
 #
-# Opening a Datapage by Coordinates
-# ---------------------------------
-# :meth:`~ATK.Models.DataPages.open_by_coord` is an equivalent methods for fetching by coordinates. This opens any **datapages** that target stars within a given ``radius``:
+# .. note::
 #
-# .. code-block:: python
-#
-#    from astropy.coordinates import SkyCoord
-#    import astropy.units as u
-#
-#    coord = SkyCoord(ra=141.185, dec=8.031, unit="deg", frame="icrs")
-#
-#    datapages = ...
-#
-#    datapages.open_by_coord(coord, radius=3*u.arcsec)
-
-# %%
-# |
-#
-# Opening a Datapage by Target
-# ----------------------------
-# Finally, :meth:`~ATK.Models.DataPages.open_by_target` can be used to open a **datapage** using a :class:`~ATK.Models.Target` directly. This allows for exact matching without the need of a ``radius``:
-#
-# .. code-block:: python
-#
-#    from astropy.coordinates import SkyCoord
-#
-#    from ATK.Models import Target
-#
-#    coord = SkyCoord(ra=141.185, dec=8.031, unit="deg", frame="icrs")
-#    target = Target.from_coord(coord)
-#
-#    datapages = ...
-#
-#    datapages.open_by_target(target)
+#    As with :meth:`~ATK.Models.DataSet.split`, matching a **datapage** to a :class:`~astropy.coordinates.SkyCoord` also requires a ``radius``.
 #
 # |
 # |
@@ -109,7 +77,7 @@ datapages.figures[0]
 # ===============================
 # Saving and Opening
 # ------------------
-# To open a **datapage** and save it to local files, any of the above methods can be provided with a ``path`` - e.g.
+# To open a **datapage** and save it to local files, :meth:`~ATK.Models.DataPages.open` can be provided with a ``path``:
 #
 # .. code-block:: python
 #
@@ -117,53 +85,20 @@ datapages.figures[0]
 #
 #    datapages = ...
 #
-#    datapages.open_by_id(target, path="example_datapage.html")
+#    datapages.open(target, path="example_datapage.html")
 #
 # |
 # |
 #
 # Saving Without Opening
 # ----------------------
-# **Datapages** can also be saved without opening them via any of the equivalent save methods.
-#
-# By ID:
+# **Datapages** can also be saved without opening them via :meth:`~ATK.Models.DataPages.save`:
 #
 # .. code-block:: python
 #
 #    target = 587316166180416640
 #
-#    datapages.save_by_id(target, path="example_datapage.html")
-#
-# |
-#
-# By coordinate:
-#
-# .. code-block:: python
-#
-#    from astropy.coordinates import SkyCoord
-#
-#    coord = SkyCoord(ra=141.185, dec=8.031, unit="deg", frame="icrs")
-#
-#    datapages = ...
-#
-#    datapages.save_by_coord(coord, path="example_datapage.html")
-#
-# |
-#
-# By :class:`~ATK.Models.Target`:
-#
-# .. code-block:: python
-#
-#    from astropy.coordinates import SkyCoord
-#
-#    from ATK.Models import Target
-#
-#    coord = SkyCoord(ra=141.185, dec=8.031, unit="deg", frame="icrs")
-#    target = Target.from_coord(coord)
-#
-#    datapages = ...
-#
-#    datapages.open_by_target(target, path="example_datapage.html")
+#    datapages.save(target, path="example_datapage.html")
 
 # %%
 #

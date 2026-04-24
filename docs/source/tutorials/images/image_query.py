@@ -20,12 +20,9 @@ ps_query.show(show_types=True)
 # sphinx_gallery_start_ignore
 from ATK.queries.image._query_info import BAND_MAP
 with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
-    f.write(".. note::\n")
-    f.write("    ATK supports queries to the following imaging surveys and bands:\n")
     for survey in BAND_MAP:
-        f.write(f"        - {survey} ({', '.join(BAND_MAP[survey])})\n")
+        f.write(f"- {survey} ({', '.join(BAND_MAP[survey])})\n")
     f.write("\n")
-    f.write("    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.")
 # sphinx_gallery_end_ignore
 
 # %%
@@ -34,7 +31,15 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 #
 # | 
 #
-# .. include:: supported_image_surveys.rst
+# .. note:: 
+# 
+#    ATK supports queries to the following imaging surveys and bands:\n`
+# 
+#    .. include:: supported_image_surveys.rst
+# 
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#    
+#    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.
 #
 # |
 # |

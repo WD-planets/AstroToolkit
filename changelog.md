@@ -107,32 +107,18 @@ Plotting
 Data
 ----
 - fix plotting legend getting too long, e.g. in test_spec
-- talk to boris about my rv_fit process
+- get full set of spectral lines from NIST for rv fitting?
+
 - ztf light curve API not working
     - get better light curve sigma clipping example
-
-- ignore path if exception
-- test all types of custom data set
-- default units for Quantity arrays
-    - needed to make sure .to() etc. doesn't fail
-
-- fix show() having too much whitespace (e.g. in teaser animation)
-- get full set of spectral lines from NIST for rv fitting?
-- units in methods, e.g. crop
 
 Docs
 ====
 - fix datapage opening section
-- add note to early tutorials that multi-target queries and operations are supported
-- replace 'star' with e.g. system, source, etc.
-
-- add note about TESS and ATLAS light curve filtering toggle
-- rename tutorial .py files
-- figures in docs need to scale with screen resolution, some html scaling thing and keep rest the same, maybe in plot_formatting under _utilities.py?
-- check docstrings / comments
-- check type hints
-- finish docs
-- function/docs links in code examples (like for external libraries)?
+- read through docs
+    - replace 'star' with e.g. system, source, etc.
+    - check docstrings / comments
+    - check type hints
 
 Other
 =====
@@ -143,6 +129,11 @@ Other
 ===========
 To-Do Later
 ===========
+improved testing
+
+- rename tutorial .py files
+- function/docs links in code examples (like for external libraries)?
+- talk to boris about my rv_fit process
 - clean up pm correction
     - main issue is e.g. overlays.py cannot be vectorised -> astropy doesn't let you define non-scalar SkyCoords with varying validity of distance/pm information, so you cannot reliably correct a grouped SkyCoord. Luckily, not used much as usually things are handled as single coordinates anyway
     - distance and pm ONLY matter for corrections, in searches its fine to lose this information and hence stay vectorised

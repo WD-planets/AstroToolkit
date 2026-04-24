@@ -316,7 +316,6 @@ def struct_to_hdu(structure: any, ignore_attrs: list = [], hdu_kind: BinTableHDU
             continue
 
         if isinstance(val, Quantity):
-            print(attr, val, type(val))
             if is_scalar_quantity(val):
                 hdr = WRITE_MAP[Quantity](attr=attr, hdr=hdr, key=attr, value=val)
             else:

@@ -202,13 +202,16 @@ def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
             warnings.warn(f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten.")
             return None
 
-        print(primary_header["ATK_EXCEPTION"])
+        if primary_header["ATK_EXCEPTION"]:
+            warnings.warn(f"Exception was encountered during data retrieval for file '{arguments['path']}'.Query will be re-run and local file will be overwritten.")
+            return None
 
     current_key = make_cache_key(kind, targeting, arguments)
 
     # print(f"Recreated key:\n{structure._cache_key}\nCurrent key:\n{current_key}")
 
     if getattr(structure, "_cache_key", None) != current_key:
+        warnings.warn("Detected change in query parameters, query will be re-run and local file will be overwritten.")
         return None
 
     return structure
@@ -227,8 +230,6 @@ def general_query(kind: str, targets: list[Target | int | SkyCoord], **arguments
 
         if rec_structure is not None:
             return rec_structure
-        else:
-            warnings.warn("Detected change in query parameters, query will be re-run and local file will be overwritten.")
 
     for target in corrected_targets:
         structure = single_target_query(kind, target, structure, **arguments)

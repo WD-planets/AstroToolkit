@@ -270,7 +270,7 @@ def get_dict_pad(dictionary: dict, key_example: str) -> int:
     Calculated the padding needed for a dict object, using a given representation to add additional padding for any non-key characters
     """
 
-    return max(len(attr) for attr in dictionary) + len(key_example) - sum(map(str.isalpha, key_example))
+    return max(len(attr) for attr in dictionary if not attr.startswith("_")) + len(key_example) - sum(map(str.isalpha, key_example))
 
 
 def update_col_widths(pad: int, depth: int) -> None:

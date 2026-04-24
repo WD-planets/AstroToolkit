@@ -1,5 +1,4 @@
-from bokeh.models import (GridBox, InlineStyleSheet, Label, Range1d, TabPanel,
-                          Tabs)
+from bokeh.models import GridBox, InlineStyleSheet, Label, Range1d, TabPanel, Tabs
 from bokeh.plotting import figure
 
 from ...configuration.base_config import BASE_CONFIG
@@ -13,6 +12,8 @@ if not TEXT_SIZE.endswith("pt"):
     TEXT_SIZE = f"{TEXT_SIZE}pt"
 TEXT_FONT = str(BASE_CONFIG._get("datapage_settings", "font"))
 
+print(TEXT_SIZE)
+
 
 def format_datatable(table, height, width):
     grid_size = BASE_CONFIG._get("datapage_settings", "grid_size")
@@ -25,7 +26,7 @@ def format_datatable(table, height, width):
     table.sizing_mode = "fixed"
 
     style_sheet = InlineStyleSheet(
-        css=f".slick-header-columns {{background-color: #e0e0e0 !important;font-family: {TEXT_FONT.lower()};font-size: {int(TEXT_SIZE[:-2])}pt; font-weight: normal}}.slick-row {{font-size: {int(TEXT_SIZE[:-2]) - 1}pt; font-weight: normal}}"
+        css=f".slick-header-columns {{background-color: #e0e0e0 !important;font-family: {TEXT_FONT.lower()};font-size: {int(TEXT_SIZE[:-2])}pt; font-weight: normal}}.slick-row {{font-size: {int(TEXT_SIZE[:-2])}pt; font-weight: normal}}"
     )
 
     table.stylesheets = [style_sheet]
@@ -89,8 +90,8 @@ def set_panel_size(panel: figure, force_square: bool, height: int, width: int, s
 
         panel.min_border_left = left
         panel.min_border_bottom = left
-        panel.min_border_top = 0
-        panel.min_border_right = 0
+        panel.min_border_top = top
+        panel.min_border_right = top
 
     elif shift_outline:
         panel.frame_width = frame_width - left - right
@@ -302,40 +303,44 @@ def get_datapage(layout: list[list]):
                 else:
                     plot_list = plots[obj_id]
 
-                    if False:
-                        plot = plot_list[0]
+                    tabs = []
+                    mapping = plot_ctnr_map[obj_id]
+
+                    tabs, titles = [], {}
+                    for i, p in enumerate(plot_list):
+                        ctnrs_for_plot = mapping.get(p.id, [])
+                        title = get_tab_title(ctnrs_for_plot)
+                        if title is None:
+                            title = str(i)
+                        count = titles.get(title, 0) + 1
+                        titles[title] = count
+                        if count > 1:
+                            title = f"{title} {count}"
+
+                        tab_list = TabPanel(child=p, title=title)
+                        tabs.append(tab_list)
+
+                    plot = Tabs(tabs=tabs)
+
+                    force_square = True if kind in ["Image"] else False
+
+            if hasattr(plot, "tabs"):
+                for tab in plot.tabs:
+                    p = tab.child
+
+                    if kind == "DataTable":
+                        p = format_datatable(p, region["rowspan"], region["colspan"])
                     else:
-                        tabs = []
-                        mapping = plot_ctnr_map[obj_id]
+                        p = set_panel_size(p, force_square, region["rowspan"], region["colspan"], shift_outline)
+                        p = set_font_sizes(p)
 
-                        tabs, titles = [], {}
-                        for i, p in enumerate(plot_list):
-                            ctnrs_for_plot = mapping.get(p.id, [])
-                            title = get_tab_title(ctnrs_for_plot)
-                            if title is None:
-                                title = str(i)
-                            count = titles.get(title, 0) + 1
-                            titles[title] = count
-                            if count > 1:
-                                title = f"{title} {count}"
-
-                            tab_list = TabPanel(child=p, title=title)
-                            tabs.append(tab_list)
-
-                        plot = Tabs(tabs=tabs)
-
-                    force_square = True if kind in ["image"] else False
-
-            for tab in plot.tabs:
-                p = tab.child
-
+                    tab.child = p
+            else:
                 if kind == "DataTable":
-                    p = format_datatable(p, region["rowspan"], region["colspan"])
+                    plot = format_datatable(plot, region["rowspan"], region["colspan"])
                 else:
-                    p = set_panel_size(p, force_square, region["rowspan"], region["colspan"], shift_outline)
-                    p = set_font_sizes(p)
-
-                tab.child = p
+                    plot = set_panel_size(plot, force_square, region["rowspan"], region["colspan"], shift_outline)
+                    plot = set_font_sizes(plot)
 
             grid_children.append((plot, region["row"], region["col"], region["rowspan"], region["colspan"]))
 

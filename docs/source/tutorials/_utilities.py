@@ -1,8 +1,8 @@
 from bokeh.models import PanTool
 from bokeh.plotting import figure
 
-GRID_SIZE = 300
-TEXT_SIZE = "10pt"
+GRID_SIZE = 200
+TEXT_SIZE = "8pt"
 
 
 def compute_borders(max_tick_chars: int = 9, tick_length: int = 6, tick_standoff: int = 5, axis_standoff: int = 5):

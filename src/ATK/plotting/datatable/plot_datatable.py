@@ -12,8 +12,8 @@ def autosize_table(table, source, font_size_pt, max_height=None):
     font_px = int(float(font_size_pt.replace("pt", "")) * 1.333)
 
     # scale row + header height
-    row_height = int(font_px * 1.6)
-    header_height = int(font_px * 1.8)
+    row_height = max(int(font_px * 1.6), 25)
+    header_height = max(int(font_px * 1.8), 30)
 
     table.row_height = row_height
 

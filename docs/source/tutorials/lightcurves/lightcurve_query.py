@@ -22,7 +22,7 @@ from ATK.queries.lightcurve._query_info import BAND_MAP
 
 with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "w") as f:
     for survey in BAND_MAP:
-        f.write(f"        - {survey} ({', '.join(BAND_MAP[survey])})\n")
+        f.write(f"- {survey} ({', '.join(BAND_MAP[survey])})\n")
     f.write("\n")
 # sphinx_gallery_end_ignore
 
@@ -36,6 +36,8 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 #    .. include:: supported_lightcurve_surveys.rst
 #
 #    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+# 
+#    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.
 #
 # |
 # |
@@ -117,6 +119,21 @@ figure
 # .. warning::
 #
 #    As ``split`` utilises a per-survey object ID to separate detections, its efficacy depends heavily on the specific implementation provided by each survey.
+#
+# |
+# |
+#
+# Data Quality Filtering
+# ======================
+# By default, basic quality filtering is enabled for surveys that are prone to poor photometry.
+#
+#     **ATLAS**: Filtering is performed as advised `here <https://fallingstar-data.com/forcedphot/faq/>`_.
+#
+#     **TESS**: ``Flux significance > 3``, ``quality flag = 0``.
+#
+# |
+#
+# To disable all unecessary filtering, pass ``filter = False`` to :func:`~ATK.Tools.query`.
 
 # %%
 #

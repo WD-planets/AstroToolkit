@@ -29,7 +29,11 @@ pass
 #
 # .. note::
 #
-#    Changes to any query parameters or the working version of ATK will automatically trigger the query to run again, overwriting the local file with the updated :class:`~ATK.Models.DataSet`.
+#    The following situations will automatically trigger the :func:`~ATK.Tools.query` to run again, overwriting the local file with the updated :class:`~ATK.Models.DataSet`:
+# 
+#        - Changes to query parameters
+#        - Changes to the working version of ATK 
+#        - If an exception was encountered during data retrieval prior to file creation (i.e. :attr:`~ATK.Models.DataSet.exception` is ``True``)
 #
 # |
 # |

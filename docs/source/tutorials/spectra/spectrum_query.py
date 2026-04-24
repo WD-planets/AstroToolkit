@@ -46,6 +46,8 @@ figure
 #    .. include:: supported_spectrum_surveys.rst
 #
 #    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#
+#    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.
 
 # %%
 #
