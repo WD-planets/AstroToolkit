@@ -29,7 +29,7 @@ classifiers = [
 dependencies = [
 	"astropy",
 	"astroquery",
-	"beautifulsoup4"
+	"beautifulsoup4",
 	"bokeh",
 	"lightkurve",
 	"matplotlib",
