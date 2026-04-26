@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref, 'a') &&
+      !contains(github.ref, 'a')
 
     permissions:
       id-token: write
