@@ -178,7 +178,7 @@ class DataFrameIOMixin:
 
         new_func = _clone_function(DataFrameIOMixin.to_dataframe)
         new_func.__doc__ = get_docstring("to_dataframe")
-        cls.to_table = new_func
+        cls.to_dataframe = new_func
 
 
 class TableIOMixin:

@@ -214,7 +214,7 @@ def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
 
     # print(f"Recreated key:\n{structure._cache_key}\nCurrent key:\n{current_key}")
 
-    if getattr(structure, "_cache_key", None) != current_key:
+    if getattr(structure, "_cache_key") != current_key:
         warnings.warn("Detected change in query parameters, query will be re-run and local file will be overwritten.")
         return None
 

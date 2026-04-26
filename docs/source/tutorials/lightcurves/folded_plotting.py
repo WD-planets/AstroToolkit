@@ -16,7 +16,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
+asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve_5.fits.gz")
 folded_data = asassn_query.apply("fold", freq=2.773227732277323, inplace=False)
 # sphinx_gallery_start_ignore
 pass

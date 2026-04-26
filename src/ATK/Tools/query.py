@@ -16,14 +16,20 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
 
     Parameters
     ----------
-    kind : {'vizier', 'image', 'lightcurve', 'spectrum', 'sed', 'hrd'}, optional
+    kind : {'vizier', 'image', 'lightcurve', 'spectrum', 'sed', 'hrd', 'datatable'}, optional
         Type of query to perform.
 
     targets : int, :class:`~astropy.coordinates.SkyCoord`, :class:`~ATK.Models.Target`, or iterable of these
         Targets of search (see :doc:`here </auto_tutorials/getting_started/data_query>`).
 
     path : str or :class:`~pathlib.Path`, optional
-        Path of local FITS file to which result should be saved. :func:`~ATK.Tools.query` will attempt to read this file instead of retrieving new data if arguments remain unchanged.
+        Path of local FITS file to which result should be saved. :func:`~ATK.Tools.query` will attempt to read this file instead of retrieving new data under all but the following situations:
+
+        - Changes to query parameters
+
+        - Changes to the working version of ATK
+
+        - If an exception was encountered during data retrieval prior to file creation (i.e. :attr:`~ATK.Models.DataSet.exception` is ``True``)
 
     corrections : bool, optional
         If ``True``, perform automatic proper motion correction (where possible, see :doc:`here </auto_tutorials/getting_started/data_query>`).
@@ -58,6 +64,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
         (see :doc:`here </auto_tutorials/configuration/config>`).
 
     |
+    |
 
     ``kind='image'``
 
@@ -78,6 +85,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
 
         Default is ``None``
 
+    |
     |
 
     ``kind='lightcurve'``
@@ -108,6 +116,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
         ATLAS forced photometry password, only required in ATLAS queries.
 
     |
+    |
 
     ``kind='spectrum'``
 
@@ -121,6 +130,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
         (see :doc:`here </auto_tutorials/configuration/config>`).
 
     |
+    |
 
     ``kind='sed'``
 
@@ -130,6 +140,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
         Default taken from ``query_settings.query_radius`` config key
         (see :doc:`here </auto_tutorials/configuration/config>`).
 
+    |
     |
 
     ``kind='hrd'``
@@ -144,6 +155,7 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
 
         Default is ``'Gmag'``.
 
+    |
     |
 
     ``kind='datatable'``
@@ -184,7 +196,9 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
     if any(target is RETURNS.EXCEPTION for target in targets):
         warnings.warn("Failed to generate requested targets, this is likely due to a Vizier fault.")
 
-        structure = DataSet[kind](kind=None, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True)
+        structure = DataSet[kind](
+            kind=None, survey=arguments.get("survey", None), targets=None, radius=arguments.get("radius", None), exception=True
+        )
 
         return structure
 
@@ -192,7 +206,9 @@ def query(kind: str, targets: int | SkyCoord | Target | list[int | SkyCoord | Ta
     if not arguments.get("corrections", True):
         for target in targets:
             initial_coords = target.initial_coords
-            target.initial_coords = SkyCoord(ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime)
+            target.initial_coords = SkyCoord(
+                ra=initial_coords.ra, dec=initial_coords.dec, frame=initial_coords.frame, obstime=initial_coords.obstime
+            )
             target.coords = initial_coords
             target.identifier = None
             target.survey = None

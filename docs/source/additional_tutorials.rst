@@ -11,3 +11,4 @@ Additional Tutorials
    tutorials/datatables/custom_index
    tutorials/datapages/custom_index
    tutorials/workflows/custom_index
+   tutorials/io/custom_index

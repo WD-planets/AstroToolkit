@@ -1,5 +1,6 @@
 import os
 import sys
+import webbrowser
 
 import astropy.units as u
 from bokeh.embed import file_html
@@ -8,6 +9,15 @@ from bokeh.plotting import figure
 from bokeh.resources import CDN
 
 from ATK.utilities.docstrings import ATTR_DOCSTRINGS
+
+
+# block bokeh plots from being opened in the browser by overriding webbrowser.open()
+def no_open(*args, **kwargs):
+    pass
+
+
+webbrowser.open = no_open
+
 
 sys.path.insert(0, os.path.abspath("./tutorials"))
 sys.path.insert(0, os.path.abspath("../../src"))
@@ -19,7 +29,7 @@ sphinx_gallery_conf = {
     "filename_pattern": r"\.py$",
     "ignore_pattern": r"^_.*\.py$",
     "reference_url": {"ATK": None},
-    "run_stale_examples": True,
+    "run_stale_examples": False,
 }
 
 # -------------------

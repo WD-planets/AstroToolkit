@@ -50,7 +50,9 @@ def write_fallback(attr: str, hdr: Header, key: str, value: any) -> Header:
         hdr.append((f"ATK_{key.upper()}", str(value)))
         return hdr
     except Exception:
-        raise ValueError(f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'.")
+        raise ValueError(
+            f"Failed to write value '{value}' of type '{type(value)}' in attribute '{attr}' to FITS header key 'ATK_{key.upper()}'."
+        )
 
     return hdr
 
@@ -251,7 +253,14 @@ def struct_to_dataframe(structure: any) -> pd.DataFrame:
         # No need to check for scalar - already excluded
         data[col] = val
 
-    return pd.DataFrame.from_dict(data)
+    df = pd.DataFrame.from_dict(data)
+
+    for col in df:
+        dtype = df[col].dtype
+        if dtype.kind in "fc" and dtype.byteorder == ">":
+            df[col] = df[col].astype(dtype.newbyteorder())
+
+    return df
 
 
 def struct_from_dataframe(ctnr: any, target: Target | int | SkyCoord, data: pd.DataFrame, **kwargs) -> any:

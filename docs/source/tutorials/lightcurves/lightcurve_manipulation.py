@@ -21,7 +21,7 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=3932951035266314496 , survey="ztf", path="example_lightcurve_2.fits.gz")
+asassn_query = query("lightcurve", targets=3932951035266314496 , survey="ztf", path="example_lightcurve_4.fits.gz")
 asassn_query.show(show_all=True)
 # sphinx_gallery_start_ignore
 asassn_query.plot(time_format="original")

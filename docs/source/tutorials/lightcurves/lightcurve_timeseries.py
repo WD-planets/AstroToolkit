@@ -25,7 +25,8 @@ from bokeh.document import Document
 # sphinx_gallery_end_ignore
 from ATK import query
 
-asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
+asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve_5.fits.gz")
+
 pspec_data = asassn_query.apply("pspec", fmin=0, fmax=10, samples=10000, inplace=False)
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits.gz")
@@ -59,7 +60,6 @@ figure
 # -------------------------
 # To instead process each band individually, pass ``multiband = False`` to :meth:`~ATK.Models.Lightcurve.pspec`. This treats each band as being entirely separate:
 
-asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
 pspec_data = asassn_query.apply("pspec", fmin=0, fmax=10, samples=10000, multiband=False, inplace=False)
 # sphinx_gallery_start_ignore
 pspec_data.store("example_pspec.fits.gz")
@@ -96,7 +96,6 @@ figure
 #
 # A multiband phase-folded light curve can threfore be generated and plotted as follows:
 
-asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
 folded_data = asassn_query.apply("fold", fmin=0, fmax=10, samples=10000, inplace=False)
 # sphinx_gallery_start_ignore
 folded_data.store("example_folded_lc.fits.gz")
