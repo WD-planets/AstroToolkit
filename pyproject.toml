@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.black]
-line-length=240
+line-length = 240
 skip-magic-trailing-comma = true
 
 [tool.ruff]
@@ -14,7 +14,7 @@ line-length = 240
 
 [project]
 name = "AstroToolkit"
-version = "1.8.0"
+version = "2.0.0"
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
