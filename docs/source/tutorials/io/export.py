@@ -20,7 +20,6 @@ In this tutorial, the aforementioned **IO methods** will be demonstrated on a :c
 # sphinx_gallery_start_ignore
 # fmt: off
 # isort: skip_file
-from IPython.display import display
 # sphinx_gallery_end_ignore
 
 from ATK import query
