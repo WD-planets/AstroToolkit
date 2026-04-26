@@ -12,6 +12,14 @@ To install the package from PyPI, use:
 pip install AstroToolkit
 ```
 
+<br>
+
+Documentation
+=============
+Full documentation for the package can be found [here](https://astrotoolkit.readthedocs.io/en/latest/).
+
+<br> 
+
 Acknowledgements
 ================
 This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (Grant agreement No. 101020057).
@@ -23,9 +31,3 @@ This project has received funding from the European Research Council (ERC) under
         <img src="./source/_static/erc_logo_dark.png" width="200"/>
     </picture>
 </p>
-
-<br>
-
-Documentation
-=============
-Full documentation for the package can be found [here](https://astrotoolkit.readthedocs.io/en/latest/).
