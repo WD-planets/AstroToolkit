@@ -29,6 +29,18 @@ class ConfigSection:
     def __delattr__(self, key):
         self._parent._del(self._name, key)
 
+    def __getitem__(self, key):
+        config = self._parent._get_section(self._name)
+        if key not in config:
+            raise KeyError(f"Key '{key}' not found in section '{self._name}'")
+        return config[key]
+
+    def __setitem__(self, key, value):
+        self._parent._set(self._name, key, value)
+
+    def __delitem__(self, key):
+        self._parent._del(self._name, key)
+
 
 def parser_to_dict(parser: ConfigParser, translator: FunctionType) -> dict:
     """
@@ -172,3 +184,23 @@ class ParserConfig:
             raise ValueError(f"Config section '{section}' does not exist.")
 
         return ConfigSection(self, section)
+
+    def __getitem__(self, section):
+        if section not in self._config:
+            raise KeyError(f"Config section '{section}' does not exist.")
+        return ConfigSection(self, section)
+
+    def __setitem__(self, section, value):
+        # Replaces an entire section with a new dict of key/value pairs
+        if section not in self._parser:
+            raise KeyError(f"Config section '{section}' does not exist.")
+        for key, val in value.items():
+            self._set(section, key, val)
+
+    def __delitem__(self, section):
+        self._load()
+        if section not in self._parser:
+            raise KeyError(f"Config section '{section}' does not exist.")
+        del self._config[section]
+        self._parser.remove_section(section)
+        self._save()

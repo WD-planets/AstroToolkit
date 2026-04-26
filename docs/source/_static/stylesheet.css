@@ -65,3 +65,10 @@ video {
 dl.py.function {
     margin-bottom: 10em;
 }
+
+.bk-Row {
+	display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    width: fit-content;
+}

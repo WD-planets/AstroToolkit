@@ -9,7 +9,8 @@ from pandas import DataFrame
 
 from ..configuration.base_config import BASE_CONFIG
 from ..utilities.docstrings import get_docstring
-from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
+from .Base import (Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin,
+                   manage_inplace)
 from .Target import Target
 
 default_scale = BASE_CONFIG._get("query_settings", "default_scale")
@@ -73,14 +74,14 @@ class SED(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     def __repr__(self):
         return "<Spectral Energy Distribution>"
 
-    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
+    def crop(self, cmin: float | None = None, cmax: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
 
         ys = [struct.flux, struct.flux_err, struct.survey, struct.correction, struct.band, struct.separation]
 
-        x, ys = crop_nd(x=struct.wavelength, ys=ys, lower_lim=min, upper_lim=max)
+        x, ys = crop_nd(x=struct.wavelength, ys=ys, lower_lim=cmin, upper_lim=cmax)
 
         flux, flux_err, survey, correction, band, separation = ys
 

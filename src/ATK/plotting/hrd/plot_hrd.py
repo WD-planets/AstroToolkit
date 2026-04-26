@@ -53,7 +53,9 @@ def setup_background(colour_str, abs_mag_band, **kwargs):
 
     backdrop_file = files("ATK.plotting.hrd").joinpath("backdrop_hrd_allmags.fits")
 
-    plot = figure(width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="GAIA HRD")
+    plot = figure(
+        width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="GAIA HRD"
+    )
 
     with fits.open(backdrop_file) as f:
         bg_df = Table(f[1].data).to_pandas()
@@ -87,8 +89,13 @@ def setup_background(colour_str, abs_mag_band, **kwargs):
         trimmed_groups = [g.sample(frac=frac, random_state=1) for _, g in bg_df.groupby("type")]
         bg_df = pd.concat(trimmed_groups, ignore_index=True)
 
+    obj_types = {"100pc": "Stars < 100pc", "CV": "CV", "SD": "Subdwarf", "WD": "White Dwarf", "WD+dM": "WD + M-dwarf"}
+
     source = ColumnDataSource(bg_df)
     for obj_type, group in bg_df.groupby("type"):
+        if obj_type == "ELM":
+            continue
+
         source = ColumnDataSource(group)
         plot.scatter(
             x="colour",
@@ -99,7 +106,7 @@ def setup_background(colour_str, abs_mag_band, **kwargs):
             alpha=0.8,
             source=source,
             marker="circle",
-            legend_label=obj_type,
+            legend_label=obj_types[obj_type],
         )
 
     return plot

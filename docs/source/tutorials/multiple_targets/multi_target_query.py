@@ -2,7 +2,7 @@
 ####################
 Multi-Target Queries
 ####################
-All tasks in ATK (including all of those showcased in previous tutorials) are designed to work modularly with multiple targets. **A target matching system is used to internally link each target (whether that be a Gaia source ID, a** :class:`~ATK.Models.Target` **or a** :class:`~astropy.coordinates.SkyCoord`) **to the data that it returns.**
+All tasks in ATK (including all of those showcased in previous tutorials) are designed to work modularly with multiple targets. **A target matching system is used to internally link each input target** (whether that be a Gaia source ID, a :class:`~ATK.Models.Target` or a :class:`~astropy.coordinates.SkyCoord`) **to the data that it returns.**
 
 |
 
@@ -31,22 +31,26 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+# 
 # .. note::
 #
-#    The returned :class:`Records <ATK.Models.Record>` have been truncated here for clarity.
+#    The returned :class:`~ATK.Models.Record` objects have been truncated here for clarity.
 # 
 # |
 # | 
 # 
 # Accessing Multi-Target Data
 # ===========================
-# The returned :class:`~ATK.Models.DataSet` contains two :class:`Records <ATK.Models.Record>`. These could be extracted by pulling them out of the :attr:`~ATK.Models.DataSet.data` attribute:
+# The returned :class:`~ATK.Models.DataSet` contains two :class:`~ATK.Models.Record` objects. These could be extracted by pulling them out of the :attr:`~ATK.Models.DataSet.data` attribute:
 
 van_maanen, hu_leo = galex_query.data
 
 # %%
 #
-# **But this can easily produce unexpected results if no data is returned for one or more of the targets.** Instead, the :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.split` method should be used. :meth:`~ATK.Models.DataSet.split` takes any valid target (i.e. a Gaia source ID, a :class:`~ATK.Models.Target`, or an astropy :class:`~astropy.coordinates.SkyCoord`) and returns a split of the :class:`~ATK.Models.DataSet` which only contains that target's data.
+# **But this can easily produce unexpected results if no data is returned for one or more of the targets.** 
+# 
+# Instead, the :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.split` method should be used. :meth:`~ATK.Models.DataSet.split` takes one or more valid targets (with each target being a Gaia source ID, a :class:`~ATK.Models.Target`, or an astropy :class:`~astropy.coordinates.SkyCoord`) and returns a split of the :class:`~ATK.Models.DataSet` which only contains that target's data.
 #
 # |
 # 
@@ -60,11 +64,11 @@ van_maanen_2.show()
 # %%
 # **The returned** :class:`~ATK.Models.DataSet` **contains only the requested target in its** :attr:`~ATK.Models.DataSet.targets` **attribute, and only the corresponding** :class:`~ATK.Models.Record` **in its** :attr:`~ATK.Models.DataSet.data` **attribute.**
 # 
-# **Multiple targets can also be passed to** :meth:`~ATK.Models.DataSet.split` **(in this case, passing both targets to** :meth:`~ATK.Models.DataSet.split` **would leave the** :class:`~ATK.Models.DataSet` **unchanged.)**
+# |
 # 
 # .. note::
 #
-#    ``inplace = False`` tells :meth:`~ATK.Models.DataSet.split` to act on and return a copy of the :class:`~ATK.Models.DataSet` (leaving the original unchanged).
+#    ``inplace = False`` tells :meth:`~ATK.Models.DataSet.split` to act on and return a copy of the :class:`~ATK.Models.DataSet` - leaving the original unchanged.
 #
 # |
 #
@@ -80,6 +84,7 @@ hu_leo = galex_query.split(coord, inplace=False, radius = 5 * u.arcsec)
 hu_leo.show()
 
 # %%
+# |
 #
 # .. note::
 #

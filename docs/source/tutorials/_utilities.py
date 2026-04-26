@@ -2,7 +2,7 @@ from bokeh.models import PanTool
 from bokeh.plotting import figure
 
 GRID_SIZE = 200
-TEXT_SIZE = "8pt"
+TEXT_SIZE = "10pt"
 
 
 def compute_borders(max_tick_chars: int = 9, tick_length: int = 6, tick_standoff: int = 5, axis_standoff: int = 5):
@@ -83,6 +83,13 @@ def format_plot(plot, width: float, height: float, force_square: bool = False):
             fig.title = None
 
             fig = set_panel_size(fig, force_square, height, width)
+
+            fig.axis.axis_label_text_font_size = TEXT_SIZE
+            fig.axis.major_label_text_font_size = TEXT_SIZE
+            if fig.title:
+                plot.title.text_font_size = TEXT_SIZE
+            if len(fig.legend) > 0:
+                fig.legend[0].label_text_font_size = TEXT_SIZE
 
             for tool in fig.select(PanTool):
                 fig.remove_tools(tool)

@@ -26,27 +26,26 @@ with open("../../auto_tutorials/images/supported_image_surveys.rst", "w") as f:
 # sphinx_gallery_end_ignore
 
 # %%
-# 
-# As in any :func:`~ATK.Tools.query`, this returns a :class:`~ATK.Models.DataSet`. In this case, the :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`Images <ATK.Models.Image>` (**one per target, subject to data availability**).
+# |
+#
+# Just like the `Vizier <https://vizier.cds.unistra.fr/>`_ :func:`~ATK.Tools.query` from the previous tutorial, this returns a :class:`~ATK.Models.DataSet`. In this case, the :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Image` objects (**one per target, subject to data availability**).
 #
 # | 
 #
 # .. note:: 
 # 
-#    ATK supports queries to the following imaging surveys and bands:\n`
+#    ATK supports queries to the following imaging surveys and bands:
 # 
 #    .. include:: supported_image_surveys.rst
 # 
 #    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
 #    
-#    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.
-#
 # |
 # |
 #
 # Plotting the Returned Data
 # ==========================
-# :class:`Images <ATK.Models.Image>` are plottable. The returned :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.plot` method can therefore be used to create a Bokeh :class:`~bokeh.plotting.figure`:
+# Unlike the :class:`~ATK.Models.Record` from the previous tutorial, the returned :class:`~ATK.Models.Image` is plottable. The :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.plot` method can therefore be used to generate a Bokeh :class:`~bokeh.plotting.figure`:
 
 ps_query.plot()
 # sphinx_gallery_start_ignore
@@ -54,7 +53,9 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# This saves a  figure to the :attr:`~ATK.Models.DataSet.figure` attribute of the :class:`~ATK.Models.DataSet`:
+# |
+#
+# The generated figure is stored in the :attr:`~ATK.Models.DataSet.figure` attribute of the :class:`~ATK.Models.DataSet`:
 
 ps_query.show()
 # sphinx_gallery_start_ignore
@@ -68,10 +69,10 @@ pass
 #
 # Viewing a Figure
 # ================
-# A :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.open` method can be used to open the stored :class:`~bokeh.plotting.figure` in the default browser:
+# A :class:`~ATK.Models.DataSet`'s :meth:`~ATK.Models.DataSet.open` method can be used to open the stored figure in the default browser:
 
 # sphinx_gallery_start_ignore
-figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+figure = format_plot(ps_query.figure, 2, 2, True)
 doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore
@@ -81,8 +82,9 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# Since a Gaia source ID was used for targeting, proper motion correction has been used to automatically centre the image on the target star.
 #
-# **Since a Gaia source ID was used for targeting, proper motion correction has been used to automatically centre the image on the target star.**
+# |
 #
 # .. note::
 #
@@ -99,9 +101,11 @@ figure
 #
 #    ps_query.open("example_image.html")
 #
+# |
+#
 # .. warning::
 #
-#    If :meth:`~ATK.Models.DataSet.open` is not provided with a ``path``, the figure will be temporarily saved to the ``~/.AstroToolkit/cached_figures`` directory (i.e. inside the home directory). By default, cached figures that are over an hour old will be removed the next time :meth:`~ATK.Models.DataSet.open` is called.
+#    If :meth:`~ATK.Models.DataSet.open` is not provided with a ``path``, the figure will be temporarily saved to the ``~/.AstroToolkit/cached_figures`` directory (i.e. inside the home directory). By default, cached figures that are over an hour old will be removed the next time :meth:`~ATK.Models.DataSet.open` is called. The duration for which figures are cached can be changed in the :doc:`config <../configuration/config>`.
 #
 # |
 #

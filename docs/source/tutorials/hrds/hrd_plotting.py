@@ -4,7 +4,7 @@ HRD Customisation
 #################
 Combining Multiple HRDs
 =======================
-By default, plotting a :class:`~ATK.Models.DataSet` with multiple :class:`HRDs <ATK.Models.HRD>` generates multiple plots. To instead combine all sources into a single plot, pass ``split = False`` to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
+By default, plotting a :class:`~ATK.Models.DataSet` that contains multiple :class:`~ATK.Models.HRD` objects generates multiple figures. To instead combine all sources into a single figure, pass ``split=False`` to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
 """
 
 # sphinx_gallery_start_ignore
@@ -16,7 +16,6 @@ from bokeh.document import Document
 from ATK import query
 
 hrd_query = query("hrd", targets=[587316166180416640, 6050296829033196032], path="example_hrd_2.fits.gz")
-
 # sphinx_gallery_start_ignore
 hrd_query.plot(split=False)
 figure = format_plot(hrd_query.figure, 2, 2)
@@ -38,10 +37,9 @@ figure
 #
 # Reducing the Background
 # =======================
-# Due to the number of background data points, plotted :class:`HRDs <ATK.Models.HRD>` can be expensive in terms of browser performance. This can be avoided by passing ``background`` as a ``float`` between ``0`` and ``1`` (default = ``1``):
+# Due to the number of background data points, plotted :class:`~ATK.Models.HRD` objects can be expensive in terms of browser performance. This can be avoided by passing ``background`` as a ``float`` between ``0`` and ``1`` (default = ``1``):
 
 hrd_query = query("hrd", targets=587316166180416640, path="example_hrd.fits.gz")
-
 # sphinx_gallery_start_ignore
 hrd_query.plot(background=0.25)
 figure = format_plot(hrd_query.figure, 2, 2)
@@ -52,7 +50,6 @@ hrd_query.open(background=0.25)
 # sphinx_gallery_start_ignore
 figure
 # sphinx_gallery_end_ignore
-
 
 # %%
 #

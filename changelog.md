@@ -100,33 +100,10 @@ Changes
 =========
 To-Do Now
 =========
-
-Plotting
---------
-
-Data
-----
-- fix plotting legend getting too long, e.g. in test_spec
-- get full set of spectral lines from NIST for rv fitting?
-
-- ztf light curve API not working
-    - get better light curve sigma clipping example
-
-atk version mismatch running when it shouldn't?
-square images
-- maybe use max() ?
-
-Docs
-====
 - read through docs
     - replace 'star' with e.g. system, source, etc.
     - check docstrings / comments
     - check type hints
-
-Other
-=====
-- check dependencies -> scipy?
-
 
 
 ===========
@@ -134,6 +111,7 @@ To-Do Later
 ===========
 improved testing
 
+- get full set of spectral lines from NIST for rv fitting?
 - rename tutorial .py files
 - function/docs links in code examples (like for external libraries)?
 - talk to boris about my rv_fit process
@@ -143,16 +121,11 @@ improved testing
 - add a way to tell if any significant periodicity was detected in powspec
 - pdm implementation
     - improve true frequency detection across range of orbital morphologies
-- dataset operations, e.g. merge, split - easy enough to implement, but need to then support some additional things like plotting for multiple surveys?
-- gui/website (?)
 - providing a SkyCoord with proper motion measurements
 - clean up and improve generalisation of data methods (pass struct instead of arrays)
-- look into using container methods on the containers themselves rather than via .apply on a DataSet
 - rich text output option (https://realpython.com/python-rich-package/)
 - calibrating + combining multiple light curves to make one massive light curve
 - decouple from Gaia with a properly implemented astrometric backend system
-- allow user to use config from within scripts, e.g. ATK.CONFIG[...][...] = ...
-- see if I can get crts working, possibly a temporary outage
 - add best-epoch separation to light curves?
 - add matplotlib as an optional plotting backend to avoid issues with many data points (e.g. hrd/tess/power spectra)?
 - don't change coordinates to icrs/celestial straight away, keep these and just change in query() without affecting Target.initial_coords?
@@ -165,7 +138,6 @@ improved testing
 - used ValueError too much, should only be used for argument errors
 - struct vs ctnr vs etc.
 - option to only return closest photometry from each survey in SED queries
-- recursive show_types=True in .show()
 - light curve overlays in images as way to show how to recombine data
     - more generally, be able to pass any structure to image plotting -> extracts positional data + overlay
 - improve warnings/logging (no print statements?)
@@ -173,7 +145,4 @@ improved testing
 - let spectral peak fitting work in velocity-space (?)
 - image overlay DataFrame -> Table
 
-background on project
-4th is closer
-
-
+- AI thing (?)

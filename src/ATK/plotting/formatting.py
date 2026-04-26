@@ -127,6 +127,11 @@ def format_plot(kind: str, plot: figure, force_square: bool = False):
         legend.label_text_font_size = f"{font_size}pt"
         plot.legend.label_text_font = text_font
 
+        base = 20
+        size = max(base - steps * 2, 6)
+        legend.glyph_width = size
+        legend.glyph_height = size
+
         plot.js_on_event(events.DoubleTap, toggle_legend_js)
         plot._legend_toggle_attached = True
 

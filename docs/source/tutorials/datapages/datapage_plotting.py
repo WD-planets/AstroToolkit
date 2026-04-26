@@ -11,8 +11,8 @@ ATK supports the creation of **datapages** as a means of neatly combining plots 
 from bokeh.document import Document
 from ATK.Config import CONFIG
 CONFIG.reset()
-CONFIG.datapage_settings.grid_size = 150
-CONFIG.datapage_settings.font_size = 6
+CONFIG["datapage_settings"]["grid_size"] = 150
+CONFIG["datapage_settings"]["font_size"] = 6
 # sphinx_gallery_end_ignore
 from ATK import query
 
@@ -30,7 +30,7 @@ table = query("datatable", columns={"gaia": ["Gmag", "BPmag", "RPmag"], "galex":
 # %%
 # |
 #
-# The only other requirement is to define the **datapage's** layout. The easiest way to do this is by passing a list of rows of :class:`DataSets <ATK.Models.DataSet>`:
+# The only other requirement is to define the **datapage's** layout. This is done by defining a grid, with each cell in the grid being a :class:`~ATK.Models.DataSet`:
 
 layout = [[image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
           [image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
@@ -44,7 +44,7 @@ layout = [[image, image, hrd,   hrd,   lc,    lc,    lc,    lc   ],
 # %%
 # |
 # 
-# This defines a **datapage** where the first row contains a 2x2 image in the top-left corner, followed by a 2x2 HRD and a 4x2 light curve, etc. Passing this to :func:`~ATK.Visualisation.grid` returns a :class:`~ATK.Models.DataPages` object, which contains one datapage per target:
+# The above example defines a **datapage** where the first row contains a 2x2 image in the top-left corner, followed by a 2x2 HRD and a 4x2 light curve, etc. Passing this to :func:`~ATK.Visualisation.grid` returns a :class:`~ATK.Models.DataPages` object, which contains one **datapage** per target in the input :class:`~ATK.Models.DataSet` objects:
 
 from ATK import grid
 

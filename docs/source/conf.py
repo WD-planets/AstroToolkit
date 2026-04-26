@@ -19,7 +19,7 @@ sphinx_gallery_conf = {
     "filename_pattern": r"\.py$",
     "ignore_pattern": r"^_.*\.py$",
     "reference_url": {"ATK": None},
-    "run_stale_examples": False,
+    "run_stale_examples": True,
 }
 
 # -------------------
@@ -72,7 +72,9 @@ def attach_units(app, what, name, obj, options, lines):
     # not in use currently but doesn't hurt to leave
     lines.append(f".. _{obj.__name__}_Units:")
     lines.append("")
-    lines.append("The following attributes are automatically converted to :class:`~astropy.units.Quantity` with a default unit unless one is explictly provided:")
+    lines.append(
+        "The following attributes are automatically converted to :class:`~astropy.units.Quantity` with a default unit unless one is explictly provided:"
+    )
 
     for attr, unit in obj._units.items():
         lines.append("")
@@ -108,7 +110,9 @@ def attach_plotting_params(app, what, name, obj, options, lines):
     # not in use currently but doesn't hurt to leave
     lines.append(f".. _{obj.__name__}_Plotting_Arguments:")
     lines.append("")
-    lines.append("The following keyword arguments are accepted when plotting via :meth:`~ATK.Models.DataSet.plot()` or :meth:`~ATK.Models.DataSet.open`.")
+    lines.append(
+        "The following keyword arguments are accepted when plotting via :meth:`~ATK.Models.DataSet.plot()` or :meth:`~ATK.Models.DataSet.open`."
+    )
 
     for param, info in obj._plot_params.items():
         lines.append("")
@@ -133,7 +137,9 @@ def attach_data_methods(app, what, name, obj, options, lines):
     # not in use currently but doesn't hurt to leave
     lines.append(f".. _{obj.__name__}_Data_Methods:")
     lines.append("")
-    lines.append(f"The following **Data Methods** are supported by :class:`~ATK.Models.{obj.__name__}` - either individually or through :meth:`DataSet.apply() <ATK.Models.DataSet.apply>`:")
+    lines.append(
+        f"The following **Data Methods** are supported by :class:`~ATK.Models.{obj.__name__}` - either individually or through :meth:`DataSet.apply() <ATK.Models.DataSet.apply>`:"
+    )
 
     data_methods = getattr(obj, "_data_methods", ())
     group_data_methods = getattr(obj, "_group_data_methods_doc", {})

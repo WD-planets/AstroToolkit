@@ -30,13 +30,13 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.HRD` containers (**one per target, subject to data availability**).
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.HRD` objects (**one per target, subject to data availability**).
 #
 # |
 #
 # .. note::
 #
-#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`here <../getting_started/data_query>`. For a refresher on plotting fundamentals, see :doc:`here <../images/image_query>`.
 #
 # |
 # |

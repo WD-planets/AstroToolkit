@@ -12,7 +12,7 @@ from ATK.queries.sed._query_info import SURVEY_MAP
 
 with open("../../auto_tutorials/seds/supported_sed_surveys.rst", "w") as f:
     for survey in SURVEY_MAP:
-        f.write(f"    - {survey}\n")
+        f.write(f"- {survey}\n")
     f.write("\n")
 # fmt: off
 # isort: skip_file
@@ -23,7 +23,6 @@ from ATK import query
 
 sed_query = query("sed", targets=587316166180416640, path="example_sed.fits.gz")
 sed_query.show(show_types=True)
-
 # sphinx_gallery_start_ignore
 sed_query.plot()
 figure = format_plot(sed_query.figure, 3, 1.5)
@@ -36,17 +35,17 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.SED` containers (**one per target, subject to data availability**). **Each** :class:`~ATK.Models.SED` **contains all retrieved photometry within the search radius.**
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.SED` objects (**one per target, subject to data availability**). **Each** :class:`~ATK.Models.SED` **contains all retrieved photometry within the search radius.**
 #
 # |
 #
 # .. note::
 #
-#    ATK SEDs utilise photometry from the following surveys:
+#    SEDs are generated using photometry from the following surveys:
 #
 #    .. include:: supported_sed_surveys.rst
 #
-#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`here <../getting_started/data_query>`. For a refresher on plotting fundamentals, see :doc:`here <../images/image_query>`.
 
 # %%
 #

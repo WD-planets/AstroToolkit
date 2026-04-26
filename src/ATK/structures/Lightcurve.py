@@ -8,7 +8,8 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
+from .Base import (Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin,
+                   manage_inplace)
 from .methods.lightcurve.phasefold import fold_lc
 from .methods.lightcurve.powspec import gen_powspec
 from .Powspec import Powspec
@@ -273,7 +274,7 @@ class Lightcurve(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     def _set_time(self, val: numpy.ndarray):
         setattr(self, self._time_type, val)
 
-    def crop(self, min: float | Quantity | None = None, max: float | Quantity | None = None, inplace: bool = True) -> Self:
+    def crop(self, cmin: float | Quantity | None = None, cmax: float | Quantity | None = None, inplace: bool = True) -> Self:
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
@@ -284,7 +285,7 @@ class Lightcurve(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
             if val is not None:
                 ys.append(val)
 
-        x, ys = crop_nd(x=struct._time, ys=ys, lower_lim=min, upper_lim=max)
+        x, ys = crop_nd(x=struct._time, ys=ys, lower_lim=cmin, upper_lim=cmax)
 
         if len(ys) > 2:
             brightness, brightness_err, ra, dec = ys

@@ -1,5 +1,5 @@
-Multi-Survey Operations
-=======================
+Merging DataSets
+================
 
 .. toctree:: 
     :maxdepth: 1

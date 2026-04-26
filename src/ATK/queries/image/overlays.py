@@ -27,7 +27,7 @@ def _get_unit(column):
 
 def get_overlay_data(image: Image, target: int | SkyCoord, survey: str, survey_info: dict, corrections=True) -> pd.DataFrame:
     radius = correct_radius(target, image.size, "vizier", survey) * 1.25
-    piggyback_radius = BASE_CONFIG._get("overlay_settings", "piggyback_radius")
+    piggyback_radius = BASE_CONFIG._get("overlay_settings", "crossmatch_radius")
 
     non_gaia_data = query(kind="vizier", targets=image.search_pos, radius=radius, survey=survey).data
 

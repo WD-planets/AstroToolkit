@@ -2,7 +2,7 @@
 ##################
 Local Data Storage
 ##################
-:class:`DataSets <ATK.Models.DataSet>` of any kind can be stored as local FITS files. These files can be read by ATK to re-create the original :class:`~ATK.Models.DataSet`.
+A :class:`ATK.Models.DataSet` of any kind can be stored as a local FITS file. These files can then be read to recreate the original :class:`~ATK.Models.DataSet`.
 
 |
 
@@ -27,13 +27,15 @@ pass
 # %%
 # This will automatically save the returned :class:`~ATK.Models.DataSet` to ``path``, and **running the script again will read this local file instead of running** :func:`~ATK.Tools.query` **again.**
 #
+# |
+# 
 # .. note::
 #
 #    The following situations will automatically trigger the :func:`~ATK.Tools.query` to run again, overwriting the local file with the updated :class:`~ATK.Models.DataSet`:
 # 
-#        - Changes to query parameters
-#        - Changes to the working version of ATK 
-#        - If an exception was encountered during data retrieval prior to file creation (i.e. :attr:`~ATK.Models.DataSet.exception` is ``True``)
+#    - Changes to query parameters
+#    - Changes to the working version of ATK 
+#    - If an exception was encountered during data retrieval prior to file creation (i.e. :attr:`~ATK.Models.DataSet.exception` is ``True``)
 #
 # |
 # |
@@ -52,7 +54,9 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# The original :class:`~ATK.Models.DataSet` can be re-created with :func:`~ATK.Tools.read`:
+# |
+#
+# The original :class:`~ATK.Models.DataSet` can be read from the file and re-created with :func:`~ATK.Tools.read`:
 
 from ATK import read
 

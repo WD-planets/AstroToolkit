@@ -5,7 +5,7 @@ Analysing Spectra
 
 Velocity Spectra
 ================
-:class:`Spectra <ATK.Models.DataSet>` support one **data method**, :meth:`~ATK.Models.Spectrum.vspec`, which converts a spectrum into a velocity spectrum relative to a given reference wavelength, ``wav_ref``:
+:class:`~ATK.Models.DataSet` objects support one **data method**, :meth:`~ATK.Models.Spectrum.vspec`, which converts wavelength into velocity relative to a given reference wavelength, ``wav_ref``:
 """
 
 # sphinx_gallery_start_ignore
@@ -35,11 +35,11 @@ figure
 # 
 # Fitting Spectral Features
 # =========================
-# :class:`Spectra <ATK.Models.DataSet>` also support two further plotting modes for performing spectral analysis.
+# :class:`~ATK.Models.Spectrum` objects also support two further plotting options for performing spectral analysis.
 #
 # |
 #
-# Spectral features can be detected and fitted by passing ``fit=True`` to :meth:`~ATK.Models.DataSet.plot`. To aid in detecting features while reducing false positives, the following additional arguments are also supported when using ``fit=True``:
+# **Spectral features can be detected and fitted** by passing ``fit=True`` to :meth:`~ATK.Models.DataSet.plot`. To aid in detecting features while reducing false positives, the following additional arguments are also supported when using ``fit=True``:
 # 
 # - ``prominence`` sets the minimum **prominence** of spectral features (see :func:`here <scipy.signal.find_peaks>` for details, default = ``2.0``)
 # 
@@ -66,7 +66,7 @@ figure
 #
 # Detecting Radial Velocities
 # ===========================
-# :class:`Spectra <ATK.Models.Spectrum>` plotting also supports multi-component radial velocity fitting by passing ``rv_fit=True``. As peaks must first be detected, the same additional parameters are accepted as when using ``fit=True``:
+# :class:`~ATK.Models.Spectrum` plotting also supports **multi-component radial velocity fitting** by passing ``rv_fit=True``. As peaks must first be detected, **the same additional parameters are accepted as when using** ``fit=True``:
 
 sdss_query.plot(rv_fit=True, smooth=5.0)
 # sphinx_gallery_start_ignore

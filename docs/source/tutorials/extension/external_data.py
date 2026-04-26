@@ -4,7 +4,7 @@ Importing External Data
 #######################
 Generating a Dataset
 ====================
-ATK also supports the use of external data. The first step is to create an empty :class:`~ATK.Models.DataSet`. This is done with :meth:`~ATK.Models.DataSet.from_target`, which requires any valid targeting for initialisation (see :doc:`here <../getting_started/data_query>`). For example, using a Gaia Source ID:
+ATK also supports the use of external data. The first step is to create an empty :class:`~ATK.Models.DataSet`. This is done with :meth:`~ATK.Models.DataSet.from_target`, which requires any valid target for initialisation (see :doc:`here <../getting_started/data_query>`). For example, using a Gaia Source ID:
 """
 
 # sphinx_gallery_start_ignore
@@ -25,10 +25,14 @@ dataset = DataSet.from_target(target)
 
 # %%
 # |
-#
-# The next step is to generate a data container to add to the :class:`~ATK.Models.DataSet`. For this tutorial, an externally-acquired spectrum will be imported into ATK. The easiest way to do this is to generate a :class:`~ATK.Models.Spectrum` using one of its IO methods: :meth:`~ATK.Models.Spectrum.from_table` and :meth:`~ATK.Models.Spectrum.from_dataframe`. In this tutorial, a :class:`~pandas.DataFrame` will be used.
 # 
-# The :class:`~pandas.DataFrame` (or :class:`~astropy.table.Table` if using :meth:`~ATK.Models.Spectrum.from_table`) must contain a column with the same name as each array-like attribute of the required data container. For a :class:`~ATK.Models.Spectrum`, the :class:`~pandas.DataFrame` must have a ``wavelength`` columns and a ``flux`` column. 
+# Importing Data 
+# --------------
+# The next step is to generate a data container to add to the :class:`~ATK.Models.DataSet`. For this tutorial, an externally-acquired spectrum will be imported into ATK. The easiest way to do this is to generate a :class:`~ATK.Models.Spectrum` using one of its **IO methods**: :meth:`~ATK.Models.Spectrum.from_table` and :meth:`~ATK.Models.Spectrum.from_dataframe`. **In this tutorial,** :meth:`~ATK.Models.Spectrum.from_dataframe` **will be used.**
+# 
+# The :class:`~pandas.DataFrame` (or :class:`~astropy.table.Table` if using :meth:`~ATK.Models.Spectrum.from_table`) must contain a column with the same name as each array-like attribute of the required data container. To generate a :class:`~ATK.Models.Spectrum`, the :class:`~pandas.DataFrame` must therefore have a ``wavelength`` column and a ``flux`` column. 
+# 
+# |
 # 
 # .. note:: 
 # 
@@ -58,13 +62,12 @@ wavelength = crval1 + (pixel_indices + 1 - crpix1) * cdelt1
 
 df = pd.DataFrame({"wavelength": wavelength * 10, "flux": flux * 10**17})
 # sphinx_gallery_end_ignore
-
-print(df)
+df
 
 # %%
-# |
+# Any other required attributes must be passed as keyword arguments to :meth:`~ATK.Models.Spectrum.from_dataframe` (or :meth:`~ATK.Models.Spectrum.from_table`). A :class:`~ATK.Models.Spectrum` only requires that we specify a ``survey``. 
 # 
-# Any other required attributes are passed as keyword arguments to :meth:`~ATK.Models.Spectrum.from_dataframe` (or :meth:`~ATK.Models.Spectrum.from_table`). A :class:`~ATK.Models.Spectrum` only requires that we specify a ``survey``. 
+# |
 # 
 # .. note::
 # 
@@ -72,7 +75,7 @@ print(df)
 # 
 # |
 #
-# The following will generate a :class:`~ATK.Models.Spectrum` which contains the external data:
+# With everything ready, the following code generates a :class:`~ATK.Models.Spectrum` from the external data:
 
 from ATK.Models import Spectrum
 
@@ -85,6 +88,8 @@ pass
 # %%
 # |
 # 
+# Adding Data to a DataSet
+# ------------------------
 # The final step is to add the :class:`~ATK.Models.Spectrum` to the :class:`~ATK.Models.DataSet`, which can be done with :meth:`~ATK.Models.DataSet.add`:
 
 dataset.add(spec)
@@ -96,9 +101,11 @@ pass
 # %%
 # |
 #
+# Using the DataSet 
+# -----------------
 # The newly constructed :class:`~ATK.Models.DataSet` can then be used throughout ATK as if it were retrieved internally:
 
-dataset.apply("crop", min=5700, inplace=True)
+dataset.apply("crop", cmin=5700, inplace=True)
 # sphinx_gallery_start_ignore
 dataset.plot(fit=True, prom=2, smooth=5)
 figure = format_plot(dataset.figure, 3, 1.5)

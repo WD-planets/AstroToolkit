@@ -7,3 +7,4 @@ Configuration
     :caption: Configuration
 
     auto_tutorials/configuration/config
+    auto_tutorials/configuration/config_keys

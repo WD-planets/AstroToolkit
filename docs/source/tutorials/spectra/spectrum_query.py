@@ -4,7 +4,7 @@ Working with Spectra
 ####################
 Performing a Spectrum Query
 ===========================
-To perform a spectrum query and plot the result:
+To perform a spectrum query to SDSS and plot the result:
 """
 
 # sphinx_gallery_start_ignore
@@ -12,7 +12,7 @@ from ATK.queries.spectrum._query_info import SURVEY_MAP
 
 with open("../../auto_tutorials/spectra/supported_spectrum_surveys.rst", "w") as f:
     for survey in SURVEY_MAP:
-        f.write(f"    - {survey}\n")
+        f.write(f"- {survey}\n")
     f.write("\n")
 # fmt: off
 # isort: skip_file
@@ -35,7 +35,9 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
-# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Spectrum` containers (**one or multiple per target, subject to data availability**). If multiple :class:`Spectra <ATK.Models.Spectrum>` are returned for a single target, these will be arranged in order of decreasing exposure.
+# |
+#
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Spectrum` objects (**one or multiple per target, subject to data availability**). If multiple :class:`~ATK.Models.Spectrum` objects are returned for a single target, these will be arranged in order of decreasing exposure.
 #
 # |
 #
@@ -45,7 +47,7 @@ figure
 #
 #    .. include:: supported_spectrum_surveys.rst
 #
-#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`previous tutorials <../getting_started/data_query>`.
+#    For a refresher on :func:`~ATK.Tools.query` fundamentals, see :doc:`here <../getting_started/data_query>`. For a refresher on plotting fundamentals, see :doc:`here <../images/image_query>`.
 #
 #    If the desired survey is not listed above, see :doc:`here <../extension/external_data>` for a tutorial on utilising external data.
 

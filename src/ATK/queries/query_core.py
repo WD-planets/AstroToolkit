@@ -56,7 +56,7 @@ def setup_targeting(targeting: any) -> list[Target]:
     Normalise user targeting input into a list of Targets
     """
 
-    backend = BASE_CONFIG._get("global_settings", "astrometric_backend")
+    # backend = BASE_CONFIG._get("global_settings", "astrometric_backend")
 
     # normalise into flat list of things that can be turned into Targets
     try:
@@ -68,7 +68,7 @@ def setup_targeting(targeting: any) -> list[Target]:
     # construct targets
     targets = []
     for obj in items:
-        target = _make_target(obj, backend)
+        target = _make_target(obj, "gaia")
         if target is RETURNS.EXCEPTION:
             return target
         if target is not RETURNS.NULL:
@@ -199,11 +199,15 @@ def recreate_struct(kind: str, targeting: list[Target], **arguments) -> DataSet:
         warnings.warn("Could not determine ATK version from local file.")
     else:
         if primary_header["ATK_VER"] != get_package_version():
-            warnings.warn(f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten.")
+            warnings.warn(
+                f"ATK version has changed since file '{arguments['path']}' was generated. Query will be re-run and local file will be overwritten."
+            )
             return None
 
         if primary_header["ATK_EXCEPTION"]:
-            warnings.warn(f"Exception was encountered during data retrieval for file '{arguments['path']}'.Query will be re-run and local file will be overwritten.")
+            warnings.warn(
+                f"Exception was encountered during data retrieval for file '{arguments['path']}'.Query will be re-run and local file will be overwritten."
+            )
             return None
 
     current_key = make_cache_key(kind, targeting, arguments)

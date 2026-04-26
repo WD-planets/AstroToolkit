@@ -4,17 +4,19 @@ Image Customisation
 ###################
 Similarly to :func:`~ATK.Tools.query`, the :meth:`~ATK.Models.DataSet.plot` method of a :class:`~ATK.Models.DataSet` accepts various additional arguments depending on the kind of data that is being plotted.
 
-When plotting :class:`images <ATK.Models.Image>`, we can utilise two such arguments: ``cmap`` and ``relative_axes``.
+When plotting an :class:`~ATK.Models.Image`, two such arguments can be utilised: ``cmap`` and ``relative_axes``.
+
+|
 
 .. note::
 
-   Calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated. In this case, :meth:`~ATK.Models.DataSet.open` will pass any additional keyword arguments to :meth:`~ATK.Models.DataSet.plot`.
+   Calling :meth:`~ATK.Models.DataSet.open` automatically calls :meth:`~ATK.Models.DataSet.plot` if a figure has not already been generated. In this case, :meth:`~ATK.Models.DataSet.open` passes any additional keyword arguments to :meth:`~ATK.Models.DataSet.plot`.
    A new plot will also be generated if the keyword arguments passed to :meth:`~ATK.Models.DataSet.open` do not match those of the stored figure.
 
 |
 
 Changing the Colour Map
------------------------
+=======================
 The ``cmap`` parameter sets the colour map of the plotted image:
 
 1. ``viridis`` (default):
@@ -81,8 +83,8 @@ figure
 # |
 #
 # Configuring Axes Coordinates
-# ----------------------------
-# So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). If we instead want to use absolute coordinates on the sky, we can pass ``relative_axes = False``:
+# ============================
+# So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). To instead use absolute coordinates on the sky, `pass ``relative_axes = False``:
 
 # sphinx_gallery_start_ignore
 ps_query.plot(relative_axes=False)

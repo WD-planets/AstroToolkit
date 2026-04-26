@@ -8,7 +8,8 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
+from .Base import (Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin,
+                   manage_inplace)
 from .Target import Target
 
 
@@ -54,14 +55,14 @@ class Powspec(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     def __repr__(self):
         return f"<{self.survey} {self.band}-band {type(self).__name__}>"
 
-    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
+    def crop(self, cmin: float | None = None, cmax: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
 
         ys = [struct.power]
 
-        x, ys = crop_nd(x=struct.frequency, ys=ys, lower_lim=min, upper_lim=max)
+        x, ys = crop_nd(x=struct.frequency, ys=ys, lower_lim=cmin, upper_lim=cmax)
 
         struct.frequency = x
         struct.power = ys[0]

@@ -4,7 +4,7 @@ Spectrum Customisation
 ######################
 Overlaying SEDs
 ===============
-Spectra can be overlayed with a spectral energy distribution (see the :doc:`next tutorial <../seds/sed_query>`) by passing a :class:`~ATK.Models.DataSet` containing :class:`SEDs <ATK.Models.SED>` to :meth:`~ATK.Models.DataSet.plot` as an ``overlay``:
+Spectra can be overlayed with a spectral energy distribution (see the :doc:`next tutorial <../seds/sed_query>`) by passing a :class:`~ATK.Models.DataSet` containing :class:`~ATK.Models.SED` objects to :meth:`~ATK.Models.DataSet.plot` or :meth:`~ATK.Models.DataSet.open`:
 """
 
 # sphinx_gallery_start_ignore
@@ -34,7 +34,7 @@ figure
 #
 # .. note::
 #
-#    :class:`Spectra <ATK.Models.Spectrum>` and their corresponding :class:`SEDs <ATK.Models.SED>` are automatically matched by :class:`~ATK.Models.Target` (i.e. by input search position or Gaia source ID) before being overlayed.
+#    :class:`~ATK.Models.Spectrum` objects and their corresponding :class:`~ATK.Models.SED` overlays are automatically matched before being overlayed.
 
 # %%
 #

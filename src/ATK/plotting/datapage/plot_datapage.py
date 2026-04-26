@@ -74,6 +74,8 @@ def set_panel_size(panel: figure, force_square: bool, height: int, width: int, s
     frame_width = grid_size * width
     frame_height = grid_size * height
 
+    toolbar_width = 30
+
     panel.sizing_mode = "fixed"
     panel.width = frame_width
     panel.height = frame_height
@@ -88,8 +90,8 @@ def set_panel_size(panel: figure, force_square: bool, height: int, width: int, s
 
         panel.min_border_left = left
         panel.min_border_bottom = left
-        panel.min_border_top = top
-        panel.min_border_right = top
+        panel.min_border_top = top + toolbar_width
+        panel.min_border_right = top + toolbar_width
 
     elif shift_outline:
         panel.frame_width = frame_width - left - right

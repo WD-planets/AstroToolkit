@@ -4,7 +4,8 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.wcs.utils import proj_plane_pixel_scales
-from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, OpenURL, Range1d, TapTool
+from bokeh.models import (ColumnDataSource, HoverTool, LinearColorMapper,
+                          OpenURL, Range1d, TapTool)
 from bokeh.palettes import Greys256, Viridis256
 from bokeh.plotting import figure
 
@@ -69,7 +70,7 @@ def get_marker_size(image: Image, overlay_data: pd.DataFrame, relative_axes: boo
     BASE_RADIUS = 5e-4
     SCALE_FACTOR = 5e-3
     HALF_IMAGE = image.size / 3600
-    POINTER_SIZE_RATIO = 1 / 5
+    POINTER_SIZE_RATIO = 1 / 4
 
     # somewhat physically-based scaling relation (compare to magnitude 20, logarithmic scaling with flux)
     flux_multiplier = 10 ** (-0.4 * (overlay_data["mag"] - 20))

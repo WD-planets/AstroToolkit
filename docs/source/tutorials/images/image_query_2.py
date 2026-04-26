@@ -31,10 +31,10 @@ from ATK import query
 ps_query = query("image", targets=2552928187080872832, survey="panstarrs", band="g", size=120, overlays=["galex"], path="example_image_2.fits.gz")
 # sphinx_gallery_start_ignore
 ps_query.plot()
-figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+figure = format_plot(ps_query.figure, 2, 2, True)
 doc = Document()
 doc.add_root(figure)
-# sphinx_gallery_end_ignore'/home/ethan/Documents/atk_1.8/ATK_new/docs/build/html/tutorials/seds/custom_index.html' 
+# sphinx_gallery_end_ignore
 ps_query.open()
 # sphinx_gallery_start_ignore
 figure
@@ -42,9 +42,9 @@ figure
 
 # %%
 # 
-# As with all figure elements in ATK, overlayed detections can be hidden by clicking them in the legend. Hovering over a detection displays its key parameters (e.g. its position and magnitude), and clicking a detection will search for the object in SIMBAD.
+# As with all figure elements, overlayed **detections can be hidden by clicking them in the legend**. Hovering over a detection displays its key parameters (e.g. its position and magnitude), and **clicking a detection searches for the object in SIMBAD**.
 # 
-# Detections are corrected for proper motion where possible, as stated by the ``corrected`` flag. Non-gaia detections are also corrected by "piggybacking" them with corresponding Gaia detections. The GALEX data that was found for van Maanen's Star from the :doc:`previous section <../getting_started/data_query>` is a match!
+# Detections are corrected for proper motion where possible, as stated by the ``corrected`` flag. **Non-gaia detections are also corrected by crossmatching them with corresponding Gaia detections**. The GALEX data that was found for van Maanen's Star from the :doc:`previous section <../getting_started/data_query>` is a match!
 # 
 # |
 # |
@@ -64,7 +64,7 @@ ps_query = query(
 )
 # sphinx_gallery_start_ignore
 ps_query.plot()
-figure = format_plot(ps_query.figure, 1.5, 1.5, True)
+figure = format_plot(ps_query.figure, 2, 2, True)
 doc = Document()
 doc.add_root(figure)
 # sphinx_gallery_end_ignore

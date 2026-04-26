@@ -4,7 +4,7 @@ Working with Multiple Surveys
 #############################
 Combining Data Sets
 ===================
-The :meth:`~ATK.Models.DataSet.merge` method of a :class:`~ATK.Models.DataSet` can be used to combine it with another, **as long as they store data of the same type** (for a tutorial on plotting multiple types of data together, see :doc:`here <../datapages/datapage_plotting>`). Along with making the recombination of :meth:`~ATK.Models.DataSet.split` :class:`DataSets <ATK.Models.DataSet>` possible, this also allows for data from more than one survey to be utilised simultaneously:
+The :meth:`~ATK.Models.DataSet.merge` method of a :class:`~ATK.Models.DataSet` can be used to combine it with another, **as long as they store data of the same type** (for a tutorial on plotting multiple types of data together, see :doc:`here <../datapages/datapage_plotting>`). Along with serving as the reversal of :meth:`~ATK.Models.DataSet.split`, :meth:`~ATK.Models.DataSet.merge` also allows for data from more than one survey to be utilised simultaneously:
 """
 
 # sphinx_gallery_start_ignore

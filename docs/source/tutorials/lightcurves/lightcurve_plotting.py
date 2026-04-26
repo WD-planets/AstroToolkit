@@ -32,12 +32,15 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+#
 # .. note::
 #
 #    ATK supports the following lightcurve surveys and bands:
 #
 #    .. include:: supported_lightcurve_surveys.rst
 #
+# |
 # |
 # 
 # Setting Band Colours
@@ -56,15 +59,18 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+#
 # .. note::
 #    The following colours are supported: ``"green"``, ``"red"``, ``"blue"``, ``"orange"``, ``"purple"``, ``"black"``
 
 # %%
 # |
+# |
 #
 # Choosing a Colour Map
 # =====================
-# By default, the colour map scales with distance from the mean brightness of the photometry in each band. This can be disabled by setting ``cmap = "flat"`` (default = ``"mean"``):
+# By default, the colour map scales relative to the **mean** brightness of the photometry in each band. This can be disabled by setting ``cmap = "flat"`` (default = ``"mean"``):
 
 # sphinx_gallery_start_ignore
 asassn_query.plot(cmap="flat")
@@ -78,11 +84,12 @@ figure
 # sphinx_gallery_end_ignore
 
 # %%
+# | 
 # |
 #
 # Using Non-Reduced MJD
 # =====================
-# By default, the x-axis is reduced to show the time since the earliest observation in each set of light curves (i.e. the minimum MJD is subtracted from all bands). To instead plot against MJD, pass ``time_format = "original"`` (default = ``"reduced"``):
+# By default, the x-axis is reduced to show the time since the earliest observation in each set of light curves (i.e. the minimum MJD across all bands is subtracted). To instead plot the unmodified MJD, pass ``time_format = "original"``:
 
 # sphinx_gallery_start_ignore
 asassn_query.plot(time_format="original")

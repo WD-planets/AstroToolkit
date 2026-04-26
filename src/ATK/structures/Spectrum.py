@@ -8,7 +8,8 @@ from astropy.units import Quantity
 from pandas import DataFrame
 
 from ..utilities.docstrings import get_docstring
-from .Base import Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin, manage_inplace
+from .Base import (Container, DataFrameIOMixin, FITSIOMixin, TableIOMixin,
+                   manage_inplace)
 from .methods.spectrum.fitting import do_fitting
 from .methods.spectrum.radial_velocities import get_rvs
 from .Target import Target
@@ -120,14 +121,14 @@ class Spectrum(Container, DataFrameIOMixin, TableIOMixin, FITSIOMixin):
     def _set_x(self, val: numpy.ndarray):
         setattr(self, self._x_type, val)
 
-    def crop(self, min: float | None = None, max: float | None = None, inplace=True):
+    def crop(self, cmin: float | None = None, cmax: float | None = None, inplace=True):
         from .methods.cropping import crop_nd
 
         struct = manage_inplace(self, inplace)
 
         ys = [struct.flux]
 
-        x, ys = crop_nd(x=struct._x_arr, ys=ys, lower_lim=min, upper_lim=max)
+        x, ys = crop_nd(x=struct._x_arr, ys=ys, lower_lim=cmin, upper_lim=cmax)
 
         struct._set_x(x)
         struct.flux = ys[0]

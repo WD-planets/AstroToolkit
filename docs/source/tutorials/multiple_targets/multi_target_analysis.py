@@ -2,7 +2,7 @@
 #####################
 Multi-Target Analysis
 #####################
-As with plotting, analysis can be performed in exactly the same way as with a single target - :meth:`~ATK.Models.DataSet.apply` will apply all **data methods** and **plot methods** across all containers in the :class:`~ATK.Models.DataSet`:
+As with plotting, analysis can be performed in exactly the same way as with a single target - :meth:`~ATK.Models.DataSet.apply` will apply all **data methods** across all containers in the :class:`~ATK.Models.DataSet`:
 """
 
 # sphinx_gallery_start_ignore

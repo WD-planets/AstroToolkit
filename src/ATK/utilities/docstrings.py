@@ -56,19 +56,19 @@ DOCSTRINGS = {
         """
         Crops all array-like attributes to a given range in x (i.e. {x}).
 
-        At least one of ``min``, ``max`` must be provided.
+        At least one of ``cmin``, ``cmax`` must be provided.
         
         Parameters
         ----------
-        min : float or :class:`~astropy.units.Quantity`, optional
+        cmin : float or :class:`~astropy.units.Quantity`, optional
             Minimum x value. If not provided, bottom range is not clipped.
 
-            If a :class:`~astropy.units.Unit` is not provided, ``min`` is assumed to be in the same unit as x.
+            If a :class:`~astropy.units.Unit` is not provided, ``cmin`` is assumed to be in the same unit as x.
 
-        max : float or :class:`~astropy.units.Quantity`, optional. 
+        cmax : float or :class:`~astropy.units.Quantity`, optional. 
             Maximum x value. If not provided, top range is not clipped.
 
-            If a :class:`~astropy.units.Unit` is not provided, ``max`` is assumed to be in the same unit as x.
+            If a :class:`~astropy.units.Unit` is not provided, ``cmax`` is assumed to be in the same unit as x.
 
 
         inplace : bool, optional

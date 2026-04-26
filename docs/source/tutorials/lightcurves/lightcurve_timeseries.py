@@ -2,17 +2,19 @@
 ###################
 Timeseries Analysis
 ###################
-Alongside the basic data methods shown in the :doc:`previous tutorial <lightcurve_manipulation>`, :class:`Lightcurves <ATK.Models.Lightcurve>` also support :class:`Lomb-Scargle <astropy.timeseries.LombScargle>` timeseries analysis.
+Alongside the basic **data methods** shown in the :doc:`previous tutorial <lightcurve_manipulation>`, :class:`~ATK.Models.Lightcurve` objects also support Lomb-Scargle timeseries analysis.
 
 |
 
 Generating Power Spectra
 ========================
-The :class:`~ATK.Models.Lightcurve.pspec` method can be used to generate power spectra (i.e. :class:`~ATK.Models.Powspec` containers) from a set of :class:`Lightcurves <ATK.Models.Lightcurve>`. A minimum and maximum frequency must be provided, along with a number of test frequencies in this range. **If no units are given, values are assumed to be in** :math:`\mathrm{days}^{-1}`.
+The :meth:`~ATK.Models.Lightcurve.pspec` method can be used to generate power spectra from one or more :class:`Lightcurves <ATK.Models.Lightcurve>`. A minimum and maximum frequency must be provided, along with a number of test frequencies in this range. **If no units are given, values are assumed to be in** :math:`\mathbf{days}^{-1}`.
+
+This process transforms the :class:`~ATK.Models.DataSet`'s :class:`~ATK.Models.Lightcurve` objects into one or more :class:`~ATK.Models.Powspec` objects.
 
 Multi-band Power Spectra
 ------------------------
-By default, this process combines all bands for each target before computing a combined power spectrum.
+By default, :meth:`~ATK.Models.Lightcurve.pspec` combines all bands for each target before computing a combined power spectrum.
 """
 
 # sphinx_gallery_start_ignore
@@ -68,6 +70,8 @@ pass
 # sphinx_gallery_end_ignore
 
 # %% 
+# |
+#
 # This generates one power spectrum per band:
 
 # sphinx_gallery_start_ignore
@@ -88,7 +92,9 @@ figure
 #
 # Phase-Folding Light Curves
 # ==========================
-# :class:`Lightcurves <ATK.Models.Lightcurve>` can be phase folded with the :meth:`~ATK.Models.Lightcurve.fold` method. **By default,** :meth:`~ATK.Models.Lightcurve.fold` **will first generate a power spectrum (as above), and use this to find an optimal frequency.** :meth:`~ATK.Models.Lightcurve.fold` **therefore accepts all parameters that can be passed to** :meth:`~ATK.Models.Lightcurve.pspec`. A multiband phase-folded light curve can be generated and plotted as follows:
+# :class:`~ATK.Models.Lightcurve` objects can be phase folded with :meth:`~ATK.Models.Lightcurve.fold`. **By default,** :meth:`~ATK.Models.Lightcurve.fold` **first generates a power spectrum from which to derive an optimal frequency.** :meth:`~ATK.Models.Lightcurve.fold` therefore accepts all parameters that can be passed to :meth:`~ATK.Models.Lightcurve.pspec`.
+#
+# A multiband phase-folded light curve can threfore be generated and plotted as follows:
 
 asassn_query = query("lightcurve", targets=5346631922949364864, survey="asassn", path="example_lightcurve.fits.gz")
 folded_data = asassn_query.apply("fold", fmin=0, fmax=10, samples=10000, inplace=False)
@@ -112,9 +118,11 @@ figure
 # 
 # Frequency Optimisation
 # ----------------------
-# Despite the underlying power spectrum being the same, the photometry in the above example has been folded on a different peak frequency - in this case the first subharmonic (i.e. ``0.5 * fopt``). **By default, a phase-dispersion metric is calculated for a set of harmonics either side of the peak frequency** and the best is chosen. This can help to preserve real periodic structure, especially if the modulation is asymmetric as seen here.** 
+# Despite the underlying power spectrum being the same, the photometry in the above example has been folded on a different peak frequency - in this case the first subharmonic (i.e. ``0.5 * fopt``). 
 # 
-# This behaviour can be disabled by passing ``optimise=False`` - in this case losing the true orbital frequency in favour of the peak frequency in the power spectrum:
+# **By default, a phase-dispersion metric is calculated for a set of harmonics either side of the peak frequency** and the best is chosen. This can help to preserve real periodic structure, especially if the modulation is asymmetric as seen here. 
+# 
+# This behaviour can be disabled by passing ``optimise=False`` to :meth:`~ATK.Models.DataSet.apply` - in this case losing the true orbital frequency in favour of the peak frequency in the power spectrum:
 
 folded_data = asassn_query.apply("fold", fmin=0, fmax=10, samples=10000, optimise=False, inplace=False)
 # sphinx_gallery_start_ignore

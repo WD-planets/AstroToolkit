@@ -30,7 +30,7 @@ figure
 # %% 
 # Plotting Arguments
 # ==================
-# Plotting arguments will be applied to all plots in the grid:
+# Plotting arguments are applied to all plots in the grid:
 
 # sphinx_gallery_start_ignore
 images.plot(cmap="grey")

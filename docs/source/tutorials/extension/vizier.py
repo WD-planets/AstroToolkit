@@ -8,9 +8,23 @@ ATK stores all survey parameters in a file, which can be opened either from the 
 
 .. code-block:: console
 
-   $ ATKsurvey show
+   $ ATKsurvey open
 
 or from inside a script:
+
+.. code-block:: python
+
+   from ATK.Config import SURVEY_CONFIG
+
+   SURVEY_CONFIG.open()
+
+|
+
+To see the current state of the **survey file**, use:
+
+.. code-block:: console
+
+   $ ATKsurvey show
 """
 
 # sphinx_gallery_start_ignore
@@ -32,13 +46,28 @@ SURVEY_CONFIG.show()
 #
 # Adding a Catalogue Alias
 # ========================
-# While any `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue can be immediately accessed by passing its catalogue ID to :func:`~ATK.Tools.query`, this may become tedious to remember in prolonged workloads. Additionally, and perhaps more importantly, **this will not benefit from proper motion correction as ATK doesn't know the catalogue's epoch.** Both of these problems can be solved by adding a catalogue alias to the **survey file**.
+# Any `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue can be immediately accessed by passing its catalogue ID to :func:`~ATK.Tools.query`:
+
+from ATK import query
+
+allwise_query = query("vizier", targets=2552928187080872832, survey="II/328/allwise")
+# sphinx_gallery_start_ignore
+pass 
+# sphinx_gallery_end_ignore
+
+
+# %%
+# |
+# 
+# However, it may become tedious to remember catalogue IDs in prolonged workloads. Additionally, and perhaps more importantly, **the above does not benefit from proper motion correction as ATK doesn't know the catalogue's epoch.** Both of these problems can be solved by adding a catalogue alias to the **survey file**.
+#
+# In this tutorial, :func:`~ATK.Tools.query` will be extended with **AllWISE**.
 # 
 # |
 # 
 # Editing the Survey File 
 # -----------------------
-# In this tutorial, :func:`~ATK.Tools.query` will be extended with **AllWISE**. To add an **AllWISE** alias, the following must be added to the **survey file**, under ``vizier``:
+# To add an **AllWISE** alias, the following must be added to the **survey file**, under ``vizier``:
 #
 # .. code-block:: console
 #
@@ -47,20 +76,8 @@ SURVEY_CONFIG.show()
 # 
 # |
 # 
-# This can be done manually by opening **survey file** in the default text editor:
-# 
-# .. code-block:: console
-# 
-#    $ ATKsurvey open
-# 
-# .. code-block:: python 
-# 
-#    SURVEY_CONFIG.open()
-# 
-# |
-# 
-# or by setting it directly:
-# 
+# This can be done manually by opening **survey file** in the default text editor, or by setting it directly:
+#
 # .. code-block:: console
 # 
 #    $ ATKsurvey set vizier allwise --id II/328/allwise
@@ -91,7 +108,7 @@ pass
 # %% 
 # |
 # 
-# **The new alias is working, but the query has not returned any data. This is because no epoch information has been added.** This can be amended by setting the ``epoch`` key with the median epoch of **AllWISE** (approximately ``2010-05-01T00:00:00.000``):
+# The new alias is working, but **the query has not returned any data.** This is because **no epoch information has been added.** This can be amended by setting the ``epoch`` key with the median epoch of **AllWISE** (approximately ``2010-05-01T00:00:00.000``):
 #
 # .. code-block:: console
 # 
@@ -124,7 +141,7 @@ allwise_query.show()
 #
 # Defining an Image Overlay
 # =========================
-# The `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue alias added above can be extended into an image overlay definition by adding some extra information. **As a minimum, all overlay definitions require three columns for positional information: a longitude column, a latitude column, and a frame to which these columns belong.**
+# The **AllWISE** `Vizier <https://vizier.cds.unistra.fr/>`_ catalogue alias added above can be extended into an image overlay definition by adding some extra information. **As a minimum, all overlay definitions require three columns for positional information: a longitude column, a latitude column, and a frame on which these are based.**
 #
 # In the case of **AllWISE**, this means adding the following:
 #
@@ -142,7 +159,7 @@ allwise_query.show()
 # 
 # | 
 # 
-# Once these keys have been added, an **AllWISE** overlay can be requested:
+# Once these keys have been added, an **AllWISE** overlay can be requested in an image :func:`~ATK.Tools.query`:
 
 # sphinx_gallery_start_ignore
 SURVEY_CONFIG["vizier"]["allwise"]["lon"] = "RAJ2000"
@@ -185,7 +202,7 @@ figure
 # 
 # |
 # 
-# This turns the **AllWISE** overlay into a photometric overlay, which scales marker sizes with magnitude and lists photometric information when these markers are hovered:
+# This turns the **AllWISE** detection overlay into a **photometric** detection overlay, which scales marker sizes with magnitude and adds photometric information to the hover interaction:
 
 # sphinx_gallery_start_ignore
 SURVEY_CONFIG["vizier"]["allwise"]["mags"] = ["W1mag", "W2mag", "W3mag", "W4mag"]
@@ -212,7 +229,7 @@ figure
 # =================================
 # Resetting the Survey File
 # -------------------------
-# The survey file can be reset to its default state:
+# To reset the **survey file** to its default state:
 #
 # .. code-block:: console
 #
@@ -228,7 +245,7 @@ figure
 #
 # Deleting an Alias
 # -----------------
-# To delete an alias (in this case the **AllWISE** alias created in this tutorial), either delete it from the commandline:
+# To delete an alias (in this case the **AllWISE** alias created in this tutorial) from the **survey file**, either delete it from the commandline:
 #
 # .. code-block:: console
 #

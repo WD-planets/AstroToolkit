@@ -4,7 +4,7 @@ Working with Light Curves
 #########################
 Performing a Light Curve Query
 ==============================
-Light curves can be fetched in a way that should be familiar from :doc:`previous tutorials <../getting_started/data_query>`. For this tutorial, ASAS-SN will be used:
+Light curves can be fetched in the same way as in :doc:`previous tutorials <../getting_started/data_query>`. For this tutorial, an ASAS-SN query will be performed:
 """
 
 # sphinx_gallery_start_ignore
@@ -27,7 +27,11 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 # sphinx_gallery_end_ignore
 
 # %%
-# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`Lightcurves <ATK.Models.Lightcurve>` (**one per photometric band per target, subject to data availability**).
+# |
+#
+# The returned :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute is a list of :class:`~ATK.Models.Lightcurve` objects (**one per photometric band per target, subject to data availability**).
+# 
+# |
 #
 # .. note::
 # 
@@ -41,10 +45,10 @@ with open("../../auto_tutorials/lightcurves/supported_lightcurve_surveys.rst", "
 #
 # |
 # |
-#
+#  
 # Plotting the Returned Data
 # ==========================
-# To plot a light curve and open it in the default browser:
+# To plot a :class:`~ATK.Models.Lightcurve` and open it in the default browser:
 
 # sphinx_gallery_start_ignore
 asassn_query.plot()
@@ -67,7 +71,7 @@ figure
 #
 # Splitting by Survey ID
 # ======================
-# **By default, light curves are returned as forced-photometry** (i.e. all detections in the requested radius are assumed to be uncontaminated by nearby sources). However, in some cases - e.g. in crowded regions or when using a large search radius - this assumption breaks down. To demonstrate this, we can change our target and increase the query radius to 1 arcminute:
+# **By default, light curves are returned as forced-photometry** (i.e. all photometric detections in the requested radius are returned as a single :class:`~ATK.Models.Lightcurve` per band). However, in some cases - e.g. in crowded regions or when using a large search radius - this assumption breaks down:
 
 import astropy.units as u
 
@@ -85,7 +89,9 @@ figure
 # sphinx_gallery_end_ignore
 
 # %% 
-# It is clear that this is actually returning the photometry of at least two stars. In this case, it may be helpful to split the returned photometry by a per-survey observation/object ID. This can be done by passing ``split = True`` to :func:`~ATK.Tools.query`:
+# |
+#
+# **It is clear that the returned** :class:`~ATK.Models.Lightcurve` **objects contain photometry of at least two stars.** In this case, it may be helpful to split the returned photometry by a per-survey observation/object ID. This can be done by passing ``split=True`` to :func:`~ATK.Tools.query`:
 
 import astropy.units as u
 
@@ -96,13 +102,15 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+# 
 # .. note::
 #
-#    By default, :meth:`~ATK.Models.DataSet.show` truncates printing of the :attr:`~ATK.Models.DataSet.data` attribute if it contains a large number of containers. This can be disabled by passing ``show_all=True`` to :meth:`~ATK.Models.DataSet.show`, as above.
+#    By default, :meth:`~ATK.Models.DataSet.show` truncates printing of the :attr:`~ATK.Models.DataSet.data` attribute if it contains a large number of containers. This can be disabled by passing ``show_all=True`` to :meth:`~ATK.Models.DataSet.show`.
 #
 # |
 #
-# The now-split light curves can then be plotted in the same way as before - now producing a grid with three figures (one per unique source):
+# The split light curves can then be plotted in the same way as before - now producing a grid with three figures (one per unique source):
 
 # sphinx_gallery_start_ignore
 asassn_query.plot()
@@ -125,7 +133,7 @@ figure
 #
 # Data Quality Filtering
 # ======================
-# By default, basic quality filtering is enabled for surveys that are prone to poor photometry.
+# By default, basic quality filtering is enabled for the following surveys:
 #
 #     **ATLAS**: Filtering is performed as advised `here <https://fallingstar-data.com/forcedphot/faq/>`_.
 #
@@ -133,7 +141,7 @@ figure
 #
 # |
 #
-# To disable all unecessary filtering, pass ``filter = False`` to :func:`~ATK.Tools.query`.
+# To disable all **unrequired** filtering, pass ``filter=False`` to :func:`~ATK.Tools.query` when retrieving data from one the above surveys.
 
 # %%
 #

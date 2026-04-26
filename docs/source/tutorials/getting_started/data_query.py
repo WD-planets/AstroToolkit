@@ -8,6 +8,8 @@ Performing a Vizier Query
 #########################
 The most simple example of a query in ATK is a `Vizier <https://vizier.cds.unistra.fr/>`_ query. In this tutorial, data will be retrieved from GALEX for a single target (for guidance on working with multiple targets simultaneously, see :doc:`here <../multiple_targets/multi_target_query>` after following these tutorials).
 
+|
+
 Queries of any kind use the :func:`~ATK.Tools.query` tool, which can be imported as follows:
 """
 
@@ -32,20 +34,20 @@ from ATK import query
 from ATK.Tools import query
 
 # %%
-# 
 # |
 # |
 #
 # Setting a Target
 # ================
-# The first step in performing a query is to set a target, which can be done in a few different ways. In this example we will use `van Maanen's Star <https://simbad.u-strasbg.fr/simbad/sim-id?Ident=van+Maanen%27s+Star&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id>`_.
+# The first step in performing a query is to set a target, which can be done in a few different ways. In this example, :func:`~ATK.Tools.query` will be used to retrieve GALEX data for `van Maanen's Star <https://simbad.u-strasbg.fr/simbad/sim-id?Ident=van+Maanen%27s+Star&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id>`_.
+#
+# | 
 #
 # 1. Stars with Gaia DR3 data can be targeted by their Source ID:
 
 target = 2552928187080872832
 
 # %%
-#
 # |
 #
 # 2. The target's coordinates can be used directly by creating an astropy :class:`~astropy.coordinates.SkyCoord`:
@@ -55,7 +57,6 @@ from astropy.coordinates import SkyCoord
 target = SkyCoord(12.2912, 5.3886, unit="deg", frame="icrs")
 
 # %%
-# 
 # |
 # 
 # 3. A :class:`~ATK.Models.Target` object can be created explicitly, either from a Gaia source ID or from the star's coordinates:
@@ -78,18 +79,19 @@ target = Target.from_coord(coord)
 #    Passing a :class:`~ATK.Models.Target` explicitly may seem unnecessary at first, but it offers a key advantage in queries that simultaneously target :doc:`multiple stars <../multiple_targets/multi_target_query>`.
 
 # %%
-# 
 # | 
 # |
 # 
 # Performing a Query
 # ====================
-# With a target set (**in this case via the star's coordinates**), we can now perform a GALEX `Vizier <https://vizier.cds.unistra.fr/>`_ query:
+# With a target set (**in this case via the star's coordinates**), a `Vizier <https://vizier.cds.unistra.fr/>`_ query can now be performed:
 
 target = SkyCoord(12.2912, 5.3886, unit="deg", frame="icrs")
 galex_query = query("vizier", targets=target, survey="galex")
 
 # %%
+# |
+#
 # .. note::
 #
 #    By default, ATK supports queries via aliases to the following `Vizier <https://vizier.cds.unistra.fr/>`_ catalogues:
@@ -100,9 +102,9 @@ galex_query = query("vizier", targets=target, survey="galex")
 # 
 # |
 #
-# The :func:`~ATK.Tools.query` tool returns a :class:`~ATK.Models.DataSet`, which contains key details of the request along with any returned data. To see the structure of the returned :class:`DataSet <ATK.Models.DataSet>`, we can call its :meth:`~ATK.Models.DataSet.show` method, which prints any ATK object in a human-readable format.
-#
-# Here, ``show_types=True`` is passed to :meth:`~ATK.Models.DataSet.show`. This forces the printing of all attribute data types:
+# **The** :func:`~ATK.Tools.query` **tool returns a** :class:`~ATK.Models.DataSet`, which contains key details of the request along with any returned data. 
+# 
+# **To see the structure of the returned** :class:`DataSet <ATK.Models.DataSet>`, its :meth:`~ATK.Models.DataSet.show` method can be called. This prints it to the terminal in a human-readable format (**this also applies to any other ATK data structure**). Passing ``show_types=True`` to :meth:`~ATK.Models.DataSet.show` forces the printing of all attribute data types. This will be used throughout these tutorials when a structure is seen for the first time:
 
 galex_query.show(show_types=True)
 # sphinx_gallery_start_ignore
@@ -110,16 +112,21 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
+# |
 # 
-# The majority of the returned :class:`~ATK.Models.DataSet`'s attributes are immediately clear, but there are a few specific details to note:
+# The majority of the returned :class:`~ATK.Models.DataSet`'s attributes are immediately clear, but there are a couple details to note:
 # 
-# - :attr:`~ATK.Models.DataSet.targets` lists the :class:`Targets <ATK.Models.Target>` of the search **as they were entered** (coordinates, frame and epoch).
+# - :attr:`~ATK.Models.DataSet.targets` lists every :class:`ATK.Models.Target` of the search **as they were entered** (coordinates, frame and epoch).
 #
 # - :attr:`~ATK.Models.DataSet.exception` states whether any exceptions were encountered. If :attr:`~ATK.Models.DataSet.exception` is ``True``, then the query encountered something unexpected. The most common cause of this is that service being utilised (in this case `Vizier <https://vizier.cds.unistra.fr/>`_) is experiencing downtime.
 #
 # |
 # 
-# Any returned data is stored in the :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute. Unfortunately, targeting van Maanen's Star with its coordinates has returned an empty :class:`~ATK.Models.DataSet`. We can instead try targeting it via its Gaia Source ID:
+# Any returned data is stored in the :class:`~ATK.Models.DataSet`'s :attr:`~ATK.Models.DataSet.data` attribute. **Unfortunately, targeting van Maanen's Star with its coordinates has returned an empty** :class:`~ATK.Models.DataSet`. 
+# 
+# |
+# 
+# Instead the star can be targeted via its Gaia Source ID:
 
 target = 2552928187080872832
 galex_query = query("vizier", targets=target, survey="galex")
@@ -129,14 +136,16 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# **Targeting van Maanen's Star in this way has allowed ATK to utilise Gaia's astrometry to correct the position of our search for proper motion** :bolditalic:`before` **it is executed. Without increasing the query radius, we have retrieved GALEX data for van Maanen's Star.**
+# |
+# 
+# **Targeting van Maanen's Star in this way has utilised Gaia's astrometry to correct the position of our search for proper motion** :bolditalic:`before` **it is executed. Without increasing the query radius, we have retrieved GALEX data for van Maanen's Star.**
 # 
 # |
 # |
 #
 # Using the Returned Data
 # =======================
-# All :class:`DataSets <ATK.Models.DataSet>` store any returned data as a list of containers matching the ``kind`` of data that was requested. Since we performed a `Vizier <https://vizier.cds.unistra.fr/>`_ query for one target, we get a list containing a single :class:`~ATK.Models.Record`:
+# A :class:`ATK.Models.DataSet` **store any returned data as a list of containers matching the** ``kind`` **of data that was requested**. Since this tutorial performed a `Vizier <https://vizier.cds.unistra.fr/>`_ query for one target, the returned :class:`~ATK.Models.DataSet` contains a single :class:`~ATK.Models.Record`:
 
 galex_entry = galex_query.data[0]
 # sphinx_gallery_start_ignore
@@ -144,6 +153,8 @@ print(galex_entry)
 # sphinx_gallery_end_ignore
 
 # %%
+# |
+#
 # As with any ATK object, :meth:`~ATK.Models.Record.show` can be used to see its structure:
 
 galex_entry.show(show_types=True)
@@ -152,13 +163,15 @@ pass
 # sphinx_gallery_end_ignore
 
 # %%
-# While the attributes of a :class:`~ATK.Models.DataSet` describe the query **as it was requested**, the attributes of any stored containers describe the query **as it was executed**:
+# |
+# 
+# Along with the ``survey`` and the returned data, the returned :class:`~ATK.Models.Record` has the following attributes:
 #
 # - :attr:`~ATK.Models.Record.catalogue` shows the ID of the requested :attr:`~ATK.Models.Record.survey` in Vizier.
 #
-# - :attr:`~ATK.Models.Record.correction` states the degree of proper motion correction that was achieved. A ``full`` correction indicates that the system has valid Gaia proper motion and distance, and so a complete 3-dimensional correction was performed. A ``partial`` correction occurs when the star has an invalid distance and so correction is purely angular on the sky - this is still fine in essentially all cases. If :attr:`~ATK.Models.Record.correction` is ``none``, no correction was performed - either because the star has invalid proper motion in Gaia, or because ATK does not know the median epoch of the requested survey (more on this later).
+# - :attr:`~ATK.Models.Record.correction` states the degree of proper motion correction that was achieved. A ``full`` correction indicates that the system has valid Gaia proper motion and distance, and so a **complete 3-dimensional correction** was performed. A ``partial`` correction occurs when the star has an **invalid distance** and so **correction is purely angular on the sky** - this is still fine in essentially all cases. If :attr:`~ATK.Models.Record.correction` is ``none``, **no correction was performed** - either because the star has **invalid proper motion** in Gaia, or because ATK does not know the median epoch of the requested survey (more on this later).
 #
-# - :attr:`~ATK.Models.Record.search_pos` gives the actual position (coordinates, frame and epoch) of the search. In this case, the coordinates of the target have been corrected from Gaia's epoch of January 2016 to GALEX's median epoch of August 2006.
+# - :attr:`~ATK.Models.Record.search_pos` gives the actual position (coordinates, frame and epoch) of the search **as it was performed**. In this case, the coordinates of the target have been corrected from Gaia's epoch of January 2016 to GALEX's median epoch of August 2006.
 # 
 # |
 #

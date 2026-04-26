@@ -28,7 +28,7 @@ pass
 # %%
 # |
 #
-# The resulting :class:`DataSets <ATK.Models.DataSet>` can then be combined into a single :class:`~ATK.Models.DataSet`:
+# The returned :class:`~ATK.Models.DataSet` objects can then be merged:
 
 all_lcs = asassn_data.merge(tess_data)
 all_lcs.show()
@@ -36,7 +36,7 @@ all_lcs.show()
 # %%
 # |
 #
-# Power spectra can be generated across the merged data set, with all survey/band/target management being performed internally:
+# Power spectra can be generated across the merged data set:
 
 all_pspec = all_lcs.apply("pspec", fmin=0, fmax=10, samples=50000, inplace=False)
 all_pspec.show()
@@ -53,12 +53,12 @@ all_fold.show()
 # %%
 # |
 # 
-# Finally, the acquired light curve, power spectrum and phase-folded light curve :class:`DataSets <ATK.Models.DataSet>` can be combined into **datapages**:
+# Finally, the acquired :class:`~ATK.Models.DataSet` objects can be combined into **datapages**:
 
 layout = [[all_lcs,   all_lcs,   all_lcs,  all_lcs,  all_lcs],
-          [all_lcs,   all_lcs,   all_lcs,  all_lcs,  all_lcs],
-          [all_pspec, all_pspec, all_fold, all_fold, all_fold],
-          [all_pspec, all_pspec, all_fold, all_fold, all_fold]]
+         [all_lcs,   all_lcs,   all_lcs,  all_lcs,  all_lcs],
+         [all_pspec, all_pspec, all_fold, all_fold, all_fold],
+         [all_pspec, all_pspec, all_fold, all_fold, all_fold]]
 
 datapages = grid(layout)
 
@@ -71,7 +71,7 @@ plot_id = plot_map[target._key]
 plot = [fig for fig in datapages.figures if fig.id is plot_id][0]
 doc.add_root(plot)
 # sphinx_gallery_end_ignore
-datapages.open_by_id(targets[0])
+datapages.open(targets[0])
 # sphinx_gallery_start_ignore
 plot
 # sphinx_gallery_end_ignore
