@@ -26,8 +26,8 @@ This project has received funding from the European Research Council (ERC) under
 
 <p align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="./docs/source/_static/erc_logo_dark.png">
-        <source media="(prefers-color-scheme: light)" srcset="./docs/source/_static/erc_logo_light.png">
-        <img src="./source/_static/erc_logo_dark.png" width="200"/>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WD-planets/AstroToolkit/latest/docs/source/_static/erc_logo_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/WD-planets/AstroToolkit/latest/docs/source/_static/erc_logo_light.png">
+        <img src="https://raw.githubusercontent.com/WD-planets/AstroToolkit/latest/docs/source/_static/erc_logo_dark.png" width="200">
     </picture>
 </p>
