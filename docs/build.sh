@@ -1,3 +1,5 @@
+pip install --editable ..
+
 make clean
 
 rm -rf source/auto_tutorials/
@@ -13,6 +15,9 @@ fi
 
 make html
 
+python source/_intro_image.py
+
 # run again to ensure no argument change warnings, and to ensure includes are built
 make clean
 make html
+

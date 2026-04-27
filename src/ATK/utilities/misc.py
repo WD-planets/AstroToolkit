@@ -14,7 +14,7 @@ def suppress_stdout() -> None:
 
 
 def get_package_version():
-    return version("AstroToolkit")
+    return version("AstroToolkit").split(".dev")[0]
 
 
 def angle_to_quantity(angle, unit):
