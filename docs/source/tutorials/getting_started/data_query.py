@@ -116,7 +116,7 @@ pass
 # 
 # The majority of the returned :class:`~ATK.Models.DataSet`'s attributes are immediately clear, but there are a couple details to note:
 # 
-# - :attr:`~ATK.Models.DataSet.targets` lists every :class:`ATK.Models.Target` of the search **as they were entered** (coordinates, frame and epoch).
+# - :attr:`~ATK.Models.DataSet.targets` lists every :class:`~ATK.Models.Target` of the search **as they were entered** (coordinates, frame and epoch).
 #
 # - :attr:`~ATK.Models.DataSet.exception` states whether any exceptions were encountered. If :attr:`~ATK.Models.DataSet.exception` is ``True``, then the query encountered something unexpected. The most common cause of this is that service being utilised (in this case `Vizier <https://vizier.cds.unistra.fr/>`_) is experiencing downtime.
 #
@@ -145,7 +145,7 @@ pass
 #
 # Using the Returned Data
 # =======================
-# A :class:`ATK.Models.DataSet` **store any returned data as a list of containers matching the** ``kind`` **of data that was requested**. Since this tutorial performed a `Vizier <https://vizier.cds.unistra.fr/>`_ query for one target, the returned :class:`~ATK.Models.DataSet` contains a single :class:`~ATK.Models.Record`:
+# A :class:`~ATK.Models.DataSet` **store any returned data as a list of containers matching the** ``kind`` **of data that was requested**. Since this tutorial performed a `Vizier <https://vizier.cds.unistra.fr/>`_ query for one target, the returned :class:`~ATK.Models.DataSet` contains a single :class:`~ATK.Models.Record`:
 
 galex_entry = galex_query.data[0]
 # sphinx_gallery_start_ignore

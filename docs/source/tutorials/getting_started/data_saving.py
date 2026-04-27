@@ -2,7 +2,7 @@
 ##################
 Local Data Storage
 ##################
-A :class:`ATK.Models.DataSet` of any kind can be stored as a local FITS file. These files can then be read to recreate the original :class:`~ATK.Models.DataSet`.
+A :class:`~ATK.Models.DataSet` of any kind can be stored as a local FITS file. These files can then be read to recreate the original :class:`~ATK.Models.DataSet`.
 
 |
 

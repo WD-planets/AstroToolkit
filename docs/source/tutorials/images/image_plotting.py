@@ -84,7 +84,7 @@ figure
 #
 # Configuring Axes Coordinates
 # ============================
-# So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). To instead use absolute coordinates on the sky, `pass ``relative_axes = False``:
+# So far, all images have had coordinate axes that are defined relative to the image centre, i.e. ``relative_axes = True`` (default). To instead use absolute coordinates on the sky, pass ``relative_axes = False``:
 
 # sphinx_gallery_start_ignore
 ps_query.plot(relative_axes=False)
