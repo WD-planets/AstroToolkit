@@ -36,10 +36,9 @@ jobs:
     environment: testpypi
     if: |
       startsWith(github.ref, 'refs/tags/v') &&
-      (contains(github.ref, 'a') ||
-       contains(github.ref, 'b') ||
-       contains(github.ref, 'rc') ||
-       github.event_name == 'workflow_dispatch')
+      (contains(github.ref_name, 'a') ||
+       contains(github.ref_name, 'b') ||
+       contains(github.ref_name, 'rc'))
 
     permissions:
       id-token: write
@@ -61,7 +60,7 @@ jobs:
     environment: pypi
     if: |
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref, 'a')
+      !contains(github.ref_name, 'a')
 
     permissions:
       id-token: write
@@ -80,9 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref, 'a') &&
-      !contains(github.ref, 'b') &&
-      !contains(github.ref, 'rc')
+      !contains(github.ref_name, 'a') &&
+      !contains(github.ref_name, 'b') &&
+      !contains(github.ref_name, 'rc')
 
     permissions:
       contents: write
