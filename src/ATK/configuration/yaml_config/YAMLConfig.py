@@ -130,6 +130,7 @@ class YAMLConfig:
                 raw = yaml.safe_load(f) or {}
         else:
             raw = self._defaults
+            self._raw = raw
             self._save()
 
         self._raw = raw
