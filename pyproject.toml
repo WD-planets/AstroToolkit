@@ -1,6 +1,8 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.backends.legacy:build"
+
+[tool.setuptools_scm]
 
 [tool.setuptools]
 include-package-data = true
@@ -14,7 +16,7 @@ line-length = 240
 
 [project]
 name = "AstroToolkit"
-version = "2.0.0"
+dynamic = ["version"]
 authors = [
   { name="Ethan Moorfield", email="ethan.moorfield@hotmail.co.uk"},
 ]
