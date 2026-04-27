@@ -49,3 +49,6 @@ Issues = "https://github.com/WD-planets/AstroToolkit/issues"
 [project.scripts]
 ATKconfig = "bin.atkconfig_command:main"
 ATKsurvey = "bin.atksurvey_command:main"
+
+[tool.setuptools.package-data]
+"ATK.plotting.hrd" = ["*.fits.gz"]

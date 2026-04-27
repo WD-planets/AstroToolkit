@@ -51,11 +51,9 @@ def setup_background(colour_str, abs_mag_band, **kwargs):
 
     colours = colour_str.split("-")
 
-    backdrop_file = files("ATK.plotting.hrd").joinpath("backdrop_hrd_allmags.fits")
+    backdrop_file = files("ATK.plotting.hrd").joinpath("backdrop_hrd_allmags.fits.gz")
 
-    plot = figure(
-        width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="GAIA HRD"
-    )
+    plot = figure(width=400, height=400, x_axis_label=colour_str, y_axis_label=abs_mag_band, tools=("pan,wheel_zoom,box_zoom,reset"), title="GAIA HRD")
 
     with fits.open(backdrop_file) as f:
         bg_df = Table(f[1].data).to_pandas()
