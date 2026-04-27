@@ -1,6 +1,7 @@
 import os
 import sys
 import webbrowser
+from importlib.metadata import version as pkg_version
 
 import astropy.units as u
 from bokeh.embed import file_html
@@ -9,6 +10,10 @@ from bokeh.plotting import figure
 from bokeh.resources import CDN
 
 from ATK.utilities.docstrings import ATTR_DOCSTRINGS
+
+release = pkg_version("AstroToolkit").split(".dev")[0]
+
+print(f"\nBUILDING UNDER CURRENT ATK VERSION: {release}\n")
 
 
 # block bokeh plots from being opened in the browser by overriding webbrowser.open()
@@ -39,7 +44,7 @@ sphinx_gallery_conf = {
 project = "AstroToolkit"
 copyright = "2026, Ethan Moorfield"
 author = "Ethan Moorfield"
-release = "1.8.0"
+release = release
 
 html_favicon = "_static/logo/icon.png"
 

@@ -4,10 +4,10 @@ rm -rf source/auto_tutorials/
 
 if [ "$1" = "wipe" ]; then
     echo "Wiping all .fits and .fits.gz files under ./source/tutorials/..."
-
     find source/tutorials/ \
-        -path "source/tutorials/extension" -prune -o \
         -type f \( -name "*.fits" -o -name "*.fits.gz" \) \
+        ! -path "source/tutorials/extension/external_*.fits" \
+        ! -path "source/tutorials/extension/external_*.fits.gz" \
         -exec rm -f {} +
 fi
 
